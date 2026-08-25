@@ -436,10 +436,6 @@ function calculateContractOffer(promotion) {
 
 function canReceiveOffer(promotion) {
 
-    /*
-     * AMADOR
-     */
-
     if (
         !player.professional ||
         !player.professional.active
@@ -452,12 +448,30 @@ function canReceiveOffer(promotion) {
 
     const stage =
         player.careerStage ||
-        "amateur";
+        "regional";
 
 
-    /*
-     * REGIONAL
-     */
+    const wins =
+        player.professional.wins || 0;
+
+
+    const fame =
+        player.fame || 0;
+
+
+    const manager =
+        player.manager;
+
+
+    const contacts =
+        manager
+        ? (manager.contacts || 0)
+        : 0;
+
+
+    /* =====================================================
+       🏟️ REGIONAL
+    ===================================================== */
 
     if (
         promotion.careerStage ===
@@ -474,56 +488,39 @@ function canReceiveOffer(promotion) {
     }
 
 
-    /*
-     * NACIONAL
-     */
+    /* =====================================================
+       🇧🇷 NACIONAL
+    ===================================================== */
 
     if (
         promotion.careerStage ===
         "national"
     ) {
 
-        /*
-         * Normalmente aparece apenas
-         * no circuito nacional.
-         */
-
         if (
             stage === "regional"
         ) {
 
             return (
-                player.professional.wins >= 3 &&
-                player.fame >= 10
+                wins >= 3 &&
+                fame >= 10
             );
 
         }
 
 
-        /*
-         * Depois de chegar ao nacional,
-         * continua podendo receber propostas.
-         */
-
-        if (
+        return (
             stage === "national" ||
             stage === "international" ||
             stage === "elite"
-        ) {
-
-            return true;
-
-        }
-
-
-        return false;
+        );
 
     }
 
 
-    /*
-     * INTERNACIONAL
-     */
+    /* =====================================================
+       🌎 INTERNACIONAL
+    ===================================================== */
 
     if (
         promotion.careerStage ===
@@ -531,18 +528,15 @@ function canReceiveOffer(promotion) {
     ) {
 
         /*
-         * Empresário obrigatório.
+         * Empresário é praticamente obrigatório
+         * para conseguir uma oportunidade internacional.
          */
 
-        if (!player.manager) {
+        if (!manager) {
 
             return false;
 
         }
-
-
-        const contacts =
-            player.manager.contacts || 0;
 
 
         if (
@@ -559,31 +553,60 @@ function canReceiveOffer(promotion) {
 
 
         /*
-         * Internacional exige
-         * experiência nacional.
+         * CAMINHO NORMAL
+         *
+         * Nacional → Internacional
          */
 
         if (
-            stage !== "international" &&
-            stage !== "elite"
+            stage === "international" ||
+            stage === "elite"
         ) {
 
-            return false;
+            return (
+                wins >= 5 &&
+                fame >= 25
+            );
 
         }
 
 
-        return (
-            player.professional.wins >= 5 &&
-            player.fame >= 25
-        );
+        /*
+         * =================================================
+         * 🚀 SALTO REGIONAL → INTERNACIONAL
+         * =================================================
+         *
+         * Extremamente bom + empresário forte.
+         */
+
+        if (
+            stage === "regional"
+        ) {
+
+            if (
+                contacts >= 80 &&
+                wins >= 7 &&
+                fame >= 35
+            ) {
+
+                return (
+                    Math.random() <
+                    0.20
+                );
+
+            }
+
+        }
+
+
+        return false;
 
     }
 
 
-    /*
-     * ELITE
-     */
+    /* =====================================================
+       👑 ELITE / UFC
+    ===================================================== */
 
     if (
         promotion.careerStage ===
@@ -591,18 +614,14 @@ function canReceiveOffer(promotion) {
     ) {
 
         /*
-         * Empresário obrigatório.
+         * UFC exige empresário forte.
          */
 
-        if (!player.manager) {
+        if (!manager) {
 
             return false;
 
         }
-
-
-        const contacts =
-            player.manager.contacts || 0;
 
 
         if (
@@ -618,19 +637,108 @@ function canReceiveOffer(promotion) {
         }
 
 
+        /*
+         * CAMINHO NORMAL
+         *
+         * Internacional → Elite
+         */
+
         if (
-            stage !== "elite"
+            stage === "international"
         ) {
+
+            if (
+                wins >= 8 &&
+                fame >= 50
+            ) {
+
+                return (
+                    Math.random() <
+                    0.35
+                );
+
+            }
+
 
             return false;
 
         }
 
 
-        return (
-            player.professional.wins >= 8 &&
-            player.fame >= 50
-        );
+        /*
+         * =================================================
+         * 🚀 NACIONAL → UFC
+         * =================================================
+         */
+
+        if (
+            stage === "national"
+        ) {
+
+            if (
+                contacts >= 90 &&
+                wins >= 10 &&
+                fame >= 65
+            ) {
+
+                return (
+                    Math.random() <
+                    0.10
+                );
+
+            }
+
+
+            return false;
+
+        }
+
+
+        /*
+         * =================================================
+         * 🚀 REGIONAL → UFC
+         * =================================================
+         *
+         * Extremamente raro.
+         */
+
+        if (
+            stage === "regional"
+        ) {
+
+            if (
+                contacts >= 95 &&
+                wins >= 12 &&
+                fame >= 80
+            ) {
+
+                return (
+                    Math.random() <
+                    0.02
+                );
+
+            }
+
+
+            return false;
+
+        }
+
+
+        /*
+         * Já está na elite.
+         */
+
+        if (
+            stage === "elite"
+        ) {
+
+            return (
+                wins >= 8 &&
+                fame >= 50
+            );
+
+        }
 
     }
 
@@ -638,7 +746,6 @@ function canReceiveOffer(promotion) {
     return false;
 
 }
-
 
 /* =========================================================
    OPORTUNIDADES ESTRANGEIRAS RARAS
