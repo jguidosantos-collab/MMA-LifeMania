@@ -283,6 +283,39 @@ function calculateBaseWinBonus(promotion) {
 /* =========================================================
    OFERTA DE CONTRATO
 ========================================================= */
+function getCareerStageLabel() {
+
+    const stage =
+        player.careerStage ||
+        "amateur";
+
+
+    const labels = {
+
+        amateur:
+            "🥋 Amador",
+
+        regional:
+            "🏟️ Regional",
+
+        national:
+            "🇧🇷 Nacional",
+
+        international:
+            "🌎 Internacional",
+
+        elite:
+            "👑 Elite"
+
+    };
+
+
+    return (
+        labels[stage] ||
+        "🥋 Amador"
+    );
+
+}
 
 function calculateContractOffer(promotion) {
 
