@@ -160,6 +160,130 @@ function findFight() {
 /* =========================================================
    LUTAR
 ========================================================= */
+function registerContractFight(won) {
+
+    if (
+        !player.currentContract ||
+        !player.currentContract.active
+    ) {
+
+        return;
+
+    }
+
+
+    /*
+     * Registra a luta.
+     */
+
+    player.currentContract.fightsCompleted =
+        (
+            player.currentContract.fightsCompleted ||
+            0
+        ) + 1;
+
+
+    /*
+     * Garante que o número de lutas
+     * contratadas exista.
+     */
+
+    const totalFights =
+        player.currentContract.fights || 3;
+
+
+    /*
+     * Verifica se o contrato terminou.
+     */
+
+    if (
+        player.currentContract.fightsCompleted >=
+        totalFights
+    ) {
+
+        player.currentContract.active =
+            false;
+
+
+        player.log.unshift(
+
+            "📄 Contrato encerrado com " +
+            player.currentContract.promotionName +
+            "."
+
+        );
+
+
+        alert(
+
+            "📄 CONTRATO ENCERRADO!\n\n" +
+
+            player.currentContract.promotionName +
+            "\n\n" +
+
+            "Lutas realizadas: " +
+            totalFights +
+
+            "\n\n" +
+
+            "Seu desempenho será usado " +
+            "para negociar o próximo contrato."
+
+        );
+
+
+        /*
+         * Guarda o contrato encerrado.
+         */
+
+        player.lastContract = {
+
+            ...player.currentContract
+
+        };
+
+
+        /*
+         * Remove o contrato atual.
+         */
+
+        player.currentContract =
+            null;
+
+
+        /*
+         * A próxima proposta será
+         * gerada posteriormente.
+         */
+
+        save();
+
+        return;
+
+    }
+
+
+    /*
+     * Ainda existem lutas no contrato.
+     */
+
+    const remaining =
+        totalFights -
+        player.currentContract.fightsCompleted;
+
+
+    player.log.unshift(
+
+        "📄 Contrato: " +
+        remaining +
+        " luta(s) restante(s)."
+
+    );
+
+
+    save();
+
+}
 
 function fight() {
 
