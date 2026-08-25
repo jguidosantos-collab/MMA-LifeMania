@@ -23,7 +23,9 @@ function tab(name) {
     if (name === "life") {
         familyScreen();
     }
-
+    if (name === "ranking") {
+        rankingScreen();
+    }
 }
 
 
