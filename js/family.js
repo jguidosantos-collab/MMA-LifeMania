@@ -1,4 +1,21 @@
+const MARRIAGE_AGE = 18;
+
+const MARRIAGE_COST = 500;
+
+const CHILD_COST = 1000;
+
+
 function dating() {
+
+    if (player.age < MARRIAGE_AGE) {
+
+        alert(
+            "❤️ Você ainda é jovem demais para iniciar a vida familiar."
+        );
+
+        return;
+    }
+
 
     if (player.relationship === "Solteiro") {
 
@@ -7,6 +24,7 @@ function dating() {
 
         player.partner =
             "Companheiro(a)";
+
 
         player.log.unshift(
             "❤️ Você começou um relacionamento."
@@ -18,17 +36,36 @@ function dating() {
         player.relationship === "Namorando"
     ) {
 
+        if (player.money < MARRIAGE_COST) {
+
+            alert(
+                "💰 Você precisa de $" +
+                MARRIAGE_COST +
+                " para se casar."
+            );
+
+            return;
+        }
+
+
+        player.money -=
+            MARRIAGE_COST;
+
+
         player.relationship =
             "Casado";
 
+
         player.married =
             true;
+
 
         player.log.unshift(
             "💍 Você se casou."
         );
 
     }
+
 
     save();
 
@@ -39,26 +76,50 @@ function dating() {
 
 function haveChild() {
 
-    if (!player.married) {
+    if (player.age < MARRIAGE_AGE) {
 
         alert(
-            "Você precisa estar casado."
+            "Você precisa ter 18 anos."
         );
 
         return;
+    }
 
+
+    if (!player.married) {
+
+        alert(
+            "💍 Você precisa estar casado."
+        );
+
+        return;
+    }
+
+
+    if (player.money < CHILD_COST) {
+
+        alert(
+            "💰 Você precisa de $" +
+            CHILD_COST +
+            " para ter um filho."
+        );
+
+        return;
     }
 
 
     if (player.children.length >= 5) {
 
         alert(
-            "Sua família já tem muitos filhos."
+            "Sua família já possui cinco filhos."
         );
 
         return;
-
     }
+
+
+    player.money -=
+        CHILD_COST;
 
 
     const names = [
@@ -77,7 +138,12 @@ function haveChild() {
         "Davi",
         "Enzo",
         "Theo",
-        "Valentina"
+        "Valentina",
+        "Benjamin",
+        "Samuel",
+        "Isabela",
+        "Manuela",
+        "Nicolas"
 
     ];
 
@@ -101,8 +167,10 @@ function haveChild() {
             player.year,
 
         potential:
-            50 +
-            Math.random() * 40,
+            Math.round(
+                50 +
+                Math.random() * 40
+            ),
 
         fightingInterest: false,
 
@@ -132,20 +200,14 @@ function haveChild() {
 
 function dynastyInfo() {
 
-    const generation =
-        player.children.length > 0
-            ? 2
-            : 1;
-
-
     return {
 
         generation:
-
-            generation,
+            player.children.length > 0
+                ? 2
+                : 1,
 
         children:
-
             player.children.length
 
     };
