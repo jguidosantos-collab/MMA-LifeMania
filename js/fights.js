@@ -7,7 +7,18 @@ function findFight() {
         alert("Você já tem uma luta marcada.");
         return;
     }
+    
+    /*
+     * AMADOR
+     */
 
+    if (!player.professional.active) {
+
+        alert(
+            "🥋 Você ainda está no circuito amador."
+        );
+
+    }
     currentEvent = generateEvent();
 
     currentOpponent = generateFighter();
