@@ -394,266 +394,239 @@ function acceptPromotion(id) {
     }
 
 
+    /*
+     * Verifica se a proposta ainda é válida.
+     */
+
+    if (
+        !canReceiveOffer(
+            promotion
+        )
+    ) {
+
+        alert(
+            "Essa oportunidade não está mais disponível."
+        );
+
+        return;
+
+    }
+
+
+    /*
+     * Calcula a proposta financeira.
+     */
+
+    const offer =
+        calculateContractOffer(
+            promotion
+        );
+
+
+    /*
+     * Guarda a organização atual.
+     */
+
     player.currentPromotion =
         promotion;
+
+
+    /*
+     * Cria o contrato.
+     */
+
+    player.currentContract = {
+
+        promotionId:
+            promotion.id,
+
+        promotionName:
+            promotion.name,
+
+        fights:
+            offer.fights,
+
+        fightsCompleted:
+            0,
+
+        purse:
+            offer.purse,
+
+        winBonus:
+            offer.winBonus,
+
+        active:
+            true,
+
+        contractNumber:
+            1
+
+    };
+
+
+    /*
+     * =====================================================
+     * ATUALIZA O ESTÁGIO DA CARREIRA
+     * =====================================================
+     *
+     * A promoção só acontece quando o contrato
+     * é realmente assinado.
+     */
+
+    if (
+        promotion.careerStage ===
+        "regional"
+    ) {
+
+        player.careerStage =
+            "regional";
+
+    }
+
+
+    if (
+        promotion.careerStage ===
+        "national"
+    ) {
+
+        player.careerStage =
+            "national";
+
+
+        player.log.unshift(
+
+            "🇧🇷 Você entrou no circuito nacional."
+
+        );
+
+    }
+
+
+    if (
+        promotion.careerStage ===
+        "international"
+    ) {
+
+        player.careerStage =
+            "international";
+
+
+        player.log.unshift(
+
+            "🌎 Você chegou ao circuito internacional!"
+
+        );
+
+    }
+
+
+    if (
+        promotion.careerStage ===
+        "elite"
+    ) {
+
+        player.careerStage =
+            "elite";
+
+
+        player.log.unshift(
+
+            "👑 VOCÊ CHEGOU À ELITE DO MMA!"
+
+        );
+
+    }
+
+
+    /*
+     * Fama pela assinatura.
+     */
+
+    player.fame +=
+        Math.max(
+            1,
+            Math.floor(
+                (
+                    promotion.prestige ||
+                    0
+                ) / 20
+            )
+        );
+
+
+    /*
+     * Registra no histórico.
+     */
+
+    if (
+        typeof getPromotionHistory ===
+        "function"
+    ) {
+
+        const history =
+            getPromotionHistory(
+                promotion.id
+            );
+
+
+        if (
+            history
+        ) {
+
+            history.contracts =
+                (
+                    history.contracts ||
+                    0
+                ) + 1;
+
+        }
+
+    }
+
+
+    /*
+     * Mensagem.
+     */
+
+    alert(
+
+        "✍️ CONTRATO ASSINADO!\n\n" +
+
+        promotion.name +
+
+        "\n\n" +
+
+        "Lutas: " +
+        offer.fights +
+
+        "\n" +
+
+        "Bolsa: $" +
+        offer.purse +
+
+        "\n" +
+
+        "Bônus de vitória: $" +
+        offer.winBonus
+
+    );
 
 
     player.log.unshift(
 
         "✍️ Contrato assinado com " +
-        promotion.name
+        promotion.name +
+        " por " +
+        offer.fights +
+        " lutas."
 
     );
 
 
-    player.fame += 2;
-
-
     save();
 
+
     career();
-
-}
-
-function career() {
-    
-    initializeChampionship();
-
-
-    const a =
-        player.attributes;
-
-
-    const title =
-        player.championship.title
-        ||
-        "Nenhum";
-
-
-    const offers = generateContractOffers();
-
-
-    document
-        .getElementById("content")
-        .innerHTML = `
-
-        <div class="card">
-
-            <div class="title">
-                🥊 CARREIRA
-            </div>
-
-
-            <div class="statline">
-
-                <span>
-                    Status
-                </span>
-
-                <b>
-                    ${
-                        player.professional.active
-                        ? "Profissional"
-                        : "Amador"
-                    }
-                </b>
-
-            </div>
-
-
-            <div class="statline">
-
-                <span>
-                    Ranking
-                </span>
-
-                <b>
-                    ${rankingText()}
-                </b>
-
-            </div>
-
-
-            <div class="statline">
-
-                <span>
-                    Vitórias
-                </span>
-
-                <b>
-                    ${player.professional.wins}
-                </b>
-
-            </div>
-
-
-            <div class="statline">
-
-                <span>
-                    Derrotas
-                </span>
-
-                <b>
-                    ${player.professional.losses}
-                </b>
-
-            </div>
-
-
-            <div class="statline">
-
-                <span>
-                    Fama
-                </span>
-
-                <b>
-                    ${Math.round(player.fame)}
-                </b>
-
-            </div>
-
-
-            <div class="statline">
-
-                <span>
-                    Cinturão
-                </span>
-
-                <b>
-                    ${title}
-                </b>
-
-            </div>
-
-
-            <div class="statline">
-
-                <span>
-                    Defesas
-                </span>
-
-                <b>
-                    ${player.championship.defenses}
-                </b>
-
-            </div>
-
-        </div>
-
-
-        <div class="card">
-
-            <div class="title">
-                📈 ATRIBUTOS
-            </div>
-
-
-            ${
-                Object
-                    .entries(a)
-                    .map(
-
-                        ([key, value]) => `
-
-                        <div class="statline">
-
-                            <span>
-                                ${key}
-                            </span>
-
-                            <b>
-                                ${value.toFixed(1)}
-                            </b>
-
-                        </div>
-
-                        `
-
-                    )
-                    .join("")
-            }
-
-        </div>
-
-
-        <div class="card">
-
-            <div class="title">
-                📄 OPORTUNIDADES
-            </div>
-
-
-            ${
-                offers.length === 0
-
-                ?
-
-                `
-                <p>
-                    Nenhuma organização está
-                    oferecendo contrato no momento.
-                </p>
-                `
-
-                :
-
-                offers
-                    .map(
-
-                        offer => `
-
-                        <div class="card">
-
-                            <b>
-                                ${offer.promotion.name}
-                            </b>
-
-                            <div class="statline">
-
-                                <span>
-                                    Prestígio
-                                </span>
-
-                                <b>
-                                    ${offer.promotion.prestige}
-                                </b>
-
-                            </div>
-
-                            <div class="statline">
-
-                                <span>
-                                    Bolsa
-                                </span>
-
-                                <b>
-                                    $${offer.purse}
-                                </b>
-
-                            </div>
-
-                            <button
-                                onclick="
-                                    acceptPromotion(
-                                        ${offer.promotion.id}
-                                    )
-                                ">
-
-                                ✍️ ACEITAR
-
-                            </button>
-
-                        </div>
-
-                        `
-
-                    )
-                    .join("")
-            }
-
-        </div>
-
-        `;
 
 }
 
