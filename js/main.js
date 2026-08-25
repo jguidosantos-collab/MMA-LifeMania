@@ -479,11 +479,8 @@ function fightScreen() {
         <div class="card">
 
             <div class="title">
-
-                ⚔️ LUTAS
-
+                ⚔️ PRÓXIMA LUTA
             </div>
-
 
             ${
                 player.nextFight
@@ -494,21 +491,61 @@ function fightScreen() {
 
                 <div class="statline">
 
-                    <span>
-                        Adversário
-                    </span>
+                    <span>Evento</span>
 
                     <b>
-                        ${player.nextFight.name}
+                        ${player.nextFight.event.name}
                     </b>
 
                 </div>
 
+                <div class="statline">
+
+                    <span>Adversário</span>
+
+                    <b>
+                        ${player.nextFight.opponent.displayName}
+                    </b>
+
+                </div>
+
+                <div class="statline">
+
+                    <span>Nacionalidade</span>
+
+                    <b>
+                        ${player.nextFight.opponent.country}
+                    </b>
+
+                </div>
+
+                <div class="statline">
+
+                    <span>Força estimada</span>
+
+                    <b>
+                        ${Math.round(
+                            player.nextFight.opponent.power
+                        )}
+                    </b>
+
+                </div>
+
+                <div class="statline">
+
+                    <span>Bolsa</span>
+
+                    <b>
+                        $${player.nextFight.purse}
+                    </b>
+
+                </div>
 
                 <button
+                    class="green"
                     onclick="fight()">
 
-                    🔥 LUTAR
+                    🔥 LUTAR AGORA
 
                 </button>
 
@@ -517,6 +554,10 @@ function fightScreen() {
                 :
 
                 `
+
+                <p>
+                    Nenhuma luta marcada.
+                </p>
 
                 <button
                     onclick="findFight()">
@@ -528,6 +569,26 @@ function fightScreen() {
                 `
 
             }
+
+        </div>
+
+        <div class="card">
+
+            <div class="title">
+                🏆 RANKING
+            </div>
+
+            <div class="statline">
+
+                <span>
+                    Posição
+                </span>
+
+                <b>
+                    ${rankingText()}
+                </b>
+
+            </div>
 
         </div>
 
