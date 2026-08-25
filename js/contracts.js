@@ -319,149 +319,234 @@ function getCareerStageLabel() {
 
 function calculateContractOffer(promotion) {
 
-    const negotiation =
-        getNegotiationMultiplier();
-
-
-    const performance =
-        getPerformanceMultiplier();
-
-
-    const promotionMultiplier =
-        getPromotionMultiplier(
-            promotion
-        );
+    let multiplier = 1;
 
 
     /*
-     * Fama também ajuda o empresário
-     * a negociar.
+     * =====================================================
+     * EMPRESÁRIO
+     * =====================================================
      */
 
-    const fameMultiplier =
-        1 +
-        clamp(
-            player.fame || 0,
-            0,
-            100
-        ) / 1000;
+    if (player.manager) {
+
+        multiplier +=
+            (
+                player.manager.contacts ||
+                0
+            ) / 200;
 
 
-    const totalMultiplier =
-        negotiation *
-        performance *
-        promotionMultiplier *
-        fameMultiplier;
+        /*
+         * Empresário também consegue
+         * negociar melhor conforme o nível.
+         */
+
+        if (
+            player.manager.level
+        ) {
+
+            const level =
+                String(
+                    player.manager.level
+                ).toLowerCase();
 
 
-    let purse =
-        Math.round(
-            calculateBasePurse(
-                promotion
-            ) *
-            totalMultiplier
-        );
+            if (
+                level.includes("elite")
+            ) {
 
+                multiplier +=
+                    0.25;
 
-    let winBonus =
-        Math.round(
-            calculateBaseWinBonus(
-                promotion
-            ) *
-            totalMultiplier
-        );
+            }
+
+            else if (
+                level.includes("alto") ||
+                level.includes("high")
+            ) {
+
+                multiplier +=
+                    0.15;
+
+            }
+
+        }
+
+    }
 
 
     /*
-     * Garante que a oferta nunca fique
-     * abaixo da bolsa base.
+     * =====================================================
+     * FAMA
+     * =====================================================
      */
 
-    purse =
-        Math.max(
-            calculateBasePurse(
-                promotion
-            ),
-            purse
-        );
-
-
-    winBonus =
-        Math.max(
-            calculateBaseWinBonus(
-                promotion
-            ),
-            winBonus
-        );
+    multiplier +=
+        (
+            player.fame ||
+            0
+        ) / 500;
 
 
     /*
-     * Segundo contrato e contratos seguintes
-     * ganham um pequeno aumento.
+     * =====================================================
+     * HISTÓRICO COM A ORGANIZAÇÃO
+     * =====================================================
      */
 
-    const history =
-        getPromotionHistory(
-            promotion.id
-        );
+    let previousContracts = 0;
 
 
     if (
-        history.contracts > 0
+        typeof getPromotionHistory ===
+        "function"
     ) {
 
-        purse =
-            Math.round(
-                purse *
-                (
-                    1 +
-                    Math.min(
-                        history.contracts * 0.05,
-                        0.20
-                    )
-                )
+        const history =
+            getPromotionHistory(
+                promotion.id
             );
 
 
-        winBonus =
-            Math.round(
-                winBonus *
-                (
-                    1 +
-                    Math.min(
-                        history.contracts * 0.05,
-                        0.20
-                    )
-                )
+        if (
+            history
+        ) {
+
+            previousContracts =
+                history.contracts ||
+                0;
+
+        }
+
+    }
+
+
+    /*
+     * Segundo contrato e seguintes
+     * ficam mais valiosos.
+     */
+
+    if (
+        previousContracts > 0
+    ) {
+
+        multiplier +=
+            Math.min(
+                0.50,
+                previousContracts *
+                0.10
             );
 
     }
 
 
+    /*
+     * =====================================================
+     * DESEMPENHO
+     * =====================================================
+     */
+
+    const wins =
+        player.professional
+        ? (
+            player.professional.wins ||
+            0
+        )
+        : 0;
+
+
+    const losses =
+        player.professional
+        ? (
+            player.professional.losses ||
+            0
+        )
+        : 0;
+
+
+    /*
+     * Cartel positivo aumenta poder
+     * de negociação.
+     */
+
+    if (
+        wins > losses
+    ) {
+
+        multiplier +=
+            Math.min(
+                0.30,
+                (
+                    wins -
+                    losses
+                ) / 30
+            );
+
+    }
+
+
+    /*
+     * =====================================================
+     * NÚMERO DE LUTAS
+     * =====================================================
+     *
+     * Entre 3 e 5.
+     */
+
+    const fights =
+        3 +
+        Math.floor(
+            Math.random() * 3
+        );
+
+
+    /*
+     * =====================================================
+     * BOLSA
+     * =====================================================
+     */
+
+    const purse =
+        Math.round(
+            promotion.basePurse *
+            multiplier
+        );
+
+
+    /*
+     * =====================================================
+     * BÔNUS
+     * =====================================================
+     */
+
+    const winBonus =
+        Math.round(
+            promotion.basePurse *
+            multiplier
+        );
+
+
     return {
 
-        promotion: promotion,
+        promotion:
+            promotion,
 
         fights:
-            generateContractLength(
-                promotion
-            ),
+            fights,
 
-        purse: purse,
+        purse:
+            purse,
 
-        winBonus: winBonus,
+        winBonus:
+            winBonus,
 
-        negotiation:
-            Math.round(
-                (
-                    totalMultiplier - 1
-                ) * 100
-            )
+        multiplier:
+            multiplier
 
     };
 
 }
-
 
 /* =========================================================
    VERIFICAÇÃO DE OFERTA
