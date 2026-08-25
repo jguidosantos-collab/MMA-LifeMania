@@ -357,3 +357,47 @@ function updateCareerStage() {
     }
 
 }
+
+function generateContractOffers() {
+
+    if (!player.professional.active) {
+
+        return [];
+
+    }
+
+
+    /*
+     * Atualiza a etapa da carreira
+     */
+
+    updateCareerStage();
+
+
+    /*
+     * Seleciona somente organizações
+     * permitidas para o estágio atual.
+     */
+
+    const available =
+        promotions.filter(
+            promotion =>
+                canReceiveOffer(promotion)
+        );
+
+
+    /*
+     * Limita a quantidade de ofertas
+     * para não encher a tela.
+     */
+
+    return available
+        .slice(0, 3)
+        .map(
+            promotion =>
+                calculateContractOffer(
+                    promotion
+                )
+        );
+
+}
