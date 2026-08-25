@@ -94,38 +94,30 @@ updateCareerStage();
      */
 
     if (
-        promotion.level >= 2 &&
-        promotion.level <= 3
+    promotion.level >= 2 &&
+    promotion.level <= 3 &&
+    !promotion.international
+) {
+
+    if (
+        player.careerStage === "regional"
     ) {
 
-        if (
-            player.careerStage === "regional"
-        ) {
-
-            /*
-             * Para sair do regional:
-             *
-             * mínimo de 3 vitórias
-             * ou fama suficiente.
-             */
-
-            return (
-                player.professional.wins >= 3 &&
-                player.fame >= 10
-            );
-
-        }
-
-
         return (
-            player.careerStage === "national"
-            ||
-            player.careerStage === "international"
-            ||
-            player.careerStage === "elite"
+            player.professional.wins >= 3 &&
+            player.fame >= 10
         );
 
     }
+
+
+    return (
+        player.careerStage === "national" ||
+        player.careerStage === "international" ||
+        player.careerStage === "elite"
+    );
+
+}
 
 
     /*
@@ -135,58 +127,43 @@ updateCareerStage();
      */
 
     if (
-        promotion.level >= 4 &&
-        promotion.level <= 5
-    ) {
+    promotion.international &&
+    promotion.level >= 3 &&
+    promotion.level <= 5
+) {
 
-        /*
-         * Sem empresário:
-         * NÃO entra no internacional.
-         */
+    if (!player.manager) {
 
-        if (!player.manager) {
-
-            return false;
-
-        }
-
-
-        /*
-         * Empresário precisa ter contatos.
-         */
-
-        if (
-            player.manager.contacts < 45
-        ) {
-
-            return false;
-
-        }
-
-
-        /*
-         * Precisa ter carreira nacional.
-         */
-
-        if (
-            player.careerStage !==
-            "international" &&
-            player.careerStage !==
-            "elite"
-        ) {
-
-            return false;
-
-        }
-
-
-        return (
-            player.professional.wins >= 5 &&
-            player.fame >= 25
-        );
+        return false;
 
     }
 
+
+    if (
+        player.manager.contacts < 45
+    ) {
+
+        return false;
+
+    }
+
+
+    if (
+        player.careerStage !== "international" &&
+        player.careerStage !== "elite"
+    ) {
+
+        return false;
+
+    }
+
+
+    return (
+        player.professional.wins >= 5 &&
+        player.fame >= 25
+    );
+
+}
 
     /*
      * =====================================
@@ -194,55 +171,39 @@ updateCareerStage();
      * =====================================
      */
 
-    if (promotion.level >= 6) {
+    if (
+    promotion.level >= 6
+) {
 
-        /*
-         * Empresário obrigatório.
-         */
+    if (!promotion.elite &&
+        player.careerStage !== "elite") {
 
-        if (!player.manager) {
-
-            return false;
-
-        }
-
-
-        /*
-         * Empresário precisa ter contatos
-         * realmente altos.
-         */
-
-        if (
-            player.manager.contacts < 80
-        ) {
-
-            return false;
-
-        }
-
-
-        /*
-         * Precisa ter chegado à fase elite.
-         */
-
-        if (
-            player.careerStage !== "elite"
-        ) {
-
-            return false;
-
-        }
-
-
-        return (
-            player.professional.wins >= 8 &&
-            player.fame >= 50
-        );
+        return false;
 
     }
 
 
-    return false;
+    if (!player.manager) {
+
+        return false;
+
+    }
+
+
+    if (
+        player.manager.contacts < 80
+    ) {
+
+        return false;
+
+    }
+
+
+    return (
+        player.careerStage === "elite" &&
+        player.professional.wins >= 8 &&
+        player.fame >= 50
+    );
 
 }
 
