@@ -73,7 +73,9 @@ function canReceiveOffer(promotion) {
     if (promotion.level === 1) {
 
         return (
-            player.careerStage === "regional"
+            player.careerStage = "regional";
+
+updateCareerStage();
             ||
             player.careerStage === "national"
             ||
