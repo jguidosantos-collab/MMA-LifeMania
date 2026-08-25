@@ -189,6 +189,12 @@ function turnProfessional() {
 
 function home() {
 
+    <button
+    onclick="tab('ranking')">
+
+    🏆 RANKINGS
+
+</button>
     const p =
         player.professional;
 
