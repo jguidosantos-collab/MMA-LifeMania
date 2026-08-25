@@ -261,6 +261,14 @@ function home() {
 
                 ⏩ AVANÇAR 1 SEMANA
 
+<button
+    class="gray"
+    onclick="resetGame()">
+
+    🔄 REINICIAR JOGO
+
+</button>
+
             </button>
 
 
