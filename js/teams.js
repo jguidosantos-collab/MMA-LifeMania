@@ -713,6 +713,52 @@ function teamScreen() {
                     generateTeamOffers();
                     teamScreen();
                 ">
+                <button
+    class="gray"
+    onclick="
+        generateManagerOffers();
+        teamScreen();
+    ">
+    👔 PROCURAR EMPRESÁRIOS
+</button>
+${
+    (player.managerOffers || [])
+        .map(
+            (manager, index) => `
+            <div class="card">
+                <div class="title">
+                    👔 ${manager.name}
+                </div>
+                <div class="statline">
+                    <span>Nível</span>
+                    <b>
+                        ${manager.level}
+                    </b>
+                </div>
+                <div class="statline">
+                    <span>Comissão</span>
+                    <b>
+                        ${manager.commission || 0}%
+                    </b>
+                </div>
+                <div class="statline">
+                    <span>Contatos</span>
+                    <b>
+                        ${manager.contacts || 0}
+                    </b>
+                </div>
+                <button
+                    class="gray"
+                    onclick="
+                        hireManager(${index})
+                    ">
+                    🤝 CONTRATAR
+                </button>
+            </div>
+            `
+        )
+        .join("")
+}
                 🔎 PROCURAR ACADEMIAS
             </button>
             ${
