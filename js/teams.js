@@ -984,3 +984,82 @@ function getTeamsByCountry(
     );
 
 }
+/* =========================================================
+   💰 CUSTOS DA ACADEMIA NA LUTA
+========================================================= */
+function calculateTeamFightCut(amount) {
+    if (
+        !player.team
+    ) {
+        return 0;
+    }
+    const fee =
+        Number(
+            player.team.fightFee || 0
+        );
+    return (
+        amount *
+        fee /
+        100
+    );
+}
+/* =========================================================
+   💰 RESUMO FINANCEIRO DA LUTA
+========================================================= */
+function calculateFightPayout(
+    purse,
+    winBonus
+) {
+    const gross =
+        Number(purse || 0) +
+        Number(winBonus || 0);
+    let managerCut = 0;
+    let teamCut = 0;
+    /* =====================================================
+       👔 EMPRESÁRIO
+    ===================================================== */
+    if (
+        player.manager
+    ) {
+        const commission =
+            Number(
+                player.manager.commission || 0
+            );
+        managerCut =
+            gross *
+            commission /
+            100;
+    }
+    /* =====================================================
+       🏢 ACADEMIA
+    ===================================================== */
+    if (
+        player.team
+    ) {
+        const teamFee =
+            Number(
+                player.team.fightFee || 0
+            );
+        teamCut =
+            gross *
+            teamFee /
+            100;
+    }
+    const net =
+        gross -
+        managerCut -
+        teamCut;
+    return {
+        gross:
+            gross,
+        managerCut:
+            managerCut,
+        teamCut:
+            teamCut,
+        net:
+            Math.max(
+                0,
+                net
+            )
+    };
+}
