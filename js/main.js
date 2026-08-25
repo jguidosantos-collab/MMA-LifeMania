@@ -118,6 +118,80 @@ function startGame() {
 
 }
 
+/* =========================
+   VIRAR PROFISSIONAL
+========================= */
+
+function turnProfessional() {
+
+    if (player.age < 18) {
+
+        alert(
+            "Você precisa ter 18 anos para se tornar profissional."
+        );
+
+        return;
+
+    }
+
+
+    if (player.professional.active) {
+
+        alert(
+            "Você já é profissional."
+        );
+
+        return;
+
+    }
+
+
+    /*
+     * Ativa a carreira profissional
+     */
+
+    player.professional.active = true;
+
+
+    /*
+     * Todo lutador começa
+     * obrigatoriamente no Regional.
+     */
+
+    player.careerStage = "regional";
+
+
+    /*
+     * Garante que não exista
+     * uma promoção grande selecionada
+     * antes da hora.
+     */
+
+    player.currentPromotion = null;
+
+
+    /*
+     * Mensagem no histórico
+     */
+
+    player.log.unshift(
+        "🥊 Você se tornou profissional e começou no circuito regional."
+    );
+
+
+    save();
+
+
+    alert(
+        "🥊 Parabéns!\n\n" +
+        "Você agora é um lutador profissional.\n\n" +
+        "Sua carreira começa no circuito REGIONAL."
+    );
+
+
+    home();
+
+}
 
 /* =========================
    TELA INICIAL
