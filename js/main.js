@@ -747,6 +747,10 @@ function teamScreen() {
 
 function familyScreen() {
 
+    const adult =
+        player.age >= 18;
+
+
     document
         .getElementById("content")
         .innerHTML = `
@@ -754,17 +758,24 @@ function familyScreen() {
         <div class="card">
 
             <div class="title">
-
                 ❤️ VIDA
+            </div>
+
+
+            <div class="statline">
+
+                <span>Idade</span>
+
+                <b>
+                    ${player.age}
+                </b>
 
             </div>
 
 
             <div class="statline">
 
-                <span>
-                    Status
-                </span>
+                <span>Status</span>
 
                 <b>
                     ${player.relationship}
@@ -773,9 +784,43 @@ function familyScreen() {
             </div>
 
 
+            <div class="statline">
+
+                <span>Dinheiro</span>
+
+                <b>
+                    $${Math.round(player.money)}
+                </b>
+
+            </div>
+
+
             ${
-                player.relationship ===
-                "Solteiro"
+                !adult
+
+                ?
+
+                `
+
+                <div class="card">
+
+                    🔒 Vida familiar liberada
+                    aos 18 anos.
+
+                </div>
+
+                `
+
+                :
+
+                ""
+
+            }
+
+
+            ${
+                adult &&
+                player.relationship === "Solteiro"
 
                 ?
 
@@ -798,8 +843,8 @@ function familyScreen() {
 
 
             ${
-                player.relationship ===
-                "Namorando"
+                adult &&
+                player.relationship === "Namorando"
 
                 ?
 
@@ -808,7 +853,7 @@ function familyScreen() {
                 <button
                     onclick="dating()">
 
-                    💍 CASAR
+                    💍 CASAR — $500
 
                 </button>
 
@@ -832,7 +877,7 @@ function familyScreen() {
                     class="green"
                     onclick="haveChild()">
 
-                    👶 TER FILHO
+                    👶 TER FILHO — $1.000
 
                 </button>
 
@@ -856,6 +901,36 @@ function familyScreen() {
             </div>
 
 
+            <div class="statline">
+
+                <span>
+                    Geração
+                </span>
+
+                <b>
+                    ${
+                        player.children.length > 0
+                        ? "2ª geração"
+                        : "1ª geração"
+                    }
+                </b>
+
+            </div>
+
+
+            <div class="statline">
+
+                <span>
+                    Filhos
+                </span>
+
+                <b>
+                    ${player.children.length}/5
+                </b>
+
+            </div>
+
+
             ${
                 player.children.length > 0
 
@@ -869,16 +944,11 @@ function familyScreen() {
                         <div class="statline">
 
                             <span>
-
                                 👶 ${child.name}
-
                             </span>
 
                             <b>
-
-                                ${child.age}
-                                anos
-
+                                ${child.age} anos
                             </b>
 
                         </div>
@@ -890,7 +960,11 @@ function familyScreen() {
 
                 :
 
-                "Nenhum filho ainda."
+                `
+                <p>
+                    Sua dinastia ainda não começou.
+                </p>
+                `
 
             }
 
@@ -899,7 +973,6 @@ function familyScreen() {
         `;
 
 }
-
 
 /* =========================
    CRIAÇÃO DO LUTADOR
