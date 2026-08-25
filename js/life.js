@@ -1,9 +1,15 @@
+const WEEKLY_FAMILY_COST = 25;
+
+
 function advanceWeek() {
 
     player.week++;
 
 
-    // 52 semanas = 1 ano
+    /*
+     * 52 semanas = 1 ano
+     */
+
     if (player.week % 52 === 0) {
 
         player.age++;
@@ -27,8 +33,10 @@ function advanceWeek() {
         );
 
 
-        // Pequena evolução natural
-        // da experiência do lutador
+        /*
+         * Experiência melhora a inteligência
+         * de luta com o passar dos anos.
+         */
 
         if (
             player.professional.active
@@ -37,7 +45,7 @@ function advanceWeek() {
             player.attributes.fightIQ =
                 Math.min(
                     100,
-                    player.attributes.fightIQ + 0.3
+                    player.attributes.fightIQ + 0.5
                 );
 
         }
@@ -45,7 +53,9 @@ function advanceWeek() {
     }
 
 
-    // Recuperação semanal
+    /*
+     * RECUPERAÇÃO
+     */
 
     player.fatigue =
         Math.max(
@@ -61,7 +71,9 @@ function advanceWeek() {
         );
 
 
-    // Custo da equipe
+    /*
+     * CUSTO DA EQUIPE
+     */
 
     if (player.team) {
 
@@ -69,6 +81,31 @@ function advanceWeek() {
             Math.floor(
                 player.team.fee / 4
             );
+
+    }
+
+
+    /*
+     * CUSTO DA FAMÍLIA
+     */
+
+    if (
+        player.married
+    ) {
+
+        player.money -=
+            WEEKLY_FAMILY_COST;
+
+    }
+
+
+    /*
+     * EVITA DINHEIRO NEGATIVO
+     */
+
+    if (player.money < 0) {
+
+        player.money = 0;
 
     }
 
@@ -85,7 +122,7 @@ function turnProfessional() {
     if (player.age < 18) {
 
         alert(
-            "Você precisa ter 18 anos."
+            "🥊 Você precisa ter 18 anos para virar profissional."
         );
 
         return;
