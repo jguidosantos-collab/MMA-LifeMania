@@ -307,8 +307,21 @@ function home() {
 
 function career() {
 
+    initializeChampionship();
+
+
     const a =
         player.attributes;
+
+
+    const title =
+        player.championship.title
+        ||
+        "Nenhum";
+
+
+    const offers =
+        generateContractOffers();
 
 
     document
@@ -318,14 +331,115 @@ function career() {
         <div class="card">
 
             <div class="title">
+                🥊 CARREIRA
+            </div>
 
-                📈 ATRIBUTOS
+
+            <div class="statline">
+
+                <span>
+                    Status
+                </span>
+
+                <b>
+                    ${
+                        player.professional.active
+                        ? "Profissional"
+                        : "Amador"
+                    }
+                </b>
 
             </div>
 
 
-            ${
+            <div class="statline">
 
+                <span>
+                    Ranking
+                </span>
+
+                <b>
+                    ${rankingText()}
+                </b>
+
+            </div>
+
+
+            <div class="statline">
+
+                <span>
+                    Vitórias
+                </span>
+
+                <b>
+                    ${player.professional.wins}
+                </b>
+
+            </div>
+
+
+            <div class="statline">
+
+                <span>
+                    Derrotas
+                </span>
+
+                <b>
+                    ${player.professional.losses}
+                </b>
+
+            </div>
+
+
+            <div class="statline">
+
+                <span>
+                    Fama
+                </span>
+
+                <b>
+                    ${Math.round(player.fame)}
+                </b>
+
+            </div>
+
+
+            <div class="statline">
+
+                <span>
+                    Cinturão
+                </span>
+
+                <b>
+                    ${title}
+                </b>
+
+            </div>
+
+
+            <div class="statline">
+
+                <span>
+                    Defesas
+                </span>
+
+                <b>
+                    ${player.championship.defenses}
+                </b>
+
+            </div>
+
+        </div>
+
+
+        <div class="card">
+
+            <div class="title">
+                📈 ATRIBUTOS
+            </div>
+
+
+            ${
                 Object
                     .entries(a)
                     .map(
@@ -348,7 +462,84 @@ function career() {
 
                     )
                     .join("")
+            }
 
+        </div>
+
+
+        <div class="card">
+
+            <div class="title">
+                📄 OPORTUNIDADES
+            </div>
+
+
+            ${
+                offers.length === 0
+
+                ?
+
+                `
+                <p>
+                    Nenhuma organização está
+                    oferecendo contrato no momento.
+                </p>
+                `
+
+                :
+
+                offers
+                    .map(
+
+                        offer => `
+
+                        <div class="card">
+
+                            <b>
+                                ${offer.promotion.name}
+                            </b>
+
+                            <div class="statline">
+
+                                <span>
+                                    Prestígio
+                                </span>
+
+                                <b>
+                                    ${offer.promotion.prestige}
+                                </b>
+
+                            </div>
+
+                            <div class="statline">
+
+                                <span>
+                                    Bolsa
+                                </span>
+
+                                <b>
+                                    $${offer.purse}
+                                </b>
+
+                            </div>
+
+                            <button
+                                onclick="
+                                    acceptPromotion(
+                                        ${offer.promotion.id}
+                                    )
+                                ">
+
+                                ✍️ ACEITAR
+
+                            </button>
+
+                        </div>
+
+                        `
+
+                    )
+                    .join("")
             }
 
         </div>
