@@ -1,7 +1,5 @@
 function tab(name) {
 
-    alert("TAB: " + name);
-
     if (name === "home") {
         home();
     }
