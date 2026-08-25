@@ -571,3 +571,922 @@ function generateEvent() {
     return generateAmateurEvent();
 
 }
+/* =========================================================
+   🌎 MUNDO MMA — SIMULAÇÃO INDEPENDENTE
+   ========================================================= */
+
+const mmaWorld = {
+
+    initialized: false,
+
+    week: 0,
+
+    fighters: [],
+
+    eventsThisWeek: [],
+
+    news: []
+
+};
+
+
+/* =========================================================
+   NOMES PARA LUTADORES DO MUNDO
+========================================================= */
+
+const worldFirstNames = [
+
+    "Carlos",
+    "João",
+    "Pedro",
+    "Lucas",
+    "Rafael",
+    "Gabriel",
+    "Mateus",
+    "Bruno",
+    "Diego",
+    "André",
+    "Felipe",
+    "Victor",
+    "Marcos",
+    "Thiago",
+    "Gustavo",
+    "Daniel",
+    "Leonardo",
+    "Ricardo",
+    "Alex",
+    "Eduardo"
+
+];
+
+
+const worldLastNames = [
+
+    "Silva",
+    "Santos",
+    "Oliveira",
+    "Souza",
+    "Costa",
+    "Pereira",
+    "Almeida",
+    "Ferreira",
+    "Rodrigues",
+    "Martins",
+    "Carvalho",
+    "Lima",
+    "Gomes",
+    "Ribeiro",
+    "Barbosa",
+    "Mendes",
+    "Dias",
+    "Teixeira",
+    "Moreira",
+    "Correia"
+
+];
+
+
+/* =========================================================
+   PAÍSES
+========================================================= */
+
+const worldCountries = [
+
+    "Brasil",
+    "Estados Unidos",
+    "Japão",
+    "México",
+    "Canadá",
+    "Reino Unido",
+    "Rússia",
+    "França",
+    "Austrália",
+    "Argentina"
+
+];
+
+
+/* =========================================================
+   CATEGORIAS
+========================================================= */
+
+const worldWeights = [
+
+    "Peso Leve",
+    "Peso Meio-Médio",
+    "Peso Médio",
+    "Peso Meio-Pesado",
+    "Peso Pesado"
+
+];
+
+
+/* =========================================================
+   ORGANIZAÇÕES DO MUNDO
+========================================================= */
+
+const worldOrganizations = [
+
+    {
+        name: "Circuito Regional Brasileiro",
+        stage: "regional",
+        country: "Brasil",
+        level: 1
+    },
+
+    {
+        name: "Shooto Brasil",
+        stage: "regional",
+        country: "Brasil",
+        level: 1
+    },
+
+    {
+        name: "Jungle Fight",
+        stage: "national",
+        country: "Brasil",
+        level: 2
+    },
+
+    {
+        name: "LFA",
+        stage: "national",
+        country: "Estados Unidos",
+        level: 2
+    },
+
+    {
+        name: "PFL",
+        stage: "international",
+        country: "Estados Unidos",
+        level: 4
+    },
+
+    {
+        name: "ONE Championship",
+        stage: "international",
+        country: "Singapura",
+        level: 4
+    },
+
+    {
+        name: "Bellator",
+        stage: "international",
+        country: "Estados Unidos",
+        level: 4
+    },
+
+    {
+        name: "RIZIN",
+        stage: "international",
+        country: "Japão",
+        level: 4
+    },
+
+    {
+        name: "KSW",
+        stage: "international",
+        country: "Polônia",
+        level: 4
+    },
+
+    {
+        name: "UAE Warriors",
+        stage: "international",
+        country: "Emirados Árabes",
+        level: 4
+    },
+
+    {
+        name: "UFC",
+        stage: "elite",
+        country: "Estados Unidos",
+        level: 6
+    }
+
+];
+
+
+/* =========================================================
+   GERAR NOME
+========================================================= */
+
+function worldRandomName() {
+
+    const first =
+        worldFirstNames[
+            Math.floor(
+                Math.random() *
+                worldFirstNames.length
+            )
+        ];
+
+
+    const last =
+        worldLastNames[
+            Math.floor(
+                Math.random() *
+                worldLastNames.length
+            )
+        ];
+
+
+    return first + " " + last;
+
+}
+
+
+/* =========================================================
+   CRIAR LUTADOR DO MUNDO
+========================================================= */
+
+function createWorldFighter(
+    weight,
+    organization,
+    index
+) {
+
+    const fighter = {
+
+        id:
+            "world_" +
+            Date.now() +
+            "_" +
+            index +
+            "_" +
+            Math.floor(
+                Math.random() * 100000
+            ),
+
+        name:
+            worldRandomName(),
+
+        country:
+            worldCountries[
+                Math.floor(
+                    Math.random() *
+                    worldCountries.length
+                )
+            ],
+
+        weight:
+            weight,
+
+        organization:
+            organization.name,
+
+        organizationLevel:
+            organization.level,
+
+        careerStage:
+            organization.stage,
+
+        wins:
+            Math.floor(
+                Math.random() * 8
+            ),
+
+        losses:
+            Math.floor(
+                Math.random() * 3
+            ),
+
+        draws:
+            0,
+
+        ranking:
+            null,
+
+        champion:
+            false,
+
+        power:
+            45 +
+            Math.random() * 35,
+
+        fame:
+            5 +
+            Math.random() * 30,
+
+        active:
+            true,
+
+        injuredWeeks:
+            0,
+
+        age:
+            20 +
+            Math.floor(
+                Math.random() * 17
+            )
+
+    };
+
+
+    return fighter;
+
+}
+
+
+/* =========================================================
+   INICIALIZAR MUNDO
+========================================================= */
+
+function initializeMMWorld() {
+
+    if (
+        mmaWorld.initialized
+    ) {
+
+        return;
+
+    }
+
+
+    mmaWorld.fighters = [];
+
+
+    let fighterIndex = 0;
+
+
+    /*
+     * Criamos lutadores para cada organização
+     * e categoria.
+     */
+
+    worldOrganizations.forEach(
+        organization => {
+
+            worldWeights.forEach(
+                weight => {
+
+                    let amount = 0;
+
+
+                    if (
+                        organization.stage ===
+                        "regional"
+                    ) {
+
+                        amount = 10;
+
+                    }
+
+
+                    if (
+                        organization.stage ===
+                        "national"
+                    ) {
+
+                        amount = 15;
+
+                    }
+
+
+                    if (
+                        organization.stage ===
+                        "international"
+                    ) {
+
+                        amount = 20;
+
+                    }
+
+
+                    if (
+                        organization.stage ===
+                        "elite"
+                    ) {
+
+                        amount = 20;
+
+                    }
+
+
+                    for (
+                        let i = 0;
+                        i < amount;
+                        i++
+                    ) {
+
+                        mmaWorld.fighters.push(
+
+                            createWorldFighter(
+                                weight,
+                                organization,
+                                fighterIndex++
+                            )
+
+                        );
+
+                    }
+
+                }
+            );
+
+        }
+    );
+
+
+    updateWorldRankings();
+
+
+    mmaWorld.initialized =
+        true;
+
+}
+
+
+/* =========================================================
+   OBTER LUTADORES DE UMA ORGANIZAÇÃO
+========================================================= */
+
+function getWorldFighters(
+    organization,
+    weight
+) {
+
+    return mmaWorld.fighters.filter(
+        fighter =>
+
+            fighter.active &&
+
+            fighter.organization ===
+            organization &&
+
+            fighter.weight ===
+            weight
+
+    );
+
+}
+
+
+/* =========================================================
+   ATUALIZAR RANKINGS
+========================================================= */
+
+function updateWorldRankings() {
+
+    /*
+     * Cada organização possui seu próprio ranking.
+     */
+
+    worldOrganizations.forEach(
+        organization => {
+
+            worldWeights.forEach(
+                weight => {
+
+                    const fighters =
+                        getWorldFighters(
+                            organization.name,
+                            weight
+                        );
+
+
+                    fighters.sort(
+                        (a, b) => {
+
+                            const scoreA =
+                                (
+                                    a.wins * 4
+                                ) +
+                                (
+                                    a.fame
+                                ) +
+                                (
+                                    a.power
+                                );
+
+
+                            const scoreB =
+                                (
+                                    b.wins * 4
+                                ) +
+                                (
+                                    b.fame
+                                ) +
+                                (
+                                    b.power
+                                );
+
+
+                            return scoreB -
+                                   scoreA;
+
+                        }
+                    );
+
+
+                    fighters.forEach(
+                        (
+                            fighter,
+                            index
+                        ) => {
+
+                            fighter.ranking =
+                                index + 1;
+
+
+                            fighter.champion =
+                                index === 0;
+
+                        }
+                    );
+
+                }
+            );
+
+        }
+    );
+
+}
+
+
+/* =========================================================
+   SIMULAR UMA LUTA DO MUNDO
+========================================================= */
+
+function simulateWorldFight(
+    fighterA,
+    fighterB
+) {
+
+    if (
+        !fighterA ||
+        !fighterB
+    ) {
+
+        return;
+
+    }
+
+
+    const powerA =
+        fighterA.power +
+        (
+            Math.random() * 20
+        ) -
+        10;
+
+
+    const powerB =
+        fighterB.power +
+        (
+            Math.random() * 20
+        ) -
+        10;
+
+
+    let winner;
+    let loser;
+
+
+    if (
+        powerA >= powerB
+    ) {
+
+        winner =
+            fighterA;
+
+        loser =
+            fighterB;
+
+    } else {
+
+        winner =
+            fighterB;
+
+        loser =
+            fighterA;
+
+    }
+
+
+    winner.wins++;
+
+
+    loser.losses++;
+
+
+    winner.fame += 1;
+
+
+    if (
+        loser.fame > 0
+    ) {
+
+        loser.fame -= 0.5;
+
+    }
+
+
+    /*
+     * Pequena evolução do vencedor.
+     */
+
+    winner.power =
+        Math.min(
+            100,
+            winner.power +
+            0.2
+        );
+
+
+    /*
+     * Pequena perda de forma do derrotado.
+     */
+
+    loser.power =
+        Math.max(
+            30,
+            loser.power -
+            0.1
+        );
+
+
+    return {
+
+        winner:
+            winner,
+
+        loser:
+            loser
+
+    };
+
+}
+
+
+/* =========================================================
+   SIMULAR UMA ORGANIZAÇÃO
+========================================================= */
+
+function simulateWorldOrganization(
+    organization
+) {
+
+    worldWeights.forEach(
+        weight => {
+
+            const fighters =
+                getWorldFighters(
+                    organization.name,
+                    weight
+                );
+
+
+            /*
+             * Embaralha os lutadores.
+             */
+
+            const shuffled =
+                [...fighters].sort(
+                    () =>
+                        Math.random() -
+                        0.5
+                );
+
+
+            /*
+             * Aproximadamente metade
+             * luta naquela semana.
+             */
+
+            for (
+                let i = 0;
+                i + 1 < shuffled.length;
+                i += 2
+            ) {
+
+                /*
+                 * Nem todo lutador luta
+                 * toda semana.
+                 */
+
+                if (
+                    Math.random() >
+                    0.35
+                ) {
+
+                    continue;
+
+                }
+
+
+                const result =
+                    simulateWorldFight(
+                        shuffled[i],
+                        shuffled[i + 1]
+                    );
+
+
+                if (
+                    result
+                ) {
+
+                    mmaWorld.eventsThisWeek.push({
+
+                        organization:
+                            organization.name,
+
+                        weight:
+                            weight,
+
+                        winner:
+                            result.winner.name,
+
+                        loser:
+                            result.loser.name
+
+                    });
+
+                }
+
+            }
+
+        }
+    );
+
+}
+
+
+/* =========================================================
+   SIMULAR UMA SEMANA
+========================================================= */
+
+function simulateMMWorldWeek() {
+
+    /*
+     * Inicializa o mundo na primeira utilização.
+     */
+
+    initializeMMWorld();
+
+
+    mmaWorld.week++;
+
+
+    mmaWorld.eventsThisWeek = [];
+
+
+    /*
+     * Todas as organizações funcionam
+     * independentemente do jogador.
+     */
+
+    worldOrganizations.forEach(
+        organization => {
+
+            simulateWorldOrganization(
+                organization
+            );
+
+        }
+    );
+
+
+    /*
+     * Atualiza rankings depois das lutas.
+     */
+
+    updateWorldRankings();
+
+
+    /*
+     * Guarda algumas notícias.
+     */
+
+    if (
+        mmaWorld.eventsThisWeek.length >
+        0
+    ) {
+
+        const news =
+            mmaWorld.eventsThisWeek
+                .slice(0, 5)
+                .map(
+                    fight =>
+
+                        "🏆 " +
+                        fight.winner +
+                        " venceu " +
+                        fight.loser +
+                        " (" +
+                        fight.organization +
+                        ")"
+
+                );
+
+
+        mmaWorld.news.unshift(
+            ...news
+        );
+
+
+        /*
+         * Mantém somente as
+         * últimas 30 notícias.
+         */
+
+        mmaWorld.news =
+            mmaWorld.news.slice(
+                0,
+                30
+            );
+
+    }
+
+
+    return mmaWorld.eventsThisWeek;
+
+}
+
+
+/* =========================================================
+   RANKING DE UMA ORGANIZAÇÃO
+========================================================= */
+
+function getWorldRanking(
+    organization,
+    weight
+) {
+
+    return mmaWorld.fighters
+        .filter(
+            fighter =>
+
+                fighter.active &&
+
+                fighter.organization ===
+                organization &&
+
+                fighter.weight ===
+                weight
+
+        )
+        .sort(
+            (a, b) => {
+
+                const scoreA =
+                    (
+                        a.wins * 4
+                    ) +
+                    a.fame +
+                    a.power;
+
+
+                const scoreB =
+                    (
+                        b.wins * 4
+                    ) +
+                    b.fame +
+                    b.power;
+
+
+                return scoreB -
+                       scoreA;
+
+            }
+        )
+        .slice(
+            0,
+            15
+        );
+
+}
+
+
+/* =========================================================
+   CAMPEÃO
+========================================================= */
+
+function getWorldChampion(
+    organization,
+    weight
+) {
+
+    const ranking =
+        getWorldRanking(
+            organization,
+            weight
+        );
+
+
+    return ranking[0] || null;
+
+}
+
+
+/* =========================================================
+   NOTÍCIAS DO MUNDO
+========================================================= */
+
+function getWorldNews() {
+
+    return (
+        mmaWorld.news || []
+    );
+
+}
