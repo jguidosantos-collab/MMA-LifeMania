@@ -1814,3 +1814,130 @@ function initCreation() {
 initCreation();
 
 load();
+function rankingScreen() {
+
+    initializeMMWorld();
+
+    const organization =
+        "UFC";
+
+    const weight =
+        player.weight || "Peso Leve";
+
+    const ranking =
+        getWorldRanking(
+            organization,
+            weight
+        );
+
+    const champion =
+        getWorldChampion(
+            organization,
+            weight
+        );
+
+    document
+        .getElementById("content")
+        .innerHTML = `
+
+        <div class="card">
+
+            <div class="title">
+                🏆 RANKINGS
+            </div>
+
+            <button
+                onclick="showRankingOrganization('UFC')">
+
+                👑 UFC
+
+            </button>
+
+            <button
+                onclick="showRankingOrganization('PFL')">
+
+                🌎 PFL
+
+            </button>
+
+            <button
+                onclick="showRankingOrganization('ONE Championship')">
+
+                🌎 ONE Championship
+
+            </button>
+
+            <button
+                onclick="showRankingOrganization('Bellator')">
+
+                🌎 Bellator
+
+            </button>
+
+            <button
+                onclick="showRankingOrganization('Jungle Fight')">
+
+                🇧🇷 Nacional
+
+            </button>
+
+            <button
+                onclick="showRankingOrganization('Shooto Brasil')">
+
+                🇧🇷 Regional
+
+            </button>
+
+        </div>
+
+        <div class="card">
+
+            <div class="title">
+                👑 ${organization}
+            </div>
+
+            <div class="statline">
+
+                <span>
+                    Campeão
+                </span>
+
+                <b>
+                    ${
+                        champion
+                        ? champion.name
+                        : "Nenhum"
+                    }
+                </b>
+
+            </div>
+
+            ${
+                ranking
+                    .map(
+                        (fighter, index) => `
+
+                        <div class="statline">
+
+                            <span>
+                                #${index + 1}
+                                ${fighter.name}
+                            </span>
+
+                            <b>
+                                ${fighter.wins}-
+                                ${fighter.losses}
+                            </b>
+
+                        </div>
+
+                        `
+                    )
+                    .join("")
+            }
+
+        </div>
+
+        `;
+
+}
