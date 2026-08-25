@@ -73,6 +73,23 @@ function createPlayer() {
 
         nextFight: null,
 
+currentPromotion: null,
+
+contracts: [],
+
+opportunities: [],
+
+championship: {
+
+    title: null,
+
+    defenses: 0,
+
+    titleWins: 0,
+
+    titleLosses: 0
+
+},
         relationship: "Solteiro",
 
         partner: null,
