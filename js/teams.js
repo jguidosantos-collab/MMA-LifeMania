@@ -618,3 +618,158 @@ function calculateFightPayout(
             )
     };
 }
+function teamScreen() {
+    const team =
+        player.team || null;
+    const manager =
+        player.manager || null;
+    document.getElementById("content").innerHTML = `
+        <div class="card">
+            <div class="title">
+                🏢 EQUIPE E EMPRESÁRIO
+            </div>
+            ${
+                team
+                ?
+                `
+                <div class="statline">
+                    <span>Academia atual</span>
+                    <b>${team.name}</b>
+                </div>
+                <div class="statline">
+                    <span>País</span>
+                    <b>${team.country || "Não informado"}</b>
+                </div>
+                <div class="statline">
+                    <span>Cidade</span>
+                    <b>${team.city || "Não informado"}</b>
+                </div>
+                <div class="statline">
+                    <span>Nível</span>
+                    <b>${team.level || "Regional"}</b>
+                </div>
+                <div class="statline">
+                    <span>Reputação</span>
+                    <b>${team.reputation || 0}</b>
+                </div>
+                <div class="statline">
+                    <span>Qualidade</span>
+                    <b>${team.quality || 0}</b>
+                </div>
+                <div class="statline">
+                    <span>Especialidade</span>
+                    <b>${team.specialty || "MMA"}</b>
+                </div>
+                <div class="statline">
+                    <span>Mensalidade</span>
+                    <b>$${team.monthlyCost || 0}</b>
+                </div>
+                <div class="statline">
+                    <span>Comissão por luta</span>
+                    <b>${team.fightFee || 0}%</b>
+                </div>
+                `
+                :
+                `
+                <p>
+                    🥊 Você ainda não possui uma academia.
+                </p>
+                `
+            }
+            <div class="statline">
+                <span>Empresário</span>
+                <b>
+                    ${
+                        manager
+                        ?
+                        manager.name
+                        :
+                        "Nenhum"
+                    }
+                </b>
+            </div>
+            ${
+                manager
+                ?
+                `
+                <div class="statline">
+                    <span>Nível</span>
+                    <b>
+                        ${manager.level}
+                    </b>
+                </div>
+                <div class="statline">
+                    <span>Comissão</span>
+                    <b>
+                        ${manager.commission || 0}%
+                    </b>
+                </div>
+                `
+                :
+                ""
+            }
+            <button
+                onclick="
+                    generateTeamOffers();
+                    teamScreen();
+                ">
+                🔎 PROCURAR ACADEMIAS
+            </button>
+            ${
+                (player.teamOffers || [])
+                    .map(
+                        (offer, index) => `
+                        <div class="card">
+                            <div class="title">
+                                🏢 ${offer.name}
+                            </div>
+                            <div class="statline">
+                                <span>País</span>
+                                <b>${offer.country}</b>
+                            </div>
+                            <div class="statline">
+                                <span>Cidade</span>
+                                <b>${offer.city}</b>
+                            </div>
+                            <div class="statline">
+                                <span>Nível</span>
+                                <b>${offer.level}</b>
+                            </div>
+                            <div class="statline">
+                                <span>Reputação</span>
+                                <b>${offer.reputation}</b>
+                            </div>
+                            <div class="statline">
+                                <span>Qualidade</span>
+                                <b>${offer.quality}</b>
+                            </div>
+                            <div class="statline">
+                                <span>Especialidade</span>
+                                <b>${offer.specialty}</b>
+                            </div>
+                            <div class="statline">
+                                <span>Mensalidade</span>
+                                <b>$${offer.monthlyCost}</b>
+                            </div>
+                            <div class="statline">
+                                <span>Comissão por luta</span>
+                                <b>${offer.fightFee}%</b>
+                            </div>
+                            <button
+                                class="green"
+                                onclick="joinTeam(${index})">
+                                🤝 ENTRAR
+                            </button>
+                            <button
+                                class="blue"
+                                onclick="tryoutTeam(${index})">
+                                🥊 FAZER TESTE
+                            </button>
+                        </div>
+                        `
+                    )
+                    .join("")
+            }
+        </div>
+    `;
+}
