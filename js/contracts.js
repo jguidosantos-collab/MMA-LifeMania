@@ -319,6 +319,33 @@ function updateCareerStage() {
 
 }
 
+    function generateContractOffers() {
+
+    if (!player.professional.active) {
+
+        return [];
+
+    }
+
+
+    const available =
+        promotions.filter(
+            promotion =>
+                canReceiveOffer(promotion)
+        );
+
+
+    return available
+        .slice(0, 3)
+        .map(
+            promotion =>
+                calculateContractOffer(
+                    promotion
+                )
+        );
+
+}
+
 function generateContractOffers() {
 
     if (!player.professional.active) {
