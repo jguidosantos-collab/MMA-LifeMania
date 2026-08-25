@@ -629,7 +629,454 @@ function acceptPromotion(id) {
     career();
 
 }
+/* =========================
+   CARREIRA
+========================= */
 
+function career() {
+
+    initializeChampionship();
+
+
+    const a =
+        player.attributes || {};
+
+
+    const title =
+        player.championship &&
+        player.championship.title
+        ?
+        player.championship.title
+        :
+        "Nenhum";
+
+
+    /*
+     * Gera as oportunidades disponíveis.
+     */
+
+    let offers = [];
+
+
+    if (
+        typeof generateContractOffers ===
+        "function"
+    ) {
+
+        offers =
+            generateContractOffers();
+
+    }
+
+
+    document
+        .getElementById("content")
+        .innerHTML = `
+
+        <div class="card">
+
+            <div class="title">
+                🥊 CARREIRA
+            </div>
+
+
+            <div class="statline">
+
+                <span>
+                    Status
+                </span>
+
+                <b>
+                    ${
+                        player.professional &&
+                        player.professional.active
+                        ?
+                        "Profissional"
+                        :
+                        "Amador"
+                    }
+                </b>
+
+            </div>
+
+
+            <div class="statline">
+
+                <span>
+                    Estágio
+                </span>
+
+                <b>
+                    ${
+                        player.careerStage
+                        ||
+                        "regional"
+                    }
+                </b>
+
+            </div>
+
+
+            <div class="statline">
+
+                <span>
+                    Ranking
+                </span>
+
+                <b>
+                    ${
+                        typeof rankingText ===
+                        "function"
+                        ?
+                        rankingText()
+                        :
+                        "Sem ranking"
+                    }
+                </b>
+
+            </div>
+
+
+            <div class="statline">
+
+                <span>
+                    Vitórias
+                </span>
+
+                <b>
+                    ${
+                        player.professional
+                        ?
+                        player.professional.wins
+                        :
+                        0
+                    }
+                </b>
+
+            </div>
+
+
+            <div class="statline">
+
+                <span>
+                    Derrotas
+                </span>
+
+                <b>
+                    ${
+                        player.professional
+                        ?
+                        player.professional.losses
+                        :
+                        0
+                    }
+                </b>
+
+            </div>
+
+
+            <div class="statline">
+
+                <span>
+                    Fama
+                </span>
+
+                <b>
+                    ${Math.round(player.fame || 0)}
+                </b>
+
+            </div>
+
+
+            <div class="statline">
+
+                <span>
+                    Cinturão
+                </span>
+
+                <b>
+                    ${title}
+                </b>
+
+            </div>
+
+
+            <div class="statline">
+
+                <span>
+                    Defesas
+                </span>
+
+                <b>
+                    ${
+                        player.championship
+                        ?
+                        player.championship.defenses
+                        :
+                        0
+                    }
+                </b>
+
+            </div>
+
+        </div>
+
+
+        <div class="card">
+
+            <div class="title">
+                📄 OPORTUNIDADES
+            </div>
+
+
+            ${
+                offers.length === 0
+
+                ?
+
+                `
+
+                <p>
+                    Nenhuma organização está
+                    oferecendo contrato no momento.
+                </p>
+
+                `
+
+                :
+
+                offers
+                    .map(
+
+                        offer => `
+
+                        <div class="card">
+
+                            <div class="title">
+                                ${offer.promotion.name}
+                            </div>
+
+
+                            <div class="statline">
+
+                                <span>
+                                    País
+                                </span>
+
+                                <b>
+                                    ${
+                                        offer.promotion.country
+                                    }
+                                </b>
+
+                            </div>
+
+
+                            <div class="statline">
+
+                                <span>
+                                    Nível
+                                </span>
+
+                                <b>
+                                    ${
+                                        offer.promotion.careerStage
+                                        ||
+                                        "Profissional"
+                                    }
+                                </b>
+
+                            </div>
+
+
+                            <div class="statline">
+
+                                <span>
+                                    Prestígio
+                                </span>
+
+                                <b>
+                                    ${
+                                        offer.promotion.prestige
+                                    }
+                                </b>
+
+                            </div>
+
+
+                            <div class="statline">
+
+                                <span>
+                                    Lutas
+                                </span>
+
+                                <b>
+                                    ${
+                                        offer.fights
+                                    }
+                                </b>
+
+                            </div>
+
+
+                            <div class="statline">
+
+                                <span>
+                                    Bolsa
+                                </span>
+
+                                <b>
+                                    $${Math.round(
+                                        offer.purse
+                                    )}
+                                </b>
+
+                            </div>
+
+
+                            <div class="statline">
+
+                                <span>
+                                    Bônus de vitória
+                                </span>
+
+                                <b>
+                                    $${Math.round(
+                                        offer.winBonus
+                                    )}
+                                </b>
+
+                            </div>
+
+
+                            <button
+                                class="green"
+                                onclick="
+                                    acceptPromotion(
+                                        ${offer.promotion.id}
+                                    )
+                                ">
+
+                                ✍️ ACEITAR CONTRATO
+
+                            </button>
+
+                        </div>
+
+                        `
+
+                    )
+                    .join("")
+            }
+
+        </div>
+
+
+        ${
+            player.currentContract &&
+            player.currentContract.active
+
+            ?
+
+            `
+
+            <div class="card">
+
+                <div class="title">
+                    📑 CONTRATO ATUAL
+                </div>
+
+
+                <div class="statline">
+
+                    <span>
+                        Organização
+                    </span>
+
+                    <b>
+                        ${
+                            player.currentContract
+                                .promotionName
+                        }
+                    </b>
+
+                </div>
+
+
+                <div class="statline">
+
+                    <span>
+                        Lutas contratadas
+                    </span>
+
+                    <b>
+                        ${
+                            player.currentContract
+                                .fights
+                        }
+                    </b>
+
+                </div>
+
+
+                <div class="statline">
+
+                    <span>
+                        Lutas realizadas
+                    </span>
+
+                    <b>
+                        ${
+                            player.currentContract
+                                .fightsCompleted
+                        }
+                    </b>
+
+                </div>
+
+
+                <div class="statline">
+
+                    <span>
+                        Bolsa
+                    </span>
+
+                    <b>
+                        $${Math.round(
+                            player.currentContract.purse
+                        )}
+                    </b>
+
+                </div>
+
+
+                <div class="statline">
+
+                    <span>
+                        Bônus de vitória
+                    </span>
+
+                    <b>
+                        $${Math.round(
+                            player.currentContract.winBonus
+                        )}
+                    </b>
+
+                </div>
+
+            </div>
+
+            `
+
+            :
+
+            ""
+
+        }
+
+        `;
+
+}
 
 /* =========================
    TREINAMENTO
