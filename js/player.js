@@ -13,7 +13,9 @@ function createPlayer() {
         style: "Completo",
 
         age: 15,
-
+        
+careerStage: "amateur",
+        
         week: 0,
 
         year: 2026,
