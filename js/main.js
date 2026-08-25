@@ -1,39 +1,29 @@
 function tab(name) {
 
+    alert("TAB: " + name);
+
     if (name === "home") {
-
         home();
-
     }
 
     if (name === "career") {
-
         career();
-
     }
 
     if (name === "train") {
-
         training();
-
     }
 
     if (name === "fight") {
-
         fightScreen();
-
     }
 
     if (name === "team") {
-
         teamScreen();
-
     }
 
     if (name === "life") {
-
         familyScreen();
-
     }
 
 }
