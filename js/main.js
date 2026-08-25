@@ -430,7 +430,7 @@ function career() {
         "Nenhum";
 
 
-    const offers = [];
+    const offers = generateContractOffers();
 
 
     document
