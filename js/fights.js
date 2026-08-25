@@ -1,70 +1,196 @@
 let currentOpponent = null;
 let currentEvent = null;
 
+
+/* =========================================================
+   PROCURAR LUTA
+========================================================= */
+
 function findFight() {
 
     if (player.nextFight) {
-        alert("Você já tem uma luta marcada.");
+
+        alert(
+            "Você já tem uma luta marcada."
+        );
+
         return;
+
     }
-    
+
+
     /*
      * AMADOR
+     *
+     * Lutador amador pode lutar normalmente,
+     * mas não utiliza contrato profissional.
      */
 
     if (!player.professional.active) {
 
-        alert(
-            "🥋 Você ainda está no circuito amador."
+        currentEvent =
+            generateEvent();
+
+        currentOpponent =
+            generateFighter();
+
+
+        currentOpponent.power +=
+            currentEvent.level * 5;
+
+
+        player.nextFight = {
+
+            opponent:
+                currentOpponent,
+
+            event:
+                currentEvent,
+
+            purse:
+                currentEvent.purse,
+
+            week:
+                player.week + 1,
+
+            amateur:
+                true
+
+        };
+
+
+        player.log.unshift(
+
+            "🥋 Luta amadora marcada: " +
+            currentEvent.name
+
         );
 
+
+        save();
+
+        fightScreen();
+
+        return;
+
     }
-    currentEvent = generateEvent();
 
-    currentOpponent = generateFighter();
 
-    // Quanto maior o evento, mais forte o adversário
+    /*
+     * PROFISSIONAL
+     */
+
+    currentEvent =
+        generateEvent();
+
+
+    currentOpponent =
+        generateFighter();
+
+
+    /*
+     * Quanto maior o evento,
+     * mais forte o adversário.
+     */
+
     currentOpponent.power +=
         currentEvent.level * 5;
 
+
+    /*
+     * Bolsa:
+     *
+     * Se existe contrato ativo,
+     * a bolsa vem do contrato.
+     *
+     * Caso contrário usa a bolsa
+     * padrão do evento.
+     */
+
+    let purse =
+        currentEvent.purse;
+
+
+    if (
+        player.currentContract &&
+        player.currentContract.active
+    ) {
+
+        purse =
+            player.currentContract.purse;
+
+    }
+
+
     player.nextFight = {
 
-        opponent: currentOpponent,
+        opponent:
+            currentOpponent,
 
-        event: currentEvent,
+        event:
+            currentEvent,
 
-        purse: currentEvent.purse,
+        purse:
+            purse,
 
-        week: player.week + 1
+        week:
+            player.week + 1,
+
+        amateur:
+            false
 
     };
 
+
     player.log.unshift(
-        "📅 Luta marcada: " +
+
+        "📅 Luta profissional marcada: " +
         currentEvent.name
+
     );
+
 
     save();
 
     fightScreen();
+
 }
 
+
+/* =========================================================
+   LUTAR
+========================================================= */
 
 function fight() {
 
     if (!player.nextFight) {
+
         return;
+
     }
+
 
     const opponent =
         player.nextFight.opponent;
 
+
     const event =
         player.nextFight.event;
+
 
     const a =
         player.attributes;
 
+
+    const isAmateur =
+        player.nextFight.amateur === true;
+
+
+    /*
+     * =====================================================
+     * FORÇA DO LUTADOR
+     * =====================================================
+     */
 
     let fighterPower = (
 
@@ -82,12 +208,26 @@ function fight() {
     ) / 10;
 
 
-    // experiência influencia
+    /*
+     * Experiência profissional.
+     */
+
     fighterPower +=
         player.professional.wins * 1.5;
 
 
-    // equipe influencia
+    /*
+     * Experiência amadora também ajuda.
+     */
+
+    fighterPower +=
+        player.amateur.wins * 0.5;
+
+
+    /*
+     * Equipe influencia.
+     */
+
     if (player.team) {
 
         fighterPower +=
@@ -96,12 +236,18 @@ function fight() {
     }
 
 
-    // fadiga prejudica
+    /*
+     * Fadiga prejudica.
+     */
+
     fighterPower -=
         player.fatigue / 5;
 
 
-    // pequena variação aleatória
+    /*
+     * Pequena variação aleatória.
+     */
+
     fighterPower +=
         Math.random() * 20 - 10;
 
@@ -114,115 +260,385 @@ function fight() {
         fighterPower >= enemyPower;
 
 
+    /* =====================================================
+       VITÓRIA
+    ===================================================== */
+
     if (won) {
 
-        player.professional.wins++;
+        /*
+         * =================================================
+         * AMADOR
+         * =================================================
+         */
 
-        opponent.losses++;
+        if (isAmateur) {
 
-        const baseMoney =
-            event.purse;
+            player.amateur.wins++;
 
 
-        // empresário pega comissão
-        let commission = 0;
+            player.fame +=
+                1;
 
-        if (player.manager) {
 
-            commission =
-                player.manager.commission;
+            player.attributes.confidence =
+                Math.min(
+                    100,
+                    player.attributes.confidence + 2
+                );
+
+
+            player.log.unshift(
+
+                "🥋 Vitória amadora contra " +
+                opponent.displayName +
+                " no " +
+                event.name
+
+            );
+
+
+            alert(
+
+                "🥋 VITÓRIA AMADORA!\n\n" +
+                opponent.displayName +
+                "\n\n" +
+                "Bolsa: $0"
+
+            );
 
         }
 
 
-        const finalMoney =
-            baseMoney -
-            (baseMoney * commission / 100);
+        /*
+         * =================================================
+         * PROFISSIONAL
+         * =================================================
+         */
+
+        else {
+
+            player.professional.wins++;
 
 
-        player.money +=
-            finalMoney;
+            opponent.losses++;
 
 
-        // fama proporcional ao evento
-        player.fame +=
-            event.level * 4;
+            /*
+             * Bolsa do contrato.
+             */
+
+            let purse =
+                event.purse;
 
 
-        // confiança
-        player.attributes.confidence =
-            Math.min(
-                100,
-                player.attributes.confidence + 3
+            let winBonus =
+                0;
+
+
+            if (
+                player.currentContract &&
+                player.currentContract.active
+            ) {
+
+                purse =
+                    player.currentContract.purse;
+
+                winBonus =
+                    player.currentContract.winBonus;
+
+            }
+
+
+            /*
+             * Soma bolsa + bônus.
+             */
+
+            let grossMoney =
+                purse +
+                winBonus;
+
+
+            /*
+             * Comissão do empresário.
+             */
+
+            let commission = 0;
+
+
+            if (player.manager) {
+
+                commission =
+                    player.manager.commission || 0;
+
+            }
+
+
+            const finalMoney =
+                grossMoney -
+                (
+                    grossMoney *
+                    commission /
+                    100
+                );
+
+
+            player.money +=
+                finalMoney;
+
+
+            /*
+             * Fama proporcional ao nível.
+             */
+
+            player.fame +=
+                event.level * 4;
+
+
+            /*
+             * Confiança.
+             */
+
+            player.attributes.confidence =
+                Math.min(
+                    100,
+                    player.attributes.confidence + 3
+                );
+
+
+            /*
+             * REGISTRA A LUTA NO CONTRATO
+             */
+
+            registerContractFight(
+                true
             );
 
 
-        player.log.unshift(
+            player.log.unshift(
 
-            "🏆 Vitória contra " +
-            opponent.displayName +
-            " no " +
-            event.name
+                "🏆 Vitória contra " +
+                opponent.displayName +
+                " no " +
+                event.name
 
-        );
-
-
-        alert(
-
-            "🏆 VITÓRIA!\n\n" +
-            opponent.displayName +
-            "\n\n" +
-            "Bolsa: $" +
-            Math.round(finalMoney)
-
-        );
-
-    } else {
-
-        player.professional.losses++;
-
-        opponent.wins++;
-
-
-        player.fame =
-            Math.max(
-                0,
-                player.fame -
-                event.level * 2
             );
 
 
-        player.attributes.confidence =
-            Math.max(
-                0,
-                player.attributes.confidence - 4
+            alert(
+
+                "🏆 VITÓRIA!\n\n" +
+
+                opponent.displayName +
+
+                "\n\n" +
+
+                "Bolsa: $" +
+                Math.round(purse) +
+
+                "\n" +
+
+                "Bônus de vitória: $" +
+                Math.round(winBonus) +
+
+                "\n\n" +
+
+                "Total bruto: $" +
+                Math.round(grossMoney) +
+
+                "\n" +
+
+                "Recebido após comissão: $" +
+                Math.round(finalMoney)
+
             );
 
-
-        player.log.unshift(
-
-            "❌ Derrota contra " +
-            opponent.displayName
-
-        );
-
-
-        alert(
-
-            "❌ DERROTA!\n\n" +
-            opponent.displayName
-
-        );
+        }
 
     }
 
 
-    // dano da luta
+    /* =====================================================
+       DERROTA
+    ===================================================== */
+
+    else {
+
+        /*
+         * =================================================
+         * AMADOR
+         * =================================================
+         */
+
+        if (isAmateur) {
+
+            player.amateur.losses++;
+
+
+            player.fame =
+                Math.max(
+                    0,
+                    player.fame - 1
+                );
+
+
+            player.attributes.confidence =
+                Math.max(
+                    0,
+                    player.attributes.confidence - 2
+                );
+
+
+            player.log.unshift(
+
+                "❌ Derrota amadora contra " +
+                opponent.displayName
+
+            );
+
+
+            alert(
+
+                "❌ DERROTA AMADORA!\n\n" +
+                opponent.displayName
+
+            );
+
+        }
+
+
+        /*
+         * =================================================
+         * PROFISSIONAL
+         * =================================================
+         */
+
+        else {
+
+            player.professional.losses++;
+
+
+            opponent.wins++;
+
+
+            /*
+             * Bolsa é paga mesmo em derrota.
+             */
+
+            let purse =
+                event.purse;
+
+
+            if (
+                player.currentContract &&
+                player.currentContract.active
+            ) {
+
+                purse =
+                    player.currentContract.purse;
+
+            }
+
+
+            /*
+             * Comissão do empresário.
+             */
+
+            let commission = 0;
+
+
+            if (player.manager) {
+
+                commission =
+                    player.manager.commission || 0;
+
+            }
+
+
+            const finalMoney =
+                purse -
+                (
+                    purse *
+                    commission /
+                    100
+                );
+
+
+            player.money +=
+                finalMoney;
+
+
+            /*
+             * Perda de fama.
+             */
+
+            player.fame =
+                Math.max(
+                    0,
+                    player.fame -
+                    event.level * 2
+                );
+
+
+            /*
+             * Confiança.
+
+             */
+
+            player.attributes.confidence =
+                Math.max(
+                    0,
+                    player.attributes.confidence - 4
+                );
+
+
+            /*
+             * REGISTRA A LUTA NO CONTRATO
+             */
+
+            registerContractFight(
+                false
+            );
+
+
+            player.log.unshift(
+
+                "❌ Derrota contra " +
+                opponent.displayName
+
+            );
+
+
+            alert(
+
+                "❌ DERROTA!\n\n" +
+
+                opponent.displayName +
+
+                "\n\n" +
+
+                "Bolsa recebida: $" +
+                Math.round(finalMoney)
+
+            );
+
+        }
+
+    }
+
+
+    /* =====================================================
+       DANO DA LUTA
+    ===================================================== */
+
     player.health =
         Math.max(
             20,
             player.health -
-            (10 + event.level * 2)
+            (
+                10 +
+                event.level * 2
+            )
         );
 
 
@@ -233,19 +649,34 @@ function fight() {
         );
 
 
+    /* =====================================================
+       LIMPAR LUTA
+    ===================================================== */
+
     player.nextFight =
         null;
 
+
     currentOpponent =
         null;
+
 
     currentEvent =
         null;
 
 
+    /* =====================================================
+       ATUALIZAR CARREIRA
+    ===================================================== */
+
+    updateCareerStage();
+
+
     updateRanking();
 
+
     save();
+
 
     home();
 
