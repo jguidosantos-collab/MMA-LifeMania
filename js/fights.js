@@ -1,57 +1,36 @@
-const opponents = [
-
-    "Lucas Rocha",
-    "Bruno Mendes",
-    "Rafael Costa",
-    "Diego Santos",
-    "Caio Almeida",
-    "Mateus Lima",
-    "Victor Silva",
-    "Gabriel Torres",
-    "Henrique Souza",
-    "Pedro Martins",
-    "Gustavo Alves",
-    "Renan Costa"
-
-];
-
+let currentOpponent = null;
+let currentEvent = null;
 
 function findFight() {
 
     if (player.nextFight) {
-
-        alert(
-            "Você já possui uma luta marcada."
-        );
-
+        alert("Você já tem uma luta marcada.");
         return;
     }
 
-    const name =
-        opponents[
-            Math.floor(
-                Math.random() *
-                opponents.length
-            )
-        ];
+    currentEvent = generateEvent();
+
+    currentOpponent = generateFighter();
+
+    // Quanto maior o evento, mais forte o adversário
+    currentOpponent.power +=
+        currentEvent.level * 5;
 
     player.nextFight = {
 
-        name: name,
+        opponent: currentOpponent,
 
-        power:
-            40 +
-            Math.random() * 35,
+        event: currentEvent,
 
-        purse:
-            300 +
-            player.fame * 50
+        purse: currentEvent.purse,
+
+        week: player.week + 1
 
     };
 
     player.log.unshift(
-        "📅 Luta marcada contra " +
-        name
+        "📅 Luta marcada: " +
+        currentEvent.name
     );
 
     save();
@@ -63,15 +42,20 @@ function findFight() {
 function fight() {
 
     if (!player.nextFight) {
-
         return;
     }
+
+    const opponent =
+        player.nextFight.opponent;
+
+    const event =
+        player.nextFight.event;
 
     const a =
         player.attributes;
 
 
-    let mine = (
+    let fighterPower = (
 
         a.strength +
         a.striking +
@@ -87,99 +71,171 @@ function fight() {
     ) / 10;
 
 
-    mine +=
-        Math.random() * 20 -
-        player.fatigue / 8;
+    // experiência influencia
+    fighterPower +=
+        player.professional.wins * 1.5;
 
 
-    const enemy =
+    // equipe influencia
+    if (player.team) {
 
-        player.nextFight.power +
-        Math.random() * 25;
+        fighterPower +=
+            player.team.quality / 8;
+
+    }
 
 
-    if (mine >= enemy) {
+    // fadiga prejudica
+    fighterPower -=
+        player.fatigue / 5;
 
-        if (
-            player.professional.active
-        ) {
 
-            player.professional.wins++;
+    // pequena variação aleatória
+    fighterPower +=
+        Math.random() * 20 - 10;
 
-        } else {
 
-            player.amateur.wins++;
+    const enemyPower =
+        opponent.power;
+
+
+    const won =
+        fighterPower >= enemyPower;
+
+
+    if (won) {
+
+        player.professional.wins++;
+
+        opponent.losses++;
+
+        const baseMoney =
+            event.purse;
+
+
+        // empresário pega comissão
+        let commission = 0;
+
+        if (player.manager) {
+
+            commission =
+                player.manager.commission;
 
         }
 
 
+        const finalMoney =
+            baseMoney -
+            (baseMoney * commission / 100);
+
+
         player.money +=
-            player.nextFight.purse * 2;
+            finalMoney;
 
 
+        // fama proporcional ao evento
         player.fame +=
+            event.level * 4;
 
-            player.professional.active
-                ? 5
-                : 2;
+
+        // confiança
+        player.attributes.confidence =
+            Math.min(
+                100,
+                player.attributes.confidence + 3
+            );
 
 
         player.log.unshift(
 
-            "🏆 Vitória sobre " +
-            player.nextFight.name
+            "🏆 Vitória contra " +
+            opponent.displayName +
+            " no " +
+            event.name
 
         );
 
-        alert("🏆 VITÓRIA!");
+
+        alert(
+
+            "🏆 VITÓRIA!\n\n" +
+            opponent.displayName +
+            "\n\n" +
+            "Bolsa: $" +
+            Math.round(finalMoney)
+
+        );
 
     } else {
 
-        if (
-            player.professional.active
-        ) {
+        player.professional.losses++;
 
-            player.professional.losses++;
+        opponent.wins++;
 
-        } else {
 
-            player.amateur.losses++;
+        player.fame =
+            Math.max(
+                0,
+                player.fame -
+                event.level * 2
+            );
 
-        }
+
+        player.attributes.confidence =
+            Math.max(
+                0,
+                player.attributes.confidence - 4
+            );
 
 
         player.log.unshift(
 
             "❌ Derrota contra " +
-            player.nextFight.name
+            opponent.displayName
 
         );
 
-        alert("❌ DERROTA!");
+
+        alert(
+
+            "❌ DERROTA!\n\n" +
+            opponent.displayName
+
+        );
 
     }
 
 
+    // dano da luta
     player.health =
-
         Math.max(
             20,
-            player.health - 15
+            player.health -
+            (10 + event.level * 2)
         );
 
 
     player.fatigue =
-
         Math.min(
             100,
             player.fatigue + 30
         );
 
 
-    player.nextFight = null;
+    player.nextFight =
+        null;
 
+    currentOpponent =
+        null;
+
+    currentEvent =
+        null;
+
+
+    updateRanking();
 
     save();
 
     home();
+
 }
