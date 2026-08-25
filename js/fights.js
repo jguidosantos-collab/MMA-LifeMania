@@ -793,7 +793,6 @@ function fight() {
        ATUALIZAR CARREIRA
     ===================================================== */
 
-    updateCareerStage();
 
 
     updateRanking();
