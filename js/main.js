@@ -1821,24 +1821,6 @@ function rankingScreen() {
 
     initializeMMWorld();
 
-    const organization =
-        "UFC";
-
-    const weight =
-        player.weight || "Peso Leve";
-
-    const ranking =
-        getWorldRanking(
-            organization,
-            weight
-        );
-
-    const champion =
-        getWorldChampion(
-            organization,
-            weight
-        );
-
     document
         .getElementById("content")
         .innerHTML = `
@@ -1846,98 +1828,159 @@ function rankingScreen() {
         <div class="card">
 
             <div class="title">
-                🏆 RANKINGS
+                🏆 RANKINGS DO MUNDO
+            </div>
+
+            <p>
+                Escolha uma organização para
+                consultar os rankings.
+            </p>
+
+        </div>
+
+
+        <div class="card">
+
+            <div class="title">
+                🇧🇷 REGIONAL
             </div>
 
             <button
-                onclick="showRankingOrganization('UFC')">
+                onclick="
+                    showRankingOrganization(
+                        'Shooto Brasil'
+                    )
+                ">
 
-                👑 UFC
-
-            </button>
-
-            <button
-                onclick="showRankingOrganization('PFL')">
-
-                🌎 PFL
+                🥋 Shooto Brasil
 
             </button>
 
             <button
-                onclick="showRankingOrganization('ONE Championship')">
+                onclick="
+                    showRankingOrganization(
+                        'Circuito Regional Brasileiro'
+                    )
+                ">
 
-                🌎 ONE Championship
-
-            </button>
-
-            <button
-                onclick="showRankingOrganization('Bellator')">
-
-                🌎 Bellator
-
-            </button>
-
-            <button
-                onclick="showRankingOrganization('Jungle Fight')">
-
-                🇧🇷 Nacional
-
-            </button>
-
-            <button
-                onclick="showRankingOrganization('Shooto Brasil')">
-
-                🇧🇷 Regional
+                🥊 Circuito Regional Brasileiro
 
             </button>
 
         </div>
 
+
         <div class="card">
 
             <div class="title">
-                👑 ${organization}
+                🇧🇷 NACIONAL
             </div>
 
-            <div class="statline">
-
-                <span>
-                    Campeão
-                </span>
-
-                <b>
-                    ${
-                        champion
-                        ? champion.name
-                        : "Nenhum"
-                    }
-                </b>
-
-            </div>
-
-            ${
-                ranking
-                    .map(
-                        (fighter, index) => `
-
-                        <div class="statline">
-
-                            <span>
-                                #${index + 1}
-                                ${fighter.name}
-                            </span>
-
-                            <b>
-                                ${fighter.wins}-
-                                ${fighter.losses}
-                            </b>
-
-                        </div>
-
-                        `
+            <button
+                onclick="
+                    showRankingOrganization(
+                        'Jungle Fight'
                     )
-                    .join("")
-            }
+                ">
+
+                🇧🇷 Jungle Fight
+
+            </button>
+
+        </div>
+
+
+        <div class="card">
+
+            <div class="title">
+                🌎 INTERNACIONAL
+            </div>
+
+            <button
+                onclick="
+                    showRankingOrganization(
+                        'PFL'
+                    )
+                ">
+
+                🏆 PFL
+
+            </button>
+
+            <button
+                onclick="
+                    showRankingOrganization(
+                        'ONE Championship'
+                    )
+                ">
+
+                🥊 ONE Championship
+
+            </button>
+
+            <button
+                onclick="
+                    showRankingOrganization(
+                        'Bellator'
+                    )
+                ">
+
+                🥊 Bellator
+
+            </button>
+
+            <button
+                onclick="
+                    showRankingOrganization(
+                        'RIZIN'
+                    )
+                ">
+
+                🇯🇵 RIZIN
+
+            </button>
+
+            <button
+                onclick="
+                    showRankingOrganization(
+                        'KSW'
+                    )
+                ">
+
+                🇵🇱 KSW
+
+            </button>
+
+            <button
+                onclick="
+                    showRankingOrganization(
+                        'UAE Warriors'
+                    )
+                ">
+
+                🇦🇪 UAE Warriors
+
+            </button>
+
+        </div>
+
+
+        <div class="card">
+
+            <div class="title">
+                👑 ELITE
+            </div>
+
+            <button
+                onclick="
+                    showRankingOrganization(
+                        'UFC'
+                    )
+                ">
+
+                🥇 UFC
+
+            </button>
 
         </div>
 
