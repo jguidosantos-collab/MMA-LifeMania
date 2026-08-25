@@ -362,3 +362,33 @@ function generateContractOffers() {
         );
 
 }
+
+function generateContractOffers() {
+
+    if (!player.professional.active) {
+
+        return [];
+
+    }
+
+
+    updateCareerStage();
+
+
+    const available =
+        promotions.filter(
+            promotion =>
+                canReceiveOffer(promotion)
+        );
+
+
+    return available
+        .slice(0, 3)
+        .map(
+            promotion =>
+                calculateContractOffer(
+                    promotion
+                )
+        );
+
+}
