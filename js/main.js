@@ -189,12 +189,6 @@ function turnProfessional() {
 
 function home() {
 
-    <button
-    onclick="tab('ranking')">
-
-    🏆 RANKINGS
-
-</button>
     const p =
         player.professional;
 
@@ -204,6 +198,9 @@ function home() {
         .innerHTML = `
 
         <div class="card">
+        <button onclick="rankingScreen()">
+    🏆 RANKINGS
+</button>
 
             <div class="title">
 
