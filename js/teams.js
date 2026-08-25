@@ -1,991 +1,548 @@
 /* =========================================================
    🏢 SISTEMA DE ACADEMIAS / EQUIPES
    ========================================================= */
-
-
 /* =========================================================
-   BANCO DE ACADEMIAS
-========================================================= */
-
+   🏢 BASE DE ACADEMIAS
+   ========================================================= */
 const teams = [
-
     /* =====================================================
-       🇧🇷 BRASIL
+       🇧🇷 BRASIL — REGIONAIS / BOAS
        ===================================================== */
-
+    {
+        name: "National Combat Academy",
+        country: "Brasil",
+        city: "São Paulo",
+        level: "Regional",
+        reputation: 25,
+        quality: 45,
+        specialty: "MMA",
+        monthlyCost: 120,
+        fightFee: 10
+    },
+    {
+        name: "Team Fortaleza MMA",
+        country: "Brasil",
+        city: "Fortaleza",
+        level: "Regional",
+        reputation: 20,
+        quality: 42,
+        specialty: "Wrestling",
+        monthlyCost: 100,
+        fightFee: 10
+    },
+    {
+        name: "Curitiba Fight Team",
+        country: "Brasil",
+        city: "Curitiba",
+        level: "Regional",
+        reputation: 30,
+        quality: 48,
+        specialty: "Grappling",
+        monthlyCost: 130,
+        fightFee: 11
+    },
+    /* =====================================================
+       🇧🇷 BRASIL — NÍVEL NACIONAL
+       ===================================================== */
     {
         name: "Nova União",
         country: "Brasil",
         city: "Rio de Janeiro",
-        level: 5,
-        reputation: 92,
-        quality: 94,
-        monthlyCost: 1200,
-        fightFeeMin: 10,
-        fightFeeMax: 15,
-        requiredFame: 35,
-        requiredWins: 6,
-        specialty: "Grappling"
+        level: "Elite",
+        reputation: 80,
+        quality: 88,
+        specialty: "Grappling / MMA",
+        monthlyCost: 500,
+        fightFee: 12
     },
-
     {
         name: "Chute Boxe",
         country: "Brasil",
         city: "Curitiba",
-        level: 5,
-        reputation: 90,
-        quality: 93,
-        monthlyCost: 1100,
-        fightFeeMin: 10,
-        fightFeeMax: 15,
-        requiredFame: 30,
-        requiredWins: 5,
-        specialty: "Striking"
+        level: "Elite",
+        reputation: 85,
+        quality: 90,
+        specialty: "Muay Thai / MMA",
+        monthlyCost: 550,
+        fightFee: 13
     },
-
+    {
+        name: "Fighting Nerds",
+        country: "Brasil",
+        city: "São Paulo",
+        level: "Elite",
+        reputation: 90,
+        quality: 94,
+        specialty: "MMA / Striking",
+        monthlyCost: 600,
+        fightFee: 14
+    },
     {
         name: "Team Nogueira",
         country: "Brasil",
         city: "Rio de Janeiro",
-        level: 4,
-        reputation: 86,
-        quality: 89,
-        monthlyCost: 900,
-        fightFeeMin: 10,
-        fightFeeMax: 14,
-        requiredFame: 25,
-        requiredWins: 4,
-        specialty: "MMA"
+        level: "Elite",
+        reputation: 82,
+        quality: 87,
+        specialty: "MMA / Grappling",
+        monthlyCost: 480,
+        fightFee: 12
     },
-
-    {
-        name: "X-Gym",
-        country: "Brasil",
-        city: "Rio de Janeiro",
-        level: 4,
-        reputation: 84,
-        quality: 88,
-        monthlyCost: 850,
-        fightFeeMin: 10,
-        fightFeeMax: 14,
-        requiredFame: 20,
-        requiredWins: 4,
-        specialty: "MMA"
-    },
-
-
     /* =====================================================
        🇺🇸 ESTADOS UNIDOS
        ===================================================== */
-
     {
         name: "American Top Team",
         country: "Estados Unidos",
-        city: "Coconut Creek",
-        level: 5,
-        reputation: 98,
-        quality: 99,
-        monthlyCost: 1800,
-        fightFeeMin: 10,
-        fightFeeMax: 15,
-        requiredFame: 50,
-        requiredWins: 8,
-        specialty: "MMA"
+        city: "Coconut Creek, Florida",
+        level: "Elite",
+        reputation: 95,
+        quality: 97,
+        specialty: "MMA Completo",
+        monthlyCost: 1000,
+        fightFee: 15
     },
-
     {
         name: "American Kickboxing Academy",
         country: "Estados Unidos",
-        city: "San Jose",
-        level: 5,
-        reputation: 96,
-        quality: 98,
-        monthlyCost: 1700,
-        fightFeeMin: 10,
-        fightFeeMax: 15,
-        requiredFame: 50,
-        requiredWins: 8,
-        specialty: "Wrestling"
+        city: "San Jose, California",
+        level: "Elite",
+        reputation: 94,
+        quality: 96,
+        specialty: "Wrestling / MMA",
+        monthlyCost: 950,
+        fightFee: 15
     },
-
+    {
+        name: "Jackson-Wink MMA",
+        country: "Estados Unidos",
+        city: "Albuquerque, New Mexico",
+        level: "Elite",
+        reputation: 93,
+        quality: 95,
+        specialty: "Gameplan / MMA",
+        monthlyCost: 900,
+        fightFee: 14
+    },
+    {
+        name: "Kings MMA",
+        country: "Estados Unidos",
+        city: "Huntington Beach, California",
+        level: "Elite",
+        reputation: 92,
+        quality: 95,
+        specialty: "Muay Thai / Striking",
+        monthlyCost: 850,
+        fightFee: 14
+    },
     {
         name: "Xtreme Couture",
         country: "Estados Unidos",
-        city: "Las Vegas",
-        level: 5,
-        reputation: 94,
-        quality: 96,
-        monthlyCost: 1500,
-        fightFeeMin: 10,
-        fightFeeMax: 15,
-        requiredFame: 45,
-        requiredWins: 7,
-        specialty: "MMA"
+        city: "Las Vegas, Nevada",
+        level: "Elite",
+        reputation: 91,
+        quality: 94,
+        specialty: "MMA Completo",
+        monthlyCost: 850,
+        fightFee: 14
     },
-
     {
-        name: "Jackson Wink MMA",
+        name: "Kill Cliff FC",
         country: "Estados Unidos",
-        city: "Albuquerque",
-        level: 5,
-        reputation: 95,
-        quality: 97,
-        monthlyCost: 1500,
-        fightFeeMin: 10,
-        fightFeeMax: 15,
-        requiredFame: 45,
-        requiredWins: 7,
-        specialty: "MMA"
-    },
-
-
-    /* =====================================================
-       🇳🇿 NOVA ZELÂNDIA
-       ===================================================== */
-
-    {
-        name: "City Kickboxing",
-        country: "Nova Zelândia",
-        city: "Auckland",
-        level: 5,
-        reputation: 97,
-        quality: 98,
-        monthlyCost: 1400,
-        fightFeeMin: 10,
-        fightFeeMax: 15,
-        requiredFame: 45,
-        requiredWins: 7,
-        specialty: "Striking"
-    },
-
-
-    /* =====================================================
-       🇹🇭 TAILÂNDIA
-       ===================================================== */
-
-    {
-        name: "Tiger Muay Thai",
-        country: "Tailândia",
-        city: "Phuket",
-        level: 5,
-        reputation: 94,
-        quality: 96,
-        monthlyCost: 1000,
-        fightFeeMin: 10,
-        fightFeeMax: 15,
-        requiredFame: 35,
-        requiredWins: 5,
-        specialty: "Striking"
-    },
-
-
-    /* =====================================================
-       🇫🇷 FRANÇA
-       ===================================================== */
-
-    {
-        name: "MMA Factory",
-        country: "França",
-        city: "Paris",
-        level: 5,
-        reputation: 93,
+        city: "Deerfield Beach, Florida",
+        level: "Elite",
+        reputation: 92,
         quality: 95,
-        monthlyCost: 1300,
-        fightFeeMin: 10,
-        fightFeeMax: 15,
-        requiredFame: 40,
-        requiredWins: 6,
-        specialty: "MMA"
+        specialty: "MMA / Wrestling",
+        monthlyCost: 900,
+        fightFee: 15
     },
-
-
-    /* =====================================================
-       🇯🇵 JAPÃO
-       ===================================================== */
-
-    {
-        name: "Tristar Japan",
-        country: "Japão",
-        city: "Tokyo",
-        level: 4,
-        reputation: 87,
-        quality: 91,
-        monthlyCost: 1100,
-        fightFeeMin: 10,
-        fightFeeMax: 14,
-        requiredFame: 30,
-        requiredWins: 5,
-        specialty: "MMA"
-    },
-
-
-    /* =====================================================
-       🇬🇧 REINO UNIDO
-       ===================================================== */
-
-    {
-        name: "Team Kaobon",
-        country: "Reino Unido",
-        city: "Liverpool",
-        level: 4,
-        reputation: 86,
-        quality: 90,
-        monthlyCost: 1000,
-        fightFeeMin: 10,
-        fightFeeMax: 14,
-        requiredFame: 30,
-        requiredWins: 5,
-        specialty: "MMA"
-    },
-
-
     /* =====================================================
        🇨🇦 CANADÁ
        ===================================================== */
-
     {
         name: "Tristar Gym",
         country: "Canadá",
         city: "Montreal",
-        level: 5,
-        reputation: 95,
-        quality: 97,
-        monthlyCost: 1500,
-        fightFeeMin: 10,
-        fightFeeMax: 15,
-        requiredFame: 45,
-        requiredWins: 7,
-        specialty: "MMA"
+        level: "Elite",
+        reputation: 90,
+        quality: 94,
+        specialty: "MMA / Wrestling",
+        monthlyCost: 800,
+        fightFee: 14
     },
-
-
+    /* =====================================================
+       🇳🇿 NOVA ZELÂNDIA
+       ===================================================== */
+    {
+        name: "City Kickboxing",
+        country: "Nova Zelândia",
+        city: "Auckland",
+        level: "Elite",
+        reputation: 94,
+        quality: 97,
+        specialty: "Kickboxing / MMA",
+        monthlyCost: 850,
+        fightFee: 15
+    },
+    /* =====================================================
+       🇹🇭 TAILÂNDIA
+       ===================================================== */
+    {
+        name: "Tiger Muay Thai",
+        country: "Tailândia",
+        city: "Phuket",
+        level: "Internacional",
+        reputation: 88,
+        quality: 91,
+        specialty: "Muay Thai / MMA",
+        monthlyCost: 650,
+        fightFee: 13
+    },
+    /* =====================================================
+       🇫🇷 FRANÇA
+       ===================================================== */
+    {
+        name: "MMA Factory",
+        country: "França",
+        city: "Paris",
+        level: "Internacional",
+        reputation: 87,
+        quality: 91,
+        specialty: "MMA Completo",
+        monthlyCost: 700,
+        fightFee: 13
+    },
+    /* =====================================================
+       🇮🇪 IRLANDA
+       ===================================================== */
+    {
+        name: "SBG Ireland",
+        country: "Irlanda",
+        city: "Dublin",
+        level: "Internacional",
+        reputation: 86,
+        quality: 89,
+        specialty: "MMA / Grappling",
+        monthlyCost: 650,
+        fightFee: 13
+    },
+    /* =====================================================
+       🇯🇵 JAPÃO
+       ===================================================== */
+    {
+        name: "RIZIN Training Camp",
+        country: "Japão",
+        city: "Tokyo",
+        level: "Internacional",
+        reputation: 84,
+        quality: 89,
+        specialty: "MMA / Striking",
+        monthlyCost: 600,
+        fightFee: 12
+    },
     /* =====================================================
        🇷🇺 RÚSSIA
        ===================================================== */
-
     {
-        name: "American Kickboxing Academy Russia",
+        name: "Eagles MMA",
         country: "Rússia",
-        city: "Moscou",
-        level: 4,
-        reputation: 88,
-        quality: 93,
-        monthlyCost: 900,
-        fightFeeMin: 10,
-        fightFeeMax: 14,
-        requiredFame: 30,
-        requiredWins: 5,
-        specialty: "Wrestling"
-    },
-
-
-    /* =====================================================
-       🇲🇽 MÉXICO
-       ===================================================== */
-
-    {
-        name: "Bonebreakers Team",
-        country: "México",
-        city: "Cidade do México",
-        level: 4,
-        reputation: 82,
-        quality: 87,
+        city: "Dagestan",
+        level: "Elite",
+        reputation: 94,
+        quality: 97,
+        specialty: "Wrestling / Sambo",
         monthlyCost: 750,
-        fightFeeMin: 10,
-        fightFeeMax: 14,
-        requiredFame: 20,
-        requiredWins: 4,
-        specialty: "Striking"
+        fightFee: 14
     }
-
 ];
-
-
 /* =========================================================
-   COMISSÃO DA ACADEMIA
+   🎲 GERAR OFERTAS
 ========================================================= */
-
-function generateTeamFee(team) {
-
-    return Math.floor(
-
-        team.fightFeeMin +
-
-        Math.random() *
-        (
-            team.fightFeeMax -
-            team.fightFeeMin +
-            1
-        )
-
-    );
-
-}
-
-
-/* =========================================================
-   VERIFICAR SE PODE ENTRAR
-========================================================= */
-
-function canJoinTeam(team) {
-
-    const fame =
-        player.fame || 0;
-
-    const wins =
-        player.professional
-        ? (
-            player.professional.wins ||
-            0
-        )
-        : 0;
-
-
-    if (
-        fame <
-        team.requiredFame
-    ) {
-
-        return false;
-
-    }
-
-
-    if (
-        wins <
-        team.requiredWins
-    ) {
-
-        return false;
-
-    }
-
-
-    return true;
-
-}
-
-
-/* =========================================================
-   GERAR OFERTAS
-========================================================= */
-
 function generateTeamOffers() {
-
     player.teamOffers = [];
-
-
-    const possible =
-        teams.filter(
-            team =>
-                canJoinTeam(team)
+    const reputation =
+        Number(
+            player.fame || 0
         );
-
-
-    const shuffled =
-        [...possible].sort(
+    const currentCountry =
+        player.country ||
+        "Brasil";
+    /*
+     * Academias próximas ao nível do lutador.
+     */
+    let available =
+        teams.filter(
+            team => {
+                /*
+                 * Academia muito acima da reputação:
+                 * não aparece normalmente.
+                 */
+                if (
+                    team.reputation >
+                    reputation + 25
+                ) {
+                    return false;
+                }
+                /*
+                 * Academia extremamente acima:
+                 * só pode aparecer através
+                 * de empresário muito forte.
+                 */
+                if (
+                    team.reputation >= 90 &&
+                    reputation < 60
+                ) {
+                    if (
+                        !player.manager ||
+                        player.manager.contacts < 80
+                    ) {
+                        return false;
+                    }
+                }
+                return true;
+            }
+        );
+    /*
+     * Prioriza academias do país do lutador.
+     */
+    const localTeams =
+        available.filter(
+            team =>
+                team.country ===
+                currentCountry
+        );
+    const foreignTeams =
+        available.filter(
+            team =>
+                team.country !==
+                currentCountry
+        );
+    /*
+     * Maioria das oportunidades
+     * vem do próprio país.
+     */
+    available =
+        [
+            ...localTeams,
+            ...foreignTeams
+        ];
+    /*
+     * Embaralha.
+     */
+    available =
+        [...available].sort(
             () =>
                 Math.random() -
                 0.5
         );
-
-
-    const selected =
-        shuffled.slice(
+    /*
+     * Até 3 ofertas.
+     */
+    player.teamOffers =
+        available.slice(
             0,
             3
         );
-
-
-    player.teamOffers =
-        selected.map(
-            team => ({
-
-                ...team,
-
-                fightFee:
-                    generateTeamFee(team),
-
-                offerType:
-                    "standard"
-
-            })
-        );
-
 }
-
-
 /* =========================================================
-   ACEITAR ACADEMIA
+   🥊 ENTRAR NA ACADEMIA
 ========================================================= */
-
 function joinTeam(index) {
-
-    const offer =
-        player.teamOffers[
-            index
-        ];
-
-
-    if (!offer) {
-
-        return;
-
-    }
-
-
     if (
-        !canJoinTeam(offer)
+        !player.teamOffers ||
+        !player.teamOffers[index]
     ) {
-
-        alert(
-
-            "❌ A academia não aceitou seu nível atual."
-
-        );
-
         return;
-
     }
-
-
-    player.team = {
-
-        name:
-            offer.name,
-
-        country:
-            offer.country,
-
-        city:
-            offer.city,
-
-        level:
-            offer.level,
-
-        reputation:
-            offer.reputation,
-
-        quality:
-            offer.quality,
-
-        monthlyCost:
-            offer.monthlyCost,
-
-        fightFee:
-            offer.fightFee,
-
-        specialty:
-            offer.specialty
-
-    };
-
-
-    /*
-     * Se a academia estiver em outro país,
-     * a mudança será processada.
-     */
-
-    if (
-        player.country !==
-        offer.country
-    ) {
-
-        moveToTeamCountry(
-            offer
-        );
-
-        return;
-
-    }
-
-
-    player.log.unshift(
-
-        "🏢 Você entrou na academia " +
-        offer.name +
-        "."
-
-    );
-
-
-    save();
-
-
-    alert(
-
-        "🏢 ACADEMIA CONTRATADA!\n\n" +
-
-        offer.name +
-        "\n" +
-
-        offer.city +
-        ", " +
-        offer.country +
-        "\n\n" +
-
-        "Mensalidade: $" +
-        offer.monthlyCost +
-        "\n" +
-
-        "Participação por luta: " +
-        offer.fightFee +
-        "%"
-
-    );
-
-
-    teamScreen();
-
-}
-
-
-/* =========================================================
-   TESTE NA ACADEMIA
-========================================================= */
-
-function tryoutTeam(index) {
-
-    const offer =
-        player.teamOffers[
-            index
-        ];
-
-
-    if (!offer) {
-
-        return;
-
-    }
-
-
-    let chance =
-        20;
-
-
-    chance +=
-        (
+    const team =
+        player.teamOffers[index];
+    const fame =
+        Number(
             player.fame || 0
-        ) / 3;
-
-
-    chance +=
-        (
-            player.professional
-            ? player.professional.wins * 2
-            : 0
         );
-
-
-    chance +=
-        (
-            player.attributes
-            ? player.attributes.technique / 5
-            : 0
+    /*
+     * Requisito de reputação.
+     */
+    if (
+        fame + 25 <
+        team.reputation
+    ) {
+        alert(
+            "❌ A academia recusou você.\n\n" +
+            team.name +
+            "\n\n" +
+            "Reputação necessária: " +
+            team.reputation +
+            "\n" +
+            "Sua reputação: " +
+            Math.round(fame)
         );
-
-
-    chance -=
-        (
-            offer.requiredFame -
-            (player.fame || 0)
-        ) *
-        0.5;
-
-
+        return;
+    }
+    /*
+     * Verifica dinheiro inicial.
+     */
+    if (
+        player.money <
+        team.monthlyCost
+    ) {
+        alert(
+            "💰 Você não possui dinheiro " +
+            "suficiente para pagar a mensalidade."
+        );
+        return;
+    }
+    player.team =
+        team;
+    player.log.unshift(
+        "🏢 Você entrou para " +
+        team.name +
+        " em " +
+        team.city +
+        ", " +
+        team.country
+    );
+    save();
+    alert(
+        "🥊 NOVA ACADEMIA!\n\n" +
+        team.name +
+        "\n\n" +
+        "📍 " +
+        team.city +
+        ", " +
+        team.country +
+        "\n\n" +
+        "⭐ Reputação: " +
+        team.reputation +
+        "\n" +
+        "💪 Qualidade: " +
+        team.quality +
+        "\n" +
+        "💵 Mensalidade: $" +
+        team.monthlyCost +
+        "\n" +
+        "🥊 Comissão por luta: " +
+        team.fightFee +
+        "%"
+    );
+    teamScreen();
+}
+/* =========================================================
+   🥊 TESTE NA ACADEMIA
+========================================================= */
+function tryoutTeam(index) {
+    if (
+        !player.teamOffers ||
+        !player.teamOffers[index]
+    ) {
+        return;
+    }
+    const team =
+        player.teamOffers[index];
+    const fame =
+        Number(
+            player.fame || 0
+        );
+    /*
+     * Diferença entre reputação
+     * do lutador e da academia.
+     */
+    const difference =
+        team.reputation -
+        fame;
+    /*
+     * Chance base.
+     */
+    let chance =
+        70;
+    /*
+     * Academia muito acima:
+     * teste fica difícil.
+     */
+    if (
+        difference > 20
+    ) {
+        chance -=
+            difference;
+    }
     /*
      * Empresário ajuda.
      */
-
     if (
         player.manager
     ) {
-
         chance +=
-            (
-                player.manager.contacts ||
-                0
-            ) / 10;
-
+            Math.min(
+                20,
+                player.manager.contacts / 10
+            );
     }
-
-
     chance =
         Math.max(
             5,
             Math.min(
-                95,
+                90,
                 chance
             )
         );
-
-
     const success =
         Math.random() * 100 <
         chance;
-
-
-    if (success) {
-
-        offer.offerType =
-            "tryout";
-
-        offer.fightFee =
-            generateTeamFee(
-                offer
-            );
-
-
-        player.log.unshift(
-
-            "🥊 Você foi aprovado no teste da " +
-            offer.name +
-            "."
-
-        );
-
-
-        save();
-
-
+    if (!success) {
         alert(
-
-            "🥊 TESTE APROVADO!\n\n" +
-
-            offer.name +
+            "❌ TESTE REPROVADO!\n\n" +
+            team.name +
             "\n\n" +
-
-            "A academia quer você na equipe."
-
+            "A academia considera que você " +
+            "ainda precisa evoluir antes de entrar."
         );
-
-
-        joinTeam(index);
-
-
-    } else {
-
-        player.log.unshift(
-
-            "❌ Você não foi aprovado no teste da " +
-            offer.name +
-            "."
-
-        );
-
-
-        save();
-
-
-        alert(
-
-            "❌ TESTE REPROVADO\n\n" +
-
-            offer.name +
-            "\n\n" +
-
-            "Seu nível ainda não é suficiente para essa equipe."
-
-        );
-
-    }
-
-}
-
-
-/* =========================================================
-   MUDANÇA DE PAÍS
-========================================================= */
-
-function moveToTeamCountry(
-    team
-) {
-
-    const travelCost =
-        team.country ===
-        "Estados Unidos"
-        ? 2500
-        : 1500;
-
-
-    const totalCost =
-        travelCost +
-        500;
-
-
-    if (
-        player.money <
-        totalCost
-    ) {
-
-        alert(
-
-            "❌ Você não tem dinheiro suficiente para se mudar.\n\n" +
-
-            "Custo da mudança: $" +
-            totalCost
-
-        );
-
         return;
-
     }
-
-
-    player.money -=
-        totalCost;
-
-
-    player.country =
-        team.country;
-
-
-    player.currentCountry =
-        team.country;
-
-
-    player.currentCity =
-        team.city;
-
-
-    player.log.unshift(
-
-        "✈️ Você se mudou para " +
-        team.city +
-        ", " +
-        team.country +
-        " para treinar na " +
-        team.name +
-        "."
-
-    );
-
-
-    save();
-
-
-    alert(
-
-        "✈️ MUDANÇA REALIZADA!\n\n" +
-
-        "Novo país: " +
-        team.country +
-        "\n" +
-
-        "Cidade: " +
-        team.city +
-        "\n\n" +
-
-        "Custo da viagem e mudança: $" +
-        totalCost
-
-    );
-
-
-    teamScreen();
-
+    /*
+     * Teste aprovado.
+     */
+    joinTeam(index);
 }
-
-
 /* =========================================================
-   CUSTO MENSAL DA ACADEMIA
+   💰 CUSTO MENSAL
 ========================================================= */
-
 function payTeamMonthlyCost() {
-
     if (
         !player.team
     ) {
-
         return;
-
     }
-
-
     const cost =
-        player.team.monthlyCost ||
-        0;
-
-
+        Number(
+            player.team.monthlyCost || 0
+        );
+    if (
+        cost <= 0
+    ) {
+        return;
+    }
     if (
         player.money >= cost
     ) {
-
         player.money -=
             cost;
-
-
         player.log.unshift(
-
-            "🏢 Mensalidade paga para " +
-            player.team.name +
-            ": $" +
-            cost
-
+            "🏢 Mensalidade paga: $" +
+            cost +
+            " — " +
+            player.team.name
         );
-
-    } else {
-
+    }
+    else {
         player.log.unshift(
-
             "⚠️ Você não conseguiu pagar a mensalidade da academia."
-
         );
-
     }
-
-
     save();
-
-}
-
-
-/* =========================================================
-   BÔNUS DA ACADEMIA
-========================================================= */
-
-function getTeamTrainingBonus(
-    attribute
-) {
-
-    if (
-        !player.team
-    ) {
-
-        return 0;
-
-    }
-
-
-    if (
-        player.team.specialty ===
-        "MMA"
-    ) {
-
-        return 2;
-
-    }
-
-
-    if (
-        player.team.specialty ===
-        attribute
-    ) {
-
-        return 5;
-
-    }
-
-
-    if (
-        attribute ===
-        "striking" &&
-        player.team.specialty ===
-        "Striking"
-    ) {
-
-        return 5;
-
-    }
-
-
-    if (
-        (
-            attribute ===
-            "wrestling" ||
-            attribute ===
-            "grappling"
-        ) &&
-        player.team.specialty ===
-        "Wrestling"
-    ) {
-
-        return 5;
-
-    }
-
-
-    if (
-        attribute ===
-        "grappling" &&
-        player.team.specialty ===
-        "Grappling"
-    ) {
-
-        return 5;
-
-    }
-
-
-    return 0;
-
-}
-
-
-/* =========================================================
-   PAGAMENTO DA ACADEMIA APÓS A LUTA
-========================================================= */
-
-function getTeamFightCommission(
-    amount
-) {
-
-    if (
-        !player.team
-    ) {
-
-        return 0;
-
-    }
-
-
-    const fee =
-        player.team.fightFee ||
-        0;
-
-
-    return (
-        amount *
-        fee /
-        100
-    );
-
-}
-
-
-/* =========================================================
-   VERIFICAR ACADEMIAS DISPONÍVEIS
-========================================================= */
-
-function getAvailableTeams() {
-
-    return teams.filter(
-        team =>
-            canJoinTeam(
-                team
-            )
-    );
-
-}
-
-
-/* =========================================================
-   LISTAR ACADEMIAS POR PAÍS
-========================================================= */
-
-function getTeamsByCountry(
-    country
-) {
-
-    return teams.filter(
-        team =>
-            team.country ===
-            country
-    );
-
 }
 /* =========================================================
-   💰 CUSTOS DA ACADEMIA NA LUTA
+   💰 DESCONTO DA ACADEMIA NA LUTA
 ========================================================= */
 function calculateTeamFightCut(amount) {
     if (
@@ -998,13 +555,13 @@ function calculateTeamFightCut(amount) {
             player.team.fightFee || 0
         );
     return (
-        amount *
+        Number(amount || 0) *
         fee /
         100
     );
 }
 /* =========================================================
-   💰 RESUMO FINANCEIRO DA LUTA
+   💰 PAGAMENTO FINAL DA LUTA
 ========================================================= */
 function calculateFightPayout(
     purse,
@@ -1013,36 +570,34 @@ function calculateFightPayout(
     const gross =
         Number(purse || 0) +
         Number(winBonus || 0);
-    let managerCut = 0;
-    let teamCut = 0;
-    /* =====================================================
-       👔 EMPRESÁRIO
-    ===================================================== */
+    let managerCut =
+        0;
+    let teamCut =
+        0;
+    /*
+     * EMPRESÁRIO
+     */
     if (
         player.manager
     ) {
-        const commission =
-            Number(
-                player.manager.commission || 0
-            );
         managerCut =
             gross *
-            commission /
+            Number(
+                player.manager.commission || 0
+            ) /
             100;
     }
-    /* =====================================================
-       🏢 ACADEMIA
-    ===================================================== */
+    /*
+     * ACADEMIA
+     */
     if (
         player.team
     ) {
-        const teamFee =
-            Number(
-                player.team.fightFee || 0
-            );
         teamCut =
             gross *
-            teamFee /
+            Number(
+                player.team.fightFee || 0
+            ) /
             100;
     }
     const net =
