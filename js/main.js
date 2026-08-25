@@ -305,6 +305,42 @@ function home() {
    CARREIRA
 ========================= */
 
+function acceptPromotion(id) {
+
+    const promotion =
+        promotions.find(
+            p => p.id === id
+        );
+
+
+    if (!promotion) {
+
+        return;
+
+    }
+
+
+    player.currentPromotion =
+        promotion;
+
+
+    player.log.unshift(
+
+        "✍️ Contrato assinado com " +
+        promotion.name
+
+    );
+
+
+    player.fame += 2;
+
+
+    save();
+
+    career();
+
+}
+
 function career() {
 
     initializeChampionship();
