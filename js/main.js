@@ -1941,3 +1941,100 @@ function rankingScreen() {
         `;
 
 }
+
+function showRankingOrganization(
+    organization
+) {
+
+    initializeMMWorld();
+
+    const weight =
+        player.weight || "Peso Leve";
+
+    const ranking =
+        getWorldRanking(
+            organization,
+            weight
+        );
+
+    const champion =
+        getWorldChampion(
+            organization,
+            weight
+        );
+
+    document
+        .getElementById("content")
+        .innerHTML = `
+
+        <div class="card">
+
+            <div class="title">
+                🏆 ${organization}
+            </div>
+
+            <div class="statline">
+
+                <span>
+                    Categoria
+                </span>
+
+                <b>
+                    ${weight}
+                </b>
+
+            </div>
+
+            <div class="statline">
+
+                <span>
+                    👑 Campeão
+                </span>
+
+                <b>
+                    ${
+                        champion
+                        ? champion.name
+                        : "Nenhum"
+                    }
+                </b>
+
+            </div>
+
+        </div>
+
+        <div class="card">
+
+            <div class="title">
+                📊 TOP 15
+            </div>
+
+            ${
+                ranking
+                    .map(
+                        (fighter, index) => `
+
+                        <div class="statline">
+
+                            <span>
+                                #${index + 1}
+                                ${fighter.name}
+                            </span>
+
+                            <b>
+                                ${fighter.wins}-
+                                ${fighter.losses}
+                            </b>
+
+                        </div>
+
+                        `
+                    )
+                    .join("")
+            }
+
+        </div>
+
+        `;
+
+}
