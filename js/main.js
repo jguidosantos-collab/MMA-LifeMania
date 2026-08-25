@@ -416,8 +416,7 @@ function acceptPromotion(id) {
 }
 
 function career() {
-alert("PASSOU DO CAREER");
-    alert("CARREIRA FOI CHAMADA");
+    
     initializeChampionship();
 
 
