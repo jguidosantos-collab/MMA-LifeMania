@@ -1,35 +1,39 @@
 function dating() {
 
-    if (
-        player.relationship ===
-        "Solteiro"
-    ) {
+    if (player.relationship === "Solteiro") {
 
         player.relationship =
             "Namorando";
 
         player.partner =
-            "Parceira(o)";
+            "Companheiro(a)";
 
         player.log.unshift(
             "❤️ Você começou um relacionamento."
         );
 
-    } else {
+    }
+
+    else if (
+        player.relationship === "Namorando"
+    ) {
 
         player.relationship =
             "Casado";
 
-        player.married = true;
+        player.married =
+            true;
 
         player.log.unshift(
             "💍 Você se casou."
         );
+
     }
 
     save();
 
     familyScreen();
+
 }
 
 
@@ -42,6 +46,18 @@ function haveChild() {
         );
 
         return;
+
+    }
+
+
+    if (player.children.length >= 5) {
+
+        alert(
+            "Sua família já tem muitos filhos."
+        );
+
+        return;
+
     }
 
 
@@ -50,11 +66,18 @@ function haveChild() {
         "Alex",
         "Lucas",
         "Rafael",
-        "Sofia",
         "Miguel",
-        "Julia",
         "Arthur",
-        "Helena"
+        "Gabriel",
+        "Sofia",
+        "Helena",
+        "Julia",
+        "Laura",
+        "Mateus",
+        "Davi",
+        "Enzo",
+        "Theo",
+        "Valentina"
 
     ];
 
@@ -68,18 +91,34 @@ function haveChild() {
         ];
 
 
-    player.children.push({
+    const child = {
 
         name: name,
 
-        age: 0
+        age: 0,
 
-    });
+        bornYear:
+            player.year,
+
+        potential:
+            50 +
+            Math.random() * 40,
+
+        fightingInterest: false,
+
+        becameFighter: false
+
+    };
+
+
+    player.children.push(child);
 
 
     player.log.unshift(
 
-        "👶 Um novo filho nasceu."
+        "👶 Nasceu " +
+        name +
+        ". A próxima geração começou."
 
     );
 
@@ -87,4 +126,28 @@ function haveChild() {
     save();
 
     familyScreen();
+
+}
+
+
+function dynastyInfo() {
+
+    const generation =
+        player.children.length > 0
+            ? 2
+            : 1;
+
+
+    return {
+
+        generation:
+
+            generation,
+
+        children:
+
+            player.children.length
+
+    };
+
 }
