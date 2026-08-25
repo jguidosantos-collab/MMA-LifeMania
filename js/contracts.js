@@ -925,71 +925,443 @@ function promotionMatchesPlayer(
 function generateContractOffers() {
 
     if (
+
         !player.professional ||
+
         !player.professional.active
+
     ) {
 
         return [];
 
     }
 
-
     /*
-     * Atualiza progressão.
+
+     * Estágio atual do lutador.
+
+     *
+
+     * Não alteramos automaticamente o estágio.
+
+     * Uma proposta maior pode aparecer antes da hora.
+
      */
 
-    updateCareerStage();
+    const stage =
 
+        player.careerStage ||
+
+        "regional";
+
+    /*
+
+     * Procura organizações que o lutador
+
+     * pode receber proposta.
+
+     */
 
     const possible =
+
         promotions.filter(
+
             promotion => {
 
+                /*
+
+                 * Verifica requisitos.
+
+                 */
+
                 if (
+
                     !canReceiveOffer(
+
                         promotion
+
                     )
+
                 ) {
 
                     return false;
 
                 }
 
+                /*
 
-                return promotionMatchesPlayer(
-                    promotion
-                );
+                 * Verifica se a organização
+
+                 * combina com o jogador.
+
+                 */
+
+                if (
+
+                    typeof promotionMatchesPlayer ===
+
+                    "function"
+
+                ) {
+
+                    if (
+
+                        !promotionMatchesPlayer(
+
+                            promotion
+
+                        )
+
+                    ) {
+
+                        return false;
+
+                    }
+
+                }
+
+                return true;
 
             }
-        );
 
+        );
 
     /*
-     * Em vez de mostrar todas as
-     * organizações, selecionamos poucas.
+
+     * =====================================================
+
+     * ORDENAÇÃO DAS OPORTUNIDADES
+
+     * =====================================================
+
+     *
+
+     * Organizações próximas do estágio atual
+
+     * aparecem com mais frequência.
+
+     *
+
+     * Propostas acima do estágio são possíveis,
+
+     * mas mais raras.
+
      */
 
-    const shuffled =
-        [...possible]
-            .sort(
-                () =>
-                    Math.random() -
-                    0.5
-            );
+    const stageLevel = {
 
+        amateur: 0,
 
-    const selected =
-        shuffled.slice(
-            0,
-            3
+        regional: 1,
+
+        national: 2,
+
+        international: 3,
+
+        elite: 4
+
+    };
+
+    const currentLevel =
+
+        stageLevel[stage] || 1;
+
+    const scored =
+
+        possible.map(
+
+            promotion => {
+
+                let level =
+
+                    promotion.level || 1;
+
+                let score = 100;
+
+                /*
+
+                 * Organização abaixo/acima
+
+                 * do estágio.
+
+                 */
+
+                if (
+
+                    level <
+
+                    currentLevel
+
+                ) {
+
+                    score -=
+
+                        (
+
+                            currentLevel -
+
+                            level
+
+                        ) * 20;
+
+                }
+
+                if (
+
+                    level >
+
+                    currentLevel
+
+                ) {
+
+                    /*
+
+                     * Quanto maior o salto,
+
+                     * mais difícil aparecer.
+
+                     */
+
+                    score -=
+
+                        (
+
+                            level -
+
+                            currentLevel
+
+                        ) * 35;
+
+                }
+
+                /*
+
+                 * Fama ajuda a chamar
+
+                 * organizações maiores.
+
+                 */
+
+                score +=
+
+                    player.fame / 5;
+
+                /*
+
+                 * Empresário aumenta muito
+
+                 * a chance de oportunidades.
+
+                 */
+
+                if (
+
+                    player.manager
+
+                ) {
+
+                    score +=
+
+                        (
+
+                            player.manager.contacts ||
+
+                            0
+
+                        ) / 2;
+
+                }
+
+                /*
+
+                 * Prestígio da organização.
+
+                 */
+
+                score +=
+
+                    (
+
+                        promotion.prestige ||
+
+                        0
+
+                    ) / 3;
+
+                return {
+
+                    promotion:
+
+                        promotion,
+
+                    score:
+
+                        Math.max(
+
+                            1,
+
+                            score
+
+                        )
+
+                };
+
+            }
+
         );
 
+    /*
+
+     * =====================================================
+
+     * SORTEIO PONDERADO
+
+     * =====================================================
+
+     */
+
+    function weightedRandom(list) {
+
+        const total =
+
+            list.reduce(
+
+                (
+
+                    sum,
+
+                    item
+
+                ) =>
+
+                    sum +
+
+                    item.score,
+
+                0
+
+            );
+
+        let random =
+
+            Math.random() *
+
+            total;
+
+        for (
+
+            const item of list
+
+        ) {
+
+            random -=
+
+                item.score;
+
+            if (
+
+                random <= 0
+
+            ) {
+
+                return item;
+
+            }
+
+        }
+
+        return list[
+
+            list.length - 1
+
+        ];
+
+    }
+
+    const selected = [];
+
+    const pool =
+
+        [...scored];
+
+    /*
+
+     * No máximo 3 propostas.
+
+     */
+
+    while (
+
+        pool.length > 0 &&
+
+        selected.length < 3
+
+    ) {
+
+        const chosen =
+
+            weightedRandom(
+
+                pool
+
+            );
+
+        if (!chosen) {
+
+            break;
+
+        }
+
+        selected.push(
+
+            chosen.promotion
+
+        );
+
+        const index =
+
+            pool.indexOf(
+
+                chosen
+
+            );
+
+        if (
+
+            index >= 0
+
+        ) {
+
+            pool.splice(
+
+                index,
+
+                1
+
+            );
+
+        }
+
+    }
+
+    /*
+
+     * Transforma organizações
+
+     * em ofertas financeiras.
+
+     */
 
     return selected.map(
+
         promotion =>
+
             calculateContractOffer(
+
                 promotion
+
             )
+
     );
 
 }
