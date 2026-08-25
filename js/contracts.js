@@ -243,3 +243,115 @@ function canReceiveOffer(promotion) {
     return false;
 
 }
+
+
+function updateCareerStage() {
+
+    /*
+     * AMADOR
+     *
+     * Não pode sair antes dos 18.
+     */
+
+    if (!player.professional.active) {
+
+        player.careerStage =
+            "amateur";
+
+        return;
+
+    }
+
+
+    /*
+     * PRIMEIRO PASSO PROFISSIONAL
+     *
+     * Sempre começa no regional.
+     */
+
+    if (
+        player.careerStage === "amateur"
+    ) {
+
+        player.careerStage =
+            "regional";
+
+        return;
+
+    }
+
+
+    /*
+     * REGIONAL → NACIONAL
+     */
+
+    if (
+        player.careerStage === "regional" &&
+        player.professional.wins >= 3 &&
+        player.fame >= 10
+    ) {
+
+        player.careerStage =
+            "national";
+
+        player.log.unshift(
+            "🇧🇷 Você alcançou o circuito nacional!"
+        );
+
+        return;
+
+    }
+
+
+    /*
+     * NACIONAL → INTERNACIONAL
+     *
+     * Empresário obrigatório.
+     */
+
+    if (
+        player.careerStage === "national" &&
+        player.professional.wins >= 5 &&
+        player.fame >= 25 &&
+        player.manager &&
+        player.manager.contacts >= 45
+    ) {
+
+        player.careerStage =
+            "international";
+
+        player.log.unshift(
+            "🌎 Seu empresário abriu as portas do circuito internacional!"
+        );
+
+        return;
+
+    }
+
+
+    /*
+     * INTERNACIONAL → ELITE
+     *
+     * Empresário forte obrigatório.
+     */
+
+    if (
+        player.careerStage === "international" &&
+        player.professional.wins >= 8 &&
+        player.fame >= 50 &&
+        player.manager &&
+        player.manager.contacts >= 80
+    ) {
+
+        player.careerStage =
+            "elite";
+
+        player.log.unshift(
+            "👑 Você alcançou a elite mundial!"
+        );
+
+        return;
+
+    }
+
+}
