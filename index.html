@@ -1,29 +1,83 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="pt-BR">
+
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>MMA Life Dynasty</title>
-<link rel="stylesheet" href="./css/style.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>MMA Life Dynasty</title>
+
+    <link rel="stylesheet" href="css/style.css">
 </head>
+
 <body>
-<header>
-<h1>MMA LIFE DYNASTY</h1>
-<p id="gameDate">Semana 1 • Janeiro • 2010</p>
-<button id="saveBtn">Salvar</button>
-<button id="loadBtn">Carregar</button>
-<button id="newBtn">Novo jogo</button>
+
+<header class="top">
+    <div class="logo">🥊 MMA LIFE</div>
+    <div class="edition">DYNASTY</div>
 </header>
+
 <main>
-<section id="homeScreen"></section>
-<section id="createScreen"></section>
-<section id="careerScreen"></section>
-<section id="trainingScreen"></section>
-<section id="fightScreen"></section>
-<section id="familyScreen"></section>
-<section id="calendarScreen"></section>
+
+    <!-- CRIAÇÃO DO LUTADOR -->
+    <section id="creation">
+        <div id="creator"></div>
+    </section>
+
+    <!-- JOGO -->
+    <section id="game" class="hidden">
+        <div id="content"></div>
+    </section>
+
 </main>
-<div id="toast"></div>
-<script type="module" src="./js/main.js"></script>
+
+<!-- MENU INFERIOR -->
+<nav id="tabs" class="tabs hidden">
+
+    <button onclick="tab('home')">
+        🏠
+        <small>Início</small>
+    </button>
+
+    <button onclick="tab('career')">
+        🥊
+        <small>Carreira</small>
+    </button>
+
+    <button onclick="tab('train')">
+        🏋️
+        <small>Treino</small>
+    </button>
+
+    <button onclick="tab('fight')">
+        ⚔️
+        <small>Lutas</small>
+    </button>
+
+    <button onclick="tab('team')">
+        🏢
+        <small>Equipe</small>
+    </button>
+
+    <button onclick="tab('life')">
+        ❤️
+        <small>Vida</small>
+    </button>
+
+</nav>
+
+<!-- JAVASCRIPT -->
+
+<script src="js/player.js"></script>
+<script src="js/training.js"></script>
+<script src="js/fights.js"></script>
+<script src="js/teams.js"></script>
+<script src="js/managers.js"></script>
+<script src="js/family.js"></script>
+<script src="js/life.js"></script>
+<script src="js/save.js"></script>
+<script src="js/main.js"></script>
+
 </body>
+
 </html>
