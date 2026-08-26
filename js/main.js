@@ -304,283 +304,456 @@ function createPlayerFromScreen() {
 ========================= */
 
 function home() {
+
     const p = player.professional || {};
     const amateur = player.amateur || {};
+
     const recordPro =
         `${p.wins || 0}-${p.losses || 0}-${p.draws || 0}`;
+
     const recordAmateur =
         `${amateur.wins || 0}-${amateur.losses || 0}-${amateur.draws || 0}`;
+
     const nextFight =
         player.nextFight || null;
+
     const team =
         player.team || null;
+
     const manager =
         player.manager || null;
+
+    const ranking =
+        typeof rankingText === "function"
+            ? rankingText()
+            : "—";
+
+    const stage =
+        player.careerStage === "elite"
+            ? "👑 ELITE"
+            : player.careerStage === "international"
+            ? "🌎 INTERNACIONAL"
+            : player.careerStage === "national"
+            ? "🇧🇷 NACIONAL"
+            : player.professional &&
+              player.professional.active
+            ? "🥊 REGIONAL"
+            : "🥋 AMADOR";
+
     document.getElementById("content").innerHTML = `
-        <div class="home-container">
-            <!-- =========================================
-                 CABEÇALHO DO LUTADOR
-            ========================================== -->
-            <div class="fighter-header">
-                <div class="fighter-avatar">
-                    <div class="avatar-placeholder">
-                        🥊
-                    </div>
-                </div>
-                <div class="fighter-info">
-                    <div class="fighter-name">
-                        ${player.name || "Lutador"}
-                    </div>
-                    <div class="fighter-country">
-                        🇧🇷 ${player.country || "Brasil"}
-                    </div>
-                    <div class="fighter-weight">
-                        ${player.weight || "Categoria"}
-                    </div>
+
+        <div class="fighter-header">
+
+            <div class="fighter-avatar">
+                <div class="avatar-placeholder">
+                    🥊
                 </div>
             </div>
-            <!-- =========================================
-                 STATUS PRINCIPAL
-            ========================================== -->
-            <div class="stats-grid">
-                <div class="stat-card">
-                    <span>IDADE</span>
-                    <strong>
-                        ${player.age || 18}
-                    </strong>
+
+            <div class="fighter-info">
+
+                <div class="fighter-name">
+                    ${player.name || "Lutador"}
                 </div>
-                <div class="stat-card">
-                    <span>FAMA</span>
-                    <strong>
-                        ${Math.round(player.fame || 0)}
-                    </strong>
+
+                <div class="fighter-country">
+                    🌎 ${player.country || "Brasil"}
                 </div>
-                <div class="stat-card">
-                    <span>PATRIMÔNIO</span>
-                    <strong>
-                        $${Math.round(player.money || 0)}
-                    </strong>
+
+                <div class="fighter-weight">
+                    ${player.weight || "Categoria"} • ${stage}
                 </div>
-                <div class="stat-card">
-                    <span>RANKING</span>
-                    <strong>
-                        ${typeof rankingText === "function"
-                            ? rankingText()
-                            : "—"}
-                    </strong>
-                </div>
+
             </div>
-            <!-- =========================================
-                 PRÓXIMA LUTA
-            ========================================== -->
-            <div class="section-title">
-                🔥 PRÓXIMO COMPROMISSO
+
+        </div>
+
+
+        <div class="stats-grid">
+
+            <div class="stat-card">
+                <span>IDADE</span>
+                <strong>
+                    ${player.age || 15}
+                </strong>
             </div>
-            ${
-                nextFight
-                ?
-                `
-                <div class="fight-card">
-                    <div class="fight-event">
-                        ${nextFight.event.name}
-                    </div>
-                    <div class="fight-versus">
-                        <div class="fighter-side">
-                            <div class="mini-avatar">
-                                🥊
-                            </div>
-                            <strong>
-                                ${player.name}
-                            </strong>
-                        </div>
-                        <div class="vs">
-                            VS
-                        </div>
-                        <div class="fighter-side">
-                            <div class="mini-avatar">
-                                👊
-                            </div>
-                            <strong>
-                                ${nextFight.opponent.displayName}
-                            </strong>
-                        </div>
-                    </div>
-                    <div class="fight-details">
-                        <span>
-                            📅 Semana ${nextFight.week}
-                        </span>
-                        <span>
-                            💰 $${Math.round(nextFight.purse || 0)}
-                        </span>
-                    </div>
-                    <button
-                        class="main-button red"
-                        onclick="fightScreen()">
-                        👊 VER LUTA
-                    </button>
-                </div>
-                `
-                :
-                `
-                <div class="empty-card">
-                    <div class="empty-icon">
-                        🥊
-                    </div>
-                    <strong>
-                        Nenhuma luta marcada
-                    </strong>
-                    <p>
-                        Prepare-se para o próximo desafio.
-                    </p>
-                    <button
-                        class="main-button"
-                        onclick="fightScreen()">
-                        🔎 PROCURAR LUTA
-                    </button>
-                </div>
-                `
-            }
-            <!-- =========================================
-                 CARREIRA
-            ========================================== -->
-            <div class="section-title">
-                🏆 MINHA CARREIRA
+
+            <div class="stat-card">
+                <span>DINHEIRO</span>
+                <strong>
+                    $${Math.round(player.money || 0)}
+                </strong>
             </div>
-            <div class="career-card">
-                <div class="career-stage">
+
+            <div class="stat-card">
+                <span>FAMA</span>
+                <strong>
+                    ${Math.round(player.fame || 0)}
+                </strong>
+            </div>
+
+            <div class="stat-card">
+                <span>RANKING</span>
+                <strong>
+                    ${ranking}
+                </strong>
+            </div>
+
+        </div>
+
+
+        <div class="section-title">
+            📅 VIDA ATUAL
+        </div>
+
+        <div class="card">
+
+            <div class="statline">
+                <span>Ano</span>
+                <b>${player.year || 2026}</b>
+            </div>
+
+            <div class="statline">
+                <span>Semana</span>
+                <b>${player.week || 0}</b>
+            </div>
+
+            <div class="statline">
+                <span>Carreira</span>
+                <b>${stage}</b>
+            </div>
+
+            <div class="statline">
+                <span>Profissional</span>
+                <b>
                     ${
-                        player.careerStage === "elite"
-                        ? "👑 ELITE"
-                        :
-                        player.careerStage === "international"
-                        ? "🌎 INTERNACIONAL"
-                        :
-                        player.careerStage === "national"
-                        ? "🇧🇷 NACIONAL"
-                        :
                         player.professional &&
                         player.professional.active
-                        ? "🥊 REGIONAL"
-                        : "🥋 AMADOR"
+                            ? "Sim"
+                            : "Não"
                     }
+                </b>
+            </div>
+
+        </div>
+
+
+        <div class="section-title">
+            🔥 PRÓXIMO EVENTO
+        </div>
+
+        ${
+            nextFight
+
+            ?
+
+            `
+
+            <div class="fight-card">
+
+                <div class="fight-event">
+                    ${nextFight.event.name}
                 </div>
-                <div class="record">
-                    <div>
-                        <span>PROFISSIONAL</span>
+
+                <div class="fight-versus">
+
+                    <div class="fighter-side">
+
+                        <div class="mini-avatar">
+                            🥊
+                        </div>
+
                         <strong>
-                            ${recordPro}
+                            ${player.name}
                         </strong>
+
                     </div>
-                    <div>
-                        <span>AMADOR</span>
+
+                    <div class="vs">
+                        VS
+                    </div>
+
+                    <div class="fighter-side">
+
+                        <div class="mini-avatar">
+                            👊
+                        </div>
+
                         <strong>
-                            ${recordAmateur}
+                            ${nextFight.opponent.displayName}
                         </strong>
+
                     </div>
+
                 </div>
-                <button
-                    class="main-button"
-                    onclick="career()">
-                    🏆 ABRIR CARREIRA
-                </button>
-            </div>
-            <!-- =========================================
-                 EQUIPE
-            ========================================== -->
-            <div class="section-title">
-                🏢 MEU TIME
-            </div>
-            <div class="team-preview">
-                <div>
-                    <span>ACADEMIA</span>
-                    <strong>
-                        ${
-                            team
-                            ? team.name
-                            : "Nenhuma academia"
-                        }
-                    </strong>
-                </div>
-                <div>
-                    <span>EMPRESÁRIO</span>
-                    <strong>
-                        ${
-                            manager
-                            ? manager.name
-                            : "Nenhum empresário"
-                        }
-                    </strong>
-                </div>
-                <button
-                    class="main-button"
-                    onclick="teamScreen()">
-                    🏢 EQUIPE
-                </button>
-            </div>
-            <!-- =========================================
-                 ATALHOS
-            ========================================== -->
-            <div class="section-title">
-                🌎 MUNDO DO MMA
-            </div>
-            <div class="quick-grid">
-                <button
-                    onclick="career()">
-                    🏆
+
+                <div class="fight-details">
+
                     <span>
-                        Carreira
+                        📅 Semana ${nextFight.week}
                     </span>
+
+                    <span>
+                        💰 $${Math.round(
+                            nextFight.purse || 0
+                        )}
+                    </span>
+
+                </div>
+
+                <button
+                    class="red"
+                    onclick="fightScreen()">
+
+                    👊 VER LUTA
+
                 </button>
+
+            </div>
+
+            `
+
+            :
+
+            `
+
+            <div class="empty-card">
+
+                <div style="
+                    font-size:38px;
+                    text-align:center;
+                    margin-bottom:10px;
+                ">
+                    🥊
+                </div>
+
+                <strong>
+                    Nenhuma luta marcada
+                </strong>
+
+                <p>
+                    Continue treinando e avance sua carreira.
+                </p>
+
                 <button
                     onclick="fightScreen()">
-                    👊
-                    <span>
-                        Lutas
-                    </span>
+
+                    🔎 PROCURAR LUTA
+
                 </button>
-                <button
-                    onclick="teamScreen()">
-                    🏢
-                    <span>
-                        Equipe
-                    </span>
-                </button>
-                <button
-                    onclick="familyScreen()">
-                    ❤️
-                    <span>
-                        Vida
-                    </span>
-                </button>
+
             </div>
-            <!-- =========================================
-                 STATUS FÍSICO
-            ========================================== -->
-            <div class="section-title">
-                ❤️ CONDIÇÃO FÍSICA
-            </div>
-            <div class="condition-card">
-                <div>
-                    <span>SAÚDE</span>
-                    <strong>
-                        ${Math.round(player.health || 0)}%
-                    </strong>
-                </div>
-                <div>
-                    <span>FADIGA</span>
-                    <strong>
-                        ${Math.round(player.fatigue || 0)}%
-                    </strong>
-                </div>
-            </div>
-        <div class="restart-section">
-    <button
-        class="main-button gray"
-        onclick="resetGame()">
-        🔄 REINICIAR JOGO
-    </button>
-</div>
+
+            `
+        }
+
+
+        <div class="section-title">
+            📊 CARTÃO DA CARREIRA
         </div>
+
+        <div class="career-card">
+
+            <div class="career-stage">
+                ${stage}
+            </div>
+
+            <div class="record">
+
+                <div>
+
+                    <span>PROFISSIONAL</span>
+
+                    <strong>
+                        ${recordPro}
+                    </strong>
+
+                </div>
+
+                <div>
+
+                    <span>AMADOR</span>
+
+                    <strong>
+                        ${recordAmateur}
+                    </strong>
+
+                </div>
+
+            </div>
+
+            <button
+                onclick="career()">
+
+                🏆 ABRIR CARREIRA
+
+            </button>
+
+        </div>
+
+
+        <div class="section-title">
+            🏢 EQUIPE
+        </div>
+
+        <div class="team-preview">
+
+            <div>
+
+                <span>ACADEMIA</span>
+
+                <strong>
+                    ${
+                        team
+                            ? team.name
+                            : "Nenhuma"
+                    }
+                </strong>
+
+            </div>
+
+            <div>
+
+                <span>EMPRESÁRIO</span>
+
+                <strong>
+                    ${
+                        manager
+                            ? manager.name
+                            : "Nenhum"
+                    }
+                </strong>
+
+            </div>
+
+            <button
+                onclick="teamScreen()">
+
+                🏢 GERENCIAR EQUIPE
+
+            </button>
+
+        </div>
+
+
+        <div class="section-title">
+            ❤️ VIDA
+        </div>
+
+        <div class="card">
+
+            <div class="statline">
+
+                <span>
+                    Relacionamento
+                </span>
+
+                <b>
+                    ${player.relationship || "Solteiro"}
+                </b>
+
+            </div>
+
+            <div class="statline">
+
+                <span>
+                    Filhos
+                </span>
+
+                <b>
+                    ${
+                        player.children
+                            ? player.children.length
+                            : 0
+                    }
+                </b>
+
+            </div>
+
+            <button
+                onclick="familyScreen()">
+
+                ❤️ ABRIR VIDA
+
+            </button>
+
+        </div>
+
+
+        <div class="section-title">
+            ❤️ CONDIÇÃO
+        </div>
+
+        <div class="condition-card">
+
+            <div>
+
+                <span>SAÚDE</span>
+
+                <strong>
+                    ${Math.round(
+                        player.health || 0
+                    )}%
+                </strong>
+
+            </div>
+
+            <div>
+
+                <span>FADIGA</span>
+
+                <strong>
+                    ${Math.round(
+                        player.fatigue || 0
+                    )}%
+                </strong>
+
+            </div>
+
+        </div>
+
+
+        <div class="section-title">
+            ⚡ AÇÕES
+        </div>
+
+        <div class="quick-grid">
+
+            <button onclick="career()">
+                🏆
+                <span>Carreira</span>
+            </button>
+
+            <button onclick="training()">
+                🏋️
+                <span>Treinar</span>
+            </button>
+
+            <button onclick="fightScreen()">
+                👊
+                <span>Lutar</span>
+            </button>
+
+            <button onclick="familyScreen()">
+                ❤️
+                <span>Vida</span>
+            </button>
+
+        </div>
+
+
+        <div class="restart-section">
+
+            <button
+                class="gray"
+                onclick="resetGame()">
+
+                🔄 REINICIAR JOGO
+
+            </button>
+
+        </div>
+
     `;
 }
 
