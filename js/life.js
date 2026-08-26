@@ -1,7 +1,8 @@
 /* =========================================================
    MMA LIFE DYNASTY
    LIFE.JS
-   VIDA + RELACIONAMENTO + CASAMENTO + FILHOS
+   VIDA + TINDER + RELACIONAMENTO + CASAMENTO
+   + GRAVIDEZ + FILHOS + ÁRVORE + HERANÇA
 ========================================================= */
 
 
@@ -95,6 +96,22 @@ function ensureLifeData() {
     }
 
 
+    /* CANDIDATAS */
+
+    if (!Array.isArray(p.partnerCandidates)) {
+        p.partnerCandidates = [];
+    }
+
+
+    /* HERDEIRO */
+
+    if (
+        typeof p.heirId === "undefined"
+    ) {
+        p.heirId = null;
+    }
+
+
     return p;
 }
 
@@ -108,6 +125,234 @@ function lifeMessage(message) {
     alert(message);
 
     lifeScreen();
+}
+
+
+/* =========================================================
+   GERADOR DE 200 CANDIDATAS
+========================================================= */
+
+function generatePartnerCandidates() {
+
+    const names = [
+
+        "Maria","Ana","Julia","Laura","Beatriz",
+        "Camila","Sofia","Mariana","Isabela","Gabriela",
+        "Amanda","Larissa","Carolina","Manuela","Helena",
+        "Valentina","Luiza","Clara","Alice","Bianca",
+        "Nicole","Rafaela","Leticia","Yasmin","Eduarda",
+        "Fernanda","Bruna","Giovanna","Melissa","Heloisa",
+        "Livia","Marina","Cecilia","Rebeca","Sarah",
+        "Isadora","Lorena","Vitória","Emilly","Emanuelly",
+        "Maitê","Alana","Elisa","Lara","Mirella",
+        "Stella","Agatha","Antonella","Olivia","Esther",
+
+        "Ayla","Aurora","Valeria","Malu","Júlia",
+        "Bárbara","Luana","Natália","Patricia","Renata",
+        "Priscila","Raquel","Vanessa","Viviane","Aline",
+        "Carla","Daniela","Débora","Elaine","Fabiana",
+        "Flávia","Gisele","Ingrid","Jéssica","Karina",
+        "Kelly","Luciana","Marcela","Monique","Nathalia",
+        "Paula","Roberta","Samara","Tainá","Tatiane",
+        "Verônica","Adriana","Alessandra","Brenda","Cristina",
+        "Denise","Evelyn","Gabriela","Irene","Janaína",
+
+        "Katarina","Letícia","Mônica","Natasha","Priscila",
+        "Regina","Simone","Talita","Úrsula","Vivian",
+        "Yara","Zoe","Abigail","Ariana","Bella",
+        "Catarina","Diana","Elena","Francesca","Giulia",
+        "Isabel","Jasmine","Kiara","Luna","Maya",
+        "Nina","Olga","Paola","Rita","Sabrina",
+        "Tereza","Valéria","Wendy","Yasmin","Zara",
+        "Amelia","Chloe","Emma","Grace","Hannah",
+        "Ivy","Jade","Kate","Leah","Mia",
+
+        "Nora","Olivia","Ruby","Sophia","Taylor",
+        "Victoria","Zoey","Ava","Ella","Emily",
+        "Lily","Madison","Natalie","Scarlett","Aria",
+        "Layla","Camila","Samantha","Penelope","Riley",
+        "Aurora","Eleanor","Hazel","Violet","Stella",
+        "Lucy","Paisley","Everly","Naomi","Eliana",
+        "Caroline","Nova","Genesis","Emilia","Kennedy",
+        "Maya","Willow","Kinsley","Delilah","Claire",
+        "Vivian","Raelynn","Liliana","Mariah","Athena",
+
+        "Sierra","Jocelyn","Adeline","Brianna","Melanie",
+        "Valerie","Mackenzie","Allison","Morgan","Kayla",
+        "Faith","Aubrey","Peyton","Brooklyn","Skylar",
+        "Arianna","Serenity","Annabelle","Gabriella","Hailey",
+        "Autumn","Nevaeh","Carla","Daphne","Elisa",
+        "Freya","Georgia","Hope","Iris","Josephine",
+        "Kylie","Lola","Margot","Noelle","Phoebe",
+        "Rose","Summer","Thea","Vera","Willa"
+    ];
+
+
+    const professions = [
+
+        "Estudante",
+        "Professora",
+        "Médica",
+        "Advogada",
+        "Empresária",
+        "Nutricionista",
+        "Fisioterapeuta",
+        "Fotógrafa",
+        "Jornalista",
+        "Designer",
+        "Engenheira",
+        "Psicóloga",
+        "Veterinária",
+        "Influenciadora",
+        "Personal Trainer",
+        "Farmacêutica",
+        "Arquiteta",
+        "Chef",
+        "Programadora",
+        "Bióloga"
+    ];
+
+
+    const countries = [
+
+        "Brasil",
+        "Estados Unidos",
+        "Argentina",
+        "México",
+        "Canadá",
+        "Japão",
+        "Espanha",
+        "França",
+        "Itália",
+        "Reino Unido"
+    ];
+
+
+    const candidates = [];
+
+
+    for (
+        let i = 0;
+        i < 200;
+        i++
+    ) {
+
+        const athlete =
+            Math.random() < 0.35;
+
+
+        const age =
+            18 +
+            Math.floor(
+                Math.random() * 13
+            );
+
+
+        const physical =
+            Math.floor(
+                Math.random() * 31
+            ) + 50;
+
+
+        const mental =
+            Math.floor(
+                Math.random() * 31
+            ) + 50;
+
+
+        const discipline =
+            Math.floor(
+                Math.random() * 31
+            ) + 50;
+
+
+        const genetics =
+            Math.floor(
+                Math.random() * 31
+            ) + 60;
+
+
+        const potential =
+            Math.min(
+                95,
+                Math.round(
+                    (
+                        physical +
+                        mental +
+                        discipline +
+                        genetics
+                    ) / 4
+                )
+            );
+
+
+        candidates.push({
+
+            id: i + 1,
+
+            name:
+                names[i % names.length],
+
+            age:
+
+                age,
+
+            country:
+
+                countries[
+                    Math.floor(
+                        Math.random() *
+                        countries.length
+                    )
+                ],
+
+            profession:
+
+                professions[
+                    Math.floor(
+                        Math.random() *
+                        professions.length
+                    )
+                ],
+
+            athlete:
+
+                athlete,
+
+            physical:
+
+                physical,
+
+            mental:
+
+                mental,
+
+            discipline:
+
+                discipline,
+
+            genetics:
+
+                genetics,
+
+            potential:
+
+                potential,
+
+            liked:
+
+                false,
+
+            passed:
+
+                false
+
+        });
+
+    }
+
+
+    return candidates;
 }
 
 
@@ -173,17 +418,26 @@ function lifeScreen() {
 
             <div class="statline">
                 <span>Idade</span>
-                <b>${p.age || 15} anos</b>
+
+                <b>
+                    ${p.age || 15} anos
+                </b>
             </div>
 
             <div class="statline">
                 <span>Dinheiro</span>
-                <b>$${Math.round(p.money || 0)}</b>
+
+                <b>
+                    $${Math.round(p.money || 0)}
+                </b>
             </div>
 
             <div class="statline">
                 <span>Fama</span>
-                <b>${Math.round(p.fame || 0)}</b>
+
+                <b>
+                    ${Math.round(p.fame || 0)}
+                </b>
             </div>
 
         </div>
@@ -194,6 +448,7 @@ function lifeScreen() {
             <div class="title">
                 💕 RELACIONAMENTO
             </div>
+
 
             <div class="statline">
 
@@ -245,9 +500,9 @@ function lifeScreen() {
 
                 <button
                     class="main-button"
-                    onclick="meetPartner()">
+                    onclick="datingScreen()">
 
-                    💕 CONHECER ALGUÉM
+                    💕 ABRIR DATING
 
                 </button>
 
@@ -356,6 +611,7 @@ function lifeScreen() {
                 💒 CASAMENTO
             </div>
 
+
             <div class="statline">
 
                 <span>
@@ -414,6 +670,7 @@ function lifeScreen() {
             <div class="title">
                 👶 FAMÍLIA
             </div>
+
 
             <div class="statline">
 
@@ -492,6 +749,7 @@ function lifeScreen() {
                 💰 DESPESAS FAMILIARES
             </div>
 
+
             <div class="statline">
 
                 <span>
@@ -505,6 +763,7 @@ function lifeScreen() {
                 </b>
 
             </div>
+
 
             <p>
                 Relacionamentos, casamento
@@ -520,6 +779,7 @@ function lifeScreen() {
             <div class="title">
                 🌳 ÁRVORE GENEALÓGICA
             </div>
+
 
             <p>
                 Acompanhe sua família
@@ -544,6 +804,7 @@ function lifeScreen() {
                 🧬 LEGADO
             </div>
 
+
             <p>
                 Seus filhos poderão continuar
                 sua história no futuro.
@@ -556,52 +817,393 @@ function lifeScreen() {
 
 
 /* =========================================================
-   CONHECER ALGUÉM
+   TINDER / DATING
 ========================================================= */
 
-function meetPartner() {
+function datingScreen() {
+
+    const p = ensureLifeData();
+
+    if (!p) {
+        return;
+    }
+
+
+    if (
+        p.age < 18
+    ) {
+
+        lifeMessage(
+            "❤️ Você precisa ter 18 anos para começar sua vida amorosa."
+        );
+
+        return;
+    }
+
+
+    if (
+        p.relationship !== "Solteiro"
+    ) {
+
+        lifeMessage(
+            "Você já está em um relacionamento."
+        );
+
+        return;
+    }
+
+
+    if (
+        !p.partnerCandidates ||
+        !p.partnerCandidates.length
+    ) {
+
+        p.partnerCandidates =
+            generatePartnerCandidates();
+
+        lifeSave();
+
+    }
+
+
+    let candidate =
+        p.partnerCandidates.find(
+            function(person) {
+
+                return (
+                    !person.passed &&
+                    !person.liked
+                );
+
+            }
+        );
+
+
+    if (!candidate) {
+
+        p.partnerCandidates =
+            generatePartnerCandidates();
+
+        lifeSave();
+
+        candidate =
+            p.partnerCandidates[0];
+
+    }
+
+
+    const content =
+        document.getElementById("content");
+
+    if (!content) {
+        return;
+    }
+
+
+    const athleteText =
+        candidate.athlete
+            ? "🥊 SIM — atleta"
+            : "❌ Não é atleta";
+
+
+    content.innerHTML = `
+
+        <div class="card">
+
+            <div class="title">
+                💕 DATING
+            </div>
+
+            <p>
+                Encontre alguém para construir
+                sua vida e sua dinastia.
+            </p>
+
+        </div>
+
+
+        <div class="card">
+
+            <div
+                style="
+                    text-align:center;
+                    font-size:70px;
+                    margin-bottom:10px;
+                "
+            >
+                👩
+            </div>
+
+
+            <div
+                class="title"
+                style="text-align:center;"
+            >
+                ${candidate.name}
+            </div>
+
+
+            <div
+                style="
+                    text-align:center;
+                    margin-bottom:15px;
+                "
+            >
+
+                ${candidate.age} anos ·
+                ${candidate.country}
+
+            </div>
+
+
+            <div class="statline">
+
+                <span>
+                    Profissão
+                </span>
+
+                <b>
+                    ${candidate.profession}
+                </b>
+
+            </div>
+
+
+            <div class="statline">
+
+                <span>
+                    Atleta
+                </span>
+
+                <b>
+                    ${athleteText}
+                </b>
+
+            </div>
+
+
+            <div class="statline">
+
+                <span>
+                    Físico
+                </span>
+
+                <b>
+                    ${candidate.physical}
+                </b>
+
+            </div>
+
+
+            <div class="statline">
+
+                <span>
+                    Mental
+                </span>
+
+                <b>
+                    ${candidate.mental}
+                </b>
+
+            </div>
+
+
+            <div class="statline">
+
+                <span>
+                    Disciplina
+                </span>
+
+                <b>
+                    ${candidate.discipline}
+                </b>
+
+            </div>
+
+
+            <div class="statline">
+
+                <span>
+                    Genética
+                </span>
+
+                <b>
+                    ${candidate.genetics}
+                </b>
+
+            </div>
+
+
+            <div class="statline">
+
+                <span>
+                    Potencial familiar
+                </span>
+
+                <b>
+                    ${candidate.potential}
+                </b>
+
+            </div>
+
+
+            <br>
+
+
+            <button
+                class="main-button"
+                onclick="likePartner(${candidate.id})">
+
+                ❤️ CURTIR
+
+            </button>
+
+
+            <button
+                class="gray"
+                onclick="passPartner(${candidate.id})">
+
+                ❌ PASSAR
+
+            </button>
+
+
+            <button
+                class="gray"
+                onclick="lifeScreen()">
+
+                ← VOLTAR
+
+            </button>
+
+        </div>
+
+    `;
+}
+
+
+/* =========================================================
+   CURTIR CANDIDATA
+========================================================= */
+
+function likePartner(id) {
 
     const p = ensureLifeData();
 
     if (!p) return;
 
 
-    const names = [
+    const candidate =
+        p.partnerCandidates.find(
+            function(person) {
 
-        "Maria",
-        "Ana",
-        "Julia",
-        "Laura",
-        "Beatriz",
-        "Camila",
-        "Sofia",
-        "Mariana",
-        "Isabela",
-        "Gabriela"
+                return person.id === id;
 
-    ];
+            }
+        );
 
 
-    const name =
-        names[
-            Math.floor(
-                Math.random() * names.length
-            )
-        ];
+    if (!candidate) {
+        return;
+    }
 
 
-    p.partner = name;
+    candidate.liked = true;
+
+
+    /*
+     * No momento do match,
+     * a candidata vira parceira.
+     */
+
+    p.partner = {
+
+        name:
+            candidate.name,
+
+        age:
+            candidate.age,
+
+        country:
+            candidate.country,
+
+        profession:
+            candidate.profession,
+
+        athlete:
+            candidate.athlete,
+
+        physical:
+            candidate.physical,
+
+        mental:
+            candidate.mental,
+
+        discipline:
+            candidate.discipline,
+
+        genetics:
+            candidate.genetics,
+
+        potential:
+            candidate.potential
+
+    };
+
 
     p.relationship =
         "Conhecendo";
 
 
-    p.relationshipLevel = 20;
+    p.relationshipLevel =
+        20;
 
 
     lifeSave();
 
+
+    alert(
+        `❤️ MATCH!\n\nVocê começou a conhecer ${candidate.name}.`
+    );
+
+
     lifeScreen();
+}
+
+
+/* =========================================================
+   PASSAR
+========================================================= */
+
+function passPartner(id) {
+
+    const p = ensureLifeData();
+
+    if (!p) return;
+
+
+    const candidate =
+        p.partnerCandidates.find(
+            function(person) {
+
+                return person.id === id;
+
+            }
+        );
+
+
+    if (!candidate) {
+        return;
+    }
+
+
+    candidate.passed = true;
+
+
+    lifeSave();
+
+
+    datingScreen();
 }
 
 
@@ -622,7 +1224,7 @@ function relationshipDate() {
     if ((p.money || 0) < cost) {
 
         lifeMessage(
-            "Você não tem dinheiro suficiente para o encontro."
+            "💰 Você não tem dinheiro suficiente para o encontro."
         );
 
         return;
@@ -633,6 +1235,7 @@ function relationshipDate() {
 
     p.familyExpenses += cost;
 
+
     p.relationshipLevel =
         Math.min(
             100,
@@ -641,7 +1244,10 @@ function relationshipDate() {
 
 
     if (
-        p.relationship === "Conhecendo" &&
+        (
+            p.relationship === "Conhecendo" ||
+            p.relationship === "Namorando"
+        ) &&
         p.relationshipLevel >= 30
     ) {
 
@@ -674,7 +1280,7 @@ function relationshipGift() {
     if ((p.money || 0) < cost) {
 
         lifeMessage(
-            "Você não tem dinheiro suficiente para comprar o presente."
+            "💰 Você não tem dinheiro suficiente para comprar o presente."
         );
 
         return;
@@ -757,7 +1363,7 @@ function marryPartner() {
     if ((p.money || 0) < cost) {
 
         lifeMessage(
-            "Você precisa de $5.000 para realizar o casamento."
+            "💰 Você precisa de $5.000 para realizar o casamento."
         );
 
         return;
@@ -773,7 +1379,8 @@ function marryPartner() {
         "Casado(a)";
 
 
-    p.married = true;
+    p.married =
+        true;
 
 
     p.relationshipLevel =
@@ -842,7 +1449,7 @@ function startPregnancy() {
     if (!p.married) {
 
         lifeMessage(
-            "Você precisa estar casado(a) para ter um filho."
+            "💍 Você precisa estar casado(a) para ter um filho."
         );
 
         return;
@@ -852,7 +1459,7 @@ function startPregnancy() {
     if (p.pregnancy) {
 
         lifeMessage(
-            "Já existe uma gestação em andamento."
+            "🤰 Já existe uma gestação em andamento."
         );
 
         return;
@@ -861,13 +1468,20 @@ function startPregnancy() {
 
     p.pregnancy = {
 
-        weeks: 0,
+        weeks:
+            0,
 
-        mother: p.partner || "Parceira",
+        mother:
+            p.partner &&
+            p.partner.name
+                ? p.partner.name
+                : "Parceira",
 
-        startedYear: p.year,
+        startedYear:
+            p.year,
 
-        startedWeek: p.week
+        startedWeek:
+            p.week
 
     };
 
@@ -879,7 +1493,7 @@ function startPregnancy() {
 
 
 /* =========================================================
-   NASCIMENTO
+   CRIAR FILHO
 ========================================================= */
 
 function createChild() {
@@ -887,6 +1501,21 @@ function createChild() {
     const p = ensureLifeData();
 
     if (!p) return;
+
+
+    let mother =
+        null;
+
+
+    if (
+        p.partner &&
+        typeof p.partner === "object"
+    ) {
+
+        mother =
+            p.partner;
+
+    }
 
 
     const names = [
@@ -901,11 +1530,21 @@ function createChild() {
         "Davi",
         "Enzo",
         "Matheus",
+        "Theo",
+        "Samuel",
+        "Benjamin",
+        "Nicolas",
         "Alice",
         "Helena",
         "Laura",
         "Sophia",
-        "Valentina"
+        "Valentina",
+        "Manuela",
+        "Isabela",
+        "Cecília",
+        "Aurora",
+        "Lívia",
+        "Clara"
 
     ];
 
@@ -913,9 +1552,85 @@ function createChild() {
     const name =
         names[
             Math.floor(
-                Math.random() * names.length
+                Math.random() *
+                names.length
             )
         ];
+
+
+    /*
+     * GENÉTICA DO FILHO
+     *
+     * O potencial do filho recebe
+     * influência dos pais.
+     */
+
+    const fatherPotential =
+        Number(
+            p.potential || 78
+        );
+
+
+    const motherPotential =
+        mother
+            ? Number(
+                mother.potential || 70
+            )
+            : 70;
+
+
+    const geneticBase =
+        (
+            fatherPotential +
+            motherPotential
+        ) / 2;
+
+
+    const geneticVariation =
+        Math.floor(
+            Math.random() * 17
+        ) - 8;
+
+
+    const childPotential =
+        Math.max(
+
+            40,
+
+            Math.min(
+
+                98,
+
+                Math.round(
+                    geneticBase +
+                    geneticVariation
+                )
+
+            )
+
+        );
+
+
+    const childOverall =
+        Math.max(
+
+            35,
+
+            Math.min(
+
+                60,
+
+                Math.round(
+                    childPotential -
+                    35 +
+                    (
+                        Math.random() * 8
+                    )
+                )
+
+            )
+
+        );
 
 
     const child = {
@@ -939,25 +1654,37 @@ function createChild() {
             p.name || "Pai",
 
         mother:
-            p.partner || "Mãe",
+            mother
+                ? mother.name
+                : "Mãe",
 
         relationship:
             50,
 
         potential:
-            Math.floor(
-                Math.random() * 13
-            ) + 78,
+            childPotential,
 
         overall:
-            Math.floor(
-                Math.random() * 11
-            ) + 40
+            childOverall,
+
+        inheritedFromFather:
+            fatherPotential,
+
+        inheritedFromMother:
+            motherPotential,
+
+        fightingInterest:
+            false,
+
+        becameFighter:
+            false
 
     };
 
 
-    p.children.push(child);
+    p.children.push(
+        child
+    );
 
 
     p.pregnancy =
@@ -968,6 +1695,9 @@ function createChild() {
 
         type:
             "child",
+
+        id:
+            child.id,
 
         name:
             child.name,
@@ -983,9 +1713,11 @@ function createChild() {
 
     lifeSave();
 
+
     alert(
         `👶 NASCEU!\n\n${child.name} nasceu e entrou para sua família.`
     );
+
 
     lifeScreen();
 }
@@ -1013,22 +1745,37 @@ function updateChildrenAge() {
             if (
                 typeof child.weeks !== "number"
             ) {
-                child.weeks = 0;
+
+                child.weeks =
+                    0;
+
             }
+
 
             if (
                 typeof child.age !== "number"
             ) {
-                child.age = 0;
+
+                child.age =
+                    0;
+
             }
 
 
             child.weeks++;
 
 
-            if (child.weeks >= 52) {
+            /*
+             * A criança só faz aniversário
+             * depois de completar 52 semanas.
+             */
 
-                child.weeks = 0;
+            if (
+                child.weeks >= 52
+            ) {
+
+                child.weeks =
+                    0;
 
                 child.age++;
 
@@ -1048,13 +1795,23 @@ function updatePregnancy() {
 
     const p = ensureLifeData();
 
-    if (!p || !p.pregnancy) {
+    if (
+        !p ||
+        !p.pregnancy
+    ) {
+
         return;
+
     }
 
 
     p.pregnancy.weeks++;
 
+
+    /*
+     * 40 semanas completas
+     * = nascimento.
+     */
 
     if (
         p.pregnancy.weeks >= 40
@@ -1070,8 +1827,7 @@ function updatePregnancy() {
 
 
 /* =========================================================
-   FUNÇÃO PARA O MAIN.JS
-   CHAMAR A CADA SEMANA
+   PROCESSAR SEMANA
 ========================================================= */
 
 function processLifeWeek() {
@@ -1087,27 +1843,35 @@ function processLifeWeek() {
 
 
     /*
-     * Se houve nascimento durante a semana,
-     * createChild() já salvou os dados.
+     * Se houve nascimento,
+     * createChild() já salvou.
      */
+
 
     updateChildrenAge();
 
 
     /*
-     * Pequena despesa semanal quando casado.
+     * Despesa semanal
+     * para quem é casado.
      */
 
     if (p.married) {
 
-        const expense = 50;
+        const expense =
+            50;
 
 
-        if ((p.money || 0) >= expense) {
+        if (
+            (p.money || 0) >=
+            expense
+        ) {
 
-            p.money -= expense;
+            p.money -=
+                expense;
 
-            p.familyExpenses += expense;
+            p.familyExpenses +=
+                expense;
 
         }
 
@@ -1136,10 +1900,13 @@ function familyTreeScreen() {
     if (!content) return;
 
 
-    let childrenHTML = "";
+    let childrenHTML =
+        "";
 
 
-    if (!p.children.length) {
+    if (
+        !p.children.length
+    ) {
 
         childrenHTML = `
 
@@ -1157,13 +1924,23 @@ function familyTreeScreen() {
             p.children.map(
                 function(child) {
 
+                    const heir =
+                        p.heirId === child.id
+                            ? " 👑 HERDEIRO"
+                            : "";
+
+
                     return `
 
                         <div class="card">
 
                             <div class="title">
+
                                 👶 ${child.name}
+                                ${heir}
+
                             </div>
+
 
                             <div class="statline">
 
@@ -1177,6 +1954,7 @@ function familyTreeScreen() {
 
                             </div>
 
+
                             <div class="statline">
 
                                 <span>
@@ -1188,6 +1966,7 @@ function familyTreeScreen() {
                                 </b>
 
                             </div>
+
 
                             <div class="statline">
 
@@ -1201,6 +1980,33 @@ function familyTreeScreen() {
 
                             </div>
 
+
+                            <div class="statline">
+
+                                <span>
+                                    Pai
+                                </span>
+
+                                <b>
+                                    ${child.father}
+                                </b>
+
+                            </div>
+
+
+                            <div class="statline">
+
+                                <span>
+                                    Mãe
+                                </span>
+
+                                <b>
+                                    ${child.mother}
+                                </b>
+
+                            </div>
+
+
                             <div class="statline">
 
                                 <span>
@@ -1213,6 +2019,7 @@ function familyTreeScreen() {
 
                             </div>
 
+
                             <div class="statline">
 
                                 <span>
@@ -1224,6 +2031,36 @@ function familyTreeScreen() {
                                 </b>
 
                             </div>
+
+
+                            ${
+                                child.age >= 18
+
+                                ?
+
+                                `
+
+                                <button
+                                    class="main-button"
+                                    onclick="chooseHeir(${child.id})">
+
+                                    👑 ESCOLHER COMO HERDEIRO
+
+                                </button>
+
+                                `
+
+                                :
+
+                                `
+
+                                <p>
+                                    🔒 Poderá continuar a dinastia
+                                    quando atingir 18 anos.
+                                </p>
+
+                                `
+                            }
 
                         </div>
 
@@ -1257,6 +2094,7 @@ function familyTreeScreen() {
                 🥊 GERAÇÃO 1
             </div>
 
+
             <div class="statline">
 
                 <span>
@@ -1268,6 +2106,7 @@ function familyTreeScreen() {
                 </b>
 
             </div>
+
 
             <div class="statline">
 
@@ -1293,18 +2132,31 @@ function familyTreeScreen() {
                 🧬 HERANÇA E SUCESSÃO
             </div>
 
-            <p>
-                No futuro, um dos seus filhos
-                poderá ser escolhido para
-                continuar sua história.
-            </p>
 
-            <p>
-                👑 Sistema de herdeiro e
-                continuidade de geração será
-                desbloqueado quando os filhos
-                atingirem idade suficiente.
-            </p>
+            ${
+                p.heirId
+
+                ?
+
+                `
+
+                <p>
+                    👑 Seu herdeiro atual foi escolhido.
+                </p>
+
+                `
+
+                :
+
+                `
+
+                <p>
+                    Escolha um filho adulto para
+                    continuar sua dinastia no futuro.
+                </p>
+
+                `
+            }
 
         </div>
 
@@ -1318,6 +2170,61 @@ function familyTreeScreen() {
         </button>
 
     `;
+
+}
+
+
+/* =========================================================
+   ESCOLHER HERDEIRO
+========================================================= */
+
+function chooseHeir(childId) {
+
+    const p = ensureLifeData();
+
+    if (!p) return;
+
+
+    const child =
+        p.children.find(
+            function(c) {
+
+                return c.id === childId;
+
+            }
+        );
+
+
+    if (!child) {
+        return;
+    }
+
+
+    if (
+        child.age < 18
+    ) {
+
+        lifeMessage(
+            "👑 O filho precisa ter pelo menos 18 anos para ser escolhido como herdeiro."
+        );
+
+        return;
+    }
+
+
+    p.heirId =
+        child.id;
+
+
+    lifeSave();
+
+
+    alert(
+        `👑 ${child.name} foi escolhido para continuar sua dinastia.`
+    );
+
+
+    familyTreeScreen();
 }
 
 
@@ -1328,8 +2235,14 @@ function familyTreeScreen() {
 window.lifeScreen =
     lifeScreen;
 
-window.meetPartner =
-    meetPartner;
+window.datingScreen =
+    datingScreen;
+
+window.likePartner =
+    likePartner;
+
+window.passPartner =
+    passPartner;
 
 window.relationshipDate =
     relationshipDate;
@@ -1354,6 +2267,9 @@ window.createChild =
 
 window.familyTreeScreen =
     familyTreeScreen;
+
+window.chooseHeir =
+    chooseHeir;
 
 window.processLifeWeek =
     processLifeWeek;
