@@ -1067,142 +1067,554 @@ function rest() {
     nextWeek();
 }
 
-/* =========================================================
-   TREINAMENTO
-========================================================= */
+/* =========================
+   TREINAMENTO / CAMP
+========================= */
 
 function training() {
 
-    const a =
-        player.attributes || {};
+    const content = document.getElementById("content");
 
-    document
-        .getElementById("content")
-        .innerHTML = `
+    if (!content) return;
+
+    player.week = player.week || 1;
+    player.year = player.year || 1;
+
+    player.trainingPlan = player.trainingPlan || {
+        weeks: {},
+        automatic: true
+    };
+
+    const currentWeek =
+        player.trainingPlan.weeks[player.week] || [];
+
+    content.innerHTML = `
 
         <div class="card">
 
             <div class="title">
-                🏋️ CAMP / TREINAMENTO
+                🏋️ CAMP DE TREINAMENTO
             </div>
 
             <div class="statline">
-
-                <span>
-                    Semana
-                </span>
-
-                <b>
-                    ${getWeek()} / 52
-                </b>
-
+                <span>Temporada</span>
+                <b>Ano ${player.year}</b>
             </div>
 
             <div class="statline">
-
-                <span>
-                    OVR
-                </span>
-
-                <b>
-                    ${getOverall()}
-                </b>
-
+                <span>Semana</span>
+                <b>${player.week} / 52</b>
             </div>
 
             <div class="statline">
+                <span>OVR</span>
+                <b>${getOverall()}</b>
+            </div>
 
-                <span>
-                    Potencial
-                </span>
-
-                <b>
-                    ${getPotential()}
-                </b>
-
+            <div class="statline">
+                <span>Potencial</span>
+                <b>${player.potential || 90}</b>
             </div>
 
         </div>
 
+
         <div class="card">
 
             <div class="title">
-                📋 PROGRAMAÇÃO
+                📅 PLANO DA SEMANA ${player.week}
             </div>
 
-            <p>
-                Escolha como será seu treino
-                nesta semana.
-            </p>
+            ${
+                currentWeek.length > 0
+
+                ?
+
+                currentWeek.map(treino => `
+
+                    <div class="statline">
+
+                        <span>
+                            ${treino.icon} ${treino.name}
+                        </span>
+
+                        <b>
+                            +${Number(treino.gain || 0).toFixed(2)}
+                        </b>
+
+                    </div>
+
+                `).join("")
+
+                :
+
+                `
+                    <p>
+                        Nenhum treino programado.
+                    </p>
+                `
+            }
+
+        </div>
+
+
+        <div class="card">
+
+            <div class="title">
+                🎯 PROGRAMAÇÃO
+            </div>
 
             <button
-                onclick="scheduleTraining('strength')">
+                class="green"
+                onclick="generateTrainingPlan()">
 
-                💪 Força
+                🎲 GERAR CAMP AUTOMÁTICO
 
             </button>
 
             <button
-                onclick="scheduleTraining('striking')">
+                onclick="programTraining()">
 
-                👊 Striking
-
-            </button>
-
-            <button
-                onclick="scheduleTraining('wrestling')">
-
-                🤼 Wrestling
-
-            </button>
-
-            <button
-                onclick="scheduleTraining('grappling')">
-
-                🥋 Grappling
-
-            </button>
-
-            <button
-                onclick="scheduleTraining('cardio')">
-
-                🏃 Cardio
-
-            </button>
-
-            <button
-                onclick="scheduleTraining('technique')">
-
-                🎯 Técnica
-
-            </button>
-
-            <button
-                onclick="scheduleTraining('defense')">
-
-                🛡️ Defesa
-
-            </button>
-
-            <button
-                onclick="scheduleTraining('auto')">
-
-                🎲 TREINO AUTOMÁTICO
+                ✏️ PROGRAMAR TREINO
 
             </button>
 
             <button
                 class="gray"
-                onclick="rest()">
+                onclick="nextWeek()">
 
-                😴 DESCANSAR E AVANÇAR SEMANA
+                ⏭️ PRÓXIMA SEMANA
 
             </button>
 
         </div>
 
-        ${backHomeButton()}
+
+        <div class="card">
+
+            <div class="title">
+                ❤️ CONDIÇÃO
+            </div>
+
+            <div class="statline">
+
+                <span>
+                    Saúde
+                </span>
+
+                <b>
+                    ${Math.round(player.health || 0)}%
+                </b>
+
+            </div>
+
+            <div class="statline">
+
+                <span>
+                    Fadiga
+                </span>
+
+                <b>
+                    ${Math.round(player.fatigue || 0)}%
+                </b>
+
+            </div>
+
+        </div>
+
     `;
+}
+
+
+/* =========================
+   OVERALL
+========================= */
+
+function getOverall() {
+
+    const a = player.attributes || {};
+
+    const values = [
+
+        a.strength || 50,
+        a.striking || 50,
+        a.wrestling || 50,
+        a.grappling || 50,
+        a.cardio || 50,
+        a.technique || 50,
+        a.defense || 50,
+        a.fightIQ || 50
+
+    ];
+
+    const total =
+        values.reduce(
+            (sum, value) => sum + value,
+            0
+        );
+
+    return Math.round(
+        total / values.length
+    );
+}
+
+
+/* =========================
+   GERAR CAMP AUTOMÁTICO
+========================= */
+
+function generateTrainingPlan() {
+
+    player.week = player.week || 1;
+
+    player.trainingPlan =
+        player.trainingPlan || {
+            weeks: {},
+            automatic: true
+        };
+
+    const options = [
+
+        {
+            name: "Força",
+            icon: "💪",
+            attribute: "strength"
+        },
+
+        {
+            name: "Striking",
+            icon: "🥊",
+            attribute: "striking"
+        },
+
+        {
+            name: "Wrestling",
+            icon: "🤼",
+            attribute: "wrestling"
+        },
+
+        {
+            name: "Grappling",
+            icon: "🥋",
+            attribute: "grappling"
+        },
+
+        {
+            name: "Cardio",
+            icon: "🏃",
+            attribute: "cardio"
+        },
+
+        {
+            name: "Técnica",
+            icon: "🎯",
+            attribute: "technique"
+        },
+
+        {
+            name: "Defesa",
+            icon: "🛡️",
+            attribute: "defense"
+        },
+
+        {
+            name: "Fight IQ",
+            icon: "🧠",
+            attribute: "fightIQ"
+        }
+
+    ];
+
+    const selected = [];
+
+    for (let i = 0; i < 3; i++) {
+
+        const treino =
+            options[
+                Math.floor(
+                    Math.random() * options.length
+                )
+            ];
+
+        selected.push({
+
+            name: treino.name,
+
+            icon: treino.icon,
+
+            attribute: treino.attribute,
+
+            gain: Number(
+                (
+                    0.40 +
+                    Math.random() * 0.70
+                ).toFixed(2)
+            )
+
+        });
+
+    }
+
+    player.trainingPlan.weeks[player.week] =
+        selected;
+
+    player.trainingPlan.automatic = true;
+
+    save();
+
+    training();
+}
+
+
+/* =========================
+   PROGRAMAR TREINO
+========================= */
+
+function programTraining() {
+
+    const options = [
+
+        ["strength", "💪 Força"],
+        ["striking", "🥊 Striking"],
+        ["wrestling", "🤼 Wrestling"],
+        ["grappling", "🥋 Grappling"],
+        ["cardio", "🏃 Cardio"],
+        ["technique", "🎯 Técnica"],
+        ["defense", "🛡️ Defesa"],
+        ["fightIQ", "🧠 Fight IQ"]
+
+    ];
+
+    let html = `
+
+        <div class="card">
+
+            <div class="title">
+                ✏️ PROGRAMAR TREINO
+            </div>
+
+            <p>
+                Escolha os treinos desta semana.
+            </p>
+
+    `;
+
+    options.forEach(option => {
+
+        html += `
+
+            <button
+                onclick="addTraining('${option[0]}')">
+
+                ${option[1]}
+
+            </button>
+
+        `;
+
+    });
+
+    html += `
+
+            <button
+                class="gray"
+                onclick="training()">
+
+                ← VOLTAR
+
+            </button>
+
+        </div>
+
+    `;
+
+    document.getElementById("content").innerHTML =
+        html;
+}
+
+
+/* =========================
+   ADICIONAR TREINO
+========================= */
+
+function addTraining(attribute) {
+
+    const names = {
+
+        strength: ["💪", "Força"],
+        striking: ["🥊", "Striking"],
+        wrestling: ["🤼", "Wrestling"],
+        grappling: ["🥋", "Grappling"],
+        cardio: ["🏃", "Cardio"],
+        technique: ["🎯", "Técnica"],
+        defense: ["🛡️", "Defesa"],
+        fightIQ: ["🧠", "Fight IQ"]
+
+    };
+
+    const data = names[attribute];
+
+    if (!data) return;
+
+    player.trainingPlan =
+        player.trainingPlan || {
+            weeks: {},
+            automatic: false
+        };
+
+    player.trainingPlan.weeks[player.week] =
+        player.trainingPlan.weeks[player.week] || [];
+
+    player.trainingPlan.weeks[player.week].push({
+
+        name: data[1],
+
+        icon: data[0],
+
+        attribute: attribute,
+
+        gain: Number(
+            (
+                0.40 +
+                Math.random() * 0.70
+            ).toFixed(2)
+        )
+
+    });
+
+    player.trainingPlan.automatic = false;
+
+    save();
+
+    training();
+}
+
+
+/* =========================
+   PRÓXIMA SEMANA
+========================= */
+
+function nextWeek() {
+
+    player.week = player.week || 1;
+    player.year = player.year || 1;
+
+    const plan =
+        player.trainingPlan &&
+        player.trainingPlan.weeks
+        ?
+        player.trainingPlan.weeks[player.week]
+        :
+        [];
+
+    /*
+     * APLICA OS TREINOS DA SEMANA
+     */
+
+    if (plan && plan.length) {
+
+        player.attributes =
+            player.attributes || {};
+
+        plan.forEach(treino => {
+
+            const attribute =
+                treino.attribute;
+
+            if (
+                typeof player.attributes[attribute]
+                !== "number"
+            ) {
+
+                player.attributes[attribute] = 50;
+
+            }
+
+            const potential =
+                player.potential || 90;
+
+            const current =
+                player.attributes[attribute];
+
+            if (current < potential) {
+
+                const room =
+                    potential - current;
+
+                const gain =
+                    Math.min(
+                        Number(treino.gain || 0),
+                        room
+                    );
+
+                player.attributes[attribute] =
+                    Number(
+                        (
+                            current + gain
+                        ).toFixed(2)
+                    );
+
+            }
+
+        });
+
+    }
+
+
+    /*
+     * RECUPERAÇÃO
+     */
+
+    player.fatigue =
+        Math.max(
+            0,
+            (player.fatigue || 0) - 10
+        );
+
+    player.health =
+        Math.min(
+            100,
+            (player.health || 100) + 3
+        );
+
+
+    /*
+     * AVANÇA A SEMANA
+     */
+
+    player.week++;
+
+
+    /*
+     * NOVO ANO
+     */
+
+    if (player.week > 52) {
+
+        player.week = 1;
+
+        player.year++;
+
+        player.log =
+            player.log || [];
+
+        player.log.unshift(
+            `🎆 Começou o Ano ${player.year}.`
+        );
+
+    }
+
+
+    save();
+
+
+    /*
+     * NÃO VOLTA PARA A TELA INICIAL.
+     * CONTINUA NO CAMP.
+     */
+
+    training();
+
 }
 
 /* =========================================================
