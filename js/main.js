@@ -442,272 +442,332 @@ function getOverall() {
     );
 }
 /* =========================================================
-   TELA PRINCIPAL
+   MMA LIFE DYNASTY
+   HOME.JS — PÁGINA INÍCIO
 ========================================================= */
+
 function home() {
-    ensurePlayer();
-    showGame();
-    const c =
-        getContent();
-    if (!c) {
+
+    const content = document.getElementById("content");
+
+    if (!content) {
+        console.error("Elemento #content não encontrado.");
         return;
     }
-    const p =
-        window.player;
-    const pro =
-        p.professional || {};
-    const amateur =
-        p.amateur || {};
-    c.innerHTML = `
-        <div class="home-container">
-            <!-- ==================================
-                 LUTADOR
-            =================================== -->
-            <div class="fighter-header">
-                <div class="fighter-avatar">
-                    🥊
-                </div>
-                <div class="fighter-info">
-                    <div class="fighter-name">
-                        ${p.name}
-                    </div>
-                    <div>
-                        ${p.country}
-                    </div>
-                    <div>
-                        ${p.weight}
-                    </div>
-                </div>
+
+    const pro = player.professional || {};
+    const amateur = player.amateur || {};
+
+    const proRecord =
+        `${pro.wins || 0}-${pro.losses || 0}-${pro.draws || 0}`;
+
+    const amateurRecord =
+        `${amateur.wins || 0}-${amateur.losses || 0}-${amateur.draws || 0}`;
+
+    content.innerHTML = `
+
+        <!-- CABEÇALHO DO LUTADOR -->
+        <div class="card fighter-card">
+
+            <div class="fighter-avatar">
+                🥊
             </div>
-            <!-- ==================================
-                 STATUS
-            =================================== -->
-            <div class="stats-grid">
-                <div class="stat-card">
-                    <span>
-                        IDADE
-                    </span>
-                    <strong>
-                        ${p.age}
-                    </strong>
-                </div>
-                <div class="stat-card">
-                    <span>
-                        OVR
-                    </span>
-                    <strong>
-                        ${getOverall()}
-                    </strong>
-                </div>
-                <div class="stat-card">
-                    <span>
-                        POTENCIAL
-                    </span>
-                    <strong>
-                        ${p.potential}
-                    </strong>
-                </div>
-                <div class="stat-card">
-                    <span>
-                        SEMANA
-                    </span>
-                    <strong>
-                        ${p.week}/52
-                    </strong>
-                </div>
+
+            <div class="fighter-info">
+
+                <h2>
+                    ${player.name || "Lutador"}
+                </h2>
+
+                <p>
+                    ${player.country || "Brasil"}
+                </p>
+
+                <p>
+                    ${player.weight || "Peso Leve"}
+                </p>
+
             </div>
-            <!-- ==================================
-                 CALENDÁRIO
-            =================================== -->
-            <div class="card">
-                <div class="title">
-                    📅 CALENDÁRIO
-                </div>
-                <div class="statline">
-                    <span>
-                        Ano
-                    </span>
-                    <b>
-                        ${p.year}
-                    </b>
-                </div>
-                <div class="statline">
-                    <span>
-                        Semana
-                    </span>
-                    <b>
-                        ${p.week} / 52
-                    </b>
-                </div>
-                <button
-                    class="main-button"
-                    onclick="tab('train')"
-                >
-                    🏋️ CAMP DE TREINAMENTO
-                </button>
-                <button
-                    class="main-button"
-                    onclick="nextWeek()"
-                >
-                    ⏭️ PRÓXIMA SEMANA
-                </button>
+
+        </div>
+
+
+        <!-- PRINCIPAIS STATUS -->
+        <div class="stats-grid">
+
+            <div class="stat-card">
+
+                <span>IDADE</span>
+
+                <strong>
+                    ${player.age || 18}
+                </strong>
+
             </div>
-            <!-- ==================================
-                 CARREIRA
-            =================================== -->
-            <div class="card">
-                <div class="title">
-                    🏆 CARREIRA
-                </div>
-                <div class="statline">
-                    <span>
-                        Status
-                    </span>
-                    <b>
-                        ${
-                            pro.active
+
+
+            <div class="stat-card">
+
+                <span>OVR</span>
+
+                <strong>
+                    ${typeof getOverall === "function"
+                        ? getOverall()
+                        : player.overall || 60}
+                </strong>
+
+            </div>
+
+
+            <div class="stat-card">
+
+                <span>POTENCIAL</span>
+
+                <strong>
+                    ${player.potential || 90}
+                </strong>
+
+            </div>
+
+
+            <div class="stat-card">
+
+                <span>FAMA</span>
+
+                <strong>
+                    ${Math.round(player.fame || 0)}
+                </strong>
+
+            </div>
+
+        </div>
+
+
+        <!-- CALENDÁRIO -->
+        <div class="card">
+
+            <div class="title">
+                📅 CALENDÁRIO
+            </div>
+
+            <div class="statline">
+
+                <span>
+                    Temporada
+                </span>
+
+                <b>
+                    Ano ${player.year || 1}
+                </b>
+
+            </div>
+
+            <div class="statline">
+
+                <span>
+                    Semana
+                </span>
+
+                <b>
+                    ${player.week || 1} / 52
+                </b>
+
+            </div>
+
+            <button
+                class="main-button"
+                onclick="nextWeek()">
+
+                ⏭️ AVANÇAR SEMANA
+
+            </button>
+
+        </div>
+
+
+        <!-- CARREIRA -->
+        <div class="card">
+
+            <div class="title">
+                🥊 CARREIRA
+            </div>
+
+            <div class="statline">
+
+                <span>
+                    Status
+                </span>
+
+                <b>
+                    ${
+                        player.professional &&
+                        player.professional.active
                             ? "Profissional"
                             : "Amador"
-                        }
-                    </b>
-                </div>
-                <div class="statline">
-                    <span>
-                        OVR
-                    </span>
-                    <b>
-                        ${getOverall()}
-                    </b>
-                </div>
-                <div class="statline">
-                    <span>
-                        Potencial
-                    </span>
-                    <b>
-                        ${p.potential}
-                    </b>
-                </div>
-                <div class="statline">
-                    <span>
-                        Profissional
-                    </span>
-                    <b>
-                        ${pro.wins || 0} -
-                        ${pro.losses || 0} -
-                        ${pro.draws || 0}
-                    </b>
-                </div>
-                <button
-                    class="main-button"
-                    onclick="tab('career')"
-                >
-                    🥊 ABRIR CARREIRA
-                </button>
+                    }
+                </b>
+
             </div>
-            <!-- ==================================
-                 MUNDO MMA
-            =================================== -->
-            <div class="card">
-                <div class="title">
-                    🌎 MUNDO DO MMA
-                </div>
-                <button
-                    class="main-button"
-                    onclick="tab('fight')"
-                >
-                    ⚔️ LUTAS
-                </button>
-                <button
-                    class="main-button"
-                    onclick="tab('team')"
-                >
-                    🏢 EQUIPE
-                </button>
-                <button
-                    class="main-button"
-                    onclick="tab('ranking')"
-                >
-                    🏆 RANKING
-                </button>
+
+            <div class="statline">
+
+                <span>
+                    Recorde profissional
+                </span>
+
+                <b>
+                    ${proRecord}
+                </b>
+
             </div>
-            <!-- ==================================
-                 VIDA
-            =================================== -->
-            <div class="card">
-                <div class="title">
-                    ❤️ VIDA
-                </div>
-                <div class="statline">
-                    <span>
-                        Relacionamento
-                    </span>
-                    <b>
-                        ${p.relationship}
-                    </b>
-                </div>
-                <div class="statline">
-                    <span>
-                        Filhos
-                    </span>
-                    <b>
-                        ${(p.children || []).length}
-                    </b>
-                </div>
-                <button
-                    class="main-button"
-                    onclick="tab('life')"
-                >
-                    ❤️ ABRIR VIDA
-                </button>
+
+            <div class="statline">
+
+                <span>
+                    Recorde amador
+                </span>
+
+                <b>
+                    ${amateurRecord}
+                </b>
+
             </div>
-            <!-- ==================================
-                 CONDIÇÃO
-            =================================== -->
-            <div class="card">
-                <div class="title">
-                    ❤️ CONDIÇÃO
-                </div>
-                <div class="statline">
-                    <span>
-                        Saúde
-                    </span>
-                    <b>
-                        ${Math.round(p.health)}%
-                    </b>
-                </div>
-                <div class="statline">
-                    <span>
-                        Fadiga
-                    </span>
-                    <b>
-                        ${Math.round(p.fatigue)}%
-                    </b>
-                </div>
-                <div class="statline">
-                    <span>
-                        Dinheiro
-                    </span>
-                    <b>
-                        $${Math.round(p.money)}
-                    </b>
-                </div>
-            </div>
-            <!-- ==================================
-                 SISTEMA
-            =================================== -->
-            <div class="card">
-                <div class="title">
-                    ⚙️ SISTEMA
-                </div>
-                <button
-                    class="main-button gray"
-                    onclick="resetGame()"
-                >
-                    🔄 REINICIAR JOGO
-                </button>
-            </div>
+
         </div>
+
+
+        <!-- PRÓXIMA LUTA -->
+        <div class="card">
+
+            <div class="title">
+                ⚔️ PRÓXIMA LUTA
+            </div>
+
+            ${
+                player.nextFight
+                ?
+                `
+
+                    <div class="statline">
+
+                        <span>
+                            Evento
+                        </span>
+
+                        <b>
+                            ${player.nextFight.event.name}
+                        </b>
+
+                    </div>
+
+
+                    <div class="statline">
+
+                        <span>
+                            Adversário
+                        </span>
+
+                        <b>
+                            ${player.nextFight.opponent.displayName}
+                        </b>
+
+                    </div>
+
+
+                    <div class="statline">
+
+                        <span>
+                            OVR adversário
+                        </span>
+
+                        <b>
+                            ${player.nextFight.opponent.power}
+                        </b>
+
+                    </div>
+
+
+                    <button
+                        class="main-button"
+                        onclick="fightScreen()">
+
+                        👊 VER LUTA
+
+                    </button>
+
+                `
+                :
+                `
+
+                    <p>
+                        Nenhuma luta marcada.
+                    </p>
+
+
+                    <button
+                        class="main-button"
+                        onclick="fightScreen()">
+
+                        🔎 PROCURAR LUTA
+
+                    </button>
+
+                `
+            }
+
+        </div>
+
+
+        <!-- CONDIÇÃO -->
+        <div class="card">
+
+            <div class="title">
+                ❤️ CONDIÇÃO
+            </div>
+
+
+            <div class="statline">
+
+                <span>
+                    Saúde
+                </span>
+
+                <b>
+                    ${Math.round(player.health || 100)}%
+                </b>
+
+            </div>
+
+
+            <div class="statline">
+
+                <span>
+                    Fadiga
+                </span>
+
+                <b>
+                    ${Math.round(player.fatigue || 0)}%
+                </b>
+
+            </div>
+
+
+            <div class="statline">
+
+                <span>
+                    Dinheiro
+                </span>
+
+                <b>
+                    $${Math.round(player.money || 0)}
+                </b>
+
+            </div>
+
+        </div>
+
     `;
+
 }
 /* =========================================================
    NAVEGAÇÃO
