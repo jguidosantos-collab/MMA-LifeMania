@@ -35,9 +35,13 @@ function createDefaultPlayer() {
 
         fame: 0,
 
-        potential: 90,
+        potential: Math.floor(
+    Math.random() * 13
+) + 78,
 
-        overall: 45,
+overall: Math.floor(
+    Math.random() * 11
+) + 40,
 
 
         /* =========================
