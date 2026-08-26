@@ -1,6 +1,17 @@
+/* =========================================================
+   MMA LIFE DYNASTY
+   PLAYER.JS
+   SISTEMA BASE DO JOGADOR
+========================================================= */
+
 let player = null;
 
-function createPlayer() {
+
+/* =========================================================
+   CRIAR JOGADOR PADRÃO
+========================================================= */
+
+function createDefaultPlayer() {
 
     player = {
 
@@ -13,9 +24,9 @@ function createPlayer() {
         style: "Completo",
 
         age: 15,
-        
-careerStage: "amateur",
-        
+
+        careerStage: "amateur",
+
         week: 0,
 
         year: 2026,
@@ -24,20 +35,50 @@ careerStage: "amateur",
 
         fame: 0,
 
+        potential: 90,
+
+        overall: 45,
+
+
+        /* =========================
+           AMADOR
+        ========================= */
+
         amateur: {
+
             wins: 0,
+
             losses: 0,
+
             draws: 0,
+
             ranking: 50
+
         },
 
+
+        /* =========================
+           PROFISSIONAL
+        ========================= */
+
         professional: {
+
             active: false,
+
             wins: 0,
+
             losses: 0,
+
             draws: 0,
+
             ranking: null
+
         },
+
+
+        /* =========================
+           ATRIBUTOS
+        ========================= */
 
         attributes: {
 
@@ -57,6 +98,12 @@ careerStage: "amateur",
 
             fightIQ: 40,
 
+            chin: 45,
+
+            offense: 45,
+
+            blocking: 45,
+
             mental: 45,
 
             discipline: 50,
@@ -65,33 +112,79 @@ careerStage: "amateur",
 
         },
 
+
+        /* =========================
+           CONDIÇÃO
+        ========================= */
+
         health: 100,
 
         fatigue: 0,
 
+
+        /* =========================
+           EQUIPE
+        ========================= */
+
         team: null,
+
+        teamOffers: [],
+
+
+        /* =========================
+           EMPRESÁRIO
+        ========================= */
 
         manager: null,
 
+        managerOffers: [],
+
+
+        /* =========================
+           CARREIRA
+        ========================= */
+
         nextFight: null,
 
-currentPromotion: null,
+        currentPromotion: null,
 
-contracts: [],
+        contracts: [],
 
-opportunities: [],
+        opportunities: [],
 
-championship: {
 
-    title: null,
+        /* =========================
+           CAMPEONATO
+        ========================= */
 
-    defenses: 0,
+        championship: {
 
-    titleWins: 0,
+            title: null,
 
-    titleLosses: 0
+            defenses: 0,
 
-},
+            titleWins: 0,
+
+            titleLosses: 0
+
+        },
+
+
+        /* =========================
+           TREINAMENTO
+        ========================= */
+
+        trainingPlan: {
+
+            weeks: {}
+
+        },
+
+
+        /* =========================
+           VIDA
+        ========================= */
+
         relationship: "Solteiro",
 
         partner: null,
@@ -100,20 +193,41 @@ championship: {
 
         children: [],
 
-        teamOffers: [],
 
-        managerOffers: [],
+        /* =========================
+           HISTÓRICO
+        ========================= */
 
         log: [
+
             "🥊 Sua carreira começou aos 15 anos."
+
         ]
 
     };
 
-}
-function createDefaultPlayer() {
-
-    createPlayer();
 
     return player;
 }
+
+
+/* =========================================================
+   COMPATIBILIDADE
+========================================================= */
+
+function createPlayer() {
+
+    return createDefaultPlayer();
+
+}
+
+
+/* =========================================================
+   DISPONIBILIZAR GLOBALMENTE
+========================================================= */
+
+window.createDefaultPlayer =
+    createDefaultPlayer;
+
+window.createPlayer =
+    createPlayer;
