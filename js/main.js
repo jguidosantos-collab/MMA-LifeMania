@@ -369,7 +369,7 @@ function startGame() {
 
             <button
     class="start-button"
-    onclick="openCreation()">
+    onclick="openCharacterCreation()"
 
                 🆕 CRIAR NOVO LUTADOR
 
@@ -379,75 +379,7 @@ function startGame() {
 
     `;
 }
-function openCreation() {
 
-    showCreation();
-
-    const creator = getElement("creator");
-
-    if (!creator) {
-        console.error("Elemento #creator não encontrado.");
-        return;
-    }
-
-    creator.innerHTML = `
-        <div class="card">
-
-            <div class="title">
-                🥊 NOVO LUTADOR
-            </div>
-
-            <p>
-                Crie seu personagem e comece sua carreira.
-            </p>
-
-            <input
-                id="newPlayerName"
-                type="text"
-                placeholder="Nome do lutador"
-            >
-
-            <select id="newPlayerCountry">
-                <option value="Brasil">🇧🇷 Brasil</option>
-                <option value="Estados Unidos">🇺🇸 Estados Unidos</option>
-                <option value="Japão">🇯🇵 Japão</option>
-                <option value="México">🇲🇽 México</option>
-                <option value="Argentina">🇦🇷 Argentina</option>
-                <option value="Canadá">🇨🇦 Canadá</option>
-                <option value="Rússia">🇷🇺 Rússia</option>
-                <option value="Reino Unido">🇬🇧 Reino Unido</option>
-            </select>
-
-            <select id="newPlayerWeight">
-                <option value="Peso Leve">Peso Leve</option>
-                <option value="Peso Meio-Médio">Peso Meio-Médio</option>
-                <option value="Peso Médio">Peso Médio</option>
-                <option value="Peso Meio-Pesado">Peso Meio-Pesado</option>
-                <option value="Peso Pesado">Peso Pesado</option>
-            </select>
-
-            <select id="newPlayerStyle">
-                <option value="Completo">🥊 Completo</option>
-                <option value="Striker">👊 Striker</option>
-                <option value="Wrestler">🤼 Wrestler</option>
-                <option value="Grappler">🥋 Grappler</option>
-            </select>
-
-            <button
-                class="green"
-                onclick="createNewPlayer()">
-                🥊 CRIAR LUTADOR
-            </button>
-
-            <button
-                class="gray"
-                onclick="startGame()">
-                ← VOLTAR
-            </button>
-
-        </div>
-    `;
-}
 
 /* =========================================================
    CRIAÇÃO DO LUTADOR
@@ -1503,8 +1435,7 @@ window.createPlayerFromScreen =
  * O nome oficial é openCharacterCreation().
  */
 
-window.openCreation =
-    openCharacterCreation;
+
 
 
 /* =========================================================
