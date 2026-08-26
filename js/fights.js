@@ -1,15 +1,8 @@
 /* =========================================================
-   🥊 MMA LIFE DYNASTY
+   MMA LIFE DYNASTY
    FIGHT.JS
    SISTEMA COMPLETO DE LUTAS
-   AMADOR
-   PROFISSIONAL
-   EVENTOS
-   CARD COMPLETO
-   CAMP DE 4 SEMANAS
-   PROFISSIONALIZAÇÃO
-   EMPRESÁRIO
-   RECUPERAÇÃO
+   AMADOR + PROFISSIONAL + EVENTOS + CAMP
 ========================================================= */
 /* =========================================================
    UTILIDADES
@@ -20,8 +13,7 @@ function fightGetPlayer() {
         !window.player
     ) {
         if (
-            typeof window.createDefaultPlayer ===
-            "function"
+            typeof window.createDefaultPlayer === "function"
         ) {
             window.player =
                 window.createDefaultPlayer();
@@ -31,241 +23,153 @@ function fightGetPlayer() {
 }
 function fightSave() {
     if (
-        typeof window.saveGame ===
-        "function"
+        typeof window.saveGame === "function"
     ) {
         window.saveGame();
     }
-    else if (
-        typeof window.save ===
-        "function"
-    ) {
-        window.save();
-    }
-}
-function fightRandomInt(min, max) {
-    return Math.floor(
-        Math.random() *
-        (max - min + 1)
-    ) + min;
-}
-function fightClamp(value, min, max) {
-    return Math.max(
-        min,
-        Math.min(max, value)
-    );
 }
 /* =========================================================
    GARANTIR ESTRUTURAS
 ========================================================= */
-function ensureFightStructures() {
+function ensureFightData() {
     const player =
         fightGetPlayer();
     if (!player) {
-        return;
+        return null;
     }
     if (!player.amateur) {
         player.amateur = {
-            fights: 0,
             wins: 0,
             losses: 0,
-            draws: 0
+            draws: 0,
+            fights: 0
         };
     }
     if (!player.professional) {
         player.professional = {
             active: false,
-            fights: 0,
             wins: 0,
             losses: 0,
-            draws: 0
+            draws: 0,
+            fights: 0
         };
     }
     if (
-        typeof player.amateur.fights !==
-        "number"
+        typeof player.camp === "undefined"
     ) {
-        player.amateur.fights =
-            Number(
-                player.amateur.wins || 0
-            ) +
-            Number(
-                player.amateur.losses || 0
-            ) +
-            Number(
-                player.amateur.draws || 0
-            );
+        player.camp = null;
     }
     if (
-        typeof player.professional.fights !==
-        "number"
+        typeof player.nextFight === "undefined"
     ) {
-        player.professional.fights =
-            Number(
-                player.professional.wins || 0
-            ) +
-            Number(
-                player.professional.losses || 0
-            ) +
-            Number(
-                player.professional.draws || 0
-            );
+        player.nextFight = null;
     }
-    if (
-        typeof player.professional.active !==
-        "boolean"
-    ) {
-        player.professional.active =
-            false;
-    }
-    if (!player.log) {
-        player.log = [];
-    }
+    return player;
 }
 /* =========================================================
-   TIPO DE CARREIRA
+   STATUS PROFISSIONAL
 ========================================================= */
-function isProfessionalFighter() {
+function isProfessional() {
     const player =
-        fightGetPlayer();
-    ensureFightStructures();
+        ensureFightData();
+    if (!player) {
+        return false;
+    }
     return !!(
-        player &&
         player.professional &&
-        player.professional.active === true
+        player.professional.active
     );
-}
-function getFightCareerType() {
-    return isProfessionalFighter()
-        ?
-        "Profissional"
-        :
-        "Amador";
 }
 /* =========================================================
    REQUISITOS PARA PROFISSIONAL
 ========================================================= */
-function getAmateurFightCount() {
+function getProfessionalRequirements() {
     const player =
-        fightGetPlayer();
-    ensureFightStructures();
-    return Number(
-        player.amateur.fights || 0
-    );
-}
-function getPlayerAge() {
-    const player =
-        fightGetPlayer();
+        ensureFightData();
     if (!player) {
-        return 0;
+        return {
+            age: 0,
+            amateurFights: 0,
+            ageOk: false,
+            fightsOk: false,
+            eligible: false
+        };
     }
-    return Number(
-        player.age || 0
-    );
-}
-function canBecomeProfessional() {
-    return (
-        getPlayerAge() >= 18 &&
-        getAmateurFightCount() >= 3
-    );
-}
-function getProfessionalRequirementsMessage() {
     const age =
-        getPlayerAge();
-    const fights =
-        getAmateurFightCount();
-    let message = "";
-    if (age < 18) {
-        message +=
-            "🔞 Você precisa ter pelo menos 18 anos.\n";
-    }
-    if (fights < 3) {
-        message +=
-            "🥊 Você precisa realizar pelo menos 3 lutas amadoras.\n";
-    }
-    return message;
+        Number(player.age || 0);
+    const amateur =
+        player.amateur || {};
+    const amateurFights =
+        Number(
+            amateur.fights ||
+            (
+                Number(amateur.wins || 0) +
+                Number(amateur.losses || 0) +
+                Number(amateur.draws || 0)
+            )
+        );
+    return {
+        age: age,
+        amateurFights:
+            amateurFights,
+        ageOk:
+            age >= 18,
+        fightsOk:
+            amateurFights >= 3,
+        eligible:
+            age >= 18 &&
+            amateurFights >= 3
+    };
 }
 /* =========================================================
-   VIRAR PROFISSIONAL
+   PROMOVER PARA PROFISSIONAL
 ========================================================= */
-function becomeProfessional() {
+function checkProfessionalPromotion() {
     const player =
-        fightGetPlayer();
-    ensureFightStructures();
+        ensureFightData();
     if (!player) {
-        return;
+        return false;
     }
     if (
+        player.professional &&
         player.professional.active
     ) {
-        alert(
-            "Você já é um lutador profissional."
-        );
-        return;
+        return true;
     }
-    if (!canBecomeProfessional()) {
-        alert(
-            "❌ VOCÊ AINDA NÃO PODE VIRAR PROFISSIONAL\n\n" +
-            getProfessionalRequirementsMessage()
-        );
-        return;
-    }
-    const confirmed =
-        confirm(
-            "🏆 PROFISSIONALIZAÇÃO\n\n" +
-            "Você cumpriu todos os requisitos.\n\n" +
-            "Idade: " +
-            getPlayerAge() +
-            " anos\n" +
-            "Lutas amadoras: " +
-            getAmateurFightCount() +
-            "\n\n" +
-            "Deseja iniciar sua carreira profissional?"
-        );
-    if (!confirmed) {
-        return;
+    const requirements =
+        getProfessionalRequirements();
+    if (!requirements.eligible) {
+        return false;
     }
     player.professional.active =
         true;
-    player.professional.fights =
-        Number(
-            player.professional.fights || 0
-        );
-    player.professional.wins =
-        Number(
-            player.professional.wins || 0
-        );
-    player.professional.losses =
-        Number(
-            player.professional.losses || 0
-        );
-    player.professional.draws =
-        Number(
-            player.professional.draws || 0
-        );
+    if (
+        !player.careerStage ||
+        player.careerStage === "amateur"
+    ) {
+        player.careerStage =
+            "regional";
+    }
+    player.log =
+        player.log || [];
     player.log.unshift(
-        "🏆 Você se tornou oficialmente um lutador profissional."
+        "🥊 Você se tornou um lutador PROFISSIONAL!"
     );
     fightSave();
-    alert(
-        "🏆 VOCÊ AGORA É PROFISSIONAL!\n\n" +
-        "Sua carreira profissional começou."
-    );
-    fightScreen();
+    return true;
 }
 /* =========================================================
    GERAR ADVERSÁRIO
 ========================================================= */
-function generateFightOpponent() {
+function generateFightOpponent(
+    forcedOVR = null
+) {
     const player =
         fightGetPlayer();
     const playerOVR =
-        typeof window.getOverall ===
-        "function"
+        typeof window.getOverall === "function"
         ?
-        Number(
-            window.getOverall()
-        )
+        Number(window.getOverall())
         :
         50;
     const names = [
@@ -284,11 +188,11 @@ function generateFightOpponent() {
         "Marcos Carvalho",
         "Thiago Alves",
         "Eduardo Santos",
-        "Ricardo Souza",
-        "Fernando Lima",
-        "Paulo Costa",
-        "Daniel Martins",
-        "Gustavo Almeida"
+        "Caio Mendes",
+        "Renan Costa",
+        "Leonardo Alves",
+        "Vinicius Rocha",
+        "Gustavo Lima"
     ];
     const styles = [
         "Striker",
@@ -299,40 +203,33 @@ function generateFightOpponent() {
     const randomName =
         names[
             Math.floor(
-                Math.random() *
-                names.length
+                Math.random() * names.length
             )
         ];
     const randomStyle =
         styles[
             Math.floor(
-                Math.random() *
-                styles.length
+                Math.random() * styles.length
             )
         ];
     const variation =
-        fightRandomInt(-7, 7);
-    const power =
-        fightClamp(
-            playerOVR + variation,
-            35,
-            95
-        );
-    const professional =
-        isProfessionalFighter();
-    let wins;
-    let losses;
-    if (professional) {
-        wins =
-            fightRandomInt(0, 18);
-        losses =
-            fightRandomInt(0, 8);
+        Math.floor(
+            Math.random() * 15
+        ) - 7;
+    let power;
+    if (forcedOVR !== null) {
+        power =
+            Number(forcedOVR);
     }
     else {
-        wins =
-            fightRandomInt(0, 7);
-        losses =
-            fightRandomInt(0, 4);
+        power =
+            Math.max(
+                35,
+                Math.min(
+                    95,
+                    playerOVR + variation
+                )
+            );
     }
     return {
         displayName:
@@ -348,89 +245,15 @@ function generateFightOpponent() {
         country:
             "Brasil",
         wins:
-            wins,
+            Math.floor(
+                Math.random() * 10
+            ),
         losses:
-            losses,
+            Math.floor(
+                Math.random() * 6
+            ),
         draws:
             0
-    };
-}
-/* =========================================================
-   GERAR LUTADORES DO CARD
-========================================================= */
-function generateCardFighter(
-    baseOVR,
-    index
-) {
-    const names = [
-        "João Pereira",
-        "Rafael Costa",
-        "Lucas Almeida",
-        "Bruno Santos",
-        "Marcos Oliveira",
-        "Diego Silva",
-        "Felipe Mendes",
-        "Gabriel Rocha",
-        "André Martins",
-        "Thiago Souza",
-        "Pedro Lima",
-        "Carlos Ferreira"
-    ];
-    const name =
-        names[
-            (
-                index +
-                fightRandomInt(
-                    0,
-                    names.length - 1
-                )
-            ) %
-            names.length
-        ];
-    const opponentNames = [
-        "Mateus Costa",
-        "Victor Silva",
-        "Eduardo Lima",
-        "Fernando Santos",
-        "Ricardo Oliveira",
-        "Gustavo Rocha",
-        "Daniel Almeida",
-        "Paulo Martins",
-        "Bruno Ferreira",
-        "Alexandre Souza",
-        "Rodrigo Mendes",
-        "Caio Ribeiro"
-    ];
-    const opponent =
-        opponentNames[
-            (
-                index +
-                fightRandomInt(
-                    0,
-                    opponentNames.length - 1
-                )
-            ) %
-            opponentNames.length
-        ];
-    return {
-        fighter1:
-            name,
-        fighter2:
-            opponent,
-        ovr1:
-            fightClamp(
-                baseOVR +
-                fightRandomInt(-12, 12),
-                35,
-                95
-            ),
-        ovr2:
-            fightClamp(
-                baseOVR +
-                fightRandomInt(-12, 12),
-                35,
-                95
-            )
     };
 }
 /* =========================================================
@@ -438,23 +261,23 @@ function generateCardFighter(
 ========================================================= */
 function generateFightEvent() {
     const professional =
-        isProfessionalFighter();
+        isProfessional();
     const amateurEvents = [
-        "MMA AMATEUR NIGHT",
-        "BRAZIL AMATEUR FIGHT",
-        "RISING FIGHTERS",
-        "MMA CHALLENGE",
-        "AMATEUR COMBAT NIGHT",
-        "FUTURE CHAMPIONS"
+        "🥊 CIRCUITO AMADOR BRASIL",
+        "🥊 MMA AMATEUR NIGHT",
+        "🥊 RISING FIGHTERS",
+        "🥊 BRAZIL AMATEUR FC",
+        "🥊 NOVOS GUERREIROS",
+        "🥊 FUTURE CHAMPIONS"
     ];
     const professionalEvents = [
-        "MMA NIGHT",
-        "FIGHT NIGHT",
-        "WARRIOR FC",
-        "BRAZIL FIGHT",
-        "COMBAT NIGHT",
-        "CHAMPIONS FIGHT",
-        "MMA ELITE"
+        "🔥 MMA NIGHT",
+        "🔥 FIGHT NIGHT",
+        "🔥 WARRIOR FC",
+        "🔥 BRAZIL FIGHT",
+        "🔥 COMBAT NIGHT",
+        "🔥 CHAMPIONS FC",
+        "🔥 ELITE MMA"
     ];
     const events =
         professional
@@ -465,39 +288,9 @@ function generateFightEvent() {
     const eventName =
         events[
             Math.floor(
-                Math.random() *
-                events.length
+                Math.random() * events.length
             )
         ];
-    const player =
-        fightGetPlayer();
-    const playerOVR =
-        typeof window.getOverall ===
-        "function"
-        ?
-        Number(
-            window.getOverall()
-        )
-        :
-        50;
-    const card = [];
-    /*
-       5 lutas no card.
-       A luta do jogador será adicionada
-       separadamente em uma posição aleatória.
-    */
-    for (
-        let i = 0;
-        i < 4;
-        i++
-    ) {
-        card.push(
-            generateCardFighter(
-                playerOVR,
-                i
-            )
-        );
-    }
     return {
         name:
             eventName,
@@ -510,69 +303,164 @@ function generateFightEvent() {
         type:
             professional
             ?
-            "Profissional"
+            "professional"
             :
-            "Amador",
-        card:
-            card
+            "amateur"
     };
 }
 /* =========================================================
-   CRIAR EVENTO + LUTA
+   GERAR CARD COMPLETO DO EVENTO
 ========================================================= */
-function createScheduledFight() {
+function generateEventCard() {
     const player =
-        fightGetPlayer();
-    ensureFightStructures();
-    const opponent =
-        generateFightOpponent();
-    const event =
-        generateFightEvent();
-    const currentWeek =
-        Number(
-            player.week || 1
-        );
-    const currentYear =
-        Number(
-            player.year || 2026
-        );
-    let fightWeek =
-        currentWeek + 4;
-    let fightYear =
-        currentYear;
-    if (
-        fightWeek > 52
-    ) {
-        fightWeek -= 52;
-        fightYear++;
+        ensureFightData();
+    if (!player) {
+        return [];
     }
-    player.nextFight = {
-        event:
-            event,
-        opponent:
-            opponent,
+    const playerOVR =
+        typeof window.getOverall === "function"
+        ?
+        Number(window.getOverall())
+        :
+        50;
+    const card = [];
+    /*
+       Cria 5 lutas no evento.
+       A luta do jogador entra no card
+       em uma posição aleatória.
+    */
+    const playerFightPosition =
+        Math.floor(
+            Math.random() * 5
+        );
+    for (
+        let i = 0;
+        i < 5;
+        i++
+    ) {
+        if (
+            i === playerFightPosition
+        ) {
+            card.push({
+                playerFight:
+                    true,
+                fighterA:
+                    player.name || "Você",
+                fighterAOVR:
+                    playerOVR,
+                fighterACountry:
+                    player.country || "Brasil",
+                fighterB:
+                    "A definir",
+                fighterBOVR:
+                    0,
+                fighterBCountry:
+                    "Brasil"
+            });
+        }
+        else {
+            const opponentA =
+                generateFightOpponent(
+                    Math.max(
+                        40,
+                        playerOVR +
+                        Math.floor(
+                            Math.random() * 21
+                        ) - 10
+                    )
+                );
+            const opponentB =
+                generateFightOpponent(
+                    Math.max(
+                        40,
+                        playerOVR +
+                        Math.floor(
+                            Math.random() * 21
+                        ) - 10
+                    )
+                );
+            card.push({
+                playerFight:
+                    false,
+                fighterA:
+                    opponentA.displayName,
+                fighterAOVR:
+                    opponentA.power,
+                fighterACountry:
+                    opponentA.country,
+                fighterB:
+                    opponentB.displayName,
+                fighterBOVR:
+                    opponentB.power,
+                fighterBCountry:
+                    opponentB.country
+            });
+        }
+    }
+    return card;
+}
+/* =========================================================
+   DATA DA LUTA
+   SEMPRE 4 SEMANAS DE CAMP
+========================================================= */
+function getFightDate() {
+    const player =
+        ensureFightData();
+    if (!player) {
+        return null;
+    }
+    let week =
+        Number(player.week || 1);
+    let year =
+        Number(player.year || 2026);
+    week += 4;
+    if (week > 52) {
+        week -= 52;
+        year++;
+    }
+    return {
         week:
-            fightWeek,
+            week,
         year:
-            fightYear,
-        scheduledFromWeek:
-            currentWeek,
-        scheduledFromYear:
-            currentYear,
-        campWeeks:
-            4,
-        campCompleted:
-            0,
-        campBonus:
-            0,
-        careerType:
-            getFightCareerType(),
-        status:
-            "scheduled"
+            year
     };
-    player.log.unshift(
-        `📅 ${getFightCareerType()} — luta marcada contra ${opponent.displayName} para a semana ${fightWeek}/${fightYear}.`
-    );
+}
+/* =========================================================
+   CRIAR CAMP
+========================================================= */
+function createFightCamp() {
+    const player =
+        ensureFightData();
+    if (!player) {
+        return;
+    }
+    if (!player.nextFight) {
+        return;
+    }
+    player.camp = {
+        active:
+            true,
+        startWeek:
+            Number(
+                player.week || 1
+            ),
+        fightWeek:
+            Number(
+                player.nextFight.week
+            ),
+        startYear:
+            Number(
+                player.year || 2026
+            ),
+        fightYear:
+            Number(
+                player.nextFight.year
+            ),
+        weeksCompleted:
+            0,
+        focus:
+            "balanced"
+    };
     fightSave();
 }
 /* =========================================================
@@ -580,380 +468,85 @@ function createScheduledFight() {
 ========================================================= */
 function searchFight() {
     const player =
-        fightGetPlayer();
+        ensureFightData();
     if (!player) {
         return;
     }
-    ensureFightStructures();
     if (player.nextFight) {
         fightScreen();
         return;
     }
-    createScheduledFight();
+    const date =
+        getFightDate();
+    const opponent =
+        generateFightOpponent();
+    const event =
+        generateFightEvent();
+    const eventCard =
+        generateEventCard();
+    /*
+       Coloca o adversário real
+       na luta do jogador.
+    */
+    eventCard.forEach(
+        function(match) {
+            if (match.playerFight) {
+                match.fighterB =
+                    opponent.displayName;
+                match.fighterBOVR =
+                    opponent.power;
+                match.fighterBCountry =
+                    opponent.country;
+            }
+        }
+    );
+    player.nextFight = {
+        event:
+            event,
+        opponent:
+            opponent,
+        card:
+            eventCard,
+        week:
+            date.week,
+        year:
+            date.year,
+        weeksUntil:
+            4
+    };
+    createFightCamp();
+    player.log =
+        player.log || [];
+    player.log.unshift(
+        `📅 Luta marcada contra ${opponent.displayName}. Evento em 4 semanas.`
+    );
+    fightSave();
     fightScreen();
 }
 /* =========================================================
-   SEMANAS ATÉ A LUTA
-========================================================= */
-function getWeeksUntilFight() {
-    const player =
-        fightGetPlayer();
-    if (
-        !player ||
-        !player.nextFight
-    ) {
-        return 0;
-    }
-    const fight =
-        player.nextFight;
-    const currentYear =
-        Number(
-            player.year || 2026
-        );
-    const currentWeek =
-        Number(
-            player.week || 1
-        );
-    const fightYear =
-        Number(
-            fight.year || currentYear
-        );
-    const fightWeek =
-        Number(
-            fight.week || currentWeek
-        );
-    return Math.max(
-        0,
-        (
-            fightYear -
-            currentYear
-        ) * 52
-        +
-        (
-            fightWeek -
-            currentWeek
-        )
-    );
-}
-/* =========================================================
-   CAMP SEMANAL
-========================================================= */
-function performFightCamp() {
-    const player =
-        fightGetPlayer();
-    if (
-        !player ||
-        !player.nextFight
-    ) {
-        return;
-    }
-    const fight =
-        player.nextFight;
-    const weeks =
-        getWeeksUntilFight();
-    if (
-        weeks <= 0
-    ) {
-        return;
-    }
-    if (
-        fight.campCompleted >= 4
-    ) {
-        return;
-    }
-    let bonus = 1;
-    /*
-       Equipe melhora preparação.
-    */
-    if (player.team) {
-        bonus += 1;
-    }
-    /*
-       Treinador melhora preparação.
-    */
-    if (player.coach) {
-        bonus +=
-            Number(
-                player.coach.level || 0
-            ) / 100;
-    }
-    /*
-       Treinador particular aumenta ainda mais.
-    */
-    if (player.privateCoach) {
-        bonus +=
-            Number(
-                player.privateCoach.level || 0
-            ) / 120;
-    }
-    /*
-       Empresário pode ajudar
-       na preparação profissional.
-    */
-    if (
-        player.manager &&
-        isProfessionalFighter()
-    ) {
-        bonus +=
-            Number(
-                player.manager.negotiation || 0
-            ) / 500;
-    }
-    fight.campWeeks =
-        Number(
-            fight.campWeeks || 4
-        );
-    fight.campCompleted =
-        Math.min(
-            4,
-            Number(
-                fight.campCompleted || 0
-            ) + 1
-        );
-    fight.campBonus =
-        Number(
-            fight.campBonus || 0
-        ) +
-        bonus;
-    /*
-       Treino gera pequena fadiga.
-    */
-    player.fatigue =
-        fightClamp(
-            Number(
-                player.fatigue || 0
-            ) + 4,
-            0,
-            100
-        );
-    player.log.unshift(
-        `🏋️ Camp semana ${fight.campCompleted}/4 concluído para a luta contra ${fight.opponent.displayName}.`
-    );
-    fightSave();
-}
-/* =========================================================
-   PROCESSAR CAMP AUTOMATICAMENTE
-   CHAMADO PELO AVANÇO DA SEMANA
-========================================================= */
-function processFightCampWeek() {
-    const player =
-        fightGetPlayer();
-    if (
-        !player ||
-        !player.nextFight
-    ) {
-        return;
-    }
-    const fight =
-        player.nextFight;
-    const weeks =
-        getWeeksUntilFight();
-    /*
-       Enquanto faltarem semanas,
-       fazemos uma preparação semanal.
-    */
-    if (
-        weeks > 0 &&
-        fight.campCompleted < 4
-    ) {
-        performFightCamp();
-    }
-}
-/* =========================================================
-   CARD COMPLETO
-========================================================= */
-function renderEventCard(
-    fight
-) {
-    const event =
-        fight.event;
-    let html = "";
-    if (
-        event &&
-        Array.isArray(event.card)
-    ) {
-        event.card.forEach(
-            (cardFight, index) => {
-                html += `
-                    <div class="statline">
-                        <span>
-                            Luta ${index + 1}
-                        </span>
-                        <b>
-                            ${cardFight.fighter1}
-                            vs
-                            ${cardFight.fighter2}
-                        </b>
-                    </div>
-                `;
-            }
-        );
-    }
-    /*
-       A luta do jogador sempre fica
-       destacada no card.
-    */
-    html += `
-        <div
-            class="card"
-            style="
-                border:2px solid currentColor;
-                margin-top:12px;
-            "
-        >
-            <div class="title">
-                ⭐ SUA LUTA
-            </div>
-            <div class="statline">
-                <span>
-                    ${fight.careerType}
-                </span>
-                <b>
-                    ${fight.playerName ||
-                    "Você"}
-                    vs
-                    ${fight.opponent.displayName}
-                </b>
-            </div>
-            <div class="statline">
-                <span>
-                    OVR
-                </span>
-                <b>
-                    ${
-                        typeof window.getOverall ===
-                        "function"
-                        ?
-                        window.getOverall()
-                        :
-                        50
-                    }
-                    vs
-                    ${fight.opponent.power}
-                </b>
-            </div>
-        </div>
-    `;
-    return html;
-}
-/* =========================================================
-   TELA DE LUTA
+   TELA PRINCIPAL DA LUTA
 ========================================================= */
 function fightScreen() {
     const player =
-        fightGetPlayer();
+        ensureFightData();
     const content =
-        document.getElementById(
-            "content"
-        );
+        document.getElementById("content");
     if (!content) {
-        console.error(
-            "Elemento #content não encontrado."
-        );
         return;
     }
-    ensureFightStructures();
     if (!player) {
-        content.innerHTML = `
-            <div class="card">
-                <div class="title">
-                    ⚔️ LUTA
-                </div>
-                <p>
-                    Nenhum lutador carregado.
-                </p>
-            </div>
-        `;
         return;
     }
     /*
-       Se não existe luta.
+       Sem luta marcada.
     */
     if (!player.nextFight) {
-        let professionalHTML = "";
-        if (
-            !player.professional.active &&
-            canBecomeProfessional()
-        ) {
-            professionalHTML = `
-                <div class="card">
-                    <div class="title">
-                        🏆 CARREIRA PROFISSIONAL
-                    </div>
-                    <p>
-                        Você já cumpriu os requisitos
-                        para se tornar profissional.
-                    </p>
-                    <div class="statline">
-                        <span>
-                            Idade
-                        </span>
-                        <b>
-                            ${getPlayerAge()} anos
-                        </b>
-                    </div>
-                    <div class="statline">
-                        <span>
-                            Lutas amadoras
-                        </span>
-                        <b>
-                            ${getAmateurFightCount()}
-                        </b>
-                    </div>
-                    <button
-                        class="green"
-                        onclick="becomeProfessional()">
-                        🏆 VIRAR PROFISSIONAL
-                    </button>
-                </div>
-            `;
-        }
-        else if (
-            !player.professional.active
-        ) {
-            professionalHTML = `
-                <div class="card">
-                    <div class="title">
-                        🥊 CAMINHO PARA O PROFISSIONAL
-                    </div>
-                    <div class="statline">
-                        <span>
-                            Idade
-                        </span>
-                        <b>
-                            ${getPlayerAge()}
-                            / 18
-                        </b>
-                    </div>
-                    <div class="statline">
-                        <span>
-                            Lutas amadoras
-                        </span>
-                        <b>
-                            ${getAmateurFightCount()}
-                            / 3
-                        </b>
-                    </div>
-                    <p>
-                        Você precisa ter 18 anos
-                        e realizar pelo menos
-                        3 lutas amadoras.
-                    </p>
-                </div>
-            `;
-        }
+        const requirements =
+            getProfessionalRequirements();
         content.innerHTML = `
             <div class="card">
                 <div class="title">
-                    ⚔️ LUTA
-                </div>
-                <div class="statline">
-                    <span>
-                        Categoria
-                    </span>
-                    <b>
-                        ${getFightCareerType()}
-                    </b>
+                    ⚔️ LUTAS
                 </div>
                 <p>
                     Você ainda não possui
@@ -964,48 +557,53 @@ function fightScreen() {
                     onclick="searchFight()">
                     🔎 PROCURAR LUTA
                 </button>
+                ${
+                    !isProfessional()
+                    ?
+                    `
+                    <div style="
+                        margin-top:20px;
+                        padding:15px;
+                        border-radius:10px;
+                        background:rgba(255,255,255,0.05);
+                    ">
+                        <strong>
+                            🥋 CAMINHO PROFISSIONAL
+                        </strong>
+                        <p>
+                            Idade:
+                            ${requirements.age}/18
+                        </p>
+                        <p>
+                            Lutas amadoras:
+                            ${requirements.amateurFights}/3
+                        </p>
+                        ${
+                            requirements.eligible
+                            ?
+                            `
+                            <p>
+                                🟢 Você já pode se tornar profissional.
+                            </p>
+                            `
+                            :
+                            `
+                            <p>
+                                🔒 Complete os requisitos para virar profissional.
+                            </p>
+                            `
+                        }
+                    </div>
+                    `
+                    :
+                    ""
+                }
+                <button
+                    class="gray"
+                    onclick="tab('home')">
+                    ← VOLTAR
+                </button>
             </div>
-            ${professionalHTML}
-            <div class="card">
-                <div class="title">
-                    📊 SEU CARTEL
-                </div>
-                <div class="statline">
-                    <span>
-                        Amador
-                    </span>
-                    <b>
-                        ${player.amateur.wins}
-                        -
-                        ${player.amateur.losses}
-                        -
-                        ${player.amateur.draws}
-                    </b>
-                </div>
-                <div class="statline">
-                    <span>
-                        Profissional
-                    </span>
-                    <b>
-                        ${
-                            player.professional.wins
-                        }
-                        -
-                        ${
-                            player.professional.losses
-                        }
-                        -
-                        ${
-                            player.professional.draws
-                        }
-                    </b>
-                </div>
-            </div>
-            <button
-                class="gray"
-                onclick="tab('home')">
-                ← VOLTAR
-            </button>
         `;
         return;
     }
@@ -1016,69 +614,54 @@ function fightScreen() {
     const event =
         fight.event;
     const playerOVR =
-        typeof window.getOverall ===
-        "function"
+        typeof window.getOverall === "function"
         ?
-        window.getOverall()
+        Number(window.getOverall())
         :
         50;
-    const weeks =
-        getWeeksUntilFight();
-    const campCompleted =
-        Number(
-            fight.campCompleted || 0
+    const currentWeek =
+        Number(player.week || 1);
+    const weeksRemaining =
+        calculateWeeksRemaining(
+            player
         );
-    const campPercent =
-        Math.min(
-            100,
-            campCompleted * 25
-        );
-    /*
-       Salvar nome do jogador para o card.
-    */
-    fight.playerName =
-        player.name ||
-        "Você";
+    let campStatus =
+        "🔥 CAMP ATIVO";
+    if (weeksRemaining <= 0) {
+        campStatus =
+            "🥊 SEMANA DA LUTA";
+    }
     content.innerHTML = `
         <div class="card">
             <div class="title">
                 ${
-                    fight.careerType ===
-                    "Profissional"
+                    isProfessional()
                     ?
-                    "🏆"
+                    "🔥 EVENTO PROFISSIONAL"
                     :
-                    "🥊"
+                    "🥋 EVENTO AMADOR"
                 }
-                ${event.name}
             </div>
-            <div class="statline">
-                <span>
-                    Categoria
-                </span>
-                <b>
-                    ${fight.careerType}
-                </b>
+            <div style="
+                text-align:center;
+                font-size:25px;
+                font-weight:bold;
+                margin:15px 0;
+            ">
+                ${event.name}
             </div>
             <div class="statline">
                 <span>
                     Local
                 </span>
                 <b>
+                    ${event.venue},
                     ${event.city}
                 </b>
             </div>
             <div class="statline">
                 <span>
-                    Arena
-                </span>
-                <b>
-                    ${event.venue}
-                </b>
-            </div>
-            <div class="statline">
-                <span>
-                    Data
+                    Evento
                 </span>
                 <b>
                     Semana ${fight.week}
@@ -1087,16 +670,24 @@ function fightScreen() {
             </div>
             <div class="statline">
                 <span>
-                    Faltam
+                    Status
+                </span>
+                <b>
+                    ${campStatus}
+                </b>
+            </div>
+            <div class="statline">
+                <span>
+                    Camp
                 </span>
                 <b>
                     ${
-                        weeks > 0
+                        weeksRemaining > 0
                         ?
-                        weeks +
-                        " semanas"
+                        weeksRemaining +
+                        " semana(s)"
                         :
-                        "HOJE"
+                        "FINALIZADO"
                     }
                 </b>
             </div>
@@ -1105,7 +696,71 @@ function fightScreen() {
             <div class="title">
                 📋 CARD COMPLETO
             </div>
-            ${renderEventCard(fight)}
+            ${
+                (fight.card || [])
+                .map(
+                    function(match, index) {
+                        return `
+                            <div style="
+                                padding:15px;
+                                margin-bottom:10px;
+                                border-radius:10px;
+                                background:
+                                    ${
+                                        match.playerFight
+                                        ?
+                                        "rgba(255,215,0,0.12)"
+                                        :
+                                        "rgba(255,255,255,0.04)"
+                                    };
+                                border:
+                                    ${
+                                        match.playerFight
+                                        ?
+                                        "1px solid rgba(255,215,0,0.35)"
+                                        :
+                                        "1px solid rgba(255,255,255,0.08)"
+                                    };
+                            ">
+                                <div style="
+                                    font-size:12px;
+                                    opacity:0.7;
+                                    margin-bottom:6px;
+                                ">
+                                    LUTA ${index + 1}
+                                    ${
+                                        match.playerFight
+                                        ?
+                                        " • SUA LUTA"
+                                        :
+                                        ""
+                                    }
+                                </div>
+                                <strong>
+                                    ${match.fighterA}
+                                </strong>
+                                <span>
+                                    (${match.fighterAOVR})
+                                </span>
+                                <div style="
+                                    text-align:center;
+                                    margin:6px 0;
+                                    font-weight:bold;
+                                ">
+                                    VS
+                                </div>
+                                <strong>
+                                    ${match.fighterB}
+                                </strong>
+                                <span>
+                                    (${match.fighterBOVR})
+                                </span>
+                            </div>
+                        `;
+                    }
+                )
+                .join("")
+            }
         </div>
         <div class="card">
             <div class="title">
@@ -1127,12 +782,6 @@ function fightScreen() {
                         <strong>
                             ${playerOVR}
                         </strong>
-                    </p>
-                    <p>
-                        Cartel amador:
-                        ${player.amateur.wins}-
-                        ${player.amateur.losses}-
-                        ${player.amateur.draws}
                     </p>
                 </div>
             </div>
@@ -1164,73 +813,48 @@ function fightScreen() {
                         Estilo:
                         ${opponent.style}
                     </p>
-                    <p>
-                        Cartel:
-                        ${opponent.wins}-
-                        ${opponent.losses}-
-                        ${opponent.draws}
-                    </p>
                 </div>
             </div>
         </div>
         <div class="card">
             <div class="title">
-                🏋️ CAMP DE PREPARAÇÃO
-            </div>
-            <div class="statline">
-                <span>
-                    Preparação
-                </span>
-                <b>
-                    ${campCompleted}/4 semanas
-                </b>
-            </div>
-            <div style="
-                width:100%;
-                height:14px;
-                background:#ddd;
-                border-radius:8px;
-                overflow:hidden;
-                margin:12px 0;
-            ">
-                <div style="
-                    width:${campPercent}%;
-                    height:100%;
-                    background:currentColor;
-                "></div>
+                🏋️ CAMP
             </div>
             <p>
-                ${
-                    weeks > 0
-                    ?
-                    "O camp será realizado durante as quatro semanas que antecedem o evento."
-                    :
-                    "O evento chegou."
-                }
+                O evento só acontece quando
+                chegar a semana marcada.
             </p>
             ${
-                weeks > 0
+                weeksRemaining > 0
                 ?
                 `
-                    <div class="statline">
-                        <span>
-                            Bônus de camp
-                        </span>
-                        <b>
-                            +
-                            ${Number(
-                                fight.campBonus || 0
-                            ).toFixed(1)}
-                        </b>
-                    </div>
+                    <p>
+                        Continue avançando as semanas
+                        para realizar seu camp.
+                    </p>
+                    <button
+                        class="main-button"
+                        onclick="tab('train')">
+                        🏋️ IR PARA TREINAMENTO
+                    </button>
                 `
                 :
-                ""
+                `
+                    <p>
+                        🔥 O camp terminou.
+                        É hora de lutar!
+                    </p>
+                    <button
+                        class="main-button"
+                        onclick="simulateFight()">
+                        🥊 ENTRAR NA LUTA
+                    </button>
+                `
             }
         </div>
         <div class="card">
             <div class="title">
-                ❤️ SUA CONDIÇÃO
+                ❤️ CONDIÇÃO
             </div>
             <div class="statline">
                 <span>
@@ -1253,36 +877,6 @@ function fightScreen() {
                 </b>
             </div>
         </div>
-        <div class="card">
-            ${
-                weeks <= 0
-                ?
-                `
-                    <div class="title">
-                        🥊 DIA DA LUTA
-                    </div>
-                    <p>
-                        O evento chegou.
-                        Está na hora de entrar no cage.
-                    </p>
-                    <button
-                        class="main-button"
-                        onclick="simulateFight()">
-                        🥊 LUTAR
-                    </button>
-                `
-                :
-                `
-                    <div class="title">
-                        ⏳ CAMP EM ANDAMENTO
-                    </div>
-                    <p>
-                        Avance as semanas para
-                        continuar sua preparação.
-                    </p>
-                `
-            }
-        </div>
         <button
             class="gray"
             onclick="tab('home')">
@@ -1291,11 +885,70 @@ function fightScreen() {
     `;
 }
 /* =========================================================
+   CALCULAR SEMANAS RESTANTES
+========================================================= */
+function calculateWeeksRemaining(
+    player
+) {
+    if (!player.nextFight) {
+        return 0;
+    }
+    const currentYear =
+        Number(player.year || 2026);
+    const currentWeek =
+        Number(player.week || 1);
+    const fightYear =
+        Number(
+            player.nextFight.year
+        );
+    const fightWeek =
+        Number(
+            player.nextFight.week
+        );
+    const currentAbsolute =
+        currentYear * 52 +
+        currentWeek;
+    const fightAbsolute =
+        fightYear * 52 +
+        fightWeek;
+    return Math.max(
+        0,
+        fightAbsolute -
+        currentAbsolute
+    );
+}
+/* =========================================================
+   PROCESSAR CAMP
+========================================================= */
+function processFightCamp() {
+    const player =
+        ensureFightData();
+    if (
+        !player ||
+        !player.nextFight
+    ) {
+        return;
+    }
+    if (!player.camp) {
+        return;
+    }
+    const remaining =
+        calculateWeeksRemaining(
+            player
+        );
+    if (remaining > 0) {
+        player.camp.weeksCompleted =
+            Number(
+                player.camp.weeksCompleted || 0
+            ) + 1;
+    }
+}
+/* =========================================================
    SIMULAR LUTA
 ========================================================= */
 function simulateFight() {
     const player =
-        fightGetPlayer();
+        ensureFightData();
     if (
         !player ||
         !player.nextFight
@@ -1303,33 +956,26 @@ function simulateFight() {
         fightScreen();
         return;
     }
-    ensureFightStructures();
-    const fight =
-        player.nextFight;
-    const weeks =
-        getWeeksUntilFight();
-    /*
-       Não permite lutar antes da data.
-    */
-    if (weeks > 0) {
-        alert(
-            "⏳ A LUTA AINDA NÃO CHEGOU!\n\n" +
-            "Faltam " +
-            weeks +
-            " semanas.\n\n" +
-            "Continue seu camp."
+    const weeksRemaining =
+        calculateWeeksRemaining(
+            player
         );
+    /*
+       NÃO deixa lutar antes da data.
+    */
+    if (weeksRemaining > 0) {
+        alert(
+            `A luta ainda não chegou. Faltam ${weeksRemaining} semana(s) para o evento.`
+        );
+        fightScreen();
         return;
     }
     const opponent =
-        fight.opponent;
+        player.nextFight.opponent;
     const playerOVR =
-        typeof window.getOverall ===
-        "function"
+        typeof window.getOverall === "function"
         ?
-        Number(
-            window.getOverall()
-        )
+        Number(window.getOverall())
         :
         50;
     const opponentOVR =
@@ -1348,34 +994,6 @@ function simulateFight() {
         Number(
             player.confidence || 50
         );
-    const campBonus =
-        Number(
-            fight.campBonus || 0
-        );
-    const teamBonus =
-        player.team
-        ?
-        Number(
-            player.team.prestige || 0
-        ) / 100
-        :
-        0;
-    const coachBonus =
-        player.coach
-        ?
-        Number(
-            player.coach.level || 0
-        ) / 100
-        :
-        0;
-    const privateBonus =
-        player.privateCoach
-        ?
-        Number(
-            player.privateCoach.level || 0
-        ) / 100
-        :
-        0;
     const playerScore =
         playerOVR
         +
@@ -1389,66 +1007,39 @@ function simulateFight() {
             confidence - 50
         ) * 0.05
         +
-        campBonus
-        +
-        teamBonus
-        +
-        coachBonus
-        +
-        privateBonus
-        +
         (
-            Math.random() * 20 -
-            10
+            Math.random() * 20 - 10
         );
     const opponentScore =
         opponentOVR
         +
         (
-            Math.random() * 20 -
-            10
+            Math.random() * 20 - 10
         );
     const playerWins =
         playerScore >= opponentScore;
-    let record;
-    if (
-        fight.careerType ===
-        "Profissional"
-    ) {
-        record =
-            player.professional;
-    }
-    else {
-        record =
-            player.amateur;
-    }
+    const professional =
+        isProfessional();
+    const record =
+        professional
+        ?
+        player.professional
+        :
+        player.amateur;
     let resultText;
     if (playerWins) {
         record.wins =
-            Number(
-                record.wins || 0
-            ) + 1;
+            Number(record.wins || 0) + 1;
         resultText =
             "🏆 VITÓRIA!";
         player.fame =
-            Number(
-                player.fame || 0
-            ) + (
-                fight.careerType ===
-                "Profissional"
-                ?
-                5
-                :
-                3
-            );
+            Number(player.fame || 0) + 3;
         player.money =
-            Number(
-                player.money || 0
-            ) + (
-                fight.careerType ===
-                "Profissional"
+            Number(player.money || 0) +
+            (
+                professional
                 ?
-                750
+                1000
                 :
                 250
             );
@@ -1459,32 +1050,28 @@ function simulateFight() {
                     player.confidence || 50
                 ) + 8
             );
+        player.log =
+            player.log || [];
         player.log.unshift(
-            `🏆 Vitória sobre ${opponent.displayName} (${fight.careerType}).`
+            `🏆 Vitória sobre ${opponent.displayName}.`
         );
     }
     else {
         record.losses =
-            Number(
-                record.losses || 0
-            ) + 1;
+            Number(record.losses || 0) + 1;
         resultText =
             "❌ DERROTA";
         player.fame =
             Math.max(
                 0,
-                Number(
-                    player.fame || 0
-                ) - 1
+                Number(player.fame || 0) - 1
             );
         player.money =
-            Number(
-                player.money || 0
-            ) + (
-                fight.careerType ===
-                "Profissional"
+            Number(player.money || 0) +
+            (
+                professional
                 ?
-                300
+                500
                 :
                 100
             );
@@ -1495,63 +1082,57 @@ function simulateFight() {
                     player.confidence || 50
                 ) - 8
             );
+        player.log =
+            player.log || [];
         player.log.unshift(
-            `❌ Derrota para ${opponent.displayName} (${fight.careerType}).`
+            `❌ Derrota para ${opponent.displayName}.`
         );
     }
-    /*
-       Toda luta realizada conta como
-       uma luta.
-    */
     record.fights =
-        Number(
-            record.fights || 0
-        ) + 1;
+        Number(record.fights || 0) + 1;
     /*
-       Dano da luta.
+       Aumenta experiência de luta.
+    */
+    player.experience =
+        Number(
+            player.experience || 0
+        ) + 2;
+    /*
+       Dano e fadiga.
     */
     player.health =
         Math.max(
             40,
-            Number(
-                player.health || 100
-            ) - 15
+            Number(player.health || 100) - 15
         );
     player.fatigue =
         Math.min(
             100,
-            Number(
-                player.fatigue || 0
-            ) + 35
+            Number(player.fatigue || 0) + 35
         );
     /*
-       Guardar resultado.
-    */
-    player.lastFightResult = {
-        careerType:
-            fight.careerType,
-        event:
-            fight.event.name,
-        opponent:
-            opponent.displayName,
-        won:
-            playerWins,
-        week:
-            fight.week,
-        year:
-            fight.year
-    };
-    /*
-       A luta terminou.
+       Remove a luta.
     */
     player.nextFight =
         null;
+    player.camp =
+        null;
+    /*
+       Depois de uma luta amadora,
+       verifica promoção.
+    */
+    let promoted =
+        false;
+    if (!professional) {
+        promoted =
+            checkProfessionalPromotion();
+    }
     fightSave();
     showFightResult(
         resultText,
         opponent,
         playerWins,
-        fight.careerType
+        promoted
     );
 }
 /* =========================================================
@@ -1561,46 +1142,27 @@ function showFightResult(
     resultText,
     opponent,
     playerWins,
-    careerType
+    promoted
 ) {
     const player =
-        fightGetPlayer();
+        ensureFightData();
     const content =
-        document.getElementById(
-            "content"
-        );
+        document.getElementById("content");
     if (!content) {
         return;
     }
-    ensureFightStructures();
-    const record =
-        careerType ===
-        "Profissional"
-        ?
-        player.professional
-        :
-        player.amateur;
-    let professionalButton = "";
-    if (
-        !player.professional.active &&
-        canBecomeProfessional()
-    ) {
-        professionalButton = `
-            <button
-                class="green"
-                onclick="becomeProfessional()">
-                🏆 VIRAR PROFISSIONAL
-            </button>
-        `;
-    }
+    const professional =
+        player.professional || {};
+    const amateur =
+        player.amateur || {};
     content.innerHTML = `
         <div class="card">
             <div class="title">
-                🥊 RESULTADO
+                🥊 RESULTADO DO EVENTO
             </div>
             <div style="
                 text-align:center;
-                font-size:32px;
+                font-size:36px;
                 font-weight:bold;
                 margin:25px 0;
             ">
@@ -1608,8 +1170,9 @@ function showFightResult(
             </div>
             <p style="
                 text-align:center;
+                font-size:18px;
             ">
-                ${player.name || "Você"}
+                ${player.name}
                 <strong>
                     ${
                         playerWins
@@ -1621,49 +1184,66 @@ function showFightResult(
                 </strong>
                 ${opponent.displayName}
             </p>
-            <p style="
-                text-align:center;
-            ">
-                Categoria:
-                <strong>
-                    ${careerType}
-                </strong>
-            </p>
         </div>
+        ${
+            promoted
+            ?
+            `
+            <div class="card">
+                <div class="title">
+                    🎉 PROMOÇÃO
+                </div>
+                <p>
+                    Você completou os requisitos
+                    para se tornar um lutador profissional!
+                </p>
+                <div class="statline">
+                    <span>
+                        Idade
+                    </span>
+                    <b>
+                        ${player.age} anos
+                    </b>
+                </div>
+                <div class="statline">
+                    <span>
+                        Lutas amadoras
+                    </span>
+                    <b>
+                        ${amateur.fights}
+                    </b>
+                </div>
+                <p>
+                    A partir de agora suas próximas
+                    lutas contarão para o recorde profissional.
+                </p>
+            </div>
+            `
+            :
+            ""
+        }
         <div class="card">
             <div class="title">
-                📊 NOVO RECORDE
+                📊 RECORDES
             </div>
             <div class="statline">
                 <span>
-                    Vitórias
+                    Amador
                 </span>
                 <b>
-                    ${record.wins || 0}
+                    ${amateur.wins || 0}-
+                    ${amateur.losses || 0}-
+                    ${amateur.draws || 0}
                 </b>
             </div>
             <div class="statline">
                 <span>
-                    Derrotas
+                    Profissional
                 </span>
                 <b>
-                    ${record.losses || 0}
-                </b>
-            </div>
-            <div class="statline">
-                <span>
-                    Empates
-                </span>
-                <b>
-                    ${record.draws || 0}
-                </b>
-            </div>
-            <div class="statline">
-                <span>
-                    Total de lutas
-                </span>
-                <b>
-                    ${record.fights || 0}
+                    ${professional.wins || 0}-
+                    ${professional.losses || 0}-
+                    ${professional.draws || 0}
                 </b>
             </div>
             <div class="statline">
@@ -1687,57 +1267,6 @@ function showFightResult(
                 </b>
             </div>
         </div>
-        ${
-            careerType ===
-            "Amador"
-            ?
-            `
-                <div class="card">
-                    <div class="title">
-                        🥊 CAMINHO PROFISSIONAL
-                    </div>
-                    <div class="statline">
-                        <span>
-                            Idade
-                        </span>
-                        <b>
-                            ${getPlayerAge()}
-                            / 18
-                        </b>
-                    </div>
-                    <div class="statline">
-                        <span>
-                            Lutas amadoras
-                        </span>
-                        <b>
-                            ${player.amateur.fights}
-                            / 3
-                        </b>
-                    </div>
-                    ${
-                        canBecomeProfessional()
-                        ?
-                        `
-                            <p>
-                                🎉 Você já cumpriu
-                                todos os requisitos!
-                            </p>
-                            ${professionalButton}
-                        `
-                        :
-                        `
-                            <p>
-                                Continue sua carreira
-                                amadora até cumprir
-                                os requisitos.
-                            </p>
-                        `
-                    }
-                </div>
-            `
-            :
-            ""
-        }
         <div class="card">
             <button
                 class="main-button"
@@ -1747,7 +1276,7 @@ function showFightResult(
             <button
                 class="gray"
                 onclick="fightScreen()">
-                ⚔️ TELA DE LUTA
+                ⚔️ TELA DE LUTAS
             </button>
         </div>
     `;
@@ -1761,99 +1290,98 @@ function processFightRecovery() {
     if (!player) {
         return;
     }
-    ensureFightStructures();
     if (
-        Number(
-            player.fatigue || 0
-        ) > 0
+        Number(player.fatigue || 0) > 0
     ) {
         player.fatigue =
             Math.max(
                 0,
-                Number(
-                    player.fatigue || 0
-                ) - 8
+                Number(player.fatigue || 0) - 8
             );
     }
     if (
-        Number(
-            player.health || 100
-        ) < 100
+        Number(player.health || 100) < 100
     ) {
         player.health =
             Math.min(
                 100,
-                Number(
-                    player.health || 100
-                ) + 5
+                Number(player.health || 100) + 5
             );
     }
 }
 /* =========================================================
-   PROCESSAR SEMANA DA LUTA
-========================================================= */
-function processFightWeek() {
-    const player =
-        fightGetPlayer();
-    if (!player) {
-        return;
-    }
-    ensureFightStructures();
-    /*
-       Recuperação normal.
-    */
-    processFightRecovery();
-    /*
-       Camp.
-    */
-    processFightCampWeek();
-    fightSave();
-}
-/* =========================================================
-   EMPRESÁRIO PROCURA LUTA
+   EMPRESÁRIO
 ========================================================= */
 function processManagerFightOffer() {
     const player =
-        fightGetPlayer();
+        ensureFightData();
     if (!player) {
         return;
     }
-    ensureFightStructures();
     /*
-       Sem empresário, não há oferta
-       automática.
-    */
-    if (!player.manager) {
-        return;
-    }
-    /*
-       Se já tem luta marcada,
-       não procura outra.
+       Nunca cria automaticamente
+       uma luta enquanto outra existe.
     */
     if (player.nextFight) {
         return;
     }
-    const isProfessional =
-        isProfessionalFighter();
     /*
-       Profissional recebe ofertas
-       um pouco mais frequentemente.
+       Depois que o lutador vira profissional,
+       o empresário passa a procurar lutas
+       com menor frequência.
     */
     const chance =
-        isProfessional
+        isProfessional()
         ?
-        0.15
+        0.08
         :
-        0.10;
+        0.12;
     if (
-        Math.random() >
-        chance
+        Math.random() > chance
     ) {
         return;
     }
-    createScheduledFight();
+    /*
+       Não cria luta automática antes
+       dos 3 requisitos? Pode lutar normalmente.
+    */
+    const date =
+        getFightDate();
+    const opponent =
+        generateFightOpponent();
+    const event =
+        generateFightEvent();
+    const eventCard =
+        generateEventCard();
+    eventCard.forEach(
+        function(match) {
+            if (match.playerFight) {
+                match.fighterB =
+                    opponent.displayName;
+                match.fighterBOVR =
+                    opponent.power;
+            }
+        }
+    );
+    player.nextFight = {
+        event:
+            event,
+        opponent:
+            opponent,
+        card:
+            eventCard,
+        week:
+            date.week,
+        year:
+            date.year,
+        weeksUntil:
+            4
+    };
+    createFightCamp();
+    player.log =
+        player.log || [];
     player.log.unshift(
-        `📩 Seu empresário conseguiu uma nova luta ${getFightCareerType()} para você.`
+        `📩 O empresário marcou uma luta contra ${opponent.displayName} para daqui 4 semanas.`
     );
     fightSave();
 }
@@ -1868,35 +1396,19 @@ window.generateFightOpponent =
     generateFightOpponent;
 window.generateFightEvent =
     generateFightEvent;
+window.generateEventCard =
+    generateEventCard;
 window.simulateFight =
     simulateFight;
 window.processFightRecovery =
     processFightRecovery;
-window.processFightWeek =
-    processFightWeek;
-window.processFightCampWeek =
-    processFightCampWeek;
-window.performFightCamp =
-    performFightCamp;
 window.processManagerFightOffer =
     processManagerFightOffer;
-window.becomeProfessional =
-    becomeProfessional;
-window.canBecomeProfessional =
-    canBecomeProfessional;
-window.getAmateurFightCount =
-    getAmateurFightCount;
-window.getPlayerAge =
-    getPlayerAge;
-window.getFightCareerType =
-    getFightCareerType;
-/* =========================================================
-   INICIALIZAÇÃO
-========================================================= */
-if (
-    typeof window.player !==
-    "undefined" &&
-    window.player
-) {
-    ensureFightStructures();
-}
+window.processFightCamp =
+    processFightCamp;
+window.getProfessionalRequirements =
+    getProfessionalRequirements;
+window.checkProfessionalPromotion =
+    checkProfessionalPromotion;
+window.isProfessional =
+    isProfessional;
