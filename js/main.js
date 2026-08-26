@@ -942,245 +942,214 @@ function tab(name) {
 
     showGame();
 
-    console.log("Abrindo página:", name);
-
-    if (name === "home") {
-        home();
-        return;
-    }
-
-    if (name === "career") {
-
-    ensurePlayer();
-
-    const content = getContent();
+    const content = getElement("content");
 
     if (!content) {
         return;
     }
 
-    const player = window.player;
 
-    const amateur = player.amateur || {};
-    const professional = player.professional || {};
+    /* =========================
+       INÍCIO
+    ========================= */
 
-    content.innerHTML = `
+    if (name === "home") {
 
-        <div class="card">
+        home();
 
-            <div class="title">
-                🥊 MINHA CARREIRA
-            </div>
-
-            <p>
-                ${player.name || "Lutador"}
-            </p>
-
-        </div>
-
-        <div class="card">
-
-            <div class="title">
-                📊 RECORDES
-            </div>
-
-            <div class="statline">
-                <span>Amador</span>
-                <b>
-                    ${amateur.wins || 0}-
-                    ${amateur.losses || 0}-
-                    ${amateur.draws || 0}
-                </b>
-            </div>
-
-            <div class="statline">
-                <span>Profissional</span>
-                <b>
-                    ${professional.wins || 0}-
-                    ${professional.losses || 0}-
-                    ${professional.draws || 0}
-                </b>
-            </div>
-
-        </div>
-
-        <div class="card">
-
-            <div class="title">
-                📈 STATUS DA CARREIRA
-            </div>
-
-            <div class="statline">
-                <span>Categoria</span>
-                <b>
-                    ${
-                        professional.active
-                            ? "Profissional"
-                            : "Amador"
-                    }
-                </b>
-            </div>
-
-            <div class="statline">
-                <span>Idade</span>
-                <b>${player.age || 18} anos</b>
-            </div>
-
-            <div class="statline">
-                <span>Fama</span>
-                <b>${Math.round(player.fame || 0)}</b>
-            </div>
-
-            <div class="statline">
-                <span>Ranking Amador</span>
-                <b>#${amateur.ranking || 50}</b>
-            </div>
-
-        </div>
-
-        <div class="card">
-
-            <div class="title">
-                🏆 ORGANIZAÇÕES
-            </div>
-
-            <p>
-                Sua trajetória começa no circuito amador.
-                Vença lutas, evolua e conquiste oportunidades
-                para chegar às grandes organizações.
-            </p>
-
-        </div>
-
-    `;
-
-    return;
-}
-
-    if (name === "train") {
-        if (typeof window.training === "function") {
-            window.training();
-        } else {
-            console.error("training() não encontrada");
-        }
         return;
     }
+
+
+    /* =========================
+       CARREIRA
+    ========================= */
+
+    if (name === "career") {
+
+        career();
+
+        return;
+    }
+
+
+    /* =========================
+       TREINO
+    ========================= */
+
+    if (name === "train") {
+
+        if (typeof window.training === "function") {
+
+            window.training();
+
+        }
+
+        return;
+    }
+
+
+    /* =========================
+       LUTAS
+    ========================= */
 
     if (name === "fight") {
 
-    console.log("BOTÃO LUTAS CLICADO");
+        if (typeof window.fightScreen === "function") {
 
-    if (typeof window.fightScreen === "function") {
+            window.fightScreen();
 
-        window.fightScreen();
-
-    } else {
-
-        alert("Erro: fightScreen não foi carregada.");
-
-        console.error(
-            "fightScreen() não encontrada"
-        );
-
-    }
-
-    return;
-}
-
-    if (name === "team") {
-        if (typeof window.teamScreen === "function") {
-            window.teamScreen();
-        } else {
-            console.error("teamScreen() não encontrada");
         }
+
         return;
     }
+
+
+    /* =========================
+       EQUIPE
+    ========================= */
+
+    if (name === "team") {
+
+        if (typeof window.teamScreen === "function") {
+
+            window.teamScreen();
+
+        }
+
+        return;
+    }
+
+
+    /* =========================
+       VIDA
+    ========================= */
 
     if (name === "life") {
 
-    ensurePlayer();
+        ensurePlayer();
 
-    const content = getElement("content");
+        const p = window.player;
 
-    if (!content) return;
+        content.innerHTML = `
 
-    const p = window.player;
+            <div class="card">
 
-    const children = Array.isArray(p.children)
-        ? p.children
-        : [];
+                <div class="title">
+                    ❤️ VIDA
+                </div>
 
-    content.innerHTML = `
+                <p>
+                    Sua vida fora do octógono.
+                </p>
 
-        <div class="card">
-
-            <div class="title">
-                ❤️ VIDA
             </div>
 
-            <p>
-                Sua vida fora do octógono.
-            </p>
 
-        </div>
+            <div class="card">
 
-        <div class="card">
+                <div class="title">
+                    💕 RELACIONAMENTO
+                </div>
 
-            <div class="title">
-                💕 RELACIONAMENTO
+                <div class="statline">
+
+                    <span>
+                        Status
+                    </span>
+
+                    <b>
+                        ${p.relationship || "Solteiro"}
+                    </b>
+
+                </div>
+
+                <div class="statline">
+
+                    <span>
+                        Parceiro
+                    </span>
+
+                    <b>
+                        ${p.partner || "Nenhum"}
+                    </b>
+
+                </div>
+
+                <div class="statline">
+
+                    <span>
+                        Casado
+                    </span>
+
+                    <b>
+                        ${p.married ? "Sim" : "Não"}
+                    </b>
+
+                </div>
+
             </div>
 
-            <div class="statline">
-                <span>Status</span>
-                <b>${p.relationship || "Solteiro"}</b>
+
+            <div class="card">
+
+                <div class="title">
+                    👶 FAMÍLIA
+                </div>
+
+                <div class="statline">
+
+                    <span>
+                        Filhos
+                    </span>
+
+                    <b>
+                        ${
+                            Array.isArray(p.children)
+                                ? p.children.length
+                                : 0
+                        }
+                    </b>
+
+                </div>
+
             </div>
 
-            <div class="statline">
-                <span>Casado</span>
-                <b>${p.married ? "Sim" : "Não"}</b>
+
+            <div class="card">
+
+                <div class="title">
+                    🧬 LEGADO
+                </div>
+
+                <p>
+                    Construa sua família, tenha filhos
+                    e deixe seu legado para a próxima geração.
+                </p>
+
             </div>
 
-        </div>
+        `;
 
-        <div class="card">
-
-            <div class="title">
-                👶 FILHOS
-            </div>
-
-            <div class="statline">
-                <span>Total</span>
-                <b>${children.length}</b>
-            </div>
-
-        </div>
-
-        <div class="card">
-
-            <div class="title">
-                🧬 LEGADO
-            </div>
-
-            <p>
-                Construa sua família e deixe seu legado
-                através das próximas gerações.
-            </p>
-
-        </div>
-
-    `;
-
-    return;
-}
-
-    if (name === "ranking") {
-        if (typeof window.rankingScreen === "function") {
-            window.rankingScreen();
-        } else {
-            console.error("rankingScreen() não encontrada");
-        }
         return;
     }
+
+
+    /* =========================
+       RANKING
+    ========================= */
+
+    if (name === "ranking") {
+
+        if (typeof window.rankingScreen === "function") {
+
+            window.rankingScreen();
+
+        }
+
+        return;
+    }
+
 }
 
 /* =========================================================
