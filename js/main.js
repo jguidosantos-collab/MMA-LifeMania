@@ -501,7 +501,7 @@ alert("1 - createNewPlayer foi acionada");
 
     newPlayer.fatigue = 0;
 
-    newPlayer.overall = 60;
+   
 
 
     newPlayer.log = [
