@@ -197,20 +197,28 @@ function canOfferManager(manager) {
         player.fame || 0;
     const wins =
         player.professional
-        ? (
+        ?
+        (
             player.professional.wins || 0
         )
-        : 0;
-    if (manager.levelNumber === 1) {
+        :
+        0;
+    if (
+        manager.levelNumber === 1
+    ) {
         return true;
     }
-    if (manager.levelNumber === 2) {
+    if (
+        manager.levelNumber === 2
+    ) {
         return (
             fame >= 10 ||
             wins >= 3
         );
     }
-    if (manager.levelNumber === 3) {
+    if (
+        manager.levelNumber === 3
+    ) {
         return (
             fame >= 35 &&
             wins >= 7
@@ -219,7 +227,7 @@ function canOfferManager(manager) {
     return false;
 }
 /* =========================================================
-   GERAR OFERTAS DE EMPRESÁRIOS
+   GERAR OFERTAS
 ========================================================= */
 function generateManagerOffers() {
     player.managerOffers = [];
@@ -243,15 +251,9 @@ function generateManagerOffers() {
         );
 }
 /* =========================================================
-   CRIAR CONTRATO DO EMPRESÁRIO
+   CRIAR CONTRATO
 ========================================================= */
 function createManagerContract(manager) {
-    /*
-     * Contrato inicial padrão:
-     * 4 anos.
-     *
-     * 1 ano = 52 semanas.
-     */
     return {
         active: true,
         durationYears: 4,
@@ -274,23 +276,98 @@ function createManagerContract(manager) {
     };
 }
 /* =========================================================
-   GARANTIR CONTRATO DO EMPRESÁRIO
+   GARANTIR CONTRATO
 ========================================================= */
 function ensureManagerContract() {
-    if (!player.manager) {
-        return;
+    if (
+        !player.manager
+    ) {
+        return null;
     }
     /*
-     * Compatibilidade com carreiras
-     * criadas antes deste sistema.
+     * Novo sistema:
+     *
+     * player.managerContract
+     *
+     * É o contrato oficial.
      */
-    if (!player.managerContract) {
-        player.managerContract =
-            createManagerContract(
-                player.manager
-            );
-        save();
+    if (
+        !player.managerContract
+    ) {
+        /*
+         * Compatibilidade com versões antigas.
+         *
+         * Algumas carreiras podem ter o contrato
+         * salvo dentro de player.manager.contract.
+         */
+        if (
+            player.manager.contract
+        ) {
+            player.managerContract =
+                {
+                    ...player.manager.contract
+                };
+        }
+        else {
+            player.managerContract =
+                createManagerContract(
+                    player.manager
+                );
+        }
     }
+    /*
+     * Garante que os campos existam.
+     */
+    const contract =
+        player.managerContract;
+    if (
+        typeof contract.active !==
+        "boolean"
+    ) {
+        contract.active = true;
+    }
+    if (
+        typeof contract.durationYears !==
+        "number"
+    ) {
+        contract.durationYears = 4;
+    }
+    if (
+        typeof contract.remainingYears !==
+        "number"
+    ) {
+        contract.remainingYears =
+            4;
+    }
+    if (
+        typeof contract.remainingWeeks !==
+        "number"
+    ) {
+        contract.remainingWeeks =
+            contract.remainingYears *
+            52;
+    }
+    if (
+        typeof contract.commission !==
+        "number"
+    ) {
+        contract.commission =
+            Number(
+                player.manager.commission || 0
+            );
+    }
+    /*
+     * IMPORTANTE:
+     *
+     * O mesmo contrato também fica
+     * disponível em manager.contract.
+     *
+     * Isso mantém compatibilidade
+     * com o teams.js.
+     */
+    player.manager.contract =
+        contract;
+    return contract;
 }
 /* =========================================================
    CONTRATAR EMPRESÁRIO
@@ -320,15 +397,17 @@ function hireManager(index) {
             manager.internationalAccess
     };
     /*
-     * Cria contrato de 4 anos.
+     * Cria contrato inicial de 4 anos.
      */
     player.managerContract =
         createManagerContract(
             manager
         );
     /*
-     * Remove eventual aviso antigo.
+     * Mantém os dois caminhos sincronizados.
      */
+    player.manager.contract =
+        player.managerContract;
     player.managerContractExpired =
         false;
     player.log =
@@ -366,20 +445,31 @@ function hireManager(index) {
    PROCESSAR CONTRATO NA VIRADA DO ANO
 ========================================================= */
 function processManagerContractYear() {
-    if (!player.manager) {
+    if (
+        !player.manager
+    ) {
         return;
     }
-    ensureManagerContract();
     const contract =
-        player.managerContract;
-    if (!contract || !contract.active) {
+        ensureManagerContract();
+    if (
+        !contract
+    ) {
+        return;
+    }
+    if (
+        !contract.active
+    ) {
         return;
     }
     /*
-     * O contrato só diminui quando
-     * começa um novo ano.
+     * IMPORTANTE:
      *
-     * Não diminui semana a semana.
+     * Esta função é chamada SOMENTE
+     * quando começa um novo ano.
+     *
+     * Portanto o contrato NÃO diminui
+     * durante as semanas.
      */
     contract.remainingYears =
         Math.max(
@@ -396,8 +486,13 @@ function processManagerContractYear() {
             ) - 52
         );
     /*
-     * Contrato terminou.
+     * Mantém manager.contract sincronizado.
      */
+    player.manager.contract =
+        contract;
+    /* =====================================================
+       CONTRATO TERMINOU
+    ===================================================== */
     if (
         contract.remainingYears <= 0
     ) {
@@ -416,31 +511,59 @@ function processManagerContractYear() {
         save();
         return;
     }
+    /*
+     * Contrato continua ativo.
+     */
     save();
 }
 /* =========================================================
-   VERIFICAR CONTRATO NO INÍCIO
+   STATUS DO CONTRATO
 ========================================================= */
 function getManagerContractStatus() {
-    if (!player.manager) {
+    if (
+        !player.manager
+    ) {
         return null;
     }
-    ensureManagerContract();
-    return player.managerContract;
+    return ensureManagerContract();
+}
+/* =========================================================
+   VERIFICAR CONTRATO ATIVO
+========================================================= */
+function hasActiveManagerContract() {
+    if (
+        !player.manager
+    ) {
+        return false;
+    }
+    const contract =
+        ensureManagerContract();
+    if (
+        !contract
+    ) {
+        return false;
+    }
+    return (
+        contract.active === true &&
+        Number(
+            contract.remainingYears || 0
+        ) > 0
+    );
 }
 /* =========================================================
    RENOVAR CONTRATO
 ========================================================= */
 function renewManagerContract() {
-    if (!player.manager) {
+    if (
+        !player.manager
+    ) {
         return;
     }
-    ensureManagerContract();
     const oldContract =
-        player.managerContract;
+        ensureManagerContract();
     /*
-     * Só permite renovação depois
-     * do término do contrato.
+     * Só permite renovar depois
+     * que o contrato acabou.
      */
     if (
         oldContract &&
@@ -454,11 +577,9 @@ function renewManagerContract() {
     const manager =
         player.manager;
     /*
-     * Por enquanto a renovação mantém
-     * a comissão atual.
+     * Novo contrato:
      *
-     * O sistema de negociação da porcentagem
-     * será usado nesta etapa posteriormente.
+     * 4 anos novamente.
      */
     player.managerContract = {
         active: true,
@@ -480,6 +601,11 @@ function renewManagerContract() {
                 player.week || 1
             )
     };
+    /*
+     * Sincroniza com manager.contract.
+     */
+    player.manager.contract =
+        player.managerContract;
     player.managerContractExpired =
         false;
     player.log =
@@ -509,7 +635,9 @@ function renewManagerContract() {
    NÃO RENOVAR
 ========================================================= */
 function declineManagerRenewal() {
-    if (!player.manager) {
+    if (
+        !player.manager
+    ) {
         return;
     }
     const managerName =
@@ -538,7 +666,9 @@ function declineManagerRenewal() {
    BÔNUS DE NEGOCIAÇÃO
 ========================================================= */
 function getManagerNegotiationBonus() {
-    if (!player.manager) {
+    if (
+        !player.manager
+    ) {
         return 0;
     }
     const negotiation =
@@ -552,7 +682,9 @@ function getManagerNegotiationBonus() {
    ACESSO INTERNACIONAL
 ========================================================= */
 function getManagerInternationalAccess() {
-    if (!player.manager) {
+    if (
+        !player.manager
+    ) {
         return 0;
     }
     return (
@@ -565,7 +697,9 @@ function getManagerInternationalAccess() {
    NÍVEL DO EMPRESÁRIO
 ========================================================= */
 function getManagerLevel() {
-    if (!player.manager) {
+    if (
+        !player.manager
+    ) {
         return 0;
     }
     return (
@@ -594,6 +728,8 @@ window.processManagerContractYear =
     processManagerContractYear;
 window.getManagerContractStatus =
     getManagerContractStatus;
+window.hasActiveManagerContract =
+    hasActiveManagerContract;
 window.renewManagerContract =
     renewManagerContract;
 window.declineManagerRenewal =
