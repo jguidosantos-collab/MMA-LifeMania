@@ -2328,9 +2328,9 @@ function initCreation() {
    INICIALIZAÇÃO
 ========================= */
 
-initCreation();
-
 load();
+
+startGame();
 function rankingScreen() {
 
     initializeMMWorld();
