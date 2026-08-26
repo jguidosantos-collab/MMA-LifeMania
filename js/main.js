@@ -1579,6 +1579,240 @@ function rest() {
     nextWeek();
 
 }
+/* =========================================================
+   CALENDÁRIO E SEMANAS
+========================================================= */
+
+function initializeCalendar() {
+
+    if (typeof player.week !== "number") {
+        player.week = 1;
+    }
+
+    if (typeof player.year !== "number") {
+        player.year = 1;
+    }
+
+    if (!player.calendar) {
+        player.calendar = {};
+    }
+
+    if (!player.trainingPlan) {
+
+        player.trainingPlan = {
+            weeks: {},
+            automatic: true
+        };
+
+    }
+}
+
+
+/* =========================================================
+   AVANÇAR SEMANA
+========================================================= */
+
+function nextWeek() {
+
+    initializeCalendar();
+
+    const week =
+        player.week;
+
+    const plan =
+        player.trainingPlan.weeks[week] || [];
+
+    /* Aplicar evolução dos treinos */
+
+    if (player.attributes) {
+
+        plan.forEach(treino => {
+
+            const attribute =
+                treino.attribute;
+
+            if (
+                typeof player.attributes[attribute]
+                !== "number"
+            ) {
+                return;
+            }
+
+            const potential =
+                player.potential || 90;
+
+            const current =
+                player.attributes[attribute];
+
+            if (current < potential) {
+
+                const gain =
+                    Math.min(
+                        treino.gain || 0.5,
+                        potential - current
+                    );
+
+                player.attributes[attribute] +=
+                    gain;
+
+            }
+
+        });
+
+    }
+
+    /* Recuperação */
+
+    player.fatigue =
+        Math.max(
+            0,
+            (player.fatigue || 0) - 10
+        );
+
+    player.health =
+        Math.min(
+            100,
+            (player.health || 100) + 3
+        );
+
+    /* Próxima semana */
+
+    player.week++;
+
+    if (player.week > 52) {
+
+        player.week = 1;
+
+        player.year++;
+
+        player.log =
+            player.log || [];
+
+        player.log.unshift(
+            "🎆 Começou o Ano " +
+            player.year +
+            "."
+        );
+
+    }
+
+    save();
+
+    home();
+}
+
+
+/* =========================================================
+   DESCANSAR = PRÓXIMA SEMANA
+========================================================= */
+
+function rest() {
+
+    nextWeek();
+
+}
+
+
+/* =========================================================
+   OVERALL
+========================================================= */
+
+function getOverall() {
+
+    const a =
+        player.attributes || {};
+
+    const values = [
+
+        a.strength || 50,
+        a.striking || 50,
+        a.wrestling || 50,
+        a.grappling || 50,
+        a.cardio || 50,
+        a.technique || 50,
+        a.defense || 50,
+        a.fightIQ || 50
+
+    ];
+
+    const total =
+        values.reduce(
+            (sum, value) =>
+                sum + value,
+            0
+        );
+
+    return Math.round(
+        total / values.length
+    );
+
+}
+
+
+/* =========================================================
+   GERAR CAMP AUTOMÁTICO
+========================================================= */
+
+function generateTrainingPlan() {
+
+    initializeCalendar();
+
+    const options = [
+
+        ["strength", "💪 Força"],
+        ["striking", "🥊 Striking"],
+        ["wrestling", "🤼 Wrestling"],
+        ["grappling", "🥋 Grappling"],
+        ["cardio", "🏃 Cardio"],
+        ["technique", "🎯 Técnica"],
+        ["defense", "🛡️ Defesa"],
+        ["fightIQ", "🧠 Fight IQ"]
+
+    ];
+
+    const selected = [];
+
+    for (let i = 0; i < 3; i++) {
+
+        const option =
+            options[
+                Math.floor(
+                    Math.random() *
+                    options.length
+                )
+            ];
+
+        selected.push({
+
+            attribute:
+                option[0],
+
+            name:
+                option[1],
+
+            gain:
+                Number(
+                    (
+                        0.40 +
+                        Math.random() * 0.70
+                    ).toFixed(2)
+                )
+
+        });
+
+    }
+
+    player.trainingPlan.weeks[player.week] =
+        selected;
+
+    player.trainingPlan.automatic =
+        true;
+
+    save();
+
+    training();
+
+}
 function training() {
 
     const content = document.getElementById("content");
