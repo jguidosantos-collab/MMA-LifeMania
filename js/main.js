@@ -1253,27 +1253,21 @@ function rest() {
 
 function resetGame() {
 
-    const confirmed =
-        confirm(
-            "Apagar esta carreira e criar um novo lutador?"
-        );
-
+    const confirmed = confirm(
+        "Apagar esta carreira e criar um novo lutador?"
+    );
 
     if (!confirmed) {
         return;
     }
 
+    localStorage.removeItem("mmaLifePlayer");
 
-    localStorage.removeItem(
-        "mmaLifePlayer"
-    );
+    window.player = createDefaultPlayer();
 
+    showCreation();
 
-    window.player =
-        createDefaultPlayer();
-
-
-    startGame();
+    openCharacterCreation();
 }
 
 
