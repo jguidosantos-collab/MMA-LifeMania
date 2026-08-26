@@ -1,9 +1,7 @@
-EVENTS.JS — MUNDO MMA + RANKINGS + CAMPEÕES
-
 /* =========================================================
    MMA LIFE DYNASTY
    EVENTS.JS
-   EVENTOS + CINTURÕES + MUNDO MMA + RANKINGS
+   PROJETO — EVENTOS + CINTURÕES + MUNDO MMA
 ========================================================= */
 /* =========================================================
    EVENTOS
@@ -361,18 +359,13 @@ function getEventChampionship(event, weightClass) {
     if (!event || !event.championship) {
         return null;
     }
-    return {
-        organization: event.name,
-        organizationId: event.id,
-        weightClass: weightClass,
-        champion: null,
-        interimChampion: null,
-        defenses: 0,
-        titleFights: 0
-    };
+    return createChampionship(
+        event,
+        weightClass
+    );
 }
 /* =========================================================
-   ESTÁGIO
+   ESTÁGIO DA CARREIRA
 ========================================================= */
 function getCareerStage() {
     if (
@@ -411,7 +404,7 @@ function generateRegionalEvent() {
     ];
 }
 function generateNationalEvent() {
-    const national =
+    const nationalEvents =
         events.filter(
             event =>
                 event.careerStage === "national" &&
@@ -422,23 +415,25 @@ function generateNationalEvent() {
         player.manager &&
         Math.random() < 0.08
     ) {
-        const foreign =
+        const foreignEvents =
             events.filter(
                 event =>
                     event.careerStage === "national" &&
                     event.foreign
             );
-        if (foreign.length > 0) {
-            return foreign[
+        if (foreignEvents.length > 0) {
+            return foreignEvents[
                 Math.floor(
-                    Math.random() * foreign.length
+                    Math.random() *
+                    foreignEvents.length
                 )
             ];
         }
     }
-    return national[
+    return nationalEvents[
         Math.floor(
-            Math.random() * national.length
+            Math.random() *
+            nationalEvents.length
         )
     ];
 }
@@ -486,7 +481,8 @@ function generatePFLTournament() {
         tournamentName: "PFL World Tournament",
         tournamentPrize: 1000000,
         tournamentRound: 1,
-        titleFight: false
+        titleFight: false,
+        rounds: 3
     };
 }
 /* =========================================================
@@ -549,12 +545,17 @@ function prepareEventForPlayer(event) {
         prepared.titleDefense = true;
     }
     /*
-     * Luta de cinturão sempre terá 5 rounds.
+     * TODA LUTA DE CINTURÃO = 5 ROUNDS
      */
-    if (prepared.titleFight) {
+    if (
+        prepared.titleFight ||
+        prepared.titleDefense
+    ) {
         prepared.rounds = 5;
     }
-    else {
+    else if (
+        typeof prepared.rounds !== "number"
+    ) {
         prepared.rounds = 3;
     }
     return prepared;
@@ -563,16 +564,24 @@ function prepareEventForPlayer(event) {
    UTILIDADES
 ========================================================= */
 function getEventPrestige(event) {
-    return event ? event.prestige || 0 : 0;
+    return event
+        ? event.prestige || 0
+        : 0;
 }
 function getEventPurse(event) {
-    return event ? event.purse || 0 : 0;
+    return event
+        ? event.purse || 0
+        : 0;
 }
 function getEventWinBonus(event) {
     if (!event) {
         return 0;
     }
-    return event.winBonus || event.purse || 0;
+    return (
+        event.winBonus ||
+        event.purse ||
+        0
+    );
 }
 /* =========================================================
    🌎 MUNDO MMA
@@ -584,7 +593,6 @@ const mmaWorld = {
     eventsThisWeek: [],
     news: [],
     championships: [],
-    rankings: {},
     ufcP4P: []
 };
 /* =========================================================
@@ -654,7 +662,7 @@ const worldWeights = [
     "Peso Pesado"
 ];
 /* =========================================================
-   ORGANIZAÇÕES DO MUNDO
+   ORGANIZAÇÕES
 ========================================================= */
 const worldOrganizations = [
     {
@@ -663,7 +671,8 @@ const worldOrganizations = [
         stage: "regional",
         country: "Brasil",
         level: 1,
-        prestige: 20
+        prestige: 20,
+        minWeeksBetweenFights: 4
     },
     {
         id: "world_shooto_brasil",
@@ -671,7 +680,8 @@ const worldOrganizations = [
         stage: "regional",
         country: "Brasil",
         level: 1,
-        prestige: 25
+        prestige: 25,
+        minWeeksBetweenFights: 4
     },
     {
         id: "world_jungle_fight",
@@ -679,7 +689,8 @@ const worldOrganizations = [
         stage: "national",
         country: "Brasil",
         level: 2,
-        prestige: 45
+        prestige: 45,
+        minWeeksBetweenFights: 6
     },
     {
         id: "world_lfa",
@@ -687,7 +698,8 @@ const worldOrganizations = [
         stage: "national",
         country: "Estados Unidos",
         level: 2,
-        prestige: 50
+        prestige: 50,
+        minWeeksBetweenFights: 6
     },
     {
         id: "world_pfl",
@@ -695,7 +707,8 @@ const worldOrganizations = [
         stage: "international",
         country: "Estados Unidos",
         level: 4,
-        prestige: 80
+        prestige: 80,
+        minWeeksBetweenFights: 8
     },
     {
         id: "world_one",
@@ -703,7 +716,8 @@ const worldOrganizations = [
         stage: "international",
         country: "Singapura",
         level: 4,
-        prestige: 82
+        prestige: 82,
+        minWeeksBetweenFights: 8
     },
     {
         id: "world_bellator",
@@ -711,7 +725,8 @@ const worldOrganizations = [
         stage: "international",
         country: "Estados Unidos",
         level: 4,
-        prestige: 78
+        prestige: 78,
+        minWeeksBetweenFights: 8
     },
     {
         id: "world_rizin",
@@ -719,7 +734,8 @@ const worldOrganizations = [
         stage: "international",
         country: "Japão",
         level: 4,
-        prestige: 75
+        prestige: 75,
+        minWeeksBetweenFights: 8
     },
     {
         id: "world_ksw",
@@ -727,7 +743,8 @@ const worldOrganizations = [
         stage: "international",
         country: "Polônia",
         level: 4,
-        prestige: 70
+        prestige: 70,
+        minWeeksBetweenFights: 8
     },
     {
         id: "world_uae",
@@ -735,7 +752,8 @@ const worldOrganizations = [
         stage: "international",
         country: "Emirados Árabes",
         level: 4,
-        prestige: 67
+        prestige: 67,
+        minWeeksBetweenFights: 8
     },
     {
         id: "world_ufc",
@@ -743,11 +761,12 @@ const worldOrganizations = [
         stage: "elite",
         country: "Estados Unidos",
         level: 6,
-        prestige: 100
+        prestige: 100,
+        minWeeksBetweenFights: 10
     }
 ];
 /* =========================================================
-   NOME ALEATÓRIO
+   NOME
 ========================================================= */
 function worldRandomName() {
     const first =
@@ -794,10 +813,8 @@ function createWorldFighter(
                 )
             ],
         weight: weight,
-        organization:
-            organization.name,
-        organizationId:
-            organization.id,
+        organization: organization.name,
+        organizationId: organization.id,
         organizationLevel:
             organization.level,
         careerStage:
@@ -822,19 +839,11 @@ function createWorldFighter(
             Math.random() * 30,
         active: true,
         injuredWeeks: 0,
-        /*
-         * Evita que o mesmo lutador lute
-         * toda semana.
-         */
-        weeksSinceFight:
+        weeksSinceLastFight:
+            8 +
             Math.floor(
-                Math.random() * 20
+                Math.random() * 12
             ),
-        weeksUntilNextFight: 0,
-        lastFightWeek: null,
-        titleWins: 0,
-        titleLosses: 0,
-        defenses: 0,
         age:
             20 +
             Math.floor(
@@ -851,7 +860,6 @@ function initializeMMWorld() {
     }
     mmaWorld.fighters = [];
     mmaWorld.championships = [];
-    mmaWorld.rankings = {};
     mmaWorld.ufcP4P = [];
     let fighterIndex = 0;
     worldOrganizations.forEach(
@@ -876,21 +884,30 @@ function initializeMMWorld() {
                         defenses: 0,
                         titleFights: 0
                     });
-                    let amount = 10;
+                    let amount = 0;
                     if (
-                        organization.stage === "national"
+                        organization.stage ===
+                        "regional"
+                    ) {
+                        amount = 10;
+                    }
+                    if (
+                        organization.stage ===
+                        "national"
                     ) {
                         amount = 15;
                     }
                     if (
-                        organization.stage === "international"
+                        organization.stage ===
+                        "international"
                     ) {
                         amount = 20;
                     }
                     if (
-                        organization.stage === "elite"
+                        organization.stage ===
+                        "elite"
                     ) {
-                        amount = 20;
+                        amount = 25;
                     }
                     for (
                         let i = 0;
@@ -912,11 +929,10 @@ function initializeMMWorld() {
     updateWorldRankings();
     updateWorldChampions();
     updateUFCPoundForPound();
-    mmaWorld.initialized =
-        true;
+    mmaWorld.initialized = true;
 }
 /* =========================================================
-   LUTADORES DE ORGANIZAÇÃO
+   LUTADORES DA ORGANIZAÇÃO
 ========================================================= */
 function getWorldFighters(
     organization,
@@ -925,50 +941,57 @@ function getWorldFighters(
     return mmaWorld.fighters.filter(
         fighter =>
             fighter.active &&
-            fighter.organization === organization &&
-            fighter.weight === weight
+            fighter.organization ===
+            organization &&
+            fighter.weight ===
+            weight
     );
 }
 /* =========================================================
-   RANKING TOP 15
+   RANKING
 ========================================================= */
-function calculateWorldRankingScore(
-    fighter
+function getWorldRanking(
+    organization,
+    weight
 ) {
-    return (
-        fighter.wins * 4 +
-        fighter.fame +
-        fighter.power +
-        fighter.titleWins * 8 +
-        fighter.defenses * 5 -
-        fighter.losses * 2
-    );
+    return mmaWorld.fighters
+        .filter(
+            fighter =>
+                fighter.active &&
+                fighter.organization ===
+                organization &&
+                fighter.weight ===
+                weight
+        )
+        .sort(
+            (a, b) => {
+                const scoreA =
+                    (a.wins * 4) +
+                    a.fame +
+                    a.power;
+                const scoreB =
+                    (b.wins * 4) +
+                    b.fame +
+                    b.power;
+                return scoreB - scoreA;
+            }
+        )
+        .slice(0, 15);
 }
+/* =========================================================
+   ATUALIZAR RANKINGS
+========================================================= */
 function updateWorldRankings() {
-    mmaWorld.rankings = {};
     worldOrganizations.forEach(
         organization => {
-            mmaWorld.rankings[
-                organization.id
-            ] = {};
             worldWeights.forEach(
                 weight => {
                     const fighters =
-                        getWorldFighters(
+                        getWorldRanking(
                             organization.name,
                             weight
                         );
-                    fighters.sort(
-                        (a, b) =>
-                            calculateWorldRankingScore(b) -
-                            calculateWorldRankingScore(a)
-                    );
-                    const top15 =
-                        fighters.slice(
-                            0,
-                            15
-                        );
-                    top15.forEach(
+                    fighters.forEach(
                         (
                             fighter,
                             index
@@ -977,18 +1000,6 @@ function updateWorldRankings() {
                                 index + 1;
                         }
                     );
-                    fighters
-                        .slice(15)
-                        .forEach(
-                            fighter => {
-                                fighter.ranking =
-                                    null;
-                            }
-                        );
-                    mmaWorld.rankings[
-                        organization.id
-                    ][weight] =
-                        top15;
                 }
             );
         }
@@ -1005,117 +1016,77 @@ function updateWorldChampions() {
                     championship.organization,
                     championship.weightClass
                 );
-            const previousChampionId =
-                championship.champion;
             const champion =
                 ranking[0] || null;
             mmaWorld.fighters.forEach(
                 fighter => {
                     if (
                         fighter.organization ===
-                            championship.organization &&
+                        championship.organization &&
                         fighter.weight ===
-                            championship.weightClass
+                        championship.weightClass
                     ) {
-                        fighter.champion =
-                            false;
-                        fighter.interimChampion =
-                            false;
+                        fighter.champion = false;
+                        fighter.interimChampion = false;
                     }
                 }
             );
             if (champion) {
-                champion.champion =
-                    true;
+                champion.champion = true;
                 championship.champion =
                     champion.id;
-                if (
-                    previousChampionId &&
-                    previousChampionId ===
-                    champion.id
-                ) {
-                    /*
-                     * O campeão permaneceu
-                     * no topo.
-                     */
-                }
             }
         }
     );
 }
 /* =========================================================
-   RANKING DE UMA ORGANIZAÇÃO
+   UFC POUND FOR POUND
 ========================================================= */
-function getWorldRanking(
-    organization,
-    weight
-) {
-    return mmaWorld.fighters
-        .filter(
+function updateUFCPoundForPound() {
+    const ufcFighters =
+        mmaWorld.fighters.filter(
             fighter =>
                 fighter.active &&
-                fighter.organization ===
-                organization &&
-                fighter.weight ===
-                weight
-        )
-        .sort(
-            (a, b) =>
-                calculateWorldRankingScore(b) -
-                calculateWorldRankingScore(a)
-        )
-        .slice(
-            0,
-            15
+                fighter.organization === "UFC"
         );
-}
-/* =========================================================
-   CAMPEÃO
-========================================================= */
-function getWorldChampion(
-    organization,
-    weight
-) {
-    const championship =
-        getWorldChampionship(
-            organization,
-            weight
-        );
-    if (
-        championship &&
-        championship.champion
-    ) {
-        return (
-            mmaWorld.fighters.find(
-                fighter =>
-                    fighter.id ===
-                    championship.champion
-            ) || null
-        );
-    }
-    const ranking =
-        getWorldRanking(
-            organization,
-            weight
-        );
-    return ranking[0] || null;
-}
-/* =========================================================
-   CINTURÃO
-========================================================= */
-function getWorldChampionship(
-    organization,
-    weight
-) {
-    return (
-        mmaWorld.championships.find(
-            championship =>
-                championship.organization ===
-                organization &&
-                championship.weightClass ===
-                weight
-        ) || null
-    );
+    mmaWorld.ufcP4P =
+        ufcFighters
+            .map(
+                fighter => ({
+                    ...fighter,
+                    p4pScore:
+                        (
+                            fighter.power * 0.45
+                        ) +
+                        (
+                            fighter.fame * 0.25
+                        ) +
+                        (
+                            fighter.wins * 4
+                        ) +
+                        (
+                            fighter.champion
+                                ? 25
+                                : 0
+                        )
+                })
+            )
+            .sort(
+                (a, b) =>
+                    b.p4pScore -
+                    a.p4pScore
+            )
+            .slice(0, 15)
+            .map(
+                (
+                    fighter,
+                    index
+                ) => ({
+                    ...fighter,
+                    p4pRanking:
+                        index + 1
+                })
+            );
 }
 /* =========================================================
    SIMULAR LUTA
@@ -1124,19 +1095,16 @@ function simulateWorldFight(
     fighterA,
     fighterB
 ) {
-    if (
-        !fighterA ||
-        !fighterB
-    ) {
+    if (!fighterA || !fighterB) {
         return null;
     }
     const powerA =
         fighterA.power +
-        Math.random() * 20 -
+        (Math.random() * 20) -
         10;
     const powerB =
         fighterB.power +
-        Math.random() * 20 -
+        (Math.random() * 20) -
         10;
     let winner;
     let loser;
@@ -1166,45 +1134,12 @@ function simulateWorldFight(
             30,
             loser.power - 0.1
         );
-    winner.weeksSinceFight = 0;
-    loser.weeksSinceFight = 0;
-    winner.lastFightWeek =
-        mmaWorld.week;
-    loser.lastFightWeek =
-        mmaWorld.week;
+    winner.weeksSinceLastFight = 0;
+    loser.weeksSinceLastFight = 0;
     return {
-        winner: winner,
-        loser: loser
+        winner,
+        loser
     };
-}
-/* =========================================================
-   LUTADORES DISPONÍVEIS
-========================================================= */
-function isWorldFighterAvailable(
-    fighter
-) {
-    if (!fighter.active) {
-        return false;
-    }
-    if (
-        fighter.injuredWeeks > 0
-    ) {
-        return false;
-    }
-    if (
-        fighter.weeksUntilNextFight > 0
-    ) {
-        return false;
-    }
-    /*
-     * Intervalo mínimo entre lutas.
-     */
-    if (
-        fighter.weeksSinceFight < 6
-    ) {
-        return false;
-    }
-    return true;
 }
 /* =========================================================
    SIMULAR ORGANIZAÇÃO
@@ -1220,7 +1155,9 @@ function simulateWorldOrganization(
                     weight
                 )
                 .filter(
-                    isWorldFighterAvailable
+                    fighter =>
+                        fighter.weeksSinceLastFight >=
+                        organization.minWeeksBetweenFights
                 );
             const shuffled =
                 [...fighters].sort(
@@ -1232,144 +1169,36 @@ function simulateWorldOrganization(
                 i + 1 < shuffled.length;
                 i += 2
             ) {
-                /*
-                 * Nem todo mundo luta
-                 * em toda semana.
-                 */
                 if (
-                    Math.random() >
-                    0.18
+                    Math.random() > 0.35
                 ) {
                     continue;
                 }
-                const fighterA =
-                    shuffled[i];
-                const fighterB =
-                    shuffled[i + 1];
-                const championship =
-                    getWorldChampionship(
-                        organization.name,
-                        weight
-                    );
-                const champion =
-                    championship &&
-                    championship.champion ===
-                    fighterA.id;
-                const challenger =
-                    championship &&
-                    championship.champion ===
-                    fighterB.id;
                 const result =
                     simulateWorldFight(
-                        fighterA,
-                        fighterB
+                        shuffled[i],
+                        shuffled[i + 1]
                     );
-                if (!result) {
-                    continue;
+                if (result) {
+                    mmaWorld.eventsThisWeek.push({
+                        organization:
+                            organization.name,
+                        organizationId:
+                            organization.id,
+                        weight: weight,
+                        winner:
+                            result.winner.name,
+                        winnerId:
+                            result.winner.id,
+                        loser:
+                            result.loser.name,
+                        loserId:
+                            result.loser.id
+                    });
                 }
-                let titleFight = false;
-                /*
-                 * Luta de cinturão só acontece
-                 * ocasionalmente.
-                 */
-                if (
-                    championship &&
-                    (
-                        champion ||
-                        challenger
-                    ) &&
-                    Math.random() < 0.15
-                ) {
-                    titleFight = true;
-                    championship.titleFights++;
-                }
-                if (titleFight) {
-                    if (
-                        result.winner.id ===
-                        championship.champion
-                    ) {
-                        championship.defenses++;
-                        result.winner.defenses++;
-                    }
-                    else {
-                        const oldChampion =
-                            mmaWorld.fighters.find(
-                                fighter =>
-                                    fighter.id ===
-                                    championship.champion
-                            );
-                        if (oldChampion) {
-                            oldChampion.champion =
-                                false;
-                            oldChampion.titleLosses++;
-                        }
-                        result.winner.champion =
-                            true;
-                        result.winner.titleWins++;
-                        championship.champion =
-                            result.winner.id;
-                    }
-                }
-                mmaWorld.eventsThisWeek.push({
-                    organization:
-                        organization.name,
-                    organizationId:
-                        organization.id,
-                    weight:
-                        weight,
-                    winner:
-                        result.winner.name,
-                    winnerId:
-                        result.winner.id,
-                    loser:
-                        result.loser.name,
-                    loserId:
-                        result.loser.id,
-                    titleFight:
-                        titleFight
-                });
             }
         }
     );
-}
-/* =========================================================
-   POUND FOR POUND UFC
-========================================================= */
-function updateUFCPoundForPound() {
-    const ufc =
-        worldOrganizations.find(
-            organization =>
-                organization.id ===
-                "world_ufc"
-        );
-    if (!ufc) {
-        mmaWorld.ufcP4P = [];
-        return;
-    }
-    const allUFC =
-        mmaWorld.fighters
-            .filter(
-                fighter =>
-                    fighter.active &&
-                    fighter.organizationId ===
-                    ufc.id
-            );
-    allUFC.sort(
-        (a, b) =>
-            calculateWorldRankingScore(b) -
-            calculateWorldRankingScore(a)
-    );
-    mmaWorld.ufcP4P =
-        allUFC.slice(
-            0,
-            15
-        );
-}
-/* =========================================================
-   OBTER P4P
-========================================================= */
-function getUFCPoundForPound() {
-    return mmaWorld.ufcP4P || [];
 }
 /* =========================================================
    SIMULAR UMA SEMANA
@@ -1379,26 +1208,24 @@ function simulateMMWorldWeek() {
     mmaWorld.week++;
     mmaWorld.eventsThisWeek = [];
     /*
-     * Recupera lutadores.
+     * Todo mundo fica uma semana mais próximo
+     * da próxima luta.
      */
     mmaWorld.fighters.forEach(
         fighter => {
-            fighter.weeksSinceFight++;
-            if (
-                fighter.injuredWeeks > 0
-            ) {
-                fighter.injuredWeeks--;
-            }
-            if (
-                fighter.weeksUntilNextFight > 0
-            ) {
-                fighter.weeksUntilNextFight--;
+            if (fighter.active) {
+                fighter.weeksSinceLastFight++;
+                if (
+                    fighter.injuredWeeks > 0
+                ) {
+                    fighter.injuredWeeks--;
+                }
             }
         }
     );
     /*
      * Cada organização possui
-     * atividade independente.
+     * seu próprio ritmo.
      */
     worldOrganizations.forEach(
         organization => {
@@ -1410,43 +1237,21 @@ function simulateMMWorldWeek() {
     updateWorldRankings();
     updateWorldChampions();
     updateUFCPoundForPound();
-    /*
-     * Notícias.
-     */
     if (
         mmaWorld.eventsThisWeek.length > 0
     ) {
         const news =
             mmaWorld.eventsThisWeek
-                .slice(
-                    0,
-                    8
-                )
+                .slice(0, 5)
                 .map(
-                    fight => {
-                        if (
-                            fight.titleFight
-                        ) {
-                            return (
-                                "🏆 " +
-                                fight.winner +
-                                " conquistou/defendeu o cinturão contra " +
-                                fight.loser +
-                                " (" +
-                                fight.organization +
-                                ")"
-                            );
-                        }
-                        return (
-                            "🥊 " +
-                            fight.winner +
-                            " venceu " +
-                            fight.loser +
-                            " (" +
-                            fight.organization +
-                            ")"
-                        );
-                    }
+                    fight =>
+                        "🏆 " +
+                        fight.winner +
+                        " venceu " +
+                        fight.loser +
+                        " (" +
+                        fight.organization +
+                        ")"
                 );
         mmaWorld.news.unshift(
             ...news
@@ -1460,14 +1265,70 @@ function simulateMMWorldWeek() {
     return mmaWorld.eventsThisWeek;
 }
 /* =========================================================
+   CAMPEÃO
+========================================================= */
+function getWorldChampion(
+    organization,
+    weight
+) {
+    const championship =
+        getWorldChampionship(
+            organization,
+            weight
+        );
+    if (
+        championship &&
+        championship.champion
+    ) {
+        return mmaWorld.fighters.find(
+            fighter =>
+                fighter.id ===
+                championship.champion
+        ) || null;
+    }
+    return null;
+}
+/* =========================================================
+   CINTURÃO
+========================================================= */
+function getWorldChampionship(
+    organization,
+    weight
+) {
+    if (!mmaWorld.championships) {
+        return null;
+    }
+    return (
+        mmaWorld.championships.find(
+            championship =>
+                championship.organization ===
+                organization &&
+                championship.weightClass ===
+                weight
+        ) || null
+    );
+}
+/* =========================================================
+   POUND FOR POUND UFC
+========================================================= */
+function getUFCPoundForPound() {
+    return mmaWorld.ufcP4P || [];
+}
+/* =========================================================
    NOTÍCIAS
 ========================================================= */
 function getWorldNews() {
     return mmaWorld.news || [];
 }
 /* =========================================================
-   EXPOR FUNÇÕES
+   DISPONIBILIZAR GLOBALMENTE
 ========================================================= */
+window.events =
+    events;
+window.eventWeightClasses =
+    eventWeightClasses;
+window.mmaWorld =
+    mmaWorld;
 window.generateEvent =
     generateEvent;
 window.prepareEventForPlayer =
@@ -1496,21 +1357,17 @@ window.generateOrganizationChampionships =
     generateOrganizationChampionships;
 window.simulateMMWorldWeek =
     simulateMMWorldWeek;
+window.getWorldFighters =
+    getWorldFighters;
 window.getWorldRanking =
     getWorldRanking;
 window.getWorldChampion =
     getWorldChampion;
 window.getWorldChampionship =
     getWorldChampionship;
-window.getWorldNews =
-    getWorldNews;
 window.getUFCPoundForPound =
     getUFCPoundForPound;
-/* =========================================================
-   DISPONIBILIZAR MUNDO
-========================================================= */
-window.mmaWorld =
-    mmaWorld;
-/* =========================================================
-   FIM EVENTS.JS
-========================================================= */
+window.updateUFCPoundForPound =
+    updateUFCPoundForPound;
+window.getWorldNews =
+    getWorldNews;
