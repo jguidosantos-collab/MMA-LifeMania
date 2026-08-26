@@ -382,12 +382,12 @@ function openCharacterCreation() {
             </select>
 
             <button
-                class="green"
-                onclick="createNewPlayer()">
+    class="green"
+    onclick="alert('BOTÃO FUNCIONOU'); createNewPlayer();">
 
-                🥊 CRIAR LUTADOR
+    🥊 CRIAR LUTADOR
 
-            </button>
+</button>
 
             <button
                 class="gray"
