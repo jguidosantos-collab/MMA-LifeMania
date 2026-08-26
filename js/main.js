@@ -34,7 +34,12 @@ function tab(name) {
 ========================= */
 
 function startGame() {
-    document.getElementById("content").innerHTML = `
+    const content =
+        document.getElementById("content");
+    if (!content) {
+        return;
+    }
+    content.innerHTML = `
         <div class="start-screen">
             <div class="start-logo">
                 🥊
@@ -43,39 +48,230 @@ function startGame() {
                 MMA LIFE
             </h1>
             <p class="start-subtitle">
-                CONSTRUA SUA CARREIRA.
+                CONSTRUA SUA CARREIRA.<br>
                 ESCREVA SEU LEGADO.
             </p>
             <div class="start-preview">
                 <div class="start-fighter">
-                    👤
+                    🥊
                 </div>
                 <div class="start-preview-text">
                     <strong>
                         SUA HISTÓRIA COMEÇA AQUI
                     </strong>
                     <span>
-                        Crie seu lutador e entre
-                        no mundo profissional do MMA.
+                        Comece como amador,
+                        construa sua reputação,
+                        conquiste contratos
+                        e chegue ao topo do MMA.
                     </span>
                 </div>
             </div>
             <button
                 class="start-button"
-                onclick="initCreation()">
+                onclick="openCharacterCreation()">
                 🆕 CRIAR NOVO LUTADOR
             </button>
-            <button
-                class="start-secondary"
-                onclick="loadGame()">
-                ▶️ CONTINUAR CARREIRA
-            </button>
             <div class="start-footer">
-                AMADOR → REGIONAL → NACIONAL
-                → INTERNACIONAL → UFC
+                AMADOR
+                →
+                REGIONAL
+                →
+                NACIONAL
+                →
+                INTERNACIONAL
+                →
+                UFC
             </div>
         </div>
     `;
+}
+/* =========================================================
+   ABRIR CRIAÇÃO DO LUTADOR
+========================================================= */
+function openCharacterCreation() {
+    const content =
+        document.getElementById("content");
+    if (!content) {
+        return;
+    }
+    content.innerHTML = `
+        <div class="card">
+            <div class="title">
+                🥊 CRIAR NOVO LUTADOR
+            </div>
+            <p>
+                Comece sua jornada no MMA.
+            </p>
+            <input
+                id="playerName"
+                placeholder="Nome do lutador"
+            >
+            <select id="country">
+                <option value="Brasil">
+                    🇧🇷 Brasil
+                </option>
+                <option value="Estados Unidos">
+                    🇺🇸 Estados Unidos
+                </option>
+                <option value="Japão">
+                    🇯🇵 Japão
+                </option>
+                <option value="México">
+                    🇲🇽 México
+                </option>
+                <option value="Argentina">
+                    🇦🇷 Argentina
+                </option>
+                <option value="Canadá">
+                    🇨🇦 Canadá
+                </option>
+                <option value="Rússia">
+                    🇷🇺 Rússia
+                </option>
+                <option value="Reino Unido">
+                    🇬🇧 Reino Unido
+                </option>
+            </select>
+            <select id="weight">
+                <option value="Peso Leve">
+                    Peso Leve
+                </option>
+                <option value="Peso Meio-Médio">
+                    Peso Meio-Médio
+                </option>
+                <option value="Peso Médio">
+                    Peso Médio
+                </option>
+                <option value="Peso Meio-Pesado">
+                    Peso Meio-Pesado
+                </option>
+                <option value="Peso Pesado">
+                    Peso Pesado
+                </option>
+            </select>
+            <select id="style">
+                <option value="Completo">
+                    🥊 Completo
+                </option>
+                <option value="Striker">
+                    👊 Striker
+                </option>
+                <option value="Wrestler">
+                    🤼 Wrestler
+                </option>
+                <option value="Grappler">
+                    🥋 Grappler
+                </option>
+            </select>
+            <button
+                class="green"
+                onclick="createPlayerFromScreen()">
+                ✅ CRIAR LUTADOR
+            </button>
+            <button
+                class="gray"
+                onclick="startGame()">
+                ← VOLTAR
+            </button>
+        </div>
+    `;
+}
+/* =========================================================
+   CRIAR LUTADOR
+========================================================= */
+function createPlayerFromScreen() {
+    const name =
+        document.getElementById("playerName").value.trim();
+    const country =
+        document.getElementById("country").value;
+    const weight =
+        document.getElementById("weight").value;
+    const style =
+        document.getElementById("style").value;
+    if (!name) {
+        alert(
+            "Digite o nome do seu lutador."
+        );
+        return;
+    }
+    /*
+     * Usa o sistema de criação existente
+     * quando ele estiver disponível.
+     */
+    if (
+        typeof createPlayer === "function"
+    ) {
+        createPlayer(
+            name,
+            country,
+            weight,
+            style
+        );
+        return;
+    }
+    /*
+     * Caso o projeto ainda não possua
+     * createPlayer(), cria o jogador básico.
+     */
+    player.name =
+        name;
+    player.country =
+        country;
+    player.weight =
+        weight;
+    player.style =
+        style;
+    player.age =
+        18;
+    player.money =
+        0;
+    player.fame =
+        0;
+    player.health =
+        100;
+    player.fatigue =
+        0;
+    player.professional =
+        player.professional || {
+            active: false,
+            wins: 0,
+            losses: 0,
+            draws: 0
+        };
+    player.amateur =
+        player.amateur || {
+            wins: 0,
+            losses: 0,
+            draws: 0
+        };
+    player.attributes =
+        player.attributes || {
+            strength: 50,
+            striking: 50,
+            wrestling: 50,
+            grappling: 50,
+            cardio: 50,
+            technique: 50,
+            defense: 50,
+            fightIQ: 50,
+            mental: 50,
+            confidence: 50
+        };
+    player.log =
+        player.log || [];
+    player.children =
+        player.children || [];
+    player.nextFight =
+        null;
+    player.team =
+        null;
+    player.manager =
+        null;
+    player.careerStage =
+        "amateur";
+    save();
+    home();
 }
 /* =========================
    VIRAR PROFISSIONAL
