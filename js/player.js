@@ -231,3 +231,4 @@ window.createDefaultPlayer =
 
 window.createPlayer =
     createPlayer;
+// player atualizado
