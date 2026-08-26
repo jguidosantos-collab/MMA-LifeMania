@@ -1435,7 +1435,8 @@ window.createPlayerFromScreen =
  * O nome oficial é openCharacterCreation().
  */
 
-
+window.openCharacterCreation =
+    openCharacterCreation;
 
 
 /* =========================================================
