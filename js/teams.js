@@ -618,15 +618,28 @@ function calculateFightPayout(
             )
     };
 }
+/* =========================================================
+   🏢 TELA DE EQUIPE
+========================================================= */
 function teamScreen() {
     const team =
         player.team || null;
     const manager =
         player.manager || null;
-    document.getElementById("content").innerHTML = `
+    const content =
+        document.getElementById(
+            "content"
+        );
+    if (!content) {
+        return;
+    }
+    content.innerHTML = `
+        <!-- =================================================
+             ACADEMIA
+        ================================================== -->
         <div class="card">
             <div class="title">
-                🏢 EQUIPE E EMPRESÁRIO
+                🏢 ACADEMIA
             </div>
             ${
                 team
@@ -634,39 +647,57 @@ function teamScreen() {
                 `
                 <div class="statline">
                     <span>Academia atual</span>
-                    <b>${team.name}</b>
+                    <b>
+                        ${team.name}
+                    </b>
                 </div>
                 <div class="statline">
                     <span>País</span>
-                    <b>${team.country || "Não informado"}</b>
+                    <b>
+                        ${team.country || "Não informado"}
+                    </b>
                 </div>
                 <div class="statline">
                     <span>Cidade</span>
-                    <b>${team.city || "Não informado"}</b>
+                    <b>
+                        ${team.city || "Não informado"}
+                    </b>
                 </div>
                 <div class="statline">
                     <span>Nível</span>
-                    <b>${team.level || "Regional"}</b>
+                    <b>
+                        ${team.level || "Regional"}
+                    </b>
                 </div>
                 <div class="statline">
                     <span>Reputação</span>
-                    <b>${team.reputation || 0}</b>
+                    <b>
+                        ${team.reputation || 0}
+                    </b>
                 </div>
                 <div class="statline">
                     <span>Qualidade</span>
-                    <b>${team.quality || 0}</b>
+                    <b>
+                        ${team.quality || 0}
+                    </b>
                 </div>
                 <div class="statline">
                     <span>Especialidade</span>
-                    <b>${team.specialty || "MMA"}</b>
+                    <b>
+                        ${team.specialty || "MMA"}
+                    </b>
                 </div>
                 <div class="statline">
                     <span>Mensalidade</span>
-                    <b>$${team.monthlyCost || 0}</b>
+                    <b>
+                        $${team.monthlyCost || 0}
+                    </b>
                 </div>
                 <div class="statline">
                     <span>Comissão por luta</span>
-                    <b>${team.fightFee || 0}%</b>
+                    <b>
+                        ${team.fightFee || 0}%
+                    </b>
                 </div>
                 `
                 :
@@ -676,58 +707,115 @@ function teamScreen() {
                 </p>
                 `
             }
-            <div class="statline">
-                <span>Empresário</span>
-                <b>
-                    ${
-                        manager
-                        ?
-                        manager.name
-                        :
-                        "Nenhum"
-                    }
-                </b>
+            <button
+                type="button"
+                class="main-button"
+                onclick="
+                    generateTeamOffers();
+                    teamScreen();
+                "
+            >
+                🔎 PROCURAR ACADEMIAS
+            </button>
+        </div>
+        <!-- =================================================
+             OFERTAS DE ACADEMIAS
+        ================================================== -->
+        ${
+            (player.teamOffers || [])
+                .map(
+                    (offer, index) => `
+                    <div class="card">
+                        <div class="title">
+                            🏢 ${offer.name}
+                        </div>
+                        <div class="statline">
+                            <span>País</span>
+                            <b>
+                                ${offer.country}
+                            </b>
+                        </div>
+                        <div class="statline">
+                            <span>Cidade</span>
+                            <b>
+                                ${offer.city}
+                            </b>
+                        </div>
+                        <div class="statline">
+                            <span>Nível</span>
+                            <b>
+                                ${offer.level}
+                            </b>
+                        </div>
+                        <div class="statline">
+                            <span>Reputação</span>
+                            <b>
+                                ${offer.reputation}
+                            </b>
+                        </div>
+                        <div class="statline">
+                            <span>Qualidade</span>
+                            <b>
+                                ${offer.quality}
+                            </b>
+                        </div>
+                        <div class="statline">
+                            <span>Especialidade</span>
+                            <b>
+                                ${offer.specialty}
+                            </b>
+                        </div>
+                        <div class="statline">
+                            <span>Mensalidade</span>
+                            <b>
+                                $${offer.monthlyCost}
+                            </b>
+                        </div>
+                        <div class="statline">
+                            <span>Comissão por luta</span>
+                            <b>
+                                ${offer.fightFee}%
+                            </b>
+                        </div>
+                        <button
+                            type="button"
+                            class="green"
+                            onclick="
+                                joinTeam(${index})
+                            "
+                        >
+                            🤝 ENTRAR
+                        </button>
+                        <button
+                            type="button"
+                            class="blue"
+                            onclick="
+                                tryoutTeam(${index})
+                            "
+                        >
+                            🥊 FAZER TESTE
+                        </button>
+                    </div>
+                `
+                )
+                .join("")
+        }
+        <!-- =================================================
+             EMPRESÁRIO
+        ================================================== -->
+        <div class="card">
+            <div class="title">
+                👔 EMPRESÁRIO
             </div>
             ${
                 manager
                 ?
                 `
                 <div class="statline">
-                    <span>Nível</span>
+                    <span>Empresário</span>
                     <b>
-                        ${manager.level}
+                        ${manager.name}
                     </b>
-                </div>
-                <div class="statline">
-                    <span>Comissão</span>
-                    <b>
-                        ${manager.commission || 0}%
-                    </b>
-                </div>
-                `
-                :
-                ""
-            }
-            <button
-                onclick="
-                    generateTeamOffers();
-                    teamScreen();
-                ">
-                <button
-    class="gray"
-    onclick="
-        generateManagerOffers();
-        teamScreen();
-    ">
-    👔 PROCURAR EMPRESÁRIOS
-</button>
-${
-    (player.managerOffers || [])
-        .map(
-            (manager, index) => `
-            <div class="card">
-                <div class="title">
-                    👔 ${manager.name}
                 </div>
                 <div class="statline">
                     <span>Nível</span>
@@ -747,75 +835,91 @@ ${
                         ${manager.contacts || 0}
                     </b>
                 </div>
-                <button
-                    class="gray"
-                    onclick="
-                        hireManager(${index})
-                    ">
-                    🤝 CONTRATAR
-                </button>
-            </div>
-            `
-        )
-        .join("")
-}
-                🔎 PROCURAR ACADEMIAS
-            </button>
-            ${
-                (player.teamOffers || [])
-                    .map(
-                        (offer, index) => `
-                        <div class="card">
-                            <div class="title">
-                                🏢 ${offer.name}
-                            </div>
-                            <div class="statline">
-                                <span>País</span>
-                                <b>${offer.country}</b>
-                            </div>
-                            <div class="statline">
-                                <span>Cidade</span>
-                                <b>${offer.city}</b>
-                            </div>
-                            <div class="statline">
-                                <span>Nível</span>
-                                <b>${offer.level}</b>
-                            </div>
-                            <div class="statline">
-                                <span>Reputação</span>
-                                <b>${offer.reputation}</b>
-                            </div>
-                            <div class="statline">
-                                <span>Qualidade</span>
-                                <b>${offer.quality}</b>
-                            </div>
-                            <div class="statline">
-                                <span>Especialidade</span>
-                                <b>${offer.specialty}</b>
-                            </div>
-                            <div class="statline">
-                                <span>Mensalidade</span>
-                                <b>$${offer.monthlyCost}</b>
-                            </div>
-                            <div class="statline">
-                                <span>Comissão por luta</span>
-                                <b>${offer.fightFee}%</b>
-                            </div>
-                            <button
-                                class="green"
-                                onclick="joinTeam(${index})">
-                                🤝 ENTRAR
-                            </button>
-                            <button
-                                class="blue"
-                                onclick="tryoutTeam(${index})">
-                                🥊 FAZER TESTE
-                            </button>
-                        </div>
-                        `
-                    )
-                    .join("")
+                <div class="statline">
+                    <span>Negociação</span>
+                    <b>
+                        ${manager.negotiation || 0}
+                    </b>
+                </div>
+                <div class="statline">
+                    <span>Acesso internacional</span>
+                    <b>
+                        ${manager.internationalAccess || 0}
+                    </b>
+                </div>
+                `
+                :
+                `
+                <p>
+                    👔 Você ainda não possui um empresário.
+                </p>
+                `
             }
+            <button
+                type="button"
+                class="gray"
+                onclick="
+                    generateManagerOffers();
+                    teamScreen();
+                "
+            >
+                👔 PROCURAR EMPRESÁRIOS
+            </button>
         </div>
+        <!-- =================================================
+             OFERTAS DE EMPRESÁRIOS
+        ================================================== -->
+        ${
+            (player.managerOffers || [])
+                .map(
+                    (managerOffer, index) => `
+                    <div class="card">
+                        <div class="title">
+                            👔 ${managerOffer.name}
+                        </div>
+                        <div class="statline">
+                            <span>Nível</span>
+                            <b>
+                                ${managerOffer.level}
+                            </b>
+                        </div>
+                        <div class="statline">
+                            <span>Comissão</span>
+                            <b>
+                                ${managerOffer.commission || 0}%
+                            </b>
+                        </div>
+                        <div class="statline">
+                            <span>Contatos</span>
+                            <b>
+                                ${managerOffer.contacts || 0}
+                            </b>
+                        </div>
+                        <div class="statline">
+                            <span>Negociação</span>
+                            <b>
+                                ${managerOffer.negotiation || 0}
+                            </b>
+                        </div>
+                        <div class="statline">
+                            <span>Acesso internacional</span>
+                            <b>
+                                ${managerOffer.internationalAccess || 0}
+                            </b>
+                        </div>
+                        <button
+                            type="button"
+                            class="gray"
+                            onclick="
+                                hireManager(${index})
+                            "
+                        >
+                            🤝 CONTRATAR
+                        </button>
+                    </div>
+                `
+                )
+                .join("")
+        }
     `;
 }
