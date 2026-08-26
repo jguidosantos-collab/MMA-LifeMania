@@ -3,87 +3,191 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
 
     <title>MMA Life Dynasty</title>
 
-    <link rel="stylesheet" href="css/style.css">
+    <link
+        rel="stylesheet"
+        href="css/style.css"
+    >
 </head>
 
 <body>
 
 <header class="top">
-    <div class="logo">🥊 MMA LIFE</div>
-    <div class="edition">DYNASTY</div>
+
+    <div class="logo">
+        🥊 MMA LIFE
+    </div>
+
+    <div class="edition">
+        DYNASTY
+    </div>
+
 </header>
+
 
 <main>
 
-    <!-- CRIAÇÃO DO LUTADOR -->
+    <!-- =========================================
+         TELA DE CRIAÇÃO / INÍCIO
+    ========================================== -->
+
     <section id="creation">
+
         <div id="creator"></div>
+
     </section>
 
-    <!-- JOGO -->
-    <section id="game" class="hidden">
+
+    <!-- =========================================
+         JOGO
+    ========================================== -->
+
+    <section
+        id="game"
+        class="hidden"
+    >
+
         <div id="content"></div>
+
     </section>
 
 </main>
 
-<!-- MENU INFERIOR -->
-<nav id="tabs" class="tabs hidden">
+
+<!-- =========================================
+     MENU DO JOGO
+========================================== -->
+
+<nav
+    id="tabs"
+    class="tabs hidden"
+>
 
     <button onclick="tab('home')">
-        🏠
-        <small>Início</small>
+
+        <span>🏠</span>
+
+        <small>
+            Início
+        </small>
+
     </button>
+
 
     <button onclick="tab('career')">
-        🥊
-        <small>Carreira</small>
+
+        <span>🥊</span>
+
+        <small>
+            Carreira
+        </small>
+
     </button>
+
 
     <button onclick="tab('train')">
-        🏋️
-        <small>Treino</small>
+
+        <span>🏋️</span>
+
+        <small>
+            Treino
+        </small>
+
     </button>
+
 
     <button onclick="tab('fight')">
-        ⚔️
-        <small>Lutas</small>
+
+        <span>⚔️</span>
+
+        <small>
+            Lutas
+        </small>
+
     </button>
+
 
     <button onclick="tab('team')">
-        🏢
-        <small>Equipe</small>
+
+        <span>🏢</span>
+
+        <small>
+            Equipe
+        </small>
+
     </button>
 
+
     <button onclick="tab('life')">
-        ❤️
-        <small>Vida</small>
+
+        <span>❤️</span>
+
+        <small>
+            Vida
+        </small>
+
+    </button>
+
+
+    <button onclick="tab('ranking')">
+
+        <span>🏆</span>
+
+        <small>
+            Ranking
+        </small>
+
     </button>
 
 </nav>
 
-<!-- JAVASCRIPT -->
+
+<!-- =========================================
+     ARQUIVOS DO JOGO
+========================================== -->
 
 <script src="js/player.js"></script>
+
 <script src="js/training.js"></script>
+
 <script src="js/fights.js"></script>
+
 <script src="js/teams.js"></script>
+
 <script src="js/managers.js"></script>
+
 <script src="js/family.js"></script>
+
 <script src="js/life.js"></script>
+
 <script src="js/save.js"></script>
+
 <script src="js/fighters.js"></script>
+
 <script src="js/events.js"></script>
+
 <script src="js/rankings.js"></script>
+
 <script src="js/promotions.js"></script>
+
 <script src="js/contracts.js"></script>
+
 <script src="js/championship.js"></script>
+
 <script src="js/opportunities.js"></script>
+
+
+<!-- MAIN SEMPRE POR ÚLTIMO -->
+
 <script src="js/main.js"></script>
+
 
 </body>
 
