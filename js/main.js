@@ -950,13 +950,112 @@ function tab(name) {
     }
 
     if (name === "career") {
-        if (typeof window.career === "function") {
-            window.career();
-        } else {
-            console.error("career() não encontrada");
-        }
+
+    ensurePlayer();
+
+    const content = getContent();
+
+    if (!content) {
         return;
     }
+
+    const player = window.player;
+
+    const amateur = player.amateur || {};
+    const professional = player.professional || {};
+
+    content.innerHTML = `
+
+        <div class="card">
+
+            <div class="title">
+                🥊 MINHA CARREIRA
+            </div>
+
+            <p>
+                ${player.name || "Lutador"}
+            </p>
+
+        </div>
+
+        <div class="card">
+
+            <div class="title">
+                📊 RECORDES
+            </div>
+
+            <div class="statline">
+                <span>Amador</span>
+                <b>
+                    ${amateur.wins || 0}-
+                    ${amateur.losses || 0}-
+                    ${amateur.draws || 0}
+                </b>
+            </div>
+
+            <div class="statline">
+                <span>Profissional</span>
+                <b>
+                    ${professional.wins || 0}-
+                    ${professional.losses || 0}-
+                    ${professional.draws || 0}
+                </b>
+            </div>
+
+        </div>
+
+        <div class="card">
+
+            <div class="title">
+                📈 STATUS DA CARREIRA
+            </div>
+
+            <div class="statline">
+                <span>Categoria</span>
+                <b>
+                    ${
+                        professional.active
+                            ? "Profissional"
+                            : "Amador"
+                    }
+                </b>
+            </div>
+
+            <div class="statline">
+                <span>Idade</span>
+                <b>${player.age || 18} anos</b>
+            </div>
+
+            <div class="statline">
+                <span>Fama</span>
+                <b>${Math.round(player.fame || 0)}</b>
+            </div>
+
+            <div class="statline">
+                <span>Ranking Amador</span>
+                <b>#${amateur.ranking || 50}</b>
+            </div>
+
+        </div>
+
+        <div class="card">
+
+            <div class="title">
+                🏆 ORGANIZAÇÕES
+            </div>
+
+            <p>
+                Sua trajetória começa no circuito amador.
+                Vença lutas, evolua e conquiste oportunidades
+                para chegar às grandes organizações.
+            </p>
+
+        </div>
+
+    `;
+
+    return;
+}
 
     if (name === "train") {
         if (typeof window.training === "function") {
