@@ -675,6 +675,7 @@ function generateEliteEvent() {
 
 /* =========================================================
    PFL WORLD TOURNAMENT
+   MANTIDO PARA COMPATIBILIDADE COM O SISTEMA PFL
 ========================================================= */
 
 function generatePFLTournament() {
@@ -779,15 +780,19 @@ function generateEvent() {
         "international"
     ) {
 
-        if (
-            player.manager &&
-            Math.random() < 0.10
-        ) {
-
-            return generatePFLTournament();
-
-        }
-
+        /*
+         * IMPORTANTE:
+         *
+         * O PFL Grand Prix NÃO é mais sorteado
+         * como um evento internacional comum.
+         *
+         * A PFL continua podendo aparecer
+         * normalmente através das lutas/eventos
+         * internacionais.
+         *
+         * O Grand Prix de US$ 1.000.000 é
+         * controlado exclusivamente pelo PFL.JS.
+         */
 
         return generateInternationalEvent();
 
