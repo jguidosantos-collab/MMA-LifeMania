@@ -1,3 +1,14 @@
+/* =========================================================
+   MMA LIFE DYNASTY
+   EVENTS.JS
+   PROJETO 1 — EVENTOS + CINTURÕES + MUNDO MMA
+========================================================= */
+
+
+/* =========================================================
+   EVENTOS
+========================================================= */
+
 const events = [
 
     /* =====================================================
@@ -5,27 +16,42 @@ const events = [
        ===================================================== */
 
     {
+        id: "amateur_cup",
         name: "Copa Amadora de MMA",
         level: 0,
         international: false,
         professional: false,
-        purse: 0
+        careerStage: "amateur",
+        purse: 0,
+        winBonus: 0,
+        prestige: 5,
+        championship: false
     },
 
     {
+        id: "amateur_brazil",
         name: "Circuito Amador Brasileiro",
         level: 0,
         international: false,
         professional: false,
-        purse: 0
+        careerStage: "amateur",
+        purse: 0,
+        winBonus: 0,
+        prestige: 7,
+        championship: false
     },
 
     {
+        id: "amateur_state",
         name: "Campeonato Estadual de MMA",
         level: 0,
         international: false,
         professional: false,
-        purse: 0
+        careerStage: "amateur",
+        purse: 0,
+        winBonus: 0,
+        prestige: 10,
+        championship: false
     },
 
 
@@ -34,30 +60,45 @@ const events = [
        ===================================================== */
 
     {
+        id: "shooto_brasil",
         name: "Shooto Brasil",
         level: 1,
         international: false,
         professional: true,
         careerStage: "regional",
-        purse: 300
+        country: "Brasil",
+        purse: 300,
+        winBonus: 300,
+        prestige: 25,
+        championship: true
     },
 
     {
+        id: "regional_brazilian",
         name: "Circuito Regional Brasileiro",
         level: 1,
         international: false,
         professional: true,
         careerStage: "regional",
-        purse: 300
+        country: "Brasil",
+        purse: 300,
+        winBonus: 300,
+        prestige: 20,
+        championship: true
     },
 
     {
+        id: "regional_fight_night",
         name: "Regional MMA Fight Night",
         level: 1,
         international: false,
         professional: true,
         careerStage: "regional",
-        purse: 300
+        country: "Brasil",
+        purse: 300,
+        winBonus: 300,
+        prestige: 15,
+        championship: true
     },
 
 
@@ -66,30 +107,45 @@ const events = [
        ===================================================== */
 
     {
+        id: "jungle_fight",
         name: "Jungle Fight",
         level: 2,
         international: false,
         professional: true,
         careerStage: "national",
-        purse: 1000
+        country: "Brasil",
+        purse: 1000,
+        winBonus: 1000,
+        prestige: 45,
+        championship: true
     },
 
     {
+        id: "brazilian_mma_championship",
         name: "Campeonato Brasileiro de MMA",
         level: 2,
         international: false,
         professional: true,
         careerStage: "national",
-        purse: 1000
+        country: "Brasil",
+        purse: 1000,
+        winBonus: 1000,
+        prestige: 40,
+        championship: true
     },
 
     {
+        id: "brazil_mma_championship",
         name: "Brazil MMA Championship",
         level: 3,
         international: false,
         professional: true,
         careerStage: "national",
-        purse: 1000
+        country: "Brasil",
+        purse: 1000,
+        winBonus: 1000,
+        prestige: 50,
+        championship: true
     },
 
 
@@ -98,6 +154,7 @@ const events = [
        ===================================================== */
 
     {
+        id: "lfa",
         name: "LFA",
         level: 2,
         international: false,
@@ -105,10 +162,15 @@ const events = [
         careerStage: "national",
         country: "Estados Unidos",
         foreign: true,
-        purse: 1000
+        purse: 1000,
+        winBonus: 1000,
+        prestige: 50,
+        championship: true,
+        foreignChance: 5
     },
 
     {
+        id: "cffc",
         name: "CFFC",
         level: 2,
         international: false,
@@ -116,7 +178,11 @@ const events = [
         careerStage: "national",
         country: "Estados Unidos",
         foreign: true,
-        purse: 1000
+        purse: 1000,
+        winBonus: 1000,
+        prestige: 45,
+        championship: true,
+        foreignChance: 4
     },
 
 
@@ -125,84 +191,138 @@ const events = [
        ===================================================== */
 
     {
+        id: "pfl",
         name: "PFL",
         level: 4,
         international: true,
         professional: true,
         careerStage: "international",
-        purse: 8000
+        country: "Estados Unidos",
+        purse: 8000,
+        winBonus: 8000,
+        prestige: 80,
+        championship: true,
+        minimumManagerContacts: 45
     },
 
     {
+        id: "one",
         name: "ONE Championship",
         level: 4,
         international: true,
         professional: true,
         careerStage: "international",
-        purse: 8000
+        country: "Singapura",
+        purse: 8000,
+        winBonus: 8000,
+        prestige: 82,
+        championship: true,
+        minimumManagerContacts: 45
     },
 
     {
+        id: "bellator",
         name: "Bellator",
         level: 4,
         international: true,
         professional: true,
         careerStage: "international",
-        purse: 7500
+        country: "Estados Unidos",
+        purse: 7500,
+        winBonus: 7500,
+        prestige: 78,
+        championship: true,
+        minimumManagerContacts: 45
     },
 
     {
+        id: "rizin",
         name: "RIZIN",
         level: 4,
         international: true,
         professional: true,
         careerStage: "international",
-        purse: 7000
+        country: "Japão",
+        purse: 7000,
+        winBonus: 7000,
+        prestige: 75,
+        championship: true,
+        minimumManagerContacts: 45
     },
 
     {
+        id: "ksw",
         name: "KSW",
         level: 4,
         international: true,
         professional: true,
         careerStage: "international",
-        purse: 6000
+        country: "Polônia",
+        purse: 6000,
+        winBonus: 6000,
+        prestige: 70,
+        championship: true,
+        minimumManagerContacts: 45
     },
 
     {
+        id: "oktagon",
         name: "OKTAGON MMA",
         level: 4,
         international: true,
         professional: true,
         careerStage: "international",
-        purse: 6000
+        country: "República Tcheca",
+        purse: 6000,
+        winBonus: 6000,
+        prestige: 68,
+        championship: true,
+        minimumManagerContacts: 45
     },
 
     {
+        id: "cage_warriors",
         name: "Cage Warriors",
         level: 4,
         international: true,
         professional: true,
         careerStage: "international",
-        purse: 5000
+        country: "Reino Unido",
+        purse: 5000,
+        winBonus: 5000,
+        prestige: 65,
+        championship: true,
+        minimumManagerContacts: 45
     },
 
     {
+        id: "brave",
         name: "BRAVE Combat Federation",
         level: 4,
         international: true,
         professional: true,
         careerStage: "international",
-        purse: 5000
+        country: "Bahrein",
+        purse: 5000,
+        winBonus: 5000,
+        prestige: 65,
+        championship: true,
+        minimumManagerContacts: 45
     },
 
     {
+        id: "uae_warriors",
         name: "UAE Warriors",
         level: 4,
         international: true,
         professional: true,
         careerStage: "international",
-        purse: 5500
+        country: "Emirados Árabes Unidos",
+        purse: 5500,
+        winBonus: 5500,
+        prestige: 67,
+        championship: true,
+        minimumManagerContacts: 45
     },
 
 
@@ -211,24 +331,164 @@ const events = [
        ===================================================== */
 
     {
+        id: "ufc_fight_night",
         name: "UFC Fight Night",
         level: 6,
         international: true,
         professional: true,
         careerStage: "elite",
-        purse: 12000
+        country: "Estados Unidos",
+        purse: 12000,
+        winBonus: 12000,
+        prestige: 100,
+        championship: true,
+        minimumManagerContacts: 80
     },
 
     {
+        id: "ufc",
         name: "UFC",
         level: 6,
         international: true,
         professional: true,
         careerStage: "elite",
-        purse: 12000
+        country: "Estados Unidos",
+        purse: 12000,
+        winBonus: 12000,
+        prestige: 100,
+        championship: true,
+        minimumManagerContacts: 80
     }
 
 ];
+
+
+/* =========================================================
+   CATEGORIAS OFICIAIS DO JOGO
+========================================================= */
+
+const eventWeightClasses = [
+
+    "Peso Leve",
+    "Peso Meio-Médio",
+    "Peso Médio",
+    "Peso Meio-Pesado",
+    "Peso Pesado"
+
+];
+
+
+/* =========================================================
+   ESTRUTURA DE CINTURÃO
+========================================================= */
+
+function createChampionship(event, weightClass) {
+
+    return {
+
+        id:
+            event.id +
+            "_" +
+            weightClass
+                .toLowerCase()
+                .replace(/\s+/g, "_"),
+
+        organization:
+            event.name,
+
+        organizationId:
+            event.id,
+
+        weightClass:
+            weightClass,
+
+        champion: null,
+
+        interimChampion: null,
+
+        defenses: 0,
+
+        titleFights: 0,
+
+        created: true
+
+    };
+
+}
+
+
+/* =========================================================
+   GERAR CINTURÕES DE UMA ORGANIZAÇÃO
+========================================================= */
+
+function generateOrganizationChampionships(event) {
+
+    if (
+        !event ||
+        !event.championship
+    ) {
+
+        return [];
+
+    }
+
+
+    return eventWeightClasses.map(
+        weightClass =>
+            createChampionship(
+                event,
+                weightClass
+            )
+    );
+
+}
+
+
+/* =========================================================
+   OBTER CINTURÃO DO EVENTO
+========================================================= */
+
+function getEventChampionship(
+    event,
+    weightClass
+) {
+
+    if (
+        !event ||
+        !event.championship
+    ) {
+
+        return null;
+
+    }
+
+
+    return {
+
+        organization:
+            event.name,
+
+        organizationId:
+            event.id,
+
+        weightClass:
+            weightClass,
+
+        champion:
+            null,
+
+        interimChampion:
+            null,
+
+        defenses:
+            0,
+
+        titleFights:
+            0
+
+    };
+
+}
 
 
 /* =========================================================
@@ -264,8 +524,8 @@ function generateAmateurEvent() {
     const amateurEvents =
         events.filter(
             event =>
-                event.careerStage === undefined &&
-                event.level === 0
+                event.careerStage ===
+                "amateur"
         );
 
 
@@ -309,7 +569,7 @@ function generateRegionalEvent() {
 
 function generateNationalEvent() {
 
-    let nationalEvents =
+    const nationalEvents =
         events.filter(
             event =>
                 event.careerStage ===
@@ -318,22 +578,10 @@ function generateNationalEvent() {
         );
 
 
-    /*
-     * Para brasileiro:
-     *
-     * prioridade absoluta aos eventos
-     * nacionais brasileiros.
-     */
-
     if (
         player.country ===
         "Brasil"
     ) {
-
-        /*
-         * Pequena chance de evento estrangeiro
-         * somente se houver empresário.
-         */
 
         if (
             player.manager &&
@@ -433,6 +681,9 @@ function generatePFLTournament() {
 
     return {
 
+        id:
+            "pfl_world_tournament",
+
         name:
             "PFL World Tournament",
 
@@ -448,11 +699,20 @@ function generatePFLTournament() {
         careerStage:
             "international",
 
+        country:
+            "Estados Unidos",
+
         purse:
             8000,
 
         winBonus:
             8000,
+
+        prestige:
+            90,
+
+        championship:
+            true,
 
         tournament:
             true,
@@ -464,7 +724,10 @@ function generatePFLTournament() {
             1000000,
 
         tournamentRound:
-            1
+            1,
+
+        titleFight:
+            false
 
     };
 
@@ -481,10 +744,6 @@ function generateEvent() {
         getCareerStage();
 
 
-    /* =====================================================
-       AMADOR
-       ===================================================== */
-
     if (
         stage ===
         "amateur"
@@ -494,10 +753,6 @@ function generateEvent() {
 
     }
 
-
-    /* =====================================================
-       REGIONAL
-       ===================================================== */
 
     if (
         stage ===
@@ -509,10 +764,6 @@ function generateEvent() {
     }
 
 
-    /* =====================================================
-       NACIONAL
-       ===================================================== */
-
     if (
         stage ===
         "national"
@@ -523,21 +774,10 @@ function generateEvent() {
     }
 
 
-    /* =====================================================
-       INTERNACIONAL
-       ===================================================== */
-
     if (
         stage ===
         "international"
     ) {
-
-        /*
-         * PFL Tournament é raro.
-         *
-         * Só aparece para lutadores
-         * com empresário.
-         */
 
         if (
             player.manager &&
@@ -554,10 +794,6 @@ function generateEvent() {
     }
 
 
-    /* =====================================================
-       ELITE
-       ===================================================== */
-
     if (
         stage ===
         "elite"
@@ -571,9 +807,137 @@ function generateEvent() {
     return generateAmateurEvent();
 
 }
+
+
+/* =========================================================
+   PREPARAR EVENTO PARA O LUTADOR
+========================================================= */
+
+function prepareEventForPlayer(event) {
+
+    if (!event) {
+
+        return null;
+
+    }
+
+
+    const weightClass =
+        player.weight ||
+        "Peso Leve";
+
+
+    const prepared = {
+
+        ...event,
+
+        weightClass:
+            weightClass,
+
+        titleFight:
+            false,
+
+        championship:
+            event.championship
+                ? getEventChampionship(
+                    event,
+                    weightClass
+                )
+                : null
+
+    };
+
+
+    /*
+     * Se o jogador já possuir cinturão
+     * naquela organização e categoria,
+     * existe possibilidade de defesa.
+     */
+
+    if (
+        player.championship &&
+        player.championship.title &&
+        player.championship.organization ===
+            event.name &&
+        player.championship.weightClass ===
+            weightClass
+    ) {
+
+        prepared.titleFight =
+            true;
+
+        prepared.titleDefense =
+            true;
+
+    }
+
+
+    return prepared;
+
+}
+
+
+/* =========================================================
+   UTILIDADE — PRESTÍGIO
+========================================================= */
+
+function getEventPrestige(event) {
+
+    if (!event) {
+
+        return 0;
+
+    }
+
+
+    return event.prestige || 0;
+
+}
+
+
+/* =========================================================
+   UTILIDADE — BOLSA
+========================================================= */
+
+function getEventPurse(event) {
+
+    if (!event) {
+
+        return 0;
+
+    }
+
+
+    return event.purse || 0;
+
+}
+
+
+/* =========================================================
+   UTILIDADE — BÔNUS
+========================================================= */
+
+function getEventWinBonus(event) {
+
+    if (!event) {
+
+        return 0;
+
+    }
+
+
+    return (
+        event.winBonus ||
+        event.purse ||
+        0
+    );
+
+}
+
+
 /* =========================================================
    🌎 MUNDO MMA — SIMULAÇÃO INDEPENDENTE
-   ========================================================= */
+========================================================= */
 
 const mmaWorld = {
 
@@ -585,7 +949,9 @@ const mmaWorld = {
 
     eventsThisWeek: [],
 
-    news: []
+    news: [],
+
+    championships: []
 
 };
 
@@ -688,80 +1054,102 @@ const worldWeights = [
 const worldOrganizations = [
 
     {
+        id: "world_regional_brazil",
         name: "Circuito Regional Brasileiro",
         stage: "regional",
         country: "Brasil",
-        level: 1
+        level: 1,
+        prestige: 20
     },
 
     {
+        id: "world_shooto_brasil",
         name: "Shooto Brasil",
         stage: "regional",
         country: "Brasil",
-        level: 1
+        level: 1,
+        prestige: 25
     },
 
     {
+        id: "world_jungle_fight",
         name: "Jungle Fight",
         stage: "national",
         country: "Brasil",
-        level: 2
+        level: 2,
+        prestige: 45
     },
 
     {
+        id: "world_lfa",
         name: "LFA",
         stage: "national",
         country: "Estados Unidos",
-        level: 2
+        level: 2,
+        prestige: 50
     },
 
     {
+        id: "world_pfl",
         name: "PFL",
         stage: "international",
         country: "Estados Unidos",
-        level: 4
+        level: 4,
+        prestige: 80
     },
 
     {
+        id: "world_one",
         name: "ONE Championship",
         stage: "international",
         country: "Singapura",
-        level: 4
+        level: 4,
+        prestige: 82
     },
 
     {
+        id: "world_bellator",
         name: "Bellator",
         stage: "international",
         country: "Estados Unidos",
-        level: 4
+        level: 4,
+        prestige: 78
     },
 
     {
+        id: "world_rizin",
         name: "RIZIN",
         stage: "international",
         country: "Japão",
-        level: 4
+        level: 4,
+        prestige: 75
     },
 
     {
+        id: "world_ksw",
         name: "KSW",
         stage: "international",
         country: "Polônia",
-        level: 4
+        level: 4,
+        prestige: 70
     },
 
     {
+        id: "world_uae",
         name: "UAE Warriors",
         stage: "international",
         country: "Emirados Árabes",
-        level: 4
+        level: 4,
+        prestige: 67
     },
 
     {
+        id: "world_ufc",
         name: "UFC",
         stage: "elite",
         country: "Estados Unidos",
-        level: 6
+        level: 6,
+        prestige: 100
     }
 
 ];
@@ -806,7 +1194,7 @@ function createWorldFighter(
     index
 ) {
 
-    const fighter = {
+    return {
 
         id:
             "world_" +
@@ -835,6 +1223,9 @@ function createWorldFighter(
         organization:
             organization.name,
 
+        organizationId:
+            organization.id,
+
         organizationLevel:
             organization.level,
 
@@ -860,6 +1251,9 @@ function createWorldFighter(
         champion:
             false,
 
+        interimChampion:
+            false,
+
         power:
             45 +
             Math.random() * 35,
@@ -882,9 +1276,6 @@ function createWorldFighter(
 
     };
 
-
-    return fighter;
-
 }
 
 
@@ -905,17 +1296,64 @@ function initializeMMWorld() {
 
     mmaWorld.fighters = [];
 
+    mmaWorld.championships = [];
+
 
     let fighterIndex = 0;
 
 
-    /*
-     * Criamos lutadores para cada organização
-     * e categoria.
-     */
-
     worldOrganizations.forEach(
         organization => {
+
+            /*
+             * Cria cinturões para organizações
+             * profissionais.
+             */
+
+            if (
+                organization.stage !==
+                "regional" ||
+                organization.prestige >= 20
+            ) {
+
+                worldWeights.forEach(
+                    weight => {
+
+                        mmaWorld.championships.push({
+
+                            id:
+                                organization.id +
+                                "_" +
+                                weight,
+
+                            organization:
+                                organization.name,
+
+                            organizationId:
+                                organization.id,
+
+                            weightClass:
+                                weight,
+
+                            champion:
+                                null,
+
+                            interimChampion:
+                                null,
+
+                            defenses:
+                                0,
+
+                            titleFights:
+                                0
+
+                        });
+
+                    }
+                );
+
+            }
+
 
             worldWeights.forEach(
                 weight => {
@@ -990,6 +1428,8 @@ function initializeMMWorld() {
 
     updateWorldRankings();
 
+    updateWorldChampions();
+
 
     mmaWorld.initialized =
         true;
@@ -1028,10 +1468,6 @@ function getWorldFighters(
 
 function updateWorldRankings() {
 
-    /*
-     * Cada organização possui seu próprio ranking.
-     */
-
     worldOrganizations.forEach(
         organization => {
 
@@ -1052,24 +1488,16 @@ function updateWorldRankings() {
                                 (
                                     a.wins * 4
                                 ) +
-                                (
-                                    a.fame
-                                ) +
-                                (
-                                    a.power
-                                );
+                                a.fame +
+                                a.power;
 
 
                             const scoreB =
                                 (
                                     b.wins * 4
                                 ) +
-                                (
-                                    b.fame
-                                ) +
-                                (
-                                    b.power
-                                );
+                                b.fame +
+                                b.power;
 
 
                             return scoreB -
@@ -1088,15 +1516,78 @@ function updateWorldRankings() {
                             fighter.ranking =
                                 index + 1;
 
-
-                            fighter.champion =
-                                index === 0;
-
                         }
                     );
 
                 }
             );
+
+        }
+    );
+
+}
+
+
+/* =========================================================
+   ATUALIZAR CAMPEÕES DO MUNDO
+========================================================= */
+
+function updateWorldChampions() {
+
+    if (
+        !mmaWorld.championships
+    ) {
+
+        return;
+
+    }
+
+
+    mmaWorld.championships.forEach(
+        championship => {
+
+            const ranking =
+                getWorldRanking(
+                    championship.organization,
+                    championship.weightClass
+                );
+
+
+            const champion =
+                ranking[0] || null;
+
+
+            mmaWorld.fighters.forEach(
+                fighter => {
+
+                    if (
+                        fighter.organization ===
+                            championship.organization &&
+                        fighter.weight ===
+                            championship.weightClass
+                    ) {
+
+                        fighter.champion =
+                            false;
+
+                        fighter.interimChampion =
+                            false;
+
+                    }
+
+                }
+            );
+
+
+            if (champion) {
+
+                champion.champion =
+                    true;
+
+                championship.champion =
+                    champion.id;
+
+            }
 
         }
     );
@@ -1118,7 +1609,7 @@ function simulateWorldFight(
         !fighterB
     ) {
 
-        return;
+        return null;
 
     }
 
@@ -1166,9 +1657,7 @@ function simulateWorldFight(
 
     winner.wins++;
 
-
     loser.losses++;
-
 
     winner.fame += 1;
 
@@ -1182,10 +1671,6 @@ function simulateWorldFight(
     }
 
 
-    /*
-     * Pequena evolução do vencedor.
-     */
-
     winner.power =
         Math.min(
             100,
@@ -1193,10 +1678,6 @@ function simulateWorldFight(
             0.2
         );
 
-
-    /*
-     * Pequena perda de forma do derrotado.
-     */
 
     loser.power =
         Math.max(
@@ -1237,10 +1718,6 @@ function simulateWorldOrganization(
                 );
 
 
-            /*
-             * Embaralha os lutadores.
-             */
-
             const shuffled =
                 [...fighters].sort(
                     () =>
@@ -1249,21 +1726,11 @@ function simulateWorldOrganization(
                 );
 
 
-            /*
-             * Aproximadamente metade
-             * luta naquela semana.
-             */
-
             for (
                 let i = 0;
                 i + 1 < shuffled.length;
                 i += 2
             ) {
-
-                /*
-                 * Nem todo lutador luta
-                 * toda semana.
-                 */
 
                 if (
                     Math.random() >
@@ -1291,14 +1758,23 @@ function simulateWorldOrganization(
                         organization:
                             organization.name,
 
+                        organizationId:
+                            organization.id,
+
                         weight:
                             weight,
 
                         winner:
                             result.winner.name,
 
+                        winnerId:
+                            result.winner.id,
+
                         loser:
-                            result.loser.name
+                            result.loser.name,
+
+                        loserId:
+                            result.loser.id
 
                     });
 
@@ -1318,10 +1794,6 @@ function simulateWorldOrganization(
 
 function simulateMMWorldWeek() {
 
-    /*
-     * Inicializa o mundo na primeira utilização.
-     */
-
     initializeMMWorld();
 
 
@@ -1330,11 +1802,6 @@ function simulateMMWorldWeek() {
 
     mmaWorld.eventsThisWeek = [];
 
-
-    /*
-     * Todas as organizações funcionam
-     * independentemente do jogador.
-     */
 
     worldOrganizations.forEach(
         organization => {
@@ -1347,16 +1814,10 @@ function simulateMMWorldWeek() {
     );
 
 
-    /*
-     * Atualiza rankings depois das lutas.
-     */
-
     updateWorldRankings();
 
+    updateWorldChampions();
 
-    /*
-     * Guarda algumas notícias.
-     */
 
     if (
         mmaWorld.eventsThisWeek.length >
@@ -1384,11 +1845,6 @@ function simulateMMWorldWeek() {
             ...news
         );
 
-
-        /*
-         * Mantém somente as
-         * últimas 30 notícias.
-         */
 
         mmaWorld.news =
             mmaWorld.news.slice(
@@ -1480,6 +1936,40 @@ function getWorldChampion(
 
 
 /* =========================================================
+   CINTURÃO DO MUNDO
+========================================================= */
+
+function getWorldChampionship(
+    organization,
+    weight
+) {
+
+    if (
+        !mmaWorld.championships
+    ) {
+
+        return null;
+
+    }
+
+
+    return (
+        mmaWorld.championships.find(
+            championship =>
+
+                championship.organization ===
+                organization &&
+
+                championship.weightClass ===
+                weight
+
+        ) || null
+    );
+
+}
+
+
+/* =========================================================
    NOTÍCIAS DO MUNDO
 ========================================================= */
 
@@ -1490,3 +1980,62 @@ function getWorldNews() {
     );
 
 }
+
+
+/* =========================================================
+   DISPONIBILIZAR FUNÇÕES GLOBALMENTE
+========================================================= */
+
+window.generateEvent =
+    generateEvent;
+
+window.prepareEventForPlayer =
+    prepareEventForPlayer;
+
+window.generateAmateurEvent =
+    generateAmateurEvent;
+
+window.generateRegionalEvent =
+    generateRegionalEvent;
+
+window.generateNationalEvent =
+    generateNationalEvent;
+
+window.generateInternationalEvent =
+    generateInternationalEvent;
+
+window.generateEliteEvent =
+    generateEliteEvent;
+
+window.generatePFLTournament =
+    generatePFLTournament;
+
+window.getEventPrestige =
+    getEventPrestige;
+
+window.getEventPurse =
+    getEventPurse;
+
+window.getEventWinBonus =
+    getEventWinBonus;
+
+window.getEventChampionship =
+    getEventChampionship;
+
+window.generateOrganizationChampionships =
+    generateOrganizationChampionships;
+
+window.simulateMMWorldWeek =
+    simulateMMWorldWeek;
+
+window.getWorldRanking =
+    getWorldRanking;
+
+window.getWorldChampion =
+    getWorldChampion;
+
+window.getWorldChampionship =
+    getWorldChampionship;
+
+window.getWorldNews =
+    getWorldNews;
