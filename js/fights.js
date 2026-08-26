@@ -1,4 +1,4 @@
-alert("FIGHTS TESTE");
+
 let currentOpponent = null;
 let currentEvent = null;
 
