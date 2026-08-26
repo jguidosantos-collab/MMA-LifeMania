@@ -408,7 +408,7 @@ function openCharacterCreation() {
 ========================================================= */
 
 function createNewPlayer() {
-
+alert("1 - createNewPlayer foi acionada");
     const nameInput =
         getElement("newPlayerName");
 
