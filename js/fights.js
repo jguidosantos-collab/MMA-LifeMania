@@ -35,6 +35,164 @@ function getFightCareerStage() {
 
 
 /* =========================================================
+   RECUPERAÇÃO
+========================================================= */
+
+function isPlayerRecovering() {
+
+    ensurePlayer();
+
+    const player = window.player;
+
+    const until =
+        Number(player.recoveryUntilWeek || 0);
+
+    const currentWeek =
+        Number(player.week || 1);
+
+    return until > currentWeek;
+}
+
+
+function getRecoveryRemaining() {
+
+    ensurePlayer();
+
+    const player = window.player;
+
+    const until =
+        Number(player.recoveryUntilWeek || 0);
+
+    const currentWeek =
+        Number(player.week || 1);
+
+    return Math.max(
+        0,
+        until - currentWeek
+    );
+}
+
+
+/* =========================================================
+   FINALIZAR RECUPERAÇÃO
+========================================================= */
+
+function processFightRecovery() {
+
+    ensurePlayer();
+
+    const player = window.player;
+
+    if (!player.recoveryUntilWeek) {
+        return;
+    }
+
+    const remaining =
+        getRecoveryRemaining();
+
+    if (remaining <= 0) {
+
+        player.recoveryWeeks = 0;
+
+        player.recoveryUntilWeek = 0;
+
+        player.log =
+            player.log || [];
+
+        player.log.unshift(
+            "🩹 Você terminou sua recuperação e está liberado para lutar novamente."
+        );
+
+        save();
+    }
+
+}
+
+
+/* =========================================================
+   CALCULAR RISCO DA LUTA
+========================================================= */
+
+function calculateFightRisk(
+    event,
+    opponent
+) {
+
+    let risk = 10;
+
+
+    if (event) {
+
+        risk +=
+            Number(event.level || 1) * 10;
+
+    }
+
+
+    if (opponent) {
+
+        risk +=
+            Number(opponent.power || 50) / 5;
+
+    }
+
+
+    risk =
+        Math.round(risk);
+
+
+    return Math.max(
+        10,
+        Math.min(
+            100,
+            risk
+        )
+    );
+
+}
+
+
+/* =========================================================
+   CALCULAR RECUPERAÇÃO
+   4 A 12 SEMANAS
+========================================================= */
+
+function calculateRecoveryWeeks(risk) {
+
+    risk =
+        Number(risk || 10);
+
+
+    if (risk < 35) {
+
+        return 4;
+
+    }
+
+    if (risk < 50) {
+
+        return 6;
+
+    }
+
+    if (risk < 65) {
+
+        return 8;
+
+    }
+
+    if (risk < 80) {
+
+        return 10;
+
+    }
+
+    return 12;
+
+}
+
+
+/* =========================================================
    EMPRESÁRIO PROCURA LUTA
 ========================================================= */
 
@@ -46,14 +204,65 @@ function managerFindFight() {
 
 
     /* =====================================================
+       PRECISA SER PROFISSIONAL
+    ===================================================== */
+
+    if (
+        !player.professional ||
+        !player.professional.active
+    ) {
+
+        alert(
+            "O sistema de empresário para ofertas de luta é destinado à carreira profissional."
+        );
+
+        return;
+
+    }
+
+
+    /* =====================================================
+       PRECISA TER EMPRESÁRIO
+    ===================================================== */
+
+    if (!player.manager) {
+
+        alert(
+            "Você precisa ter um empresário para receber ofertas de luta."
+        );
+
+        return;
+
+    }
+
+
+    /* =====================================================
+       JÁ ESTÁ EM RECUPERAÇÃO
+    ===================================================== */
+
+    if (isPlayerRecovering()) {
+
+        alert(
+
+            "🩹 Você ainda está em recuperação.\n\n" +
+
+            "Semanas restantes: " +
+            getRecoveryRemaining()
+
+        );
+
+        fightScreen();
+
+        return;
+
+    }
+
+
+    /* =====================================================
        JÁ EXISTE OFERTA
     ===================================================== */
 
     if (player.fightOffer) {
-
-        alert(
-            "Você já possui uma oferta de luta."
-        );
 
         fightScreen();
 
@@ -68,10 +277,6 @@ function managerFindFight() {
 
     if (player.nextFight) {
 
-        alert(
-            "Você já tem uma luta marcada."
-        );
-
         fightScreen();
 
         return;
@@ -80,33 +285,17 @@ function managerFindFight() {
 
 
     /* =====================================================
-       AMADOR
-       
-       No amador continua podendo procurar luta.
-       ===================================================== */
+       GERAR EVENTO
+    ===================================================== */
 
-    if (
-        !player.professional ||
-        !player.professional.active
-    ) {
-
-        findFight();
-
-        return;
-
-    }
+    currentEvent =
+        generateEvent();
 
 
-    /* =====================================================
-       EMPRESÁRIO
-       
-       A partir do profissional, o empresário procura.
-       ===================================================== */
-
-    if (!player.manager) {
+    if (!currentEvent) {
 
         alert(
-            "Você precisa de um empresário para receber ofertas de luta."
+            "O empresário não encontrou uma oportunidade de luta neste momento."
         );
 
         return;
@@ -114,20 +303,46 @@ function managerFindFight() {
     }
 
 
-    currentEvent =
-        generateEvent();
-
+    /* =====================================================
+       GERAR ADVERSÁRIO
+    ===================================================== */
 
     currentOpponent =
         generateFighter();
 
 
-    currentOpponent.power +=
-        currentEvent.level * 5;
+    if (!currentOpponent) {
 
+        alert(
+            "O empresário não encontrou um adversário disponível."
+        );
+
+        return;
+
+    }
+
+
+    /* =====================================================
+       FORÇA DO EVENTO
+    ===================================================== */
+
+    currentOpponent.power =
+        Number(
+            currentOpponent.power || 50
+        ) +
+        Number(
+            currentEvent.level || 1
+        ) * 5;
+
+
+    /* =====================================================
+       BOLSA
+    ===================================================== */
 
     let purse =
-        currentEvent.purse;
+        Number(
+            currentEvent.purse || 0
+        );
 
 
     if (
@@ -136,78 +351,53 @@ function managerFindFight() {
     ) {
 
         purse =
-            player.currentContract.purse;
+            Number(
+                player.currentContract.purse ||
+                purse
+            );
 
     }
 
 
-    /*
-     * Risco básico da luta.
-     *
-     * Lutas maiores e adversários mais fortes
-     * aumentam o risco.
-     */
+    /* =====================================================
+       RISCO
+    ===================================================== */
 
-    let risk =
-        Math.round(
-            (
-                currentEvent.level * 10
-            ) +
-            (
-                currentOpponent.power / 5
-            )
+    const risk =
+        calculateFightRisk(
+            currentEvent,
+            currentOpponent
         );
 
 
-    risk =
-        Math.max(
-            10,
-            Math.min(
-                100,
-                risk
-            )
+    /* =====================================================
+       RECUPERAÇÃO
+    ===================================================== */
+
+    const recoveryWeeks =
+        calculateRecoveryWeeks(
+            risk
         );
 
 
-    /*
-     * Descanso estimado.
-     *
-     * 4 a 12 semanas.
-     */
+    /* =====================================================
+       SEMANA PROPOSTA
+       
+       O empresário não marca uma luta
+       imediatamente.
+       
+       Mínimo de 2 semanas de preparação.
+       ===================================================== */
 
-    let recoveryWeeks;
-
-
-    if (risk < 35) {
-
-        recoveryWeeks = 4;
-
-    }
-    else if (risk < 50) {
-
-        recoveryWeeks = 6;
-
-    }
-    else if (risk < 65) {
-
-        recoveryWeeks = 8;
-
-    }
-    else if (risk < 80) {
-
-        recoveryWeeks = 10;
-
-    }
-    else {
-
-        recoveryWeeks = 12;
-
-    }
+    const proposedWeek =
+        Number(
+            player.week || 1
+        ) + 2;
 
 
-    /*
-     * Cria a oferta.
-     */
+    /* =====================================================
+       CRIAR OFERTA
+    ===================================================== */
 
     player.fightOffer = {
 
@@ -227,10 +417,13 @@ function managerFindFight() {
             recoveryWeeks,
 
         proposedWeek:
-            player.week + 2,
+            proposedWeek,
 
         amateur:
-            false
+            false,
+
+        offeredAtWeek:
+            player.week
 
     };
 
@@ -241,7 +434,7 @@ function managerFindFight() {
 
     player.log.unshift(
 
-        "📩 Seu empresário recebeu uma oferta de luta: " +
+        "📩 Seu empresário apresentou uma nova oferta de luta: " +
         currentEvent.name
 
     );
@@ -251,6 +444,98 @@ function managerFindFight() {
 
 
     fightScreen();
+
+}
+
+
+/* =========================================================
+   EMPRESÁRIO AUTOMÁTICO
+========================================================= */
+
+function processManagerFightOffer() {
+
+    ensurePlayer();
+
+    const player = window.player;
+
+
+    /* =====================================================
+       SÓ PROFISSIONAL
+    ===================================================== */
+
+    if (
+        !player.professional ||
+        !player.professional.active
+    ) {
+
+        return;
+
+    }
+
+
+    /* =====================================================
+       SEM EMPRESÁRIO
+    ===================================================== */
+
+    if (!player.manager) {
+
+        return;
+
+    }
+
+
+    /* =====================================================
+       RECUPERAÇÃO
+    ===================================================== */
+
+    if (isPlayerRecovering()) {
+
+        return;
+
+    }
+
+
+    /* =====================================================
+       JÁ TEM OFERTA
+    ===================================================== */
+
+    if (player.fightOffer) {
+
+        return;
+
+    }
+
+
+    /* =====================================================
+       JÁ TEM LUTA
+    ===================================================== */
+
+    if (player.nextFight) {
+
+        return;
+
+    }
+
+
+    /*
+     * O empresário procura automaticamente.
+     *
+     * Existe uma pequena chance de ele não
+     * encontrar uma luta naquela semana.
+     */
+
+    const chance =
+        Math.random();
+
+
+    if (chance > 0.65) {
+
+        return;
+
+    }
+
+
+    managerFindFight();
 
 }
 
@@ -267,6 +552,17 @@ function acceptFightOffer() {
 
 
     if (!player.fightOffer) {
+
+        return;
+
+    }
+
+
+    if (isPlayerRecovering()) {
+
+        alert(
+            "Você ainda está em recuperação."
+        );
 
         return;
 
@@ -396,6 +692,37 @@ function findFight() {
     const player = window.player;
 
 
+    /* =====================================================
+       PROFISSIONAL
+       
+       NÃO PODE PROCURAR.
+       O EMPRESÁRIO PROCURA.
+       ===================================================== */
+
+    if (
+        player.professional &&
+        player.professional.active
+    ) {
+
+        alert(
+
+            "👔 Como profissional, você não procura mais suas próprias lutas.\n\n" +
+
+            "Seu empresário será responsável por encontrar oportunidades."
+
+        );
+
+        managerFindFight();
+
+        return;
+
+    }
+
+
+    /* =====================================================
+       JÁ TEM LUTA
+    ===================================================== */
+
     if (player.nextFight) {
 
         alert(
@@ -422,69 +749,59 @@ function findFight() {
        AMADOR
        ===================================================== */
 
-    if (!player.professional.active) {
-
-        currentEvent =
-            generateEvent();
-
-        currentOpponent =
-            generateFighter();
+    currentEvent =
+        generateEvent();
 
 
-        currentOpponent.power +=
-            currentEvent.level * 5;
+    currentOpponent =
+        generateFighter();
 
 
-        player.nextFight = {
-
-            opponent:
-                currentOpponent,
-
-            event:
-                currentEvent,
-
-            purse:
-                currentEvent.purse,
-
-            week:
-                player.week + 1,
-
-            amateur:
-                true
-
-        };
+    currentOpponent.power +=
+        currentEvent.level * 5;
 
 
-        player.log =
-            player.log || [];
+    player.nextFight = {
+
+        opponent:
+            currentOpponent,
+
+        event:
+            currentEvent,
+
+        purse:
+            currentEvent.purse,
+
+        week:
+            player.week + 1,
+
+        amateur:
+            true,
+
+        risk:
+            0,
+
+        recoveryWeeks:
+            0
+
+    };
 
 
-        player.log.unshift(
-
-            "🥋 Luta amadora marcada: " +
-            currentEvent.name
-
-        );
+    player.log =
+        player.log || [];
 
 
-        save();
+    player.log.unshift(
 
-        fightScreen();
+        "🥋 Luta amadora marcada: " +
+        currentEvent.name
 
-        return;
-
-    }
+    );
 
 
-    /*
-     * IMPORTANTE:
-     *
-     * Profissional NÃO procura mais a própria luta.
-     *
-     * O empresário faz isso.
-     */
+    save();
 
-    managerFindFight();
+    fightScreen();
 
 }
 
@@ -608,6 +925,51 @@ function fight() {
     }
 
 
+    /* =====================================================
+       VERIFICAR SEMANA
+    ===================================================== */
+
+    const fightWeek =
+        Number(
+            player.nextFight.week ||
+            player.week
+        );
+
+
+    if (
+        Number(player.week) <
+        fightWeek
+    ) {
+
+        alert(
+
+            "📅 Essa luta está marcada para a semana " +
+            fightWeek +
+            ".\n\n" +
+
+            "Você ainda precisa avançar o tempo."
+
+        );
+
+        return;
+
+    }
+
+
+    if (
+        Number(player.week) >
+        fightWeek
+    ) {
+
+        alert(
+            "⚠️ A data dessa luta já passou."
+        );
+
+        return;
+
+    }
+
+
     const opponent =
         player.nextFight.opponent;
 
@@ -630,38 +992,46 @@ function fight() {
 
     let fighterPower = (
 
-        a.strength +
-        a.striking +
-        a.wrestling +
-        a.grappling +
-        a.cardio +
-        a.technique +
-        a.defense +
-        a.fightIQ +
-        a.mental +
-        a.confidence
+        Number(a.strength || 40) +
+        Number(a.striking || 40) +
+        Number(a.wrestling || 40) +
+        Number(a.grappling || 40) +
+        Number(a.cardio || 40) +
+        Number(a.technique || 40) +
+        Number(a.defense || 40) +
+        Number(a.fightIQ || 40) +
+        Number(a.mental || 40) +
+        Number(a.confidence || 40)
 
     ) / 10;
 
 
     fighterPower +=
-        player.professional.wins * 1.5;
+        Number(
+            player.professional.wins || 0
+        ) * 1.5;
 
 
     fighterPower +=
-        player.amateur.wins * 0.5;
+        Number(
+            player.amateur.wins || 0
+        ) * 0.5;
 
 
     if (player.team) {
 
         fighterPower +=
-            player.team.quality / 8;
+            Number(
+                player.team.quality || 0
+            ) / 8;
 
     }
 
 
     fighterPower -=
-        player.fatigue / 5;
+        Number(
+            player.fatigue || 0
+        ) / 5;
 
 
     fighterPower +=
@@ -669,7 +1039,9 @@ function fight() {
 
 
     const enemyPower =
-        opponent.power;
+        Number(
+            opponent.power || 50
+        );
 
 
     const won =
@@ -694,7 +1066,9 @@ function fight() {
             player.attributes.confidence =
                 Math.min(
                     100,
-                    player.attributes.confidence + 2
+                    Number(
+                        player.attributes.confidence || 40
+                    ) + 2
                 );
 
 
@@ -724,11 +1098,16 @@ function fight() {
             player.professional.wins++;
 
 
-            opponent.losses++;
+            opponent.losses =
+                Number(
+                    opponent.losses || 0
+                ) + 1;
 
 
             let purse =
-                event.purse;
+                Number(
+                    event.purse || 0
+                );
 
 
             let winBonus =
@@ -741,11 +1120,17 @@ function fight() {
             ) {
 
                 purse =
-                    player.currentContract.purse;
+                    Number(
+                        player.currentContract.purse ||
+                        purse
+                    );
 
 
                 winBonus =
-                    player.currentContract.winBonus;
+                    Number(
+                        player.currentContract.winBonus ||
+                        0
+                    );
 
             }
 
@@ -788,7 +1173,9 @@ function fight() {
 
 
             const finalMoney =
-                payout.net;
+                Number(
+                    payout.net || 0
+                );
 
 
             player.money +=
@@ -796,13 +1183,17 @@ function fight() {
 
 
             player.fame +=
-                event.level * 4;
+                Number(
+                    event.level || 1
+                ) * 4;
 
 
             player.attributes.confidence =
                 Math.min(
                     100,
-                    player.attributes.confidence + 3
+                    Number(
+                        player.attributes.confidence || 40
+                    ) + 3
                 );
 
 
@@ -840,17 +1231,17 @@ function fight() {
                 "\n\n" +
 
                 "Total bruto: $" +
-                Math.round(payout.gross) +
+                Math.round(payout.gross || 0) +
 
                 "\n" +
 
                 "Empresário: -$" +
-                Math.round(payout.managerCut) +
+                Math.round(payout.managerCut || 0) +
 
                 "\n" +
 
                 "Academia: -$" +
-                Math.round(payout.teamCut) +
+                Math.round(payout.teamCut || 0) +
 
                 "\n\n" +
 
@@ -885,7 +1276,9 @@ function fight() {
             player.attributes.confidence =
                 Math.max(
                     0,
-                    player.attributes.confidence - 2
+                    Number(
+                        player.attributes.confidence || 40
+                    ) - 2
                 );
 
 
@@ -911,11 +1304,16 @@ function fight() {
             player.professional.losses++;
 
 
-            opponent.wins++;
+            opponent.wins =
+                Number(
+                    opponent.wins || 0
+                ) + 1;
 
 
             let purse =
-                event.purse;
+                Number(
+                    event.purse || 0
+                );
 
 
             if (
@@ -924,7 +1322,10 @@ function fight() {
             ) {
 
                 purse =
-                    player.currentContract.purse;
+                    Number(
+                        player.currentContract.purse ||
+                        purse
+                    );
 
             }
 
@@ -967,7 +1368,9 @@ function fight() {
 
 
             const finalMoney =
-                payout.net;
+                Number(
+                    payout.net || 0
+                );
 
 
             player.money +=
@@ -978,14 +1381,18 @@ function fight() {
                 Math.max(
                     0,
                     player.fame -
-                    event.level * 2
+                    Number(
+                        event.level || 1
+                    ) * 2
                 );
 
 
             player.attributes.confidence =
                 Math.max(
                     0,
-                    player.attributes.confidence - 4
+                    Number(
+                        player.attributes.confidence || 40
+                    ) - 4
                 );
 
 
@@ -1018,12 +1425,12 @@ function fight() {
                 "\n\n" +
 
                 "Empresário: -$" +
-                Math.round(payout.managerCut) +
+                Math.round(payout.managerCut || 0) +
 
                 "\n" +
 
                 "Academia: -$" +
-                Math.round(payout.teamCut) +
+                Math.round(payout.teamCut || 0) +
 
                 "\n\n" +
 
@@ -1039,38 +1446,45 @@ function fight() {
 
     /* =====================================================
        RECUPERAÇÃO PÓS-LUTA
+       
+       Somente profissional.
+       4 a 12 semanas.
     ===================================================== */
 
-    const recoveryWeeks =
-        Number(
-            player.nextFight.recoveryWeeks || 4
+    if (!isAmateur) {
+
+        const recoveryWeeks =
+            Number(
+                player.nextFight.recoveryWeeks || 4
+            );
+
+
+        player.recoveryWeeks =
+            Math.max(
+                4,
+                Math.min(
+                    12,
+                    recoveryWeeks
+                )
+            );
+
+
+        player.recoveryUntilWeek =
+            Number(
+                player.week || 1
+            ) +
+            player.recoveryWeeks;
+
+
+        player.log.unshift(
+
+            "🩹 Recuperação pós-luta: " +
+            player.recoveryWeeks +
+            " semanas."
+
         );
 
-
-    player.recoveryWeeks =
-        Math.max(
-            4,
-            Math.min(
-                12,
-                recoveryWeeks
-            )
-        );
-
-
-    player.recoveryUntilWeek =
-        Number(
-            player.week || 1
-        ) +
-        player.recoveryWeeks;
-
-
-    player.log.unshift(
-
-        "🩹 Recuperação pós-luta: " +
-        player.recoveryWeeks +
-        " semanas."
-
-    );
+    }
 
 
     /* =====================================================
@@ -1080,10 +1494,14 @@ function fight() {
     player.health =
         Math.max(
             20,
-            player.health -
+            Number(
+                player.health || 100
+            ) -
             (
                 10 +
-                event.level * 2
+                Number(
+                    event.level || 1
+                ) * 2
             )
         );
 
@@ -1091,7 +1509,9 @@ function fight() {
     player.fatigue =
         Math.min(
             100,
-            player.fatigue + 30
+            Number(
+                player.fatigue || 0
+            ) + 30
         );
 
 
@@ -1115,7 +1535,14 @@ function fight() {
         null;
 
 
-    updateRanking();
+    if (
+        typeof updateRanking ===
+        "function"
+    ) {
+
+        updateRanking();
+
+    }
 
 
     save();
@@ -1152,6 +1579,14 @@ function fightScreen() {
         player.professional.active;
 
 
+    const recovering =
+        isPlayerRecovering();
+
+
+    const recoveryRemaining =
+        getRecoveryRemaining();
+
+
     content.innerHTML = `
 
         <div class="card">
@@ -1175,7 +1610,69 @@ function fightScreen() {
 
         ${
             isProfessional &&
-            player.fightOffer
+            recovering
+
+            ?
+
+            `
+
+            <div class="card">
+
+                <div class="title">
+                    🩹 RECUPERAÇÃO PÓS-LUTA
+                </div>
+
+                <p>
+                    Você ainda está se recuperando da última luta.
+                </p>
+
+
+                <div class="statline">
+
+                    <span>
+                        Semanas restantes
+                    </span>
+
+                    <b>
+                        ${recoveryRemaining}
+                    </b>
+
+                </div>
+
+
+                <div class="statline">
+
+                    <span>
+                        Recuperação total
+                    </span>
+
+                    <b>
+                        ${player.recoveryWeeks || 4}
+                        semanas
+                    </b>
+
+                </div>
+
+
+                <p>
+                    Seu empresário aguardará você estar liberado antes de apresentar uma nova luta.
+                </p>
+
+            </div>
+
+            `
+
+            :
+
+            ""
+        }
+
+
+        ${
+            isProfessional &&
+            player.fightOffer &&
+            !recovering
+
             ?
 
             `
@@ -1185,6 +1682,11 @@ function fightScreen() {
                 <div class="title">
                     📩 OFERTA DE LUTA
                 </div>
+
+
+                <p>
+                    👔 Seu empresário encontrou esta oportunidade para você:
+                </p>
 
 
                 <div class="statline">
@@ -1395,6 +1897,20 @@ function fightScreen() {
 
                         </div>
 
+
+                        <div class="statline">
+
+                            <span>
+                                Recuperação estimada
+                            </span>
+
+                            <b>
+                                ${player.nextFight.recoveryWeeks}
+                                semanas
+                            </b>
+
+                        </div>
+
                         `
 
                         :
@@ -1403,13 +1919,35 @@ function fightScreen() {
                     }
 
 
-                    <button
-                        class="main-button"
-                        onclick="fight()">
+                    ${
+                        Number(player.week) >=
+                        Number(player.nextFight.week)
 
-                        👊 LUTAR
+                        ?
 
-                    </button>
+                        `
+
+                        <button
+                            class="main-button"
+                            onclick="fight()">
+
+                            👊 LUTAR
+
+                        </button>
+
+                        `
+
+                        :
+
+                        `
+
+                        <p>
+                            ⏳ Prepare-se para a luta.
+                        </p>
+
+                        `
+
+                    }
 
                 `
 
@@ -1421,7 +1959,7 @@ function fightScreen() {
                         ${
                             isProfessional
                             ?
-                            "Nenhuma luta aceita no momento. Aguarde uma oferta do empresário."
+                            "Nenhuma luta aceita no momento. Seu empresário está procurando oportunidades."
                             :
                             "Você não possui uma luta marcada."
                         }
@@ -1470,7 +2008,9 @@ function fightScreen() {
                 </span>
 
                 <b>
-                    ${player.amateur.wins}-${player.amateur.losses}-${player.amateur.draws}
+                    ${player.amateur.wins}-
+                    ${player.amateur.losses}-
+                    ${player.amateur.draws}
                 </b>
 
             </div>
@@ -1483,7 +2023,9 @@ function fightScreen() {
                 </span>
 
                 <b>
-                    ${player.professional.wins}-${player.professional.losses}-${player.professional.draws}
+                    ${player.professional.wins}-
+                    ${player.professional.losses}-
+                    ${player.professional.draws}
                 </b>
 
             </div>
@@ -1496,7 +2038,9 @@ function fightScreen() {
                 </span>
 
                 <b>
-                    ${Math.round(player.fatigue)}%
+                    ${Math.round(
+                        player.fatigue || 0
+                    )}%
                 </b>
 
             </div>
@@ -1504,6 +2048,7 @@ function fightScreen() {
 
             ${
                 player.recoveryWeeks > 0
+
                 ?
 
                 `
@@ -1511,7 +2056,7 @@ function fightScreen() {
                 <div class="statline">
 
                     <span>
-                        Recuperação
+                        Recuperação total
                     </span>
 
                     <b>
@@ -1546,6 +2091,9 @@ window.findFight =
 window.managerFindFight =
     managerFindFight;
 
+window.processManagerFightOffer =
+    processManagerFightOffer;
+
 window.acceptFightOffer =
     acceptFightOffer;
 
@@ -1557,3 +2105,12 @@ window.fight =
 
 window.fightScreen =
     fightScreen;
+
+window.isPlayerRecovering =
+    isPlayerRecovering;
+
+window.getRecoveryRemaining =
+    getRecoveryRemaining;
+
+window.processFightRecovery =
+    processFightRecovery;
