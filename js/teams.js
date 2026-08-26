@@ -1,108 +1,139 @@
 /* =========================================================
    🏢 MMA LIFE DYNASTY
    TEAM.JS
-   SISTEMA COMPLETO:
-   EQUIPES + TREINADORES + TREINADORES PARTICULARES
+   EQUIPES + TREINADORES + TREINADOR PARTICULAR
    + EMPRESÁRIOS
+   VERSÃO SEGURA / COMPATÍVEL
 ========================================================= */
+
+
 /* =========================================================
    UTILIDADES
 ========================================================= */
+
 function teamRandomInt(min, max) {
     return Math.floor(
         Math.random() * (max - min + 1)
     ) + min;
 }
+
 function teamClamp(value, min, max) {
     return Math.max(
         min,
         Math.min(max, value)
     );
 }
+
 function teamSave() {
-    if (typeof saveGame === "function") {
-        saveGame();
-    }
-    else if (typeof save === "function") {
-        save();
-    }
-    else {
-        localStorage.setItem(
-            "mmaLifePlayer",
-            JSON.stringify(window.player)
+
+    try {
+
+        if (typeof saveGame === "function") {
+            saveGame();
+            return;
+        }
+
+        if (typeof save === "function") {
+            save();
+            return;
+        }
+
+        if (window.player) {
+            localStorage.setItem(
+                "mmaLifePlayer",
+                JSON.stringify(window.player)
+            );
+        }
+
+    } catch (error) {
+
+        console.warn(
+            "TEAM.JS: erro ao salvar:",
+            error
         );
+
     }
 }
+
+
 /* =========================================================
    GERADOR DE EQUIPES
-   IMPORTANTE:
-   FICA ANTES DO BANCO PARA NÃO QUEBRAR O CARREGAMENTO
 ========================================================= */
+
 function createCountryTeams(
     country,
     prefix,
     names
 ) {
+
     return names.map(
-        (name, index) => {
-            const rank =
-                index + 1;
+        function(name, index) {
+
+            const rank = index + 1;
+
             const prestige =
-                98 -
-                (index * 3);
+                98 - (index * 3);
+
             return {
+
                 id:
                     prefix.toLowerCase() +
                     "_" +
                     String(rank).padStart(2, "0"),
-                name:
-                    name,
-                country:
-                    country,
-                rank:
-                    rank,
+
+                name: name,
+
+                country: country,
+
+                rank: rank,
+
                 prestige:
                     teamClamp(
                         prestige,
                         70,
                         98
                     ),
+
                 structure:
                     teamClamp(
                         prestige - 2,
                         68,
                         96
                     ),
+
                 coaching:
                     teamClamp(
                         prestige + 1,
                         72,
                         99
                     ),
+
                 cost:
                     700 +
                     (10 - rank) * 120,
+
                 specialty:
                     [
                         "Completo",
                         "Striking",
                         "Wrestling",
                         "Grappling"
-                    ][
-                        index % 4
-                    ]
+                    ][index % 4]
             };
+
         }
     );
 }
+
+
 /* =========================================================
    🏢 BANCO DE EQUIPES
-   TOP 10 DE CADA PAÍS
 ========================================================= */
-const mmaTeams = [
-    /* =====================================================
-       🇧🇷 BRASIL
-    ===================================================== */
+
+const mmaTeamsData = [
+
+    /* ================= BRASIL ================= */
+
     {
         id: "br_01",
         name: "Nova União",
@@ -114,6 +145,7 @@ const mmaTeams = [
         cost: 1800,
         specialty: "Grappling"
     },
+
     {
         id: "br_02",
         name: "Chute Boxe",
@@ -125,6 +157,7 @@ const mmaTeams = [
         cost: 1750,
         specialty: "Striking"
     },
+
     {
         id: "br_03",
         name: "Team Nogueira",
@@ -136,6 +169,7 @@ const mmaTeams = [
         cost: 1650,
         specialty: "Completo"
     },
+
     {
         id: "br_04",
         name: "Pitbull Brothers",
@@ -147,6 +181,7 @@ const mmaTeams = [
         cost: 1550,
         specialty: "Completo"
     },
+
     {
         id: "br_05",
         name: "X-Gym",
@@ -158,6 +193,7 @@ const mmaTeams = [
         cost: 1500,
         specialty: "Striking"
     },
+
     {
         id: "br_06",
         name: "Team Shogun",
@@ -169,6 +205,7 @@ const mmaTeams = [
         cost: 1350,
         specialty: "Striking"
     },
+
     {
         id: "br_07",
         name: "RFT Team",
@@ -180,6 +217,7 @@ const mmaTeams = [
         cost: 1200,
         specialty: "Wrestling"
     },
+
     {
         id: "br_08",
         name: "GFT Team",
@@ -191,6 +229,7 @@ const mmaTeams = [
         cost: 1100,
         specialty: "Grappling"
     },
+
     {
         id: "br_09",
         name: "Alliance Brasil",
@@ -202,6 +241,7 @@ const mmaTeams = [
         cost: 950,
         specialty: "Grappling"
     },
+
     {
         id: "br_10",
         name: "Arena Fight Team",
@@ -213,9 +253,10 @@ const mmaTeams = [
         cost: 800,
         specialty: "Completo"
     },
-    /* =====================================================
-       🇺🇸 ESTADOS UNIDOS
-    ===================================================== */
+
+
+    /* ================= ESTADOS UNIDOS ================= */
+
     {
         id: "us_01",
         name: "American Top Team",
@@ -227,6 +268,7 @@ const mmaTeams = [
         cost: 2200,
         specialty: "Completo"
     },
+
     {
         id: "us_02",
         name: "American Kickboxing Academy",
@@ -238,6 +280,7 @@ const mmaTeams = [
         cost: 2100,
         specialty: "Wrestling"
     },
+
     {
         id: "us_03",
         name: "Jackson Wink",
@@ -249,6 +292,7 @@ const mmaTeams = [
         cost: 2000,
         specialty: "Striking"
     },
+
     {
         id: "us_04",
         name: "American Kickboxing Team",
@@ -260,6 +304,7 @@ const mmaTeams = [
         cost: 1800,
         specialty: "Striking"
     },
+
     {
         id: "us_05",
         name: "Kings MMA",
@@ -271,6 +316,7 @@ const mmaTeams = [
         cost: 1750,
         specialty: "Muay Thai"
     },
+
     {
         id: "us_06",
         name: "Elevation Fight Team",
@@ -282,6 +328,7 @@ const mmaTeams = [
         cost: 1500,
         specialty: "Completo"
     },
+
     {
         id: "us_07",
         name: "Sanford MMA",
@@ -293,6 +340,7 @@ const mmaTeams = [
         cost: 1450,
         specialty: "Striking"
     },
+
     {
         id: "us_08",
         name: "Factory X",
@@ -304,6 +352,7 @@ const mmaTeams = [
         cost: 1300,
         specialty: "Completo"
     },
+
     {
         id: "us_09",
         name: "Fortis MMA",
@@ -315,6 +364,7 @@ const mmaTeams = [
         cost: 1200,
         specialty: "Wrestling"
     },
+
     {
         id: "us_10",
         name: "Glory MMA Academy",
@@ -326,9 +376,10 @@ const mmaTeams = [
         cost: 1000,
         specialty: "Striking"
     },
-    /* =====================================================
-       🇯🇵 JAPÃO
-    ===================================================== */
+
+
+    /* ================= JAPÃO ================= */
+
     {
         id: "jp_01",
         name: "Japanese Combat Elite",
@@ -340,6 +391,7 @@ const mmaTeams = [
         cost: 1900,
         specialty: "Grappling"
     },
+
     {
         id: "jp_02",
         name: "Pancrase Team",
@@ -351,6 +403,7 @@ const mmaTeams = [
         cost: 1800,
         specialty: "Completo"
     },
+
     {
         id: "jp_03",
         name: "Shooto Elite",
@@ -362,6 +415,7 @@ const mmaTeams = [
         cost: 1650,
         specialty: "Grappling"
     },
+
     {
         id: "jp_04",
         name: "Rizin Combat Team",
@@ -373,6 +427,7 @@ const mmaTeams = [
         cost: 1600,
         specialty: "Completo"
     },
+
     {
         id: "jp_05",
         name: "Tokyo Fight Academy",
@@ -384,6 +439,7 @@ const mmaTeams = [
         cost: 1400,
         specialty: "Striking"
     },
+
     {
         id: "jp_06",
         name: "Osaka Combat Club",
@@ -395,6 +451,7 @@ const mmaTeams = [
         cost: 1250,
         specialty: "Wrestling"
     },
+
     {
         id: "jp_07",
         name: "Kyoto MMA",
@@ -406,6 +463,7 @@ const mmaTeams = [
         cost: 1100,
         specialty: "Grappling"
     },
+
     {
         id: "jp_08",
         name: "Samurai Fight Team",
@@ -417,6 +475,7 @@ const mmaTeams = [
         cost: 1000,
         specialty: "Striking"
     },
+
     {
         id: "jp_09",
         name: "Nippon Combat",
@@ -428,6 +487,7 @@ const mmaTeams = [
         cost: 900,
         specialty: "Completo"
     },
+
     {
         id: "jp_10",
         name: "Tokyo Warriors",
@@ -439,9 +499,10 @@ const mmaTeams = [
         cost: 800,
         specialty: "Completo"
     },
-    /* =====================================================
-       🇲🇽 MÉXICO
-    ===================================================== */
+
+
+    /* ================= MÉXICO ================= */
+
     {
         id: "mx_01",
         name: "Mexico Combat Elite",
@@ -453,6 +514,7 @@ const mmaTeams = [
         cost: 1500,
         specialty: "Striking"
     },
+
     {
         id: "mx_02",
         name: "Azteca Fight Team",
@@ -464,6 +526,7 @@ const mmaTeams = [
         cost: 1400,
         specialty: "Grappling"
     },
+
     {
         id: "mx_03",
         name: "Mexico MMA Academy",
@@ -475,6 +538,7 @@ const mmaTeams = [
         cost: 1300,
         specialty: "Completo"
     },
+
     {
         id: "mx_04",
         name: "Guerreros MMA",
@@ -486,6 +550,7 @@ const mmaTeams = [
         cost: 1150,
         specialty: "Striking"
     },
+
     {
         id: "mx_05",
         name: "Tijuana Combat",
@@ -497,6 +562,7 @@ const mmaTeams = [
         cost: 1050,
         specialty: "Wrestling"
     },
+
     {
         id: "mx_06",
         name: "Azteca Warriors",
@@ -508,6 +574,7 @@ const mmaTeams = [
         cost: 950,
         specialty: "Striking"
     },
+
     {
         id: "mx_07",
         name: "Monterrey MMA",
@@ -519,6 +586,7 @@ const mmaTeams = [
         cost: 850,
         specialty: "Completo"
     },
+
     {
         id: "mx_08",
         name: "Guadalajara Fight Team",
@@ -530,6 +598,7 @@ const mmaTeams = [
         cost: 800,
         specialty: "Grappling"
     },
+
     {
         id: "mx_09",
         name: "Cancun Combat",
@@ -541,6 +610,7 @@ const mmaTeams = [
         cost: 700,
         specialty: "Striking"
     },
+
     {
         id: "mx_10",
         name: "Maya Fight Academy",
@@ -552,9 +622,10 @@ const mmaTeams = [
         cost: 600,
         specialty: "Completo"
     },
-    /* =====================================================
-       🇦🇷 ARGENTINA
-    ===================================================== */
+
+
+    /* ================= ARGENTINA ================= */
+
     ...createCountryTeams(
         "Argentina",
         "AR",
@@ -571,9 +642,10 @@ const mmaTeams = [
             "Argentina Fight Academy"
         ]
     ),
-    /* =====================================================
-       🇨🇦 CANADÁ
-    ===================================================== */
+
+
+    /* ================= CANADÁ ================= */
+
     ...createCountryTeams(
         "Canadá",
         "CA",
@@ -590,9 +662,10 @@ const mmaTeams = [
             "North Star MMA"
         ]
     ),
-    /* =====================================================
-       🇷🇺 RÚSSIA
-    ===================================================== */
+
+
+    /* ================= RÚSSIA ================= */
+
     ...createCountryTeams(
         "Rússia",
         "RU",
@@ -609,9 +682,10 @@ const mmaTeams = [
             "Russian Fight Academy"
         ]
     ),
-    /* =====================================================
-       🇬🇧 REINO UNIDO
-    ===================================================== */
+
+
+    /* ================= REINO UNIDO ================= */
+
     ...createCountryTeams(
         "Reino Unido",
         "UK",
@@ -628,11 +702,26 @@ const mmaTeams = [
             "British Fight Academy"
         ]
     )
+
 ];
+
+
+/*
+   IMPORTANTE:
+   Usamos uma variável diferente da antiga "mmaTeams"
+   para evitar conflito caso o arquivo seja carregado
+   novamente.
+*/
+
+window.mmaTeams = mmaTeamsData;
+
+
 /* =========================================================
-   🥋 TREINADORES DAS EQUIPES
+   🥋 TREINADORES
 ========================================================= */
-const teamCoaches = [
+
+const teamCoachesData = [
+
     {
         id: "coach_01",
         name: "Ricardo Almeida",
@@ -641,6 +730,7 @@ const teamCoaches = [
         privateCost: 850,
         weeklyCost: 120
     },
+
     {
         id: "coach_02",
         name: "Marcelo Rocha",
@@ -649,6 +739,7 @@ const teamCoaches = [
         privateCost: 800,
         weeklyCost: 115
     },
+
     {
         id: "coach_03",
         name: "Fernando Costa",
@@ -657,6 +748,7 @@ const teamCoaches = [
         privateCost: 750,
         weeklyCost: 110
     },
+
     {
         id: "coach_04",
         name: "Daniel Souza",
@@ -665,6 +757,7 @@ const teamCoaches = [
         privateCost: 720,
         weeklyCost: 105
     },
+
     {
         id: "coach_05",
         name: "Anderson Lima",
@@ -673,6 +766,7 @@ const teamCoaches = [
         privateCost: 650,
         weeklyCost: 95
     },
+
     {
         id: "coach_06",
         name: "Paulo Mendes",
@@ -681,11 +775,18 @@ const teamCoaches = [
         privateCost: 600,
         weeklyCost: 90
     }
+
 ];
+
+window.teamCoaches = teamCoachesData;
+
+
 /* =========================================================
    👤 TREINADORES PARTICULARES
 ========================================================= */
-const privateCoaches = [
+
+const privateCoachesData = [
+
     {
         id: "private_01",
         name: "Rafael Mendes",
@@ -694,6 +795,7 @@ const privateCoaches = [
         cost: 900,
         weeklyCost: 150
     },
+
     {
         id: "private_02",
         name: "Bruno Silva",
@@ -702,6 +804,7 @@ const privateCoaches = [
         cost: 850,
         weeklyCost: 140
     },
+
     {
         id: "private_03",
         name: "Carlos Oliveira",
@@ -710,6 +813,7 @@ const privateCoaches = [
         cost: 1000,
         weeklyCost: 160
     },
+
     {
         id: "private_04",
         name: "Eduardo Santos",
@@ -718,415 +822,444 @@ const privateCoaches = [
         cost: 1200,
         weeklyCost: 180
     }
+
 ];
+
+window.privateCoaches = privateCoachesData;
+
+
 /* =========================================================
-   👔 SISTEMA DE EMPRESÁRIOS
+   👔 EMPRESÁRIOS
 ========================================================= */
-/* =========================================================
-   GERAR COMISSÃO
-========================================================= */
+
 function randomManagerCommission(min, max) {
+
     return Math.floor(
         min +
         Math.random() *
-        (
-            max -
-            min +
-            1
-        )
+        (max - min + 1)
     );
+
 }
-/* =========================================================
-   BANCO DE EMPRESÁRIOS
-========================================================= */
-const managers = [
-    /* =====================================================
-       🟢 INICIANTES
-    ===================================================== */
+
+
+const managersData = [
+
+    /* ================= INICIANTES ================= */
+
     {
         name: "Carlos Mendes",
         level: "Iniciante",
         levelNumber: 1,
-        commission:
-            randomManagerCommission(10, 15),
-        contacts:
-            20 +
-            Math.floor(Math.random() * 16),
-        negotiation:
-            25 +
-            Math.floor(Math.random() * 21),
-        internationalAccess:
-            10 +
-            Math.floor(Math.random() * 16)
+        commission: randomManagerCommission(10, 15),
+        contacts: 20 + Math.floor(Math.random() * 16),
+        negotiation: 25 + Math.floor(Math.random() * 21),
+        internationalAccess: 10 + Math.floor(Math.random() * 16)
     },
+
     {
         name: "Lucas Ferreira",
         level: "Iniciante",
         levelNumber: 1,
-        commission:
-            randomManagerCommission(10, 15),
-        contacts:
-            20 +
-            Math.floor(Math.random() * 16),
-        negotiation:
-            30 +
-            Math.floor(Math.random() * 21),
-        internationalAccess:
-            15 +
-            Math.floor(Math.random() * 16)
+        commission: randomManagerCommission(10, 15),
+        contacts: 20 + Math.floor(Math.random() * 16),
+        negotiation: 30 + Math.floor(Math.random() * 21),
+        internationalAccess: 15 + Math.floor(Math.random() * 16)
     },
+
     {
         name: "Bruno Almeida",
         level: "Iniciante",
         levelNumber: 1,
-        commission:
-            randomManagerCommission(10, 15),
-        contacts:
-            25 +
-            Math.floor(Math.random() * 16),
-        negotiation:
-            25 +
-            Math.floor(Math.random() * 21),
-        internationalAccess:
-            10 +
-            Math.floor(Math.random() * 21)
+        commission: randomManagerCommission(10, 15),
+        contacts: 25 + Math.floor(Math.random() * 16),
+        negotiation: 25 + Math.floor(Math.random() * 21),
+        internationalAccess: 10 + Math.floor(Math.random() * 21)
     },
-    /* =====================================================
-       🔵 INTERMEDIÁRIOS
-    ===================================================== */
+
+
+    /* ================= INTERMEDIÁRIOS ================= */
+
     {
         name: "Rafael Costa",
         level: "Intermediário",
         levelNumber: 2,
-        commission:
-            randomManagerCommission(13, 20),
-        contacts:
-            40 +
-            Math.floor(Math.random() * 31),
-        negotiation:
-            45 +
-            Math.floor(Math.random() * 31),
-        internationalAccess:
-            35 +
-            Math.floor(Math.random() * 31)
+        commission: randomManagerCommission(13, 20),
+        contacts: 40 + Math.floor(Math.random() * 31),
+        negotiation: 45 + Math.floor(Math.random() * 31),
+        internationalAccess: 35 + Math.floor(Math.random() * 31)
     },
+
     {
         name: "André Silva",
         level: "Intermediário",
         levelNumber: 2,
-        commission:
-            randomManagerCommission(13, 20),
-        contacts:
-            45 +
-            Math.floor(Math.random() * 31),
-        negotiation:
-            50 +
-            Math.floor(Math.random() * 31),
-        internationalAccess:
-            40 +
-            Math.floor(Math.random() * 31)
+        commission: randomManagerCommission(13, 20),
+        contacts: 45 + Math.floor(Math.random() * 31),
+        negotiation: 50 + Math.floor(Math.random() * 31),
+        internationalAccess: 40 + Math.floor(Math.random() * 31)
     },
+
     {
         name: "Thiago Rodrigues",
         level: "Intermediário",
         levelNumber: 2,
-        commission:
-            randomManagerCommission(13, 20),
-        contacts:
-            40 +
-            Math.floor(Math.random() * 36),
-        negotiation:
-            55 +
-            Math.floor(Math.random() * 26),
-        internationalAccess:
-            45 +
-            Math.floor(Math.random() * 26)
+        commission: randomManagerCommission(13, 20),
+        contacts: 40 + Math.floor(Math.random() * 36),
+        negotiation: 55 + Math.floor(Math.random() * 26),
+        internationalAccess: 45 + Math.floor(Math.random() * 26)
     },
+
     {
         name: "Felipe Martins",
         level: "Intermediário",
         levelNumber: 2,
-        commission:
-            randomManagerCommission(13, 20),
-        contacts:
-            50 +
-            Math.floor(Math.random() * 26),
-        negotiation:
-            45 +
-            Math.floor(Math.random() * 36),
-        internationalAccess:
-            40 +
-            Math.floor(Math.random() * 31)
+        commission: randomManagerCommission(13, 20),
+        contacts: 50 + Math.floor(Math.random() * 26),
+        negotiation: 45 + Math.floor(Math.random() * 36),
+        internationalAccess: 40 + Math.floor(Math.random() * 31)
     },
-    /* =====================================================
-       🟣 ELITE
-    ===================================================== */
+
+
+    /* ================= ELITE ================= */
+
     {
         name: "Marcos Oliveira",
         level: "Elite",
         levelNumber: 3,
-        commission:
-            randomManagerCommission(15, 25),
-        contacts:
-            80 +
-            Math.floor(Math.random() * 21),
-        negotiation:
-            75 +
-            Math.floor(Math.random() * 26),
-        internationalAccess:
-            75 +
-            Math.floor(Math.random() * 26)
+        commission: randomManagerCommission(15, 25),
+        contacts: 80 + Math.floor(Math.random() * 21),
+        negotiation: 75 + Math.floor(Math.random() * 26),
+        internationalAccess: 75 + Math.floor(Math.random() * 26)
     },
+
     {
         name: "Eduardo Martins",
         level: "Elite",
         levelNumber: 3,
-        commission:
-            randomManagerCommission(15, 25),
-        contacts:
-            85 +
-            Math.floor(Math.random() * 16),
-        negotiation:
-            80 +
-            Math.floor(Math.random() * 21),
-        internationalAccess:
-            80 +
-            Math.floor(Math.random() * 21)
+        commission: randomManagerCommission(15, 25),
+        contacts: 85 + Math.floor(Math.random() * 16),
+        negotiation: 80 + Math.floor(Math.random() * 21),
+        internationalAccess: 80 + Math.floor(Math.random() * 21)
     },
+
     {
         name: "Ricardo Fernandes",
         level: "Elite",
         levelNumber: 3,
-        commission:
-            randomManagerCommission(15, 25),
-        contacts:
-            90 +
-            Math.floor(Math.random() * 11),
-        negotiation:
-            85 +
-            Math.floor(Math.random() * 16),
-        internationalAccess:
-            85 +
-            Math.floor(Math.random() * 16)
+        commission: randomManagerCommission(15, 25),
+        contacts: 90 + Math.floor(Math.random() * 11),
+        negotiation: 85 + Math.floor(Math.random() * 16),
+        internationalAccess: 85 + Math.floor(Math.random() * 16)
     }
+
 ];
+
+window.managers = managersData;
+
+
 /* =========================================================
-   REQUISITOS PARA APARECER EMPRESÁRIO
+   👔 REQUISITOS DO EMPRESÁRIO
 ========================================================= */
+
 function canOfferManager(manager) {
+
+    if (!window.player) {
+        return false;
+    }
+
     const fame =
-        player.fame || 0;
+        Number(window.player.fame || 0);
+
     const wins =
-        player.professional
-        ?
-        (
-            player.professional.wins || 0
-        )
-        :
-        0;
-    if (
-        manager.levelNumber === 1
-    ) {
+        window.player.professional
+            ?
+            Number(
+                window.player.professional.wins || 0
+            )
+            :
+            0;
+
+    if (manager.levelNumber === 1) {
         return true;
     }
-    if (
-        manager.levelNumber === 2
-    ) {
+
+    if (manager.levelNumber === 2) {
+
         return (
             fame >= 10 ||
             wins >= 3
         );
+
     }
-    if (
-        manager.levelNumber === 3
-    ) {
+
+    if (manager.levelNumber === 3) {
+
         return (
             fame >= 35 &&
             wins >= 7
         );
+
     }
+
     return false;
+
 }
+
+
 /* =========================================================
-   GERAR OFERTAS DE EMPRESÁRIOS
+   👔 GERAR OFERTAS
 ========================================================= */
+
 function generateManagerOffers() {
-    player.managerOffers = [];
+
+    if (!window.player) {
+        return;
+    }
+
+    window.player.managerOffers = [];
+
     const possible =
-        managers.filter(
-            manager =>
-                canOfferManager(manager)
+        managersData.filter(
+            function(manager) {
+                return canOfferManager(manager);
+            }
         );
+
     const shuffled =
         [...possible].sort(
-            () =>
-                Math.random() - 0.5
+            function() {
+                return Math.random() - 0.5;
+            }
         );
-    const selected =
-        shuffled.slice(0, 3);
-    player.managerOffers =
-        selected.map(
-            manager => ({
-                ...manager
-            })
-        );
+
+    window.player.managerOffers =
+        shuffled
+            .slice(0, 3)
+            .map(
+                function(manager) {
+                    return {
+                        ...manager
+                    };
+                }
+            );
+
 }
+
+
 /* =========================================================
-   CRIAR CONTRATO DO EMPRESÁRIO
+   👔 CONTRATO
 ========================================================= */
+
 function createManagerContract(manager) {
+
     return {
+
         active: true,
+
         durationYears: 4,
+
         remainingYears: 4,
+
         yearsRemaining: 4,
+
         remainingWeeks: 208,
+
         commission:
             Number(
                 manager.commission || 0
             ),
+
         managerName:
             manager.name,
+
         startedYear:
             Number(
-                player.year || 2026
+                window.player.year || 2026
             ),
+
         startedWeek:
             Number(
-                player.week || 1
+                window.player.week || 1
             )
+
     };
+
 }
+
+
 /* =========================================================
-   GARANTIR CONTRATO DO EMPRESÁRIO
+   👔 GARANTIR CONTRATO
 ========================================================= */
+
 function ensureManagerContract() {
+
     if (
-        !player.manager
+        !window.player ||
+        !window.player.manager
     ) {
         return null;
     }
-    if (
-        !player.managerContract
-    ) {
+
+    if (!window.player.managerContract) {
+
         if (
-            player.manager.contract
+            window.player.manager.contract
         ) {
-            player.managerContract =
+
+            window.player.managerContract =
                 {
-                    ...player.manager.contract
+                    ...window.player.manager.contract
                 };
-        }
-        else {
-            player.managerContract =
+
+        } else {
+
+            window.player.managerContract =
                 createManagerContract(
-                    player.manager
+                    window.player.manager
                 );
+
         }
+
     }
+
     const contract =
-        player.managerContract;
+        window.player.managerContract;
+
     if (
-        typeof contract.active !==
-        "boolean"
+        typeof contract.active !== "boolean"
     ) {
         contract.active = true;
     }
+
     if (
-        typeof contract.durationYears !==
-        "number"
+        typeof contract.durationYears !== "number"
     ) {
         contract.durationYears = 4;
     }
+
     if (
-        typeof contract.remainingYears !==
-        "number"
+        typeof contract.remainingYears !== "number"
     ) {
+
         if (
-            typeof contract.yearsRemaining ===
-            "number"
+            typeof contract.yearsRemaining === "number"
         ) {
+
             contract.remainingYears =
                 contract.yearsRemaining;
-        }
-        else {
+
+        } else {
+
             contract.remainingYears = 4;
+
         }
+
     }
+
     contract.yearsRemaining =
         Number(
             contract.remainingYears || 0
         );
+
     if (
-        typeof contract.remainingWeeks !==
-        "number"
+        typeof contract.remainingWeeks !== "number"
     ) {
+
         contract.remainingWeeks =
-            contract.remainingYears *
-            52;
+            contract.remainingYears * 52;
+
     }
+
     if (
-        typeof contract.commission !==
-        "number"
+        typeof contract.commission !== "number"
     ) {
+
         contract.commission =
             Number(
-                player.manager.commission || 0
+                window.player.manager.commission || 0
             );
+
     }
-    player.manager.contract =
+
+    window.player.manager.contract =
         contract;
+
     return contract;
+
 }
+
+
 /* =========================================================
-   CONTRATAR EMPRESÁRIO
+   👔 CONTRATAR EMPRESÁRIO
 ========================================================= */
+
 function hireManager(index) {
+
+    if (!window.player) {
+        return;
+    }
+
     if (
-        !player.managerOffers
+        !window.player.managerOffers
     ) {
         generateManagerOffers();
     }
+
     const manager =
-        player.managerOffers[
-            index
-        ];
+        window.player.managerOffers[index];
+
     if (!manager) {
         return;
     }
-    player.manager = {
+
+    window.player.manager = {
+
         name:
             manager.name,
+
         level:
             manager.level,
+
         levelNumber:
             manager.levelNumber,
+
         commission:
             manager.commission,
+
         contacts:
             manager.contacts,
+
         negotiation:
             manager.negotiation,
+
         internationalAccess:
             manager.internationalAccess
+
     };
-    player.managerContract =
+
+    window.player.managerContract =
         createManagerContract(
             manager
         );
-    player.manager.contract =
-        player.managerContract;
-    player.managerContractExpired =
+
+    window.player.manager.contract =
+        window.player.managerContract;
+
+    window.player.managerContractExpired =
         false;
-    player.log =
-        player.log || [];
-    player.log.unshift(
+
+    window.player.log =
+        window.player.log || [];
+
+    window.player.log.unshift(
         "👔 " +
         manager.name +
-        " tornou-se seu empresário " +
-        "com contrato de 4 anos."
+        " tornou-se seu empresário com contrato de 4 anos."
     );
+
     teamSave();
+
     alert(
         "👔 EMPRESÁRIO CONTRATADO!\n\n" +
         manager.name +
@@ -1147,156 +1280,129 @@ function hireManager(index) {
         "Acesso internacional: " +
         manager.internationalAccess
     );
+
     teamScreen();
+
 }
+
+
 /* =========================================================
-   PROCESSAR CONTRATO NA VIRADA DO ANO
+   👔 STATUS
 ========================================================= */
-function processManagerContractYear() {
-    if (
-        !player.manager
-    ) {
-        return;
-    }
-    ensureManagerContract();
-    const contract =
-        player.managerContract;
-    if (
-        !contract ||
-        !contract.active
-    ) {
-        return;
-    }
-    contract.remainingYears =
-        Math.max(
-            0,
-            Number(
-                contract.remainingYears || 0
-            ) - 1
-        );
-    contract.yearsRemaining =
-        contract.remainingYears;
-    contract.remainingWeeks =
-        Math.max(
-            0,
-            Number(
-                contract.remainingWeeks || 0
-            ) - 52
-        );
-    player.manager.contract =
-        contract;
-    if (
-        contract.remainingYears <= 0
-    ) {
-        contract.remainingYears = 0;
-        contract.yearsRemaining = 0;
-        contract.remainingWeeks = 0;
-        contract.active = false;
-        player.managerContractExpired =
-            true;
-        player.log =
-            player.log || [];
-        player.log.unshift(
-            "📄 O contrato com " +
-            player.manager.name +
-            " chegou ao fim."
-        );
-        save();
-        return;
-    }
-    save();
-}
-/* =========================================================
-   STATUS DO CONTRATO
-========================================================= */
+
 function getManagerContractStatus() {
+
     if (
-        !player.manager
+        !window.player ||
+        !window.player.manager
     ) {
         return null;
     }
-    ensureManagerContract();
-    return player.managerContract;
+
+    return ensureManagerContract();
+
 }
-/* =========================================================
-   VERIFICAR CONTRATO ATIVO
-========================================================= */
+
+
 function hasActiveManagerContract() {
-    if (
-        !player.manager
-    ) {
-        return false;
-    }
+
     const contract =
-        ensureManagerContract();
-    if (
-        !contract
-    ) {
+        getManagerContractStatus();
+
+    if (!contract) {
         return false;
     }
+
     return (
         contract.active === true &&
         Number(
             contract.remainingYears || 0
         ) > 0
     );
+
 }
+
+
 /* =========================================================
-   RENOVAR CONTRATO
+   👔 RENOVAR
 ========================================================= */
+
 function renewManagerContract() {
+
     if (
-        !player.manager
+        !window.player ||
+        !window.player.manager
     ) {
         return;
     }
-    ensureManagerContract();
+
     const oldContract =
-        player.managerContract;
+        ensureManagerContract();
+
     if (
         oldContract &&
         oldContract.active
     ) {
+
         alert(
             "📄 Seu contrato atual ainda está ativo."
         );
+
         return;
     }
+
     const manager =
-        player.manager;
-    player.managerContract = {
+        window.player.manager;
+
+    window.player.managerContract = {
+
         active: true,
+
         durationYears: 4,
+
         remainingYears: 4,
+
         yearsRemaining: 4,
+
         remainingWeeks: 208,
+
         commission:
             Number(
                 manager.commission || 0
             ),
+
         managerName:
             manager.name,
+
         startedYear:
             Number(
-                player.year || 2026
+                window.player.year || 2026
             ),
+
         startedWeek:
             Number(
-                player.week || 1
+                window.player.week || 1
             )
+
     };
-    player.manager.contract =
-        player.managerContract;
-    player.managerContractExpired =
+
+    window.player.manager.contract =
+        window.player.managerContract;
+
+    window.player.managerContractExpired =
         false;
-    player.log =
-        player.log || [];
-    player.log.unshift(
+
+    window.player.log =
+        window.player.log || [];
+
+    window.player.log.unshift(
         "🔄 Contrato renovado com " +
         manager.name +
         " por mais 4 anos."
     );
+
     teamSave();
+
     alert(
         "🔄 CONTRATO RENOVADO!\n\n" +
         manager.name +
@@ -1306,175 +1412,470 @@ function renewManagerContract() {
         manager.commission +
         "%"
     );
+
     if (
         typeof home === "function"
     ) {
         home();
     }
+
 }
+
+
 /* =========================================================
-   NÃO RENOVAR
+   👔 NÃO RENOVAR
 ========================================================= */
+
 function declineManagerRenewal() {
+
     if (
-        !player.manager
+        !window.player ||
+        !window.player.manager
     ) {
         return;
     }
+
     const managerName =
-        player.manager.name;
-    player.log =
-        player.log || [];
-    player.log.unshift(
-        "🚪 Você decidiu não renovar " +
-        "o contrato com " +
+        window.player.manager.name;
+
+    window.player.log =
+        window.player.log || [];
+
+    window.player.log.unshift(
+        "🚪 Você decidiu não renovar o contrato com " +
         managerName +
         "."
     );
-    player.manager = null;
-    player.managerContract = null;
-    player.managerContractExpired =
+
+    window.player.manager = null;
+
+    window.player.managerContract = null;
+
+    window.player.managerContractExpired =
         false;
+
     teamSave();
+
     alert(
         "🚪 CONTRATO ENCERRADO\n\n" +
-        "Você decidiu seguir sua carreira " +
-        "sem empresário."
+        "Você decidiu seguir sua carreira sem empresário."
     );
-    home();
+
+    if (
+        typeof home === "function"
+    ) {
+        home();
+    }
+
 }
+
+
 /* =========================================================
-   BÔNUS DE NEGOCIAÇÃO
+   👔 BÔNUS
 ========================================================= */
+
 function getManagerNegotiationBonus() {
+
     if (
-        !player.manager
+        !window.player ||
+        !window.player.manager
     ) {
         return 0;
     }
-    const negotiation =
-        player.manager.negotiation ||
-        0;
+
     return (
-        negotiation / 5
+        Number(
+            window.player.manager.negotiation || 0
+        ) / 5
     );
+
 }
-/* =========================================================
-   ACESSO INTERNACIONAL
-========================================================= */
+
+
 function getManagerInternationalAccess() {
+
     if (
-        !player.manager
+        !window.player ||
+        !window.player.manager
     ) {
         return 0;
     }
-    return (
-        player.manager
-            .internationalAccess ||
-        0
+
+    return Number(
+        window.player.manager.internationalAccess || 0
     );
+
 }
-/* =========================================================
-   NÍVEL DO EMPRESÁRIO
-========================================================= */
+
+
 function getManagerLevel() {
+
     if (
-        !player.manager
+        !window.player ||
+        !window.player.manager
     ) {
         return 0;
     }
-    return (
-        player.manager.levelNumber ||
-        1
+
+    return Number(
+        window.player.manager.levelNumber || 1
     );
+
 }
+
+
 /* =========================================================
-   ESTRUTURA DO PLAYER
+   👔 PROCESSAR CONTRATO ANUAL
 ========================================================= */
-function ensureTeamPlayer() {
+
+function processManagerContractYear() {
+
     if (
-        typeof window.player ===
-        "undefined" ||
+        !window.player ||
+        !window.player.manager
+    ) {
+        return;
+    }
+
+    const contract =
+        ensureManagerContract();
+
+    if (
+        !contract ||
+        !contract.active
+    ) {
+        return;
+    }
+
+    contract.remainingYears =
+        Math.max(
+            0,
+            Number(
+                contract.remainingYears || 0
+            ) - 1
+        );
+
+    contract.yearsRemaining =
+        contract.remainingYears;
+
+    contract.remainingWeeks =
+        Math.max(
+            0,
+            Number(
+                contract.remainingWeeks || 0
+            ) - 52
+        );
+
+    window.player.manager.contract =
+        contract;
+
+    if (
+        contract.remainingYears <= 0
+    ) {
+
+        contract.remainingYears = 0;
+
+        contract.yearsRemaining = 0;
+
+        contract.remainingWeeks = 0;
+
+        contract.active = false;
+
+        window.player.managerContractExpired =
+            true;
+
+        window.player.log =
+            window.player.log || [];
+
+        window.player.log.unshift(
+            "📄 O contrato com " +
+            window.player.manager.name +
+            " chegou ao fim."
+        );
+
+    }
+
+    teamSave();
+
+}
+
+
+/* =========================================================
+   👔 TELA DE OFERTAS
+========================================================= */
+
+function openManagerOffers() {
+
+    if (!window.player) {
+        return;
+    }
+
+    generateManagerOffers();
+
+    const content =
+        document.getElementById("content");
+
+    if (!content) {
+        return;
+    }
+
+    if (
+        !window.player.managerOffers ||
+        window.player.managerOffers.length === 0
+    ) {
+
+        content.innerHTML = `
+
+            <div class="card">
+
+                <div class="title">
+                    👔 EMPRESÁRIOS
+                </div>
+
+                <p>
+                    Nenhum empresário está
+                    disponível neste momento.
+                </p>
+
+                <button
+                    class="gray"
+                    onclick="teamScreen()">
+
+                    VOLTAR
+
+                </button>
+
+            </div>
+
+        `;
+
+        return;
+
+    }
+
+    content.innerHTML = `
+
+        <div class="card">
+
+            <div class="title">
+                👔 ESCOLHA SEU EMPRESÁRIO
+            </div>
+
+            <p>
+                As ofertas disponíveis dependem
+                da sua fama e carreira.
+            </p>
+
+        </div>
+
+        ${
+            window.player.managerOffers
+                .map(
+                    function(manager, index) {
+
+                        return `
+
+                            <div class="card">
+
+                                <div class="title">
+                                    👔 ${manager.name}
+                                </div>
+
+                                <div class="statline">
+                                    <span>Nível</span>
+                                    <b>${manager.level}</b>
+                                </div>
+
+                                <div class="statline">
+                                    <span>Comissão</span>
+                                    <b>${manager.commission}%</b>
+                                </div>
+
+                                <div class="statline">
+                                    <span>Contatos</span>
+                                    <b>${manager.contacts}</b>
+                                </div>
+
+                                <div class="statline">
+                                    <span>Negociação</span>
+                                    <b>${manager.negotiation}</b>
+                                </div>
+
+                                <div class="statline">
+                                    <span>Acesso internacional</span>
+                                    <b>${manager.internationalAccess}</b>
+                                </div>
+
+                                <button
+                                    class="green"
+                                    onclick="hireManager(${index})">
+
+                                    👔 CONTRATAR EMPRESÁRIO
+
+                                </button>
+
+                            </div>
+
+                        `;
+
+                    }
+                )
+                .join("")
+        }
+
+        <button
+            class="main-button"
+            onclick="teamScreen()">
+
+            ⬅️ VOLTAR
+
+        </button>
+
+    `;
+
+}
+
+
+/* =========================================================
+   🏢 EQUIPES DO PAÍS
+========================================================= */
+
+function getTeamsByCountry(country) {
+
+    return window.mmaTeams.filter(
+        function(team) {
+            return team.country === country;
+        }
+    );
+
+}
+
+
+/* =========================================================
+   🧬 GARANTIR PLAYER
+========================================================= */
+
+function ensureTeamPlayer() {
+
+    if (
         !window.player
     ) {
+
         if (
-            typeof createDefaultPlayer ===
-            "function"
+            typeof createDefaultPlayer === "function"
         ) {
+
             window.player =
                 createDefaultPlayer();
+
+        } else {
+
+            return;
+
         }
+
     }
-    if (!player.team) {
-        player.team = null;
+
+    if (!window.player.team) {
+        window.player.team = null;
     }
-    if (!player.coach) {
-        player.coach = null;
+
+    if (!window.player.coach) {
+        window.player.coach = null;
     }
-    if (!player.privateCoach) {
-        player.privateCoach = null;
+
+    if (!window.player.privateCoach) {
+        window.player.privateCoach = null;
     }
-    if (!player.teamHistory) {
-        player.teamHistory = [];
+
+    if (!window.player.teamHistory) {
+        window.player.teamHistory = [];
     }
-    if (!player.managerOffers) {
-        player.managerOffers = [];
+
+    if (!window.player.managerOffers) {
+        window.player.managerOffers = [];
     }
+
 }
+
+
 /* =========================================================
-   CHANCE DE ENTRAR NA EQUIPE
+   🏢 CHANCE DE ENTRAR
 ========================================================= */
+
 function getTeamAcceptanceChance(team) {
+
     ensureTeamPlayer();
+
+    if (!window.player) {
+        return 5;
+    }
+
     const ovr =
         typeof getOverall === "function"
-        ?
-        getOverall()
-        :
-        40;
+            ?
+            Number(getOverall() || 40)
+            :
+            40;
+
     const fame =
         Number(
-            player.fame || 0
+            window.player.fame || 0
         );
-    let chance =
-        15;
+
+    let chance = 15;
+
     chance +=
-        ovr -
-        50;
+        ovr - 50;
+
     chance +=
         fame / 5;
+
     chance +=
         (
             100 -
             team.prestige
         ) / 2;
+
     return teamClamp(
         chance,
         5,
         95
     );
+
 }
+
+
 /* =========================================================
-   ENTRAR NA EQUIPE
+   🏢 ENTRAR NA EQUIPE
 ========================================================= */
+
 function joinTeam(teamId) {
+
     ensureTeamPlayer();
+
+    if (!window.player) {
+        return;
+    }
+
     const team =
-        mmaTeams.find(
-            item =>
-                item.id === teamId
+        window.mmaTeams.find(
+            function(item) {
+                return item.id === teamId;
+            }
         );
+
     if (!team) {
         return;
     }
+
     const chance =
-        getTeamAcceptanceChance(
-            team
-        );
+        getTeamAcceptanceChance(team);
+
     if (
-        Math.random() * 100 >
-        chance
+        Math.random() * 100 > chance
     ) {
+
         alert(
             "🏢 A equipe recusou sua entrada.\n\n" +
             "Equipe: " +
@@ -1482,64 +1883,74 @@ function joinTeam(teamId) {
             "\n\n" +
             "Tente melhorar seu OVR, fama e carreira."
         );
+
         return;
     }
-    player.team = {
-        id:
-            team.id,
-        name:
-            team.name,
-        country:
-            team.country,
-        rank:
-            team.rank,
-        prestige:
-            team.prestige,
-        specialty:
-            team.specialty
+
+    window.player.team = {
+
+        id: team.id,
+
+        name: team.name,
+
+        country: team.country,
+
+        rank: team.rank,
+
+        prestige: team.prestige,
+
+        specialty: team.specialty
+
     };
-    player.teamHistory.push({
-        team:
-            team.name,
-        country:
-            team.country,
-        joinedYear:
-            player.year,
-        joinedWeek:
-            player.week
+
+    window.player.teamHistory.push({
+
+        team: team.name,
+
+        country: team.country,
+
+        joinedYear: window.player.year,
+
+        joinedWeek: window.player.week
+
     });
+
     const coach =
-        teamCoaches[
+        window.teamCoaches[
             (team.rank - 1) %
-            teamCoaches.length
+            window.teamCoaches.length
         ];
-    player.coach = {
-        id:
-            coach.id,
-        name:
-            coach.name,
-        specialty:
-            coach.specialty,
+
+    window.player.coach = {
+
+        id: coach.id,
+
+        name: coach.name,
+
+        specialty: coach.specialty,
+
         level:
             Math.min(
                 99,
                 coach.level +
                 Math.floor(
-                    (
-                        100 -
-                        team.rank
-                    ) / 10
+                    (100 - team.rank) / 10
                 )
             )
+
     };
-    player.log =
-        player.log || [];
-    player.log.unshift(
+
+    window.player.log =
+        window.player.log || [];
+
+    window.player.log.unshift(
         "🏢 Você entrou para " +
         team.name +
         "."
     );
+
     teamSave();
+
     alert(
         "🏢 EQUIPE CONTRATADA!\n\n" +
         team.name +
@@ -1547,85 +1958,119 @@ function joinTeam(teamId) {
         team.country +
         "\n\n" +
         "Treinador: " +
-        player.coach.name
+        window.player.coach.name
     );
+
     teamScreen();
+
 }
+
+
 /* =========================================================
-   SAIR DA EQUIPE
+   🚪 SAIR DA EQUIPE
 ========================================================= */
+
 function leaveTeam() {
+
     ensureTeamPlayer();
+
     if (
-        !player.team
+        !window.player ||
+        !window.player.team
     ) {
         return;
     }
+
     const oldTeam =
-        player.team.name;
-    player.team = null;
-    player.coach = null;
-    player.log =
-        player.log || [];
-    player.log.unshift(
+        window.player.team.name;
+
+    window.player.team = null;
+
+    window.player.coach = null;
+
+    window.player.log =
+        window.player.log || [];
+
+    window.player.log.unshift(
         "🚪 Você deixou a equipe " +
         oldTeam +
         "."
     );
+
     teamSave();
+
     teamScreen();
+
 }
+
+
 /* =========================================================
-   CONTRATAR TREINADOR PARTICULAR
+   🥋 TREINADOR PARTICULAR
 ========================================================= */
+
 function hirePrivateCoach(coachId) {
+
     ensureTeamPlayer();
+
+    if (!window.player) {
+        return;
+    }
+
     const coach =
-        privateCoaches.find(
-            item =>
-                item.id === coachId
+        window.privateCoaches.find(
+            function(item) {
+                return item.id === coachId;
+            }
         );
+
     if (!coach) {
         return;
     }
+
     const money =
         Number(
-            player.money || 0
+            window.player.money || 0
         );
-    if (
-        money <
-        coach.cost
-    ) {
+
+    if (money < coach.cost) {
+
         alert(
             "💰 Dinheiro insuficiente.\n\n" +
             "Custo: $" +
             coach.cost
         );
+
         return;
     }
-    player.money =
-        money -
-        coach.cost;
-    player.privateCoach = {
-        id:
-            coach.id,
-        name:
-            coach.name,
-        specialty:
-            coach.specialty,
-        level:
-            coach.level,
-        weeklyCost:
-            coach.weeklyCost
+
+    window.player.money =
+        money - coach.cost;
+
+    window.player.privateCoach = {
+
+        id: coach.id,
+
+        name: coach.name,
+
+        specialty: coach.specialty,
+
+        level: coach.level,
+
+        weeklyCost: coach.weeklyCost
+
     };
-    player.log =
-        player.log || [];
-    player.log.unshift(
+
+    window.player.log =
+        window.player.log || [];
+
+    window.player.log.unshift(
         "🥋 Você contratou o treinador particular " +
         coach.name +
         "."
     );
+
     teamSave();
+
     alert(
         "🥋 TREINADOR PARTICULAR CONTRATADO!\n\n" +
         coach.name +
@@ -1642,766 +2087,770 @@ function hirePrivateCoach(coachId) {
         "Custo semanal: $" +
         coach.weeklyCost
     );
+
     teamScreen();
+
 }
+
+
 /* =========================================================
-   DEMITIR TREINADOR PARTICULAR
+   🚪 DEMITIR TREINADOR
 ========================================================= */
+
 function firePrivateCoach() {
+
     ensureTeamPlayer();
+
     if (
-        !player.privateCoach
+        !window.player ||
+        !window.player.privateCoach
     ) {
         return;
     }
+
     const name =
-        player.privateCoach.name;
-    player.privateCoach = null;
-    player.log =
-        player.log || [];
-    player.log.unshift(
+        window.player.privateCoach.name;
+
+    window.player.privateCoach = null;
+
+    window.player.log =
+        window.player.log || [];
+
+    window.player.log.unshift(
         "🥋 Você encerrou o trabalho com " +
         name +
         "."
     );
+
     teamSave();
+
     teamScreen();
+
 }
+
+
 /* =========================================================
-   TREINAMENTO DA EQUIPE
+   🥊 TREINAMENTO
 ========================================================= */
+
+function getTrainingAttribute(specialty) {
+
+    if (specialty === "Striking") {
+        return "striking";
+    }
+
+    if (specialty === "Wrestling") {
+        return "wrestling";
+    }
+
+    if (specialty === "Grappling") {
+        return "grappling";
+    }
+
+    return "technique";
+
+}
+
+
 function applyTeamTraining() {
+
     ensureTeamPlayer();
+
     if (
-        !player.team
+        !window.player ||
+        !window.player.team
     ) {
         return;
     }
+
     const team =
-        mmaTeams.find(
-            item =>
-                item.id ===
-                player.team.id
+        window.mmaTeams.find(
+            function(item) {
+                return (
+                    item.id ===
+                    window.player.team.id
+                );
+            }
         );
+
     if (!team) {
         return;
     }
-    if (!player.attributes) {
-        player.attributes = {};
+
+    if (!window.player.attributes) {
+        window.player.attributes = {};
     }
-    const specialty =
-        team.specialty;
-    let attribute;
-    if (
-        specialty ===
-        "Striking"
-    ) {
-        attribute =
-            "striking";
-    }
-    else if (
-        specialty ===
-        "Wrestling"
-    ) {
-        attribute =
-            "wrestling";
-    }
-    else if (
-        specialty ===
-        "Grappling"
-    ) {
-        attribute =
-            "grappling";
-    }
-    else {
-        attribute =
-            "technique";
-    }
+
+    const attribute =
+        getTrainingAttribute(
+            team.specialty
+        );
+
     const current =
         Number(
-            player.attributes[
-                attribute
-            ] || 40
+            window.player.attributes[attribute] || 40
         );
+
     const potential =
         Number(
-            player.potential ||
-            90
+            window.player.potential || 90
         );
+
     const gain =
         0.20 +
-        (
-            team.coaching /
-            500
-        );
-    player.attributes[
-        attribute
-    ] =
+        (team.coaching / 500);
+
+    window.player.attributes[attribute] =
         Number(
             Math.min(
                 potential,
                 current + gain
             ).toFixed(2)
         );
+
 }
-/* =========================================================
-   TREINAMENTO PARTICULAR
-========================================================= */
+
+
 function applyPrivateCoachTraining() {
+
     ensureTeamPlayer();
+
     if (
-        !player.privateCoach
+        !window.player ||
+        !window.player.privateCoach
     ) {
         return;
     }
-    if (!player.attributes) {
-        player.attributes = {};
+
+    if (!window.player.attributes) {
+        window.player.attributes = {};
     }
+
     const coach =
-        player.privateCoach;
-    let attribute;
-    if (
-        coach.specialty ===
-        "Striking"
-    ) {
-        attribute =
-            "striking";
-    }
-    else if (
-        coach.specialty ===
-        "Wrestling"
-    ) {
-        attribute =
-            "wrestling";
-    }
-    else if (
-        coach.specialty ===
-        "Grappling"
-    ) {
-        attribute =
-            "grappling";
-    }
-    else {
-        attribute =
-            "technique";
-    }
+        window.player.privateCoach;
+
+    const attribute =
+        getTrainingAttribute(
+            coach.specialty
+        );
+
     const current =
         Number(
-            player.attributes[
-                attribute
-            ] || 40
+            window.player.attributes[attribute] || 40
         );
+
     const potential =
         Number(
-            player.potential ||
-            90
+            window.player.potential || 90
         );
+
     const gain =
         0.35 +
-        (
-            coach.level /
-            500
-        );
-    player.attributes[
-        attribute
-    ] =
+        (coach.level / 500);
+
+    window.player.attributes[attribute] =
         Number(
             Math.min(
                 potential,
                 current + gain
             ).toFixed(2)
         );
+
 }
+
+
 /* =========================================================
-   PROCESSAR EQUIPE NA VIRADA DA SEMANA
+   📅 PROCESSAR SEMANA
 ========================================================= */
+
 function processTeamWeek() {
+
     ensureTeamPlayer();
+
+    if (!window.player) {
+        return;
+    }
+
     applyTeamTraining();
+
     applyPrivateCoachTraining();
+
     if (
-        player.privateCoach
+        window.player.privateCoach
     ) {
+
         const cost =
             Number(
-                player.privateCoach
-                    .weeklyCost || 0
+                window.player.privateCoach.weeklyCost || 0
             );
-        player.money =
+
+        window.player.money =
             Math.max(
                 0,
                 Number(
-                    player.money || 0
+                    window.player.money || 0
                 ) - cost
             );
+
     }
+
     teamSave();
+
 }
+
+
 /* =========================================================
-   EQUIPES DO PAÍS
+   🏢 TELA DE EQUIPE
 ========================================================= */
-function getTeamsByCountry(
-    country
-) {
-    return mmaTeams.filter(
-        team =>
-            team.country ===
-            country
-    );
-}
-/* =========================================================
-   TELA DE EQUIPE
-========================================================= */
+
 function teamScreen() {
+
     ensureTeamPlayer();
+
+    if (!window.player) {
+        return;
+    }
+
     if (
-        typeof showGame ===
-        "function"
+        typeof showGame === "function"
     ) {
         showGame();
     }
+
     const content =
-        getElement("content");
+        document.getElementById("content");
+
     if (!content) {
         return;
     }
+
     const country =
-        player.country ||
+        window.player.country ||
         "Brasil";
+
     const teams =
-        getTeamsByCountry(
-            country
-        );
+        getTeamsByCountry(country);
+
     let teamHTML = "";
-    /* =====================================================
-       JÁ TEM EQUIPE
-    ===================================================== */
-    if (
-        player.team
-    ) {
+
+
+    /* ================= SUA EQUIPE ================= */
+
+    if (window.player.team) {
+
         teamHTML = `
+
             <div class="card">
+
                 <div class="title">
                     🏢 SUA EQUIPE
                 </div>
+
                 <div class="statline">
                     <span>Equipe</span>
-                    <b>
-                        ${player.team.name}
-                    </b>
+                    <b>${window.player.team.name}</b>
                 </div>
+
                 <div class="statline">
                     <span>País</span>
-                    <b>
-                        ${player.team.country}
-                    </b>
+                    <b>${window.player.team.country}</b>
                 </div>
+
                 <div class="statline">
                     <span>Ranking</span>
-                    <b>
-                        #${player.team.rank}
-                    </b>
+                    <b>#${window.player.team.rank}</b>
                 </div>
+
                 <div class="statline">
                     <span>Especialidade</span>
-                    <b>
-                        ${player.team.specialty}
-                    </b>
+                    <b>${window.player.team.specialty}</b>
                 </div>
+
                 ${
-                    player.coach
-                    ?
-                    `
-                    <div class="statline">
-                        <span>
-                            Treinador
-                        </span>
-                        <b>
-                            ${player.coach.name}
-                        </b>
-                    </div>
-                    `
-                    :
-                    ""
+                    window.player.coach
+                        ?
+                        `
+                        <div class="statline">
+                            <span>Treinador</span>
+                            <b>${window.player.coach.name}</b>
+                        </div>
+                        `
+                        :
+                        ""
                 }
+
                 <button
                     class="gray"
                     onclick="leaveTeam()">
+
                     🚪 SAIR DA EQUIPE
+
                 </button>
+
             </div>
+
         `;
+
     }
-    /* =====================================================
-       PROCURAR EQUIPE
-    ===================================================== */
+
+
+    /* ================= PROCURAR EQUIPE ================= */
+
     else {
+
         teamHTML = `
+
             <div class="card">
+
                 <div class="title">
                     🏢 PROCURAR EQUIPE
                 </div>
+
                 <p>
                     Escolha uma academia para
                     desenvolver sua carreira.
                 </p>
+
             </div>
+
             ${
-                teams.map(
-                    team => `
-                    <div class="card">
-                        <div class="title">
-                            #${team.rank}
-                            ${team.name}
-                        </div>
-                        <div class="statline">
-                            <span>
-                                Prestígio
-                            </span>
-                            <b>
-                                ${team.prestige}
-                            </b>
-                        </div>
-                        <div class="statline">
-                            <span>
-                                Estrutura
-                            </span>
-                            <b>
-                                ${team.structure}
-                            </b>
-                        </div>
-                        <div class="statline">
-                            <span>
-                                Treinamento
-                            </span>
-                            <b>
-                                ${team.coaching}
-                            </b>
-                        </div>
-                        <div class="statline">
-                            <span>
-                                Especialidade
-                            </span>
-                            <b>
-                                ${team.specialty}
-                            </b>
-                        </div>
-                        <div class="statline">
-                            <span>
-                                Custo
-                            </span>
-                            <b>
-                                $${team.cost}
-                            </b>
-                        </div>
-                        <button
-                            class="green"
-                            onclick="joinTeam('${team.id}')">
-                            🥊 TENTAR ENTRAR
-                        </button>
-                    </div>
-                    `
-                ).join("")
+                teams
+                    .map(
+                        function(team) {
+
+                            return `
+
+                                <div class="card">
+
+                                    <div class="title">
+                                        #${team.rank}
+                                        ${team.name}
+                                    </div>
+
+                                    <div class="statline">
+                                        <span>Prestígio</span>
+                                        <b>${team.prestige}</b>
+                                    </div>
+
+                                    <div class="statline">
+                                        <span>Estrutura</span>
+                                        <b>${team.structure}</b>
+                                    </div>
+
+                                    <div class="statline">
+                                        <span>Treinamento</span>
+                                        <b>${team.coaching}</b>
+                                    </div>
+
+                                    <div class="statline">
+                                        <span>Especialidade</span>
+                                        <b>${team.specialty}</b>
+                                    </div>
+
+                                    <div class="statline">
+                                        <span>Custo</span>
+                                        <b>$${team.cost}</b>
+                                    </div>
+
+                                    <button
+                                        class="green"
+                                        onclick="joinTeam('${team.id}')">
+
+                                        🥊 TENTAR ENTRAR
+
+                                    </button>
+
+                                </div>
+
+                            `;
+
+                        }
+                    )
+                    .join("")
             }
+
         `;
+
     }
+
+
     /* =====================================================
-       HTML DA TELA
+       TELA COMPLETA
     ===================================================== */
+
     content.innerHTML = `
+
         <div class="card">
+
             <div class="title">
                 🏢 EQUIPE
             </div>
+
             <p>
                 ${country}
             </p>
+
         </div>
+
         ${teamHTML}
-        <!-- ================================================
-             TREINADOR PARTICULAR
-        ================================================= -->
+
+
+        <!-- TREINADOR PARTICULAR -->
+
         <div class="card">
+
             <div class="title">
                 🥋 TREINADOR PARTICULAR
             </div>
+
             ${
-                player.privateCoach
-                ?
-                `
-                    <div class="statline">
-                        <span>
-                            Treinador
-                        </span>
-                        <b>
-                            ${player.privateCoach.name}
-                        </b>
-                    </div>
-                    <div class="statline">
-                        <span>
-                            Especialidade
-                        </span>
-                        <b>
-                            ${player.privateCoach.specialty}
-                        </b>
-                    </div>
-                    <div class="statline">
-                        <span>
-                            Nível
-                        </span>
-                        <b>
-                            ${player.privateCoach.level}
-                        </b>
-                    </div>
-                    <div class="statline">
-                        <span>
-                            Custo semanal
-                        </span>
-                        <b>
-                            $${player.privateCoach.weeklyCost}
-                        </b>
-                    </div>
-                    <button
-                        class="gray"
-                        onclick="firePrivateCoach()">
-                        🚪 ENCERRAR TREINADOR
-                    </button>
-                `
-                :
-                `
-                    <p>
-                        Tenha dinheiro suficiente
-                        para contratar um treinador
-                        particular.
-                    </p>
-                    ${
-                        privateCoaches.map(
-                            coach => `
-                                <div
-                                    class="statline"
-                                    style="margin-top:10px">
-                                    <span>
-                                        ${coach.name}
-                                        —
-                                        ${coach.specialty}
-                                    </span>
-                                    <b>
-                                        Nível
-                                        ${coach.level}
-                                    </b>
-                                </div>
-                                <button
-                                    class="green"
-                                    onclick="hirePrivateCoach('${coach.id}')">
-                                    🥋 CONTRATAR
-                                    $${coach.cost}
-                                </button>
-                            `
-                        ).join("")
-                    }
-                `
+                window.player.privateCoach
+                    ?
+                    `
+
+                        <div class="statline">
+                            <span>Treinador</span>
+                            <b>
+                                ${window.player.privateCoach.name}
+                            </b>
+                        </div>
+
+                        <div class="statline">
+                            <span>Especialidade</span>
+                            <b>
+                                ${window.player.privateCoach.specialty}
+                            </b>
+                        </div>
+
+                        <div class="statline">
+                            <span>Nível</span>
+                            <b>
+                                ${window.player.privateCoach.level}
+                            </b>
+                        </div>
+
+                        <div class="statline">
+                            <span>Custo semanal</span>
+                            <b>
+                                $${window.player.privateCoach.weeklyCost}
+                            </b>
+                        </div>
+
+                        <button
+                            class="gray"
+                            onclick="firePrivateCoach()">
+
+                            🚪 ENCERRAR TREINADOR
+
+                        </button>
+
+                    `
+                    :
+                    `
+
+                        <p>
+                            Tenha dinheiro suficiente
+                            para contratar um treinador
+                            particular.
+                        </p>
+
+                        ${
+                            window.privateCoaches
+                                .map(
+                                    function(coach) {
+
+                                        return `
+
+                                            <div
+                                                class="statline"
+                                                style="margin-top:10px">
+
+                                                <span>
+                                                    ${coach.name}
+                                                    —
+                                                    ${coach.specialty}
+                                                </span>
+
+                                                <b>
+                                                    Nível ${coach.level}
+                                                </b>
+
+                                            </div>
+
+                                            <button
+                                                class="green"
+                                                onclick="hirePrivateCoach('${coach.id}')">
+
+                                                🥋 CONTRATAR
+                                                $${coach.cost}
+
+                                            </button>
+
+                                        `;
+
+                                    }
+                                )
+                                .join("")
+                        }
+
+                    `
             }
+
         </div>
-        <!-- ================================================
-             EMPRESÁRIO
-        ================================================= -->
+
+
+        <!-- EMPRESÁRIO -->
+
         <div class="card">
+
             <div class="title">
                 👔 EMPRESÁRIO
             </div>
+
             ${
-                player.manager
-                ?
-                `
-                    <div class="statline">
-                        <span>
-                            Empresário
-                        </span>
-                        <b>
-                            ${player.manager.name}
-                        </b>
-                    </div>
-                    <div class="statline">
-                        <span>
-                            Nível
-                        </span>
-                        <b>
-                            ${player.manager.level}
-                        </b>
-                    </div>
-                    <div class="statline">
-                        <span>
-                            Comissão
-                        </span>
-                        <b>
-                            ${player.manager.commission}%
-                        </b>
-                    </div>
-                    <div class="statline">
-                        <span>
-                            Contatos
-                        </span>
-                        <b>
-                            ${player.manager.contacts}
-                        </b>
-                    </div>
-                    <div class="statline">
-                        <span>
-                            Negociação
-                        </span>
-                        <b>
-                            ${player.manager.negotiation}
-                        </b>
-                    </div>
-                    <div class="statline">
-                        <span>
-                            Acesso internacional
-                        </span>
-                        <b>
-                            ${player.manager.internationalAccess}
-                        </b>
-                    </div>
-                    ${
-                        getManagerContractStatus()
-                        ?
-                        `
-                            <div class="statline">
-                                <span>
-                                    Contrato
-                                </span>
-                                <b>
-                                    ${
-                                        getManagerContractStatus()
-                                            .yearsRemaining
-                                    }
-                                    anos
-                                </b>
-                            </div>
-                        `
-                        :
-                        ""
-                    }
-                    ${
-                        player.managerContractExpired
-                        ?
-                        `
-                            <button
-                                class="green"
-                                onclick="renewManagerContract()">
-                                🔄 RENOVAR CONTRATO
-                            </button>
-                            <button
-                                class="gray"
-                                onclick="declineManagerRenewal()">
-                                🚪 NÃO RENOVAR
-                            </button>
-                        `
-                        :
-                        ""
-                    }
-                `
-                :
-                `
-                    <p>
-                        Você ainda não possui
-                        empresário.
-                    </p>
-                    <p>
-                        Empresários podem melhorar
-                        suas negociações, contatos
-                        e oportunidades internacionais.
-                    </p>
-                    <button
-                        class="green"
-                        onclick="openManagerOffers()">
-                        👔 PROCURAR EMPRESÁRIO
-                    </button>
-                `
+                window.player.manager
+                    ?
+                    `
+
+                        <div class="statline">
+                            <span>Empresário</span>
+                            <b>
+                                ${window.player.manager.name}
+                            </b>
+                        </div>
+
+                        <div class="statline">
+                            <span>Nível</span>
+                            <b>
+                                ${window.player.manager.level}
+                            </b>
+                        </div>
+
+                        <div class="statline">
+                            <span>Comissão</span>
+                            <b>
+                                ${window.player.manager.commission}%
+                            </b>
+                        </div>
+
+                        <div class="statline">
+                            <span>Contatos</span>
+                            <b>
+                                ${window.player.manager.contacts}
+                            </b>
+                        </div>
+
+                        <div class="statline">
+                            <span>Negociação</span>
+                            <b>
+                                ${window.player.manager.negotiation}
+                            </b>
+                        </div>
+
+                        <div class="statline">
+                            <span>Acesso internacional</span>
+                            <b>
+                                ${window.player.manager.internationalAccess}
+                            </b>
+                        </div>
+
+                        ${
+                            getManagerContractStatus()
+                                ?
+                                `
+                                    <div class="statline">
+
+                                        <span>
+                                            Contrato
+                                        </span>
+
+                                        <b>
+                                            ${
+                                                getManagerContractStatus()
+                                                    .yearsRemaining
+                                            }
+                                            anos
+                                        </b>
+
+                                    </div>
+                                `
+                                :
+                                ""
+                        }
+
+                        ${
+                            window.player.managerContractExpired
+                                ?
+                                `
+
+                                    <button
+                                        class="green"
+                                        onclick="renewManagerContract()">
+
+                                        🔄 RENOVAR CONTRATO
+
+                                    </button>
+
+                                    <button
+                                        class="gray"
+                                        onclick="declineManagerRenewal()">
+
+                                        🚪 NÃO RENOVAR
+
+                                    </button>
+
+                                `
+                                :
+                                ""
+                        }
+
+                    `
+                    :
+                    `
+
+                        <p>
+                            Você ainda não possui
+                            empresário.
+                        </p>
+
+                        <p>
+                            Empresários podem melhorar
+                            suas negociações, contatos
+                            e oportunidades internacionais.
+                        </p>
+
+                        <button
+                            class="green"
+                            onclick="openManagerOffers()">
+
+                            👔 PROCURAR EMPRESÁRIO
+
+                        </button>
+
+                    `
             }
+
         </div>
+
+
         <button
             class="main-button"
             onclick="tab('home')">
+
             🏠 VOLTAR AO INÍCIO
+
         </button>
+
     `;
+
 }
+
+
 /* =========================================================
-   TELA DE OFERTAS DE EMPRESÁRIOS
+   🌐 EXPORTAR FUNÇÕES
+   IMPORTANTE PARA OS OUTROS SISTEMAS
 ========================================================= */
-function openManagerOffers() {
-    ensureTeamPlayer();
-    generateManagerOffers();
-    const content =
-        getElement("content");
-    if (!content) {
-        return;
-    }
-    if (
-        !player.managerOffers ||
-        player.managerOffers.length === 0
-    ) {
-        content.innerHTML = `
-            <div class="card">
-                <div class="title">
-                    👔 EMPRESÁRIOS
-                </div>
-                <p>
-                    Nenhum empresário está
-                    disponível neste momento.
-                </p>
-                <button
-                    class="gray"
-                    onclick="teamScreen()">
-                    VOLTAR
-                </button>
-            </div>
-        `;
-        return;
-    }
-    content.innerHTML = `
-        <div class="card">
-            <div class="title">
-                👔 ESCOLHA SEU EMPRESÁRIO
-            </div>
-            <p>
-                As ofertas disponíveis dependem
-                da sua fama e carreira.
-            </p>
-        </div>
-        ${
-            player.managerOffers.map(
-                (manager, index) => `
-                <div class="card">
-                    <div class="title">
-                        👔 ${manager.name}
-                    </div>
-                    <div class="statline">
-                        <span>
-                            Nível
-                        </span>
-                        <b>
-                            ${manager.level}
-                        </b>
-                    </div>
-                    <div class="statline">
-                        <span>
-                            Comissão
-                        </span>
-                        <b>
-                            ${manager.commission}%
-                        </b>
-                    </div>
-                    <div class="statline">
-                        <span>
-                            Contatos
-                        </span>
-                        <b>
-                            ${manager.contacts}
-                        </b>
-                    </div>
-                    <div class="statline">
-                        <span>
-                            Negociação
-                        </span>
-                        <b>
-                            ${manager.negotiation}
-                        </b>
-                    </div>
-                    <div class="statline">
-                        <span>
-                            Acesso internacional
-                        </span>
-                        <b>
-                            ${manager.internationalAccess}
-                        </b>
-                    </div>
-                    <button
-                        class="green"
-                        onclick="hireManager(${index})">
-                        👔 CONTRATAR EMPRESÁRIO
-                    </button>
-                </div>
-                `
-            ).join("")
-        }
-        <button
-            class="main-button"
-            onclick="teamScreen()">
-            ⬅️ VOLTAR
-        </button>
-    `;
-}
-/* =========================================================
-   COMPATIBILIDADE GLOBAL
-========================================================= */
-window.mmaTeams =
-    mmaTeams;
-window.teamCoaches =
-    teamCoaches;
-window.privateCoaches =
-    privateCoaches;
-window.managers =
-    managers;
-/* =========================================================
-   EQUIPE
-========================================================= */
+
 window.ensureTeamPlayer =
     ensureTeamPlayer;
+
 window.teamScreen =
     teamScreen;
+
 window.joinTeam =
     joinTeam;
+
 window.leaveTeam =
     leaveTeam;
+
 window.hirePrivateCoach =
     hirePrivateCoach;
+
 window.firePrivateCoach =
     firePrivateCoach;
+
 window.processTeamWeek =
     processTeamWeek;
+
 window.applyTeamTraining =
     applyTeamTraining;
+
 window.applyPrivateCoachTraining =
     applyPrivateCoachTraining;
+
 window.getTeamsByCountry =
     getTeamsByCountry;
-/* =========================================================
-   EMPRESÁRIO
-========================================================= */
+
+window.getTeamAcceptanceChance =
+    getTeamAcceptanceChance;
+
+
+/* EMPRESÁRIO */
+
 window.generateManagerOffers =
     generateManagerOffers;
+
 window.openManagerOffers =
     openManagerOffers;
+
 window.hireManager =
     hireManager;
-window.getManagerNegotiationBonus =
-    getManagerNegotiationBonus;
-window.getManagerInternationalAccess =
-    getManagerInternationalAccess;
-window.getManagerLevel =
-    getManagerLevel;
+
 window.createManagerContract =
     createManagerContract;
+
 window.ensureManagerContract =
     ensureManagerContract;
+
 window.processManagerContractYear =
     processManagerContractYear;
+
 window.getManagerContractStatus =
     getManagerContractStatus;
+
 window.hasActiveManagerContract =
     hasActiveManagerContract;
+
 window.renewManagerContract =
     renewManagerContract;
+
 window.declineManagerRenewal =
     declineManagerRenewal;
+
+window.getManagerNegotiationBonus =
+    getManagerNegotiationBonus;
+
+window.getManagerInternationalAccess =
+    getManagerInternationalAccess;
+
+window.getManagerLevel =
+    getManagerLevel;
+
+
 /* =========================================================
    INICIALIZAÇÃO
 ========================================================= */
+
 if (
-    typeof window.player !==
-    "undefined" &&
     window.player
 ) {
+
     ensureTeamPlayer();
+
 }
+
+console.log(
+    "✅ TEAM.JS carregado com sucesso."
+);
+
+console.log(
+    "🥊 Sistema de equipes: OK"
+);
+
+console.log(
+    "👔 Sistema de empresários: OK"
+);
+
+console.log(
+    "🥋 Sistema de treinadores: OK"
+);
