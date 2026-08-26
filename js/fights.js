@@ -862,3 +862,5 @@ function fightScreen() {
 window.findFight = findFight;
 window.fight = fight;
 window.fightScreen = fightScreen;
+
+alert("FIGHTS.JS CARREGOU");
