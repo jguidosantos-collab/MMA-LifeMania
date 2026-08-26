@@ -221,33 +221,35 @@ function openCharacterCreation() {
    CRIAR LUTADOR
 ========================================================= */
 function createPlayerFromScreen() {
+
     const name =
         document.getElementById("playerName").value.trim();
+
     const country =
         document.getElementById("country").value;
+
     const weight =
         document.getElementById("weight").value;
+
     const style =
         document.getElementById("style").value;
+
     if (!name) {
-        alert(
-            "Digite o nome do seu lutador."
-        );
+        alert("Digite o nome do seu lutador.");
         return;
     }
-    /*
-     * Usa o sistema de criação existente
-     * quando ele estiver disponível.
-     */
+
+    // Cria o jogador usando o sistema principal
     if (typeof createPlayer === "function") {
+        createPlayer();
 
-    createPlayer();
+        player.name = name;
+        player.country = country;
+        player.weight = weight;
+        player.style = style;
+    }
 
-    player.name = name;
-    player.country = country;
-    player.weight = weight;
-    player.style = style;
-
+    // Garantir dados básicos
     player.age = 15;
     player.money = 500;
     player.fame = 0;
@@ -255,177 +257,48 @@ function createPlayerFromScreen() {
     player.fatigue = 0;
 
     player.careerStage = "amateur";
-
     player.nextFight = null;
     player.team = null;
     player.manager = null;
 
-    // Mostra o jogo imediatamente
+    if (!player.log) {
+        player.log = [];
+    }
+
+    if (!player.children) {
+        player.children = [];
+    }
+
+    // Salva o novo lutador
+    save();
+
+    // Esconde criação
     const creation =
         document.getElementById("creation");
-
-    const game =
-        document.getElementById("game");
-
-    const tabs =
-        document.getElementById("tabs");
 
     if (creation) {
         creation.classList.add("hidden");
     }
 
+    // Mostra o jogo
+    const game =
+        document.getElementById("game");
+
     if (game) {
         game.classList.remove("hidden");
     }
+
+    // Mostra as abas
+    const tabs =
+        document.getElementById("tabs");
 
     if (tabs) {
         tabs.classList.remove("hidden");
     }
 
-    save();
-
-    home();
-
-    return;
-}
-    /*
-     * Caso o projeto ainda não possua
-     * createPlayer(), cria o jogador básico.
-     */
-    player.name =
-        name;
-    player.country =
-        country;
-    player.weight =
-        weight;
-    player.style =
-        style;
-    player.age =
-        18;
-    player.money =
-        0;
-    player.fame =
-        0;
-    player.health =
-        100;
-    player.fatigue =
-        0;
-    player.professional =
-        player.professional || {
-            active: false,
-            wins: 0,
-            losses: 0,
-            draws: 0
-        };
-    player.amateur =
-        player.amateur || {
-            wins: 0,
-            losses: 0,
-            draws: 0
-        };
-    player.attributes =
-        player.attributes || {
-            strength: 50,
-            striking: 50,
-            wrestling: 50,
-            grappling: 50,
-            cardio: 50,
-            technique: 50,
-            defense: 50,
-            fightIQ: 50,
-            mental: 50,
-            confidence: 50
-        };
-    player.log =
-        player.log || [];
-    player.children =
-        player.children || [];
-    player.nextFight =
-        null;
-    player.team =
-        null;
-    player.manager =
-        null;
-    player.careerStage =
-        "amateur";
-    save();
+    // ABRE A TELA PRINCIPAL AUTOMATICAMENTE
     home();
 }
-/* =========================
-   VIRAR PROFISSIONAL
-========================= */
-
-function turnProfessional() {
-
-    if (player.age < 18) {
-
-        alert(
-            "Você precisa ter 18 anos para se tornar profissional."
-        );
-
-        return;
-
-    }
-
-
-    if (player.professional.active) {
-
-        alert(
-            "Você já é profissional."
-        );
-
-        return;
-
-    }
-
-
-    /*
-     * Ativa a carreira profissional
-     */
-
-    player.professional.active = true;
-
-
-    /*
-     * Todo lutador começa
-     * obrigatoriamente no Regional.
-     */
-
-    player.careerStage = "regional";
-
-
-    /*
-     * Garante que não exista
-     * uma promoção grande selecionada
-     * antes da hora.
-     */
-
-    player.currentPromotion = null;
-
-
-    /*
-     * Mensagem no histórico
-     */
-
-    player.log.unshift(
-        "🥊 Você se tornou profissional e começou no circuito regional."
-    );
-
-
-    save();
-
-
-    alert(
-        "🥊 Parabéns!\n\n" +
-        "Você agora é um lutador profissional.\n\n" +
-        "Sua carreira começa no circuito REGIONAL."
-    );
-
-
-    home();
-
-}
-
 /* =========================
    TELA INICIAL
 ========================= */
