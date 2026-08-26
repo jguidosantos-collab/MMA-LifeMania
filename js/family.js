@@ -1,329 +1,782 @@
 /* =========================================================
    MMA LIFE DYNASTY
    FAMILY.JS
-   VIDA + FAMÍLIA + GESTAÇÃO + HERANÇA
+   VIDA + RELACIONAMENTO + FAMÍLIA
 ========================================================= */
-
+/* =========================================================
+   CONFIGURAÇÕES
+========================================================= */
 const MARRIAGE_AGE = 18;
-
 const MARRIAGE_COST = 500;
-
 const CHILD_COST = 1000;
-
-const FAMILY_WEEKLY_COST = 50;
-
-const PREGNANCY_WEEKS = 40;
-
-
+const MAX_CHILDREN = 5;
 /* =========================================================
-   GARANTIR ESTRUTURA DA FAMÍLIA
+   NOMES
+   200 CANDIDATAS SERÃO GERADAS AUTOMATICAMENTE
 ========================================================= */
-
-function ensureFamilyData() {
-
-    if (!window.player) {
-        return;
-    }
-
-    const p = window.player;
-
-    if (!Array.isArray(p.children)) {
-        p.children = [];
-    }
-
-    if (!Array.isArray(p.familyHistory)) {
-        p.familyHistory = [];
-    }
-
-    if (typeof p.pregnancy === "undefined") {
-        p.pregnancy = null;
-    }
-
-    if (typeof p.heir === "undefined") {
-        p.heir = null;
-    }
-
-    if (typeof p.familyExpenses === "undefined") {
-        p.familyExpenses = FAMILY_WEEKLY_COST;
-    }
+const femaleNames = [
+    "Camila",
+    "Ana",
+    "Julia",
+    "Marina",
+    "Sofia",
+    "Beatriz",
+    "Laura",
+    "Isabela",
+    "Gabriela",
+    "Manuela",
+    "Valentina",
+    "Alice",
+    "Helena",
+    "Luiza",
+    "Livia",
+    "Clara",
+    "Maria",
+    "Carolina",
+    "Larissa",
+    "Amanda",
+    "Bianca",
+    "Rafaela",
+    "Leticia",
+    "Mariana",
+    "Eduarda",
+    "Fernanda",
+    "Bruna",
+    "Natalia",
+    "Yasmin",
+    "Giovanna",
+    "Melissa",
+    "Nicole",
+    "Maitê",
+    "Cecilia",
+    "Isadora",
+    "Lorena",
+    "Sarah",
+    "Eloá",
+    "Rebeca",
+    "Vitória",
+    "Clara",
+    "Esther",
+    "Elisa",
+    "Ayla",
+    "Mirella",
+    "Alana",
+    "Isis",
+    "Olivia",
+    "Emma",
+    "Emily",
+    "Chloe",
+    "Grace",
+    "Ella",
+    "Ava",
+    "Mia",
+    "Lily",
+    "Charlotte",
+    "Amelia",
+    "Harper",
+    "Evelyn",
+    "Abigail",
+    "Scarlett",
+    "Victoria",
+    "Riley",
+    "Aria",
+    "Layla",
+    "Nora",
+    "Zoey",
+    "Hannah",
+    "Luna",
+    "Zoe",
+    "Stella",
+    "Aurora",
+    "Lucy",
+    "Ellie",
+    "Maya",
+    "Leah",
+    "Naomi",
+    "Samantha",
+    "Natalie",
+    "Claire",
+    "Madison",
+    "Brooklyn",
+    "Savannah",
+    "Paisley",
+    "Skylar",
+    "Yuki",
+    "Hana",
+    "Sakura",
+    "Aiko",
+    "Akari",
+    "Mio",
+    "Rin",
+    "Mei",
+    "Yuna",
+    "Emi",
+    "Nana",
+    "Ayaka",
+    "Reina",
+    "Kira",
+    "Valeria",
+    "Camila",
+    "Sofia",
+    "Lucia",
+    "Elena",
+    "Isabella",
+    "Martina",
+    "Carla",
+    "Paula",
+    "Alba",
+    "Claudia",
+    "Daniela",
+    "Sara",
+    "Irene",
+    "Aitana",
+    "Marta",
+    "Adriana",
+    "Patricia",
+    "Natalia",
+    "Alejandra",
+    "Gabriela",
+    "Renata",
+    "Ximena",
+    "Marisol",
+    "Catalina",
+    "Antonella",
+    "Florencia",
+    "Julieta",
+    "Agustina",
+    "Luciana",
+    "Pilar",
+    "Josefina",
+    "Emilia",
+    "Martina",
+    "Alma",
+    "Violeta",
+    "Rocio",
+    "Carolina",
+    "Daniela",
+    "Sabrina",
+    "Mariana",
+    "Veronica",
+    "Andrea",
+    "Sofia",
+    "Anna",
+    "Anastasia",
+    "Alina",
+    "Irina",
+    "Ekaterina",
+    "Natalia",
+    "Daria",
+    "Katerina",
+    "Elena",
+    "Vera",
+    "Polina",
+    "Maria",
+    "Tatiana",
+    "Olga",
+    "Yulia",
+    "Nadia",
+    "Karina",
+    "Milana",
+    "Arina",
+    "Eva",
+    "Mila",
+    "Amira",
+    "Lina",
+    "Leila",
+    "Nina",
+    "Sara",
+    "Layla",
+    "Mariam",
+    "Amina",
+    "Fatima",
+    "Hiba",
+    "Yasmin",
+    "Nour",
+    "Laila",
+    "Zahra",
+    "Samira",
+    "Dina",
+    "Maya",
+    "Rania",
+    "Salma",
+    "Aisha",
+    "Hana",
+    "Leila",
+    "Mariam",
+    "Nora",
+    "Ines",
+    "Sana",
+    "Aya",
+    "Mina",
+    "Noor",
+    "Jade",
+    "Ruby",
+    "Ivy",
+    "Hazel",
+    "Violet",
+    "Daisy",
+    "Rose",
+    "Iris",
+    "Willow",
+    "Poppy",
+    "Eleanor",
+    "Alice",
+    "Matilda",
+    "Florence",
+    "Elsie",
+    "Maisie",
+    "Freya",
+    "Isla",
+    "Phoebe",
+    "Sienna",
+    "Eliza",
+    "Georgia",
+    "Millie",
+    "Rosie"
+];
+/* =========================================================
+   PAÍSES
+========================================================= */
+const datingCountries = [
+    "Brasil",
+    "Brasil",
+    "Brasil",
+    "Brasil",
+    "Argentina",
+    "México",
+    "Estados Unidos",
+    "Canadá",
+    "Reino Unido",
+    "Espanha",
+    "Portugal",
+    "França",
+    "Itália",
+    "Alemanha",
+    "Polônia",
+    "Rússia",
+    "Japão",
+    "Japão",
+    "Coreia do Sul",
+    "Tailândia"
+];
+/* =========================================================
+   PROFISSÕES
+========================================================= */
+const datingProfessions = [
+    "Estudante",
+    "Professora",
+    "Médica",
+    "Advogada",
+    "Empresária",
+    "Influenciadora",
+    "Nutricionista",
+    "Fisioterapeuta",
+    "Designer",
+    "Jornalista",
+    "Fotógrafa",
+    "Atleta",
+    "Personal Trainer",
+    "Engenheira",
+    "Veterinária"
+];
+/* =========================================================
+   GERADOR DE ATRIBUTOS
+========================================================= */
+function randomStat(min, max) {
+    return Math.floor(
+        Math.random() * (max - min + 1)
+    ) + min;
 }
-
-
 /* =========================================================
-   NAMORAR / CASAR
+   GERAR CANDIDATAS
 ========================================================= */
-
+function generateDatingCandidates() {
+    const candidates = [];
+    for (
+        let i = 0;
+        i < 200;
+        i++
+    ) {
+        const name =
+            femaleNames[
+                i % femaleNames.length
+            ];
+        const country =
+            datingCountries[
+                i % datingCountries.length
+            ];
+        const athlete =
+            Math.random() < 0.35;
+        const profession =
+            athlete
+                ? "Atleta"
+                : datingProfessions[
+                    Math.floor(
+                        Math.random() *
+                        datingProfessions.length
+                    )
+                ];
+        candidates.push({
+            id: i + 1,
+            name:
+                name,
+            age:
+                randomStat(18, 29),
+            country:
+                country,
+            profession:
+                profession,
+            athlete:
+                athlete,
+            intelligence:
+                randomStat(65, 97),
+            physical:
+                randomStat(60, 97),
+            genetics:
+                randomStat(65, 97),
+            mental:
+                randomStat(60, 97),
+            personality:
+                randomStat(65, 97),
+            fertility:
+                randomStat(65, 95)
+        });
+    }
+    return candidates;
+}
+/* =========================================================
+   BANCO DAS 200 CANDIDATAS
+========================================================= */
+const datingCandidates =
+    generateDatingCandidates();
+/* =========================================================
+   CONTROLE DO TINDER
+========================================================= */
+let datingIndex = 0;
+/* =========================================================
+   NAMORO ANTIGO / COMPATIBILIDADE
+========================================================= */
 function dating() {
-
-    ensureFamilyData();
-
-    const p = window.player;
-
-    if (p.age < MARRIAGE_AGE) {
-
+    ensurePlayer();
+    if (player.age < MARRIAGE_AGE) {
         alert(
             "❤️ Você ainda é jovem demais para iniciar a vida familiar."
         );
-
         return;
     }
-
-
-    if (p.relationship === "Solteiro") {
-
-        p.relationship = "Namorando";
-
-        p.partner = "Companheiro(a)";
-
-        p.log.unshift(
-            "❤️ Você começou um relacionamento."
-        );
-
-    }
-
-    else if (
-        p.relationship === "Namorando"
+    if (
+        player.relationship ===
+        "Solteiro"
     ) {
-
-        if (p.money < MARRIAGE_COST) {
-
+        datingScreen();
+        return;
+    }
+    if (
+        player.relationship ===
+        "Namorando"
+    ) {
+        if (
+            player.money <
+            MARRIAGE_COST
+        ) {
             alert(
                 "💰 Você precisa de $" +
                 MARRIAGE_COST +
                 " para se casar."
             );
-
             return;
         }
-
-
-        p.money -= MARRIAGE_COST;
-
-        p.relationship = "Casado";
-
-        p.married = true;
-
-        p.log.unshift(
-            "💍 Você se casou e começou uma nova fase da vida."
+        player.money -=
+            MARRIAGE_COST;
+        player.relationship =
+            "Casado";
+        player.married =
+            true;
+        player.log =
+            player.log || [];
+        player.log.unshift(
+            "💍 Você se casou."
         );
-
-        p.familyHistory.unshift({
-            type: "marriage",
-            year: p.year,
-            week: p.week
-        });
-
+        save();
+        familyScreen();
     }
-
-
-    save();
-
-    familyScreen();
 }
-
-
 /* =========================================================
-   INICIAR GESTAÇÃO
+   TELA TINDER
 ========================================================= */
-
-function haveChild() {
-
-    ensureFamilyData();
-
-    const p = window.player;
-
-
-    if (p.age < MARRIAGE_AGE) {
-
-        alert(
-            "Você precisa ter pelo menos 18 anos."
+function datingScreen() {
+    ensurePlayer();
+    const content =
+        document.getElementById(
+            "content"
         );
-
+    if (!content) return;
+    if (player.age < 18) {
+        content.innerHTML = `
+            <div class="card">
+                <div class="title">
+                    ❤️ RELACIONAMENTOS
+                </div>
+                <p>
+                    Você poderá começar a namorar
+                    quando completar 18 anos.
+                </p>
+            </div>
+        `;
         return;
     }
-
-
-    if (!p.married) {
-
+    if (
+        player.relationship !==
+        "Solteiro"
+    ) {
+        showRelationship();
+        return;
+    }
+    if (
+        datingIndex >=
+        datingCandidates.length
+    ) {
+        datingIndex = 0;
+    }
+    const candidate =
+        datingCandidates[
+            datingIndex
+        ];
+    content.innerHTML = `
+        <div class="card">
+            <div class="title">
+                ❤️ ENCONTRE ALGUÉM
+            </div>
+            <p>
+                Deslize pelas candidatas
+                e escolha quem pode fazer
+                parte da sua história.
+            </p>
+        </div>
+        <div class="card">
+            <div class="dating-avatar">
+                👩
+            </div>
+            <h2>
+                ${candidate.name},
+                ${candidate.age}
+            </h2>
+            <p>
+                🌎 ${candidate.country}
+            </p>
+            <p>
+                💼 ${candidate.profession}
+            </p>
+            <div class="statline">
+                <span>
+                    🥊 Atleta
+                </span>
+                <b>
+                    ${
+                        candidate.athlete
+                            ? "Sim"
+                            : "Não"
+                    }
+                </b>
+            </div>
+            <div class="statline">
+                <span>
+                    🧬 Genética
+                </span>
+                <b>
+                    ${candidate.genetics}
+                </b>
+            </div>
+            <div class="statline">
+                <span>
+                    🧠 Inteligência
+                </span>
+                <b>
+                    ${candidate.intelligence}
+                </b>
+            </div>
+            <div class="statline">
+                <span>
+                    💪 Condição física
+                </span>
+                <b>
+                    ${candidate.physical}
+                </b>
+            </div>
+            <div class="statline">
+                <span>
+                    🧘 Mental
+                </span>
+                <b>
+                    ${candidate.mental}
+                </b>
+            </div>
+            <div class="statline">
+                <span>
+                    ❤️ Personalidade
+                </span>
+                <b>
+                    ${candidate.personality}
+                </b>
+            </div>
+            <div class="statline">
+                <span>
+                    👶 Fertilidade
+                </span>
+                <b>
+                    ${candidate.fertility}
+                </b>
+            </div>
+            <div class="dating-buttons">
+                <button
+                    class="gray"
+                    onclick="passCandidate()">
+                    ❌ PASSAR
+                </button>
+                <button
+                    class="green"
+                    onclick="likeCandidate()">
+                    ❤️ CURTIR
+                </button>
+            </div>
+        </div>
+    `;
+}
+/* =========================================================
+   PASSAR CANDIDATA
+========================================================= */
+function passCandidate() {
+    datingIndex++;
+    if (
+        datingIndex >=
+        datingCandidates.length
+    ) {
+        datingIndex = 0;
+    }
+    datingScreen();
+}
+/* =========================================================
+   CURTIR CANDIDATA
+========================================================= */
+function likeCandidate() {
+    ensurePlayer();
+    const candidate =
+        datingCandidates[
+            datingIndex
+        ];
+    if (!candidate) return;
+    player.relationship =
+        "Namorando";
+    player.partner =
+        candidate.name;
+    player.partnerData = {
+        ...candidate
+    };
+    player.log =
+        player.log || [];
+    player.log.unshift(
+        `❤️ Você começou a namorar ${candidate.name}.`
+    );
+    save();
+    alert(
+        "❤️ Você começou a namorar " +
+        candidate.name +
+        "!"
+    );
+    lifeScreen();
+}
+/* =========================================================
+   RELACIONAMENTO ATUAL
+========================================================= */
+function showRelationship() {
+    ensurePlayer();
+    const content =
+        document.getElementById(
+            "content"
+        );
+    if (!content) return;
+    const partner =
+        player.partnerData || {};
+    content.innerHTML = `
+        <div class="card">
+            <div class="title">
+                ❤️ SEU RELACIONAMENTO
+            </div>
+            <h2>
+                ${player.partner || "Companheiro(a)"}
+            </h2>
+            <p>
+                ${partner.profession || "Profissão desconhecida"}
+            </p>
+        </div>
+        <div class="card">
+            <div class="title">
+                🧬 PERFIL
+            </div>
+            <div class="statline">
+                <span>Atleta</span>
+                <b>
+                    ${
+                        partner.athlete
+                            ? "Sim"
+                            : "Não"
+                    }
+                </b>
+            </div>
+            <div class="statline">
+                <span>Genética</span>
+                <b>
+                    ${partner.genetics || "-"}
+                </b>
+            </div>
+            <div class="statline">
+                <span>Físico</span>
+                <b>
+                    ${partner.physical || "-"}
+                </b>
+            </div>
+            <div class="statline">
+                <span>Mental</span>
+                <b>
+                    ${partner.mental || "-"}
+                </b>
+            </div>
+        </div>
+        <div class="card">
+            <div class="title">
+                💍 PRÓXIMO PASSO
+            </div>
+            <p>
+                O casamento custa
+                $${MARRIAGE_COST}.
+            </p>
+            <button
+                class="green"
+                onclick="dating()">
+                💍 CASAR
+            </button>
+        </div>
+    `;
+}
+/* =========================================================
+   CASAMENTO
+========================================================= */
+function marry() {
+    ensurePlayer();
+    if (
+        player.relationship !==
+        "Namorando"
+    ) {
+        alert(
+            "❤️ Você precisa estar namorando."
+        );
+        return;
+    }
+    if (
+        player.money <
+        MARRIAGE_COST
+    ) {
+        alert(
+            "💰 Você precisa de $" +
+            MARRIAGE_COST +
+            " para se casar."
+        );
+        return;
+    }
+    player.money -=
+        MARRIAGE_COST;
+    player.relationship =
+        "Casado";
+    player.married =
+        true;
+    player.log =
+        player.log || [];
+    player.log.unshift(
+        "💍 Você se casou com " +
+        player.partner +
+        "."
+    );
+    save();
+    lifeScreen();
+}
+/* =========================================================
+   TER FILHO
+========================================================= */
+function haveChild() {
+    ensurePlayer();
+    if (
+        player.age <
+        MARRIAGE_AGE
+    ) {
+        alert(
+            "Você precisa ter 18 anos."
+        );
+        return;
+    }
+    if (
+        !player.married
+    ) {
         alert(
             "💍 Você precisa estar casado."
         );
-
         return;
     }
-
-
-    if (p.pregnancy) {
-
-        alert(
-            "🤰 Sua esposa já está grávida."
-        );
-
-        return;
-    }
-
-
-    if (p.children.length >= 5) {
-
-        alert(
-            "Sua família já possui cinco filhos."
-        );
-
-        return;
-    }
-
-
-    if (p.money < CHILD_COST) {
-
+    if (
+        player.money <
+        CHILD_COST
+    ) {
         alert(
             "💰 Você precisa de $" +
             CHILD_COST +
-            " para iniciar uma gestação."
+            " para ter um filho."
         );
-
         return;
     }
-
-
-    p.money -= CHILD_COST;
-
-
-    p.pregnancy = {
-
-        weeks: 0,
-
-        totalWeeks: PREGNANCY_WEEKS,
-
-        startedYear: p.year,
-
-        startedWeek: p.week
-
-    };
-
-
-    p.log.unshift(
-        "🤰 Sua esposa ficou grávida. A gestação começou."
-    );
-
-
-    save();
-
-    familyScreen();
-}
-
-
-/* =========================================================
-   AVANÇAR UMA SEMANA DA FAMÍLIA
-========================================================= */
-
-function processFamilyWeek() {
-
-    ensureFamilyData();
-
-    const p = window.player;
-
-
-    /* =========================
-       DESPESAS FAMILIARES
-    ========================= */
-
-    if (p.married) {
-
-        p.money =
-            Math.max(
-                0,
-                Number(p.money || 0) -
-                FAMILY_WEEKLY_COST
-            );
-
-    }
-
-
-    /* =========================
-       GESTAÇÃO
-    ========================= */
-
-    if (p.pregnancy) {
-
-        p.pregnancy.weeks += 1;
-
-
-        if (
-            p.pregnancy.weeks >=
-            PREGNANCY_WEEKS
-        ) {
-
-            completePregnancy();
-
-        }
-
-    }
-
-
-    /* =========================
-       IDADE DOS FILHOS
-       52 SEMANAS = 1 ANO
-    ========================= */
-
     if (
-        !p._familyWeekCounter
+        !Array.isArray(
+            player.children
+        )
     ) {
-
-        p._familyWeekCounter = 0;
-
+        player.children = [];
     }
-
-
-    p._familyWeekCounter += 1;
-
-
     if (
-        p._familyWeekCounter >= 52
+        player.children.length >=
+        MAX_CHILDREN
     ) {
-
-        p._familyWeekCounter = 0;
-
-        ageChildren();
-
+        alert(
+            "Sua família já possui cinco filhos."
+        );
+        return;
     }
-
-}
-
-
-/* =========================================================
-   FINALIZAR GESTAÇÃO
-========================================================= */
-
-function completePregnancy() {
-
-    const p = window.player;
-
+    player.money -=
+        CHILD_COST;
     const names = [
-
         "Alex",
         "Lucas",
         "Rafael",
         "Miguel",
         "Arthur",
         "Gabriel",
+        "Davi",
+        "Theo",
+        "Samuel",
+        "Nicolas",
+        "Benjamin",
+        "Mateus",
+        "Enzo",
+        "Heitor",
+        "Guilherme",
         "Sofia",
         "Helena",
         "Julia",
         "Laura",
-        "Mateus",
-        "Davi",
-        "Enzo",
-        "Theo",
         "Valentina",
-        "Benjamin",
-        "Samuel",
+        "Alice",
         "Isabela",
         "Manuela",
-        "Nicolas"
-
+        "Clara",
+        "Beatriz"
     ];
-
-
     const name =
         names[
             Math.floor(
@@ -331,790 +784,234 @@ function completePregnancy() {
                 names.length
             )
         ];
-
-
+    const partner =
+        player.partnerData || {};
+    const fatherPotential =
+        Number(
+            player.potential || 80
+        );
+    const motherGenetics =
+        Number(
+            partner.genetics || 75
+        );
+    const geneticAverage =
+        (
+            fatherPotential +
+            motherGenetics
+        ) / 2;
+    const variation =
+        randomStat(
+            -10,
+            10
+        );
+    const childPotential =
+        Math.max(
+            50,
+            Math.min(
+                99,
+                Math.round(
+                    geneticAverage +
+                    variation
+                )
+            )
+        );
     const child = {
-
-        id:
-            Date.now() +
-            Math.floor(
-                Math.random() * 10000
-            ),
-
-        name: name,
-
-        age: 0,
-
-        bornYear: p.year,
-
-        bornWeek: p.week,
-
+        name:
+            name,
+        age:
+            0,
+        bornYear:
+            player.year,
+        bornWeek:
+            player.week,
         potential:
-            Math.floor(
-                Math.random() * 41
-            ) + 50,
-
+            childPotential,
         fightingInterest:
-            Math.random() < 0.35,
-
-        becameFighter: false,
-
-        inheritance: 0,
-
-        chosenHeir: false
-
+            Math.random() < 0.5,
+        becameFighter:
+            false,
+        mother:
+            player.partner || null,
+        father:
+            player.name || null
     };
-
-
-    p.children.push(child);
-
-    p.pregnancy = null;
-
-
-    p.familyHistory.unshift({
-
-        type: "birth",
-
-        child: name,
-
-        year: p.year,
-
-        week: p.week
-
-    });
-
-
-    p.log.unshift(
-
+    player.children.push(
+        child
+    );
+    player.log =
+        player.log || [];
+    player.log.unshift(
         "👶 Nasceu " +
         name +
         ". A próxima geração começou."
-
     );
-
-
     save();
-
+    lifeScreen();
 }
-
-
-/* =========================================================
-   ENVELHECER FILHOS
-========================================================= */
-
-function ageChildren() {
-
-    const p = window.player;
-
-
-    if (!Array.isArray(p.children)) {
-        return;
-    }
-
-
-    p.children.forEach(
-        function(child) {
-
-            child.age =
-                Number(child.age || 0) + 1;
-
-
-            if (child.age === 18) {
-
-                p.log.unshift(
-
-                    "🎂 " +
-                    child.name +
-                    " completou 18 anos."
-
-                );
-
-            }
-
-        }
-    );
-
-
-    save();
-
-}
-
-
-/* =========================================================
-   ESCOLHER HERDEIRO
-========================================================= */
-
-function chooseHeir(childId) {
-
-    ensureFamilyData();
-
-    const p = window.player;
-
-
-    const child =
-        p.children.find(
-            function(c) {
-
-                return String(c.id) ===
-                    String(childId);
-
-            }
-        );
-
-
-    if (!child) {
-
-        alert(
-            "Filho não encontrado."
-        );
-
-        return;
-    }
-
-
-    if (child.age < 18) {
-
-        alert(
-            "👶 Seu filho precisa ter pelo menos 18 anos para ser escolhido como herdeiro."
-        );
-
-        return;
-    }
-
-
-    p.children.forEach(
-        function(c) {
-
-            c.chosenHeir = false;
-
-        }
-    );
-
-
-    child.chosenHeir = true;
-
-    p.heir = child.id;
-
-
-    p.log.unshift(
-
-        "👑 Você escolheu " +
-        child.name +
-        " para continuar o legado."
-
-    );
-
-
-    save();
-
-    familyScreen();
-}
-
-
-/* =========================================================
-   CALCULAR HERANÇA
-========================================================= */
-
-function calculateInheritance() {
-
-    ensureFamilyData();
-
-    const p = window.player;
-
-
-    if (!p.heir) {
-        return 0;
-    }
-
-
-    const child =
-        p.children.find(
-            function(c) {
-
-                return String(c.id) ===
-                    String(p.heir);
-
-            }
-        );
-
-
-    if (!child) {
-        return 0;
-    }
-
-
-    return Math.max(
-        0,
-        Math.round(
-            Number(p.money || 0)
-        )
-    );
-}
-
-
-/* =========================================================
-   TRANSFERIR HERANÇA
-========================================================= */
-
-function transferInheritance() {
-
-    ensureFamilyData();
-
-    const p = window.player;
-
-
-    if (!p.heir) {
-
-        alert(
-            "👑 Primeiro escolha quem continuará seu legado."
-        );
-
-        return;
-    }
-
-
-    const child =
-        p.children.find(
-            function(c) {
-
-                return String(c.id) ===
-                    String(p.heir);
-
-            }
-        );
-
-
-    if (!child) {
-        return;
-    }
-
-
-    const inheritance =
-        calculateInheritance();
-
-
-    child.inheritance =
-        inheritance;
-
-
-    p.money = 0;
-
-
-    p.log.unshift(
-
-        "💰 A herança de $" +
-        inheritance +
-        " foi destinada a " +
-        child.name +
-        "."
-
-    );
-
-
-    save();
-
-    familyScreen();
-}
-
-
 /* =========================================================
    INFORMAÇÕES DA DINASTIA
 ========================================================= */
-
 function dynastyInfo() {
-
-    ensureFamilyData();
-
-    const p = window.player;
-
-
+    ensurePlayer();
     return {
-
         generation:
-            p.children.length > 0
+            player.children &&
+            player.children.length > 0
                 ? 2
                 : 1,
-
         children:
-            p.children.length,
-
-        pregnant:
-            !!p.pregnancy,
-
-        pregnancyWeeks:
-            p.pregnancy
-                ? p.pregnancy.weeks
-                : 0,
-
-        heir:
-            p.heir
-
+            Array.isArray(
+                player.children
+            )
+                ? player.children.length
+                : 0
     };
-
 }
-
-
 /* =========================================================
-   ÁRVORE GENEALÓGICA
+   FAMÍLIA
 ========================================================= */
-
-function familyTree() {
-
-    ensureFamilyData();
-
-    const p = window.player;
-
-
-    let html = `
-
-        <div class="card">
-
-            <div class="title">
-                🌳 ÁRVORE GENEALÓGICA
-            </div>
-
-            <div class="family-tree">
-
-                <div class="tree-person">
-
-                    🥊 <strong>
-                        ${p.name || "Você"}
-                    </strong>
-
-                    <small>
-                        Geração 1
-                    </small>
-
-                </div>
-
-    `;
-
-
-    if (p.children.length === 0) {
-
-        html += `
-
-            <p>
-                Sua árvore ainda não possui
-                descendentes.
-            </p>
-
-        `;
-
-    }
-
-
-    p.children.forEach(
-        function(child) {
-
-            html += `
-
-                <div class="tree-person">
-
-                    👶 <strong>
-                        ${child.name}
-                    </strong>
-
-                    <small>
-                        ${child.age} anos
-                    </small>
-
-                    <small>
-                        Potencial: ${child.potential}
-                    </small>
-
-                    ${
-                        child.chosenHeir
-                        ? "<small>👑 HERDEIRO</small>"
-                        : ""
-                    }
-
-                </div>
-
-            `;
-
-        }
-    );
-
-
-    html += `
-
-            </div>
-
-        </div>
-
-    `;
-
-
-    return html;
-}
-
-
-/* =========================================================
-   TELA DA FAMÍLIA
-========================================================= */
-
 function familyScreen() {
-
-    ensureFamilyData();
-
-    const p = window.player;
-
+    ensurePlayer();
     const content =
-        document.getElementById("content");
-
-
-    if (!content) {
-        return;
-    }
-
-
-    let pregnancyHTML = "";
-
-
-    if (p.pregnancy) {
-
-        pregnancyHTML = `
-
-            <div class="card">
-
-                <div class="title">
-                    🤰 GESTAÇÃO
-                </div>
-
-                <div class="statline">
-
-                    <span>
-                        Progresso
-                    </span>
-
-                    <b>
-                        ${p.pregnancy.weeks}
-                        /
-                        ${p.pregnancy.totalWeeks}
-                        semanas
-                    </b>
-
-                </div>
-
-                <p>
-                    Faltam
-                    ${
-                        p.pregnancy.totalWeeks -
-                        p.pregnancy.weeks
-                    }
-                    semanas para o nascimento.
-                </p>
-
-            </div>
-
-        `;
-
-    }
-
-
-    let childrenHTML = "";
-
-
-    if (p.children.length === 0) {
-
-        childrenHTML = `
-
-            <p>
-                Você ainda não tem filhos.
-            </p>
-
-        `;
-
-    }
-
-
-    p.children.forEach(
-        function(child) {
-
-            childrenHTML += `
-
-                <div class="card">
-
-                    <div class="title">
-                        👶 ${child.name}
-                    </div>
-
-                    <div class="statline">
-
-                        <span>
-                            Idade
-                        </span>
-
-                        <b>
-                            ${child.age} anos
-                        </b>
-
-                    </div>
-
-                    <div class="statline">
-
-                        <span>
-                            Potencial
-                        </span>
-
-                        <b>
-                            ${child.potential}
-                        </b>
-
-                    </div>
-
-                    <div class="statline">
-
-                        <span>
-                            Interesse em MMA
-                        </span>
-
-                        <b>
-                            ${
-                                child.fightingInterest
-                                ? "Sim"
-                                : "Não"
-                            }
-                        </b>
-
-                    </div>
-
-                    ${
-                        child.age >= 18
-                        ?
-
-                        `
-
-                            <button
-                                class="main-button"
-                                onclick="chooseHeir('${child.id}')">
-
-                                👑 ESCOLHER COMO HERDEIRO
-
-                            </button>
-
-                        `
-
-                        :
-
-                        ""
-
-                    }
-
-                </div>
-
-            `;
-
-        }
-    );
-
-
+        document.getElementById(
+            "content"
+        );
+    if (!content) return;
+    const children =
+        Array.isArray(
+            player.children
+        )
+            ? player.children
+            : [];
     content.innerHTML = `
-
         <div class="card">
-
             <div class="title">
                 👨‍👩‍👧 FAMÍLIA
             </div>
-
-            <div class="statline">
-
-                <span>
-                    Relacionamento
-                </span>
-
-                <b>
-                    ${p.relationship || "Solteiro"}
-                </b>
-
+            <p>
+                Construa sua família
+                e seu legado.
+            </p>
+        </div>
+        <div class="card">
+            <div class="title">
+                ❤️ RELACIONAMENTO
             </div>
-
             <div class="statline">
-
+                <span>
+                    Status
+                </span>
+                <b>
+                    ${
+                        player.relationship ||
+                        "Solteiro"
+                    }
+                </b>
+            </div>
+            <div class="statline">
                 <span>
                     Parceiro
                 </span>
-
                 <b>
-                    ${p.partner || "Nenhum"}
+                    ${
+                        player.partner ||
+                        "Nenhum"
+                    }
                 </b>
-
             </div>
-
-            <div class="statline">
-
-                <span>
-                    Filhos
-                </span>
-
-                <b>
-                    ${p.children.length}
-                </b>
-
-            </div>
-
-            <div class="statline">
-
-                <span>
-                    Gastos familiares
-                </span>
-
-                <b>
-                    $${FAMILY_WEEKLY_COST}/semana
-                </b>
-
-            </div>
-
-        </div>
-
-
-        <div class="card">
-
-            <div class="title">
-                💕 RELACIONAMENTO
-            </div>
-
             ${
-                p.relationship === "Solteiro"
-
-                ?
-
+                player.relationship ===
+                "Solteiro"
+                    ?
                 `
-
                     <button
-                        class="main-button"
-                        onclick="dating()">
-
-                        ❤️ COMEÇAR RELACIONAMENTO
-
+                        class="green"
+                        onclick="datingScreen()">
+                        ❤️ CONHECER ALGUÉM
                     </button>
-
                 `
-
-                :
-
-                p.relationship === "Namorando"
-
-                ?
-
-                `
-
-                    <button
-                        class="main-button"
-                        onclick="dating()">
-
-                        💍 CASAR — $${MARRIAGE_COST}
-
-                    </button>
-
-                `
-
-                :
-
-                `
-
-                    <p>
-                        💍 Você está casado.
-                    </p>
-
-                `
+                    :
+                ""
             }
-
         </div>
-
-
-        ${pregnancyHTML}
-
-
         <div class="card">
-
             <div class="title">
                 👶 FILHOS
             </div>
-
-            <button
-                class="main-button"
-                onclick="haveChild()">
-
-                👶 TER UM FILHO — $${CHILD_COST}
-
-            </button>
-
-        </div>
-
-
-        ${childrenHTML}
-
-
-        ${familyTree()}
-
-
-        <div class="card">
-
-            <div class="title">
-                👑 LEGADO
+            <div class="statline">
+                <span>
+                    Filhos
+                </span>
+                <b>
+                    ${children.length}
+                </b>
             </div>
-
-            <p>
-                ${
-                    p.heir
-                    ? "Você já escolheu quem continuará sua dinastia."
-                    : "Escolha um filho adulto para continuar sua história."
-                }
-            </p>
-
             ${
-                p.heir
-                ?
-
+                player.married
+                    ?
                 `
-
                     <button
-                        class="main-button"
-                        onclick="transferInheritance()">
-
-                        💰 DESTINAR HERANÇA
-
+                        class="green"
+                        onclick="haveChild()">
+                        👶 TER FILHO
                     </button>
-
                 `
-
-                :
-
+                    :
                 ""
-
             }
-
+            ${
+                children.length > 0
+                    ?
+                children.map(
+                    function(child) {
+                        return `
+                            <div class="statline">
+                                <span>
+                                    👶 ${child.name}
+                                </span>
+                                <b>
+                                    ${child.age} anos
+                                </b>
+                            </div>
+                        `;
+                    }
+                ).join("")
+                    :
+                `<p>
+                    Você ainda não tem filhos.
+                </p>`
+            }
         </div>
-
+        <div class="card">
+            <div class="title">
+                🧬 LEGADO
+            </div>
+            <p>
+                Seus filhos poderão continuar
+                sua história e, no futuro,
+                assumir sua carreira.
+            </p>
+        </div>
     `;
-
 }
-
-
 /* =========================================================
    FUNÇÕES GLOBAIS
 ========================================================= */
-
-window.dating = dating;
-
-window.haveChild = haveChild;
-
-window.processFamilyWeek =
-    processFamilyWeek;
-
-window.chooseHeir =
-    chooseHeir;
-
-window.calculateInheritance =
-    calculateInheritance;
-
-window.transferInheritance =
-    transferInheritance;
-
+window.dating =
+    dating;
+window.datingScreen =
+    datingScreen;
+window.passCandidate =
+    passCandidate;
+window.likeCandidate =
+    likeCandidate;
+window.showRelationship =
+    showRelationship;
+window.marry =
+    marry;
+window.haveChild =
+    haveChild;
 window.dynastyInfo =
     dynastyInfo;
-
 window.familyScreen =
     familyScreen;
