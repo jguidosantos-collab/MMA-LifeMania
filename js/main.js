@@ -830,9 +830,7 @@ function home() {
             </div>
 
         </div>
-    `;
-}
-<div class="restart-section">
+        <div class="restart-section">
 
     <button
         class="main-button gray"
@@ -843,6 +841,9 @@ function home() {
     </button>
 
 </div>
+    `;
+}
+
 /* =========================================================
    CALENDÁRIO
 ========================================================= */
