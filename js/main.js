@@ -175,65 +175,75 @@ function loadGame() {
    TELA INICIAL
 ========================================================= */
 function startGame() {
-    showCreation();
-    const creator =
-        getElement("creator");
-    if (!creator) {
-        console.error(
-            "Não encontrei #creator."
-        );
+
+    const creation = document.getElementById("creation");
+    const creator = document.getElementById("creator");
+    const game = document.getElementById("game");
+    const tabs = document.getElementById("tabs");
+
+    if (!creation || !creator || !game) {
+        console.error("Estrutura do index.html não encontrada.");
         return;
     }
+
+    creation.classList.remove("hidden");
+    game.classList.add("hidden");
+
+    if (tabs) {
+        tabs.classList.add("hidden");
+    }
+
     creator.innerHTML = `
+
         <div class="start-screen">
+
             <div class="start-logo">
                 🥊
             </div>
+
             <h1>
                 MMA LIFE
             </h1>
-            <div class="edition">
-                DYNASTY
-            </div>
+
             <p class="start-subtitle">
                 CONSTRUA SUA CARREIRA.<br>
                 ESCREVA SEU LEGADO.
             </p>
+
             <div class="start-preview">
+
                 <div class="start-fighter">
                     🥊
                 </div>
+
                 <div class="start-preview-text">
+
                     <strong>
                         SUA HISTÓRIA COMEÇA AQUI
                     </strong>
+
                     <span>
                         Comece como amador,
                         evolua seu lutador,
-                        conquiste contratos,
-                        títulos e construa
-                        seu legado.
+                        consiga contratos,
+                        conquiste títulos
+                        e construa seu legado.
                     </span>
+
                 </div>
+
             </div>
+
             <button
                 class="start-button"
-                onclick="openCreation()"
-            >
+                onclick="openCharacterCreation()">
+
                 🆕 CRIAR NOVO LUTADOR
+
             </button>
-            <div class="start-footer">
-                AMADOR
-                →
-                REGIONAL
-                →
-                NACIONAL
-                →
-                INTERNACIONAL
-                →
-                ELITE
-            </div>
+
         </div>
+
     `;
 }
 /* =========================================================
