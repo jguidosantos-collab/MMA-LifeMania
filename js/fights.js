@@ -732,3 +732,133 @@ function fight() {
     home();
 
 }
+/* =========================================================
+   TELA DE LUTAS
+========================================================= */
+
+function fightScreen() {
+
+    ensurePlayer();
+
+    const content = getElement("content");
+
+    if (!content) {
+        return;
+    }
+
+    const player = window.player;
+
+    content.innerHTML = `
+
+        <div class="card">
+
+            <div class="title">
+                ⚔️ CENTRAL DE LUTAS
+            </div>
+
+            <p>
+                Gerencie suas lutas e procure seu próximo adversário.
+            </p>
+
+        </div>
+
+        <div class="card">
+
+            <div class="title">
+                📅 PRÓXIMA LUTA
+            </div>
+
+            ${
+                player.nextFight
+                ?
+
+                `
+                    <div class="statline">
+                        <span>Evento</span>
+                        <b>
+                            ${player.nextFight.event.name}
+                        </b>
+                    </div>
+
+                    <div class="statline">
+                        <span>Adversário</span>
+                        <b>
+                            ${player.nextFight.opponent.displayName}
+                        </b>
+                    </div>
+
+                    <div class="statline">
+                        <span>Força</span>
+                        <b>
+                            ${Math.round(player.nextFight.opponent.power)}
+                        </b>
+                    </div>
+
+                    <button
+                        class="main-button"
+                        onclick="fight()">
+
+                        👊 LUTAR
+
+                    </button>
+                `
+
+                :
+
+                `
+                    <p>
+                        Você não possui uma luta marcada.
+                    </p>
+
+                    <button
+                        class="main-button"
+                        onclick="findFight()">
+
+                        🔎 PROCURAR LUTA
+
+                    </button>
+                `
+            }
+
+        </div>
+
+        <div class="card">
+
+            <div class="title">
+                📊 SEU STATUS
+            </div>
+
+            <div class="statline">
+                <span>Amador</span>
+                <b>
+                    ${player.amateur.wins}-${player.amateur.losses}-${player.amateur.draws}
+                </b>
+            </div>
+
+            <div class="statline">
+                <span>Profissional</span>
+                <b>
+                    ${player.professional.wins}-${player.professional.losses}-${player.professional.draws}
+                </b>
+            </div>
+
+            <div class="statline">
+                <span>Fadiga</span>
+                <b>
+                    ${Math.round(player.fatigue)}%
+                </b>
+            </div>
+
+        </div>
+
+    `;
+}
+
+
+/* =========================================================
+   FUNÇÕES GLOBAIS
+========================================================= */
+
+window.findFight = findFight;
+window.fight = fight;
+window.fightScreen = fightScreen;
