@@ -1283,18 +1283,81 @@ function rest() {
 function resetGame() {
 
     const confirmed = confirm(
-        "Apagar esta carreira e criar um novo lutador?"
+        "Apagar esta carreira e voltar para a tela de criação?"
     );
 
     if (!confirmed) {
         return;
     }
 
+    // Apaga o jogador salvo
     localStorage.removeItem("mmaLifePlayer");
 
+    // Cria um jogador vazio apenas para manter o sistema funcionando
     window.player = createDefaultPlayer();
 
-    startGame();
+    // Mostra a tela de criação imediatamente
+    showCreation();
+
+    const creator = getElement("creator");
+
+    if (!creator) {
+        return;
+    }
+
+    creator.innerHTML = `
+
+        <div class="start-screen">
+
+            <div class="start-logo">
+                🥊
+            </div>
+
+            <h1>
+                MMA LIFE
+            </h1>
+
+            <p class="start-subtitle">
+                CONSTRUA SUA CARREIRA.<br>
+                ESCREVA SEU LEGADO.
+            </p>
+
+            <div class="start-preview">
+
+                <div class="start-fighter">
+                    🥊
+                </div>
+
+                <div class="start-preview-text">
+
+                    <strong>
+                        SUA HISTÓRIA COMEÇA AQUI
+                    </strong>
+
+                    <span>
+                        Comece como amador,
+                        evolua seu lutador,
+                        consiga contratos,
+                        conquiste títulos
+                        e construa seu legado.
+                    </span>
+
+                </div>
+
+            </div>
+
+            <button
+                class="start-button"
+                onclick="openCharacterCreation()">
+
+                🆕 CRIAR NOVO LUTADOR
+
+            </button>
+
+        </div>
+
+    `;
+
 }
 
 
