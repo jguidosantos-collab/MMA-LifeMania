@@ -1055,6 +1055,10 @@ function nextWeek() {
     const player =
         window.player;
 
+       if (typeof window.processLifeWeek === "function") {
+        window.processLifeWeek();
+    }
+
 
     const plan =
         player.trainingPlan &&
