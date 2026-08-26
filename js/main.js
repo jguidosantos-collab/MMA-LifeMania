@@ -929,7 +929,21 @@ function home() {
             </div>
 
         </div>
+        <div class="card">
 
+            <div class="title">
+                ⚙️ JOGO
+            </div>
+
+            <button
+                class="gray"
+                onclick="resetGame()">
+
+                🔄 REINICIAR CARREIRA
+
+            </button>
+
+        </div>
     `;
 }
 
