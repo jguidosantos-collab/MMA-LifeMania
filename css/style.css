@@ -126,3 +126,407 @@ select {
     color: #888;
     font-size: 8px;
 }
+/* =========================================================
+   NOVA INTERFACE — MMA LIFE
+========================================================= */
+.home-container {
+    width: 100%;
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 18px 14px 90px;
+    box-sizing: border-box;
+}
+/* =========================================================
+   CABEÇALHO DO LUTADOR
+========================================================= */
+.fighter-header {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 22px;
+    margin-bottom: 16px;
+    border-radius: 22px;
+    background:
+        linear-gradient(
+            145deg,
+            #181818,
+            #090909
+        );
+    border: 1px solid #292929;
+    box-shadow:
+        0 12px 35px rgba(0,0,0,.45);
+    overflow: hidden;
+}
+.fighter-header::after {
+    content: "";
+    position: absolute;
+    width: 150px;
+    height: 150px;
+    right: -50px;
+    top: -60px;
+    background: #e11;
+    opacity: .12;
+    border-radius: 50%;
+}
+.fighter-avatar {
+    width: 92px;
+    height: 92px;
+    min-width: 92px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background:
+        linear-gradient(
+            145deg,
+            #2b2b2b,
+            #111
+        );
+    border: 2px solid #3a3a3a;
+    box-shadow:
+        0 5px 20px rgba(0,0,0,.5);
+}
+.avatar-placeholder {
+    font-size: 42px;
+}
+.fighter-info {
+    position: relative;
+    z-index: 2;
+}
+.fighter-name {
+    font-size: 25px;
+    font-weight: 900;
+    color: #fff;
+    letter-spacing: -.5px;
+}
+.fighter-country {
+    margin-top: 5px;
+    font-size: 14px;
+    color: #bbb;
+}
+.fighter-weight {
+    display: inline-block;
+    margin-top: 9px;
+    padding: 5px 10px;
+    border-radius: 8px;
+    background: #242424;
+    color: #ddd;
+    font-size: 12px;
+    font-weight: 700;
+}
+/* =========================================================
+   CARDS DE STATUS
+========================================================= */
+.stats-grid {
+    display: grid;
+    grid-template-columns:
+        repeat(2, 1fr);
+    gap: 10px;
+    margin-bottom: 22px;
+}
+.stat-card {
+    padding: 17px;
+    border-radius: 16px;
+    background: #141414;
+    border: 1px solid #252525;
+}
+.stat-card span {
+    display: block;
+    color: #777;
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 1px;
+}
+.stat-card strong {
+    display: block;
+    margin-top: 7px;
+    color: #fff;
+    font-size: 20px;
+}
+/* =========================================================
+   TÍTULOS
+========================================================= */
+.section-title {
+    margin:
+        24px
+        3px
+        10px;
+    color: #aaa;
+    font-size: 12px;
+    font-weight: 900;
+    letter-spacing: 1.4px;
+}
+/* =========================================================
+   PRÓXIMA LUTA
+========================================================= */
+.fight-card {
+    padding: 20px;
+    border-radius: 20px;
+    background:
+        linear-gradient(
+            145deg,
+            #211010,
+            #101010
+        );
+    border: 1px solid #402020;
+    box-shadow:
+        0 12px 30px rgba(0,0,0,.4);
+}
+.fight-event {
+    text-align: center;
+    color: #e5e5e5;
+    font-size: 13px;
+    font-weight: 800;
+    text-transform: uppercase;
+}
+.fight-versus {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    margin: 25px 0;
+}
+.fighter-side {
+    width: 40%;
+    text-align: center;
+}
+.fighter-side strong {
+    display: block;
+    margin-top: 8px;
+    color: #fff;
+    font-size: 13px;
+}
+.mini-avatar {
+    width: 58px;
+    height: 58px;
+    margin: auto;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #222;
+    font-size: 27px;
+}
+.vs {
+    color: #e11;
+    font-size: 18px;
+    font-weight: 1000;
+}
+.fight-details {
+    display: flex;
+    justify-content: space-between;
+    padding:
+        11px 0;
+    border-top: 1px solid #292929;
+    border-bottom: 1px solid #292929;
+    color: #aaa;
+    font-size: 12px;
+}
+/* =========================================================
+   BOTÕES
+========================================================= */
+.main-button {
+    width: 100%;
+    margin-top: 14px;
+    padding: 14px;
+    border: 0;
+    border-radius: 12px;
+    background: #292929;
+    color: #fff;
+    font-size: 13px;
+    font-weight: 900;
+    cursor: pointer;
+}
+.main-button:hover {
+    filter: brightness(1.15);
+}
+.main-button.red {
+    background:
+        linear-gradient(
+            135deg,
+            #d71920,
+            #8e0d12
+        );
+}
+.main-button.gray {
+    background: #202020;
+    color: #aaa;
+}
+/* =========================================================
+   CARD VAZIO
+========================================================= */
+.empty-card {
+    padding: 30px 20px;
+    text-align: center;
+    border-radius: 20px;
+    background: #141414;
+    border: 1px solid #252525;
+}
+.empty-icon {
+    font-size: 40px;
+    margin-bottom: 10px;
+}
+.empty-card strong {
+    display: block;
+    color: #fff;
+    font-size: 16px;
+}
+.empty-card p {
+    color: #777;
+    font-size: 12px;
+}
+/* =========================================================
+   CARREIRA
+========================================================= */
+.career-card {
+    padding: 20px;
+    border-radius: 20px;
+    background: #141414;
+    border: 1px solid #252525;
+}
+.career-stage {
+    color: #e11;
+    font-size: 13px;
+    font-weight: 900;
+    letter-spacing: 1px;
+}
+.record {
+    display: grid;
+    grid-template-columns:
+        repeat(2, 1fr);
+    gap: 10px;
+    margin-top: 18px;
+}
+.record div {
+    padding: 13px;
+    border-radius: 12px;
+    background: #1c1c1c;
+}
+.record span {
+    display: block;
+    color: #777;
+    font-size: 9px;
+    font-weight: 800;
+}
+.record strong {
+    display: block;
+    margin-top: 5px;
+    color: #fff;
+    font-size: 19px;
+}
+/* =========================================================
+   EQUIPE
+========================================================= */
+.team-preview {
+    padding: 18px;
+    border-radius: 18px;
+    background: #141414;
+    border: 1px solid #252525;
+}
+.team-preview > div {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 0;
+    border-bottom: 1px solid #242424;
+}
+.team-preview > div:last-of-type {
+    border-bottom: 0;
+}
+.team-preview span {
+    color: #777;
+    font-size: 10px;
+    font-weight: 800;
+}
+.team-preview strong {
+    color: #eee;
+    font-size: 12px;
+    text-align: right;
+}
+/* =========================================================
+   ATALHOS
+========================================================= */
+.quick-grid {
+    display: grid;
+    grid-template-columns:
+        repeat(2, 1fr);
+    gap: 10px;
+}
+.quick-grid button {
+    min-height: 85px;
+    border: 1px solid #252525;
+    border-radius: 17px;
+    background: #141414;
+    color: #fff;
+    font-size: 28px;
+    cursor: pointer;
+}
+.quick-grid button span {
+    display: block;
+    margin-top: 7px;
+    color: #aaa;
+    font-size: 11px;
+    font-weight: 800;
+}
+/* =========================================================
+   CONDIÇÃO FÍSICA
+========================================================= */
+.condition-card {
+    display: grid;
+    grid-template-columns:
+        repeat(2, 1fr);
+    gap: 10px;
+}
+.condition-card div {
+    padding: 17px;
+    border-radius: 15px;
+    background: #141414;
+    border: 1px solid #252525;
+}
+.condition-card span {
+    display: block;
+    color: #777;
+    font-size: 10px;
+    font-weight: 800;
+}
+.condition-card strong {
+    display: block;
+    margin-top: 7px;
+    color: #fff;
+    font-size: 20px;
+}
+/* =========================================================
+   REINICIAR
+========================================================= */
+.restart-section {
+    margin-top: 30px;
+    padding-top: 10px;
+    border-top: 1px solid #202020;
+}
+.restart-section .main-button {
+    opacity: .65;
+}
+/* =========================================================
+   CELULARES PEQUENOS
+========================================================= */
+@media (max-width: 390px) {
+    .home-container {
+        padding-left: 10px;
+        padding-right: 10px;
+    }
+    .fighter-header {
+        padding: 17px;
+    }
+    .fighter-avatar {
+        width: 76px;
+        height: 76px;
+        min-width: 76px;
+    }
+    .fighter-name {
+        font-size: 21px;
+    }
+    .fight-versus {
+        gap: 4px;
+    }
+}
