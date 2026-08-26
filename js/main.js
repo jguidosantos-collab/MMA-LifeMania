@@ -22,8 +22,6 @@ function showCreation() {
     if (creation) {
         creation.classList.remove("hidden");
         creation.style.display = "block";
-        creation.style.visibility = "visible";
-        creation.style.opacity = "1";
     }
     if (game) {
         game.classList.add("hidden");
@@ -63,106 +61,8 @@ function ensurePlayer() {
         typeof window.player === "undefined" ||
         !window.player
     ) {
-        if (typeof createDefaultPlayer === "function") {
-            window.player = createDefaultPlayer();
-        } else {
-            console.error(
-                "createDefaultPlayer() não encontrada."
-            );
-        }
-    }
-}
-/* =========================================================
-   NORMALIZAR DADOS NOVOS
-========================================================= */
-function normalizePlayerData() {
-    ensurePlayer();
-    if (!window.player) {
-        return;
-    }
-    const p = window.player;
-    /* =========================
-       ESTRUTURAS PRINCIPAIS
-    ========================= */
-    p.attributes =
-        p.attributes || {};
-    p.professional =
-        p.professional || {};
-    p.amateur =
-        p.amateur || {};
-    p.trainingPlan =
-        p.trainingPlan || {};
-    p.log =
-        Array.isArray(p.log)
-            ? p.log
-            : [];
-    /* =========================
-       CONTRATOS
-    ========================= */
-    p.promotionHistory =
-        p.promotionHistory || {};
-    if (
-        typeof p.currentContract ===
-        "undefined"
-    ) {
-        p.currentContract = null;
-    }
-    if (
-        typeof p.currentPromotion ===
-        "undefined"
-    ) {
-        p.currentPromotion = null;
-    }
-    /* =========================
-       CARREIRA
-    ========================= */
-    if (!p.careerStage) {
-        if (
-            p.professional &&
-            p.professional.active
-        ) {
-            p.careerStage =
-                "regional";
-        } else {
-            p.careerStage =
-                "amateur";
-        }
-    }
-    /* =========================
-       CALENDÁRIO
-    ========================= */
-    if (
-        typeof p.week !== "number"
-    ) {
-        p.week = 1;
-    }
-    if (
-        typeof p.year !== "number"
-    ) {
-        p.year = 2026;
-    }
-    /* =========================
-       CONDIÇÃO
-    ========================= */
-    if (
-        typeof p.health !== "number"
-    ) {
-        p.health = 100;
-    }
-    if (
-        typeof p.fatigue !== "number"
-    ) {
-        p.fatigue = 0;
-    }
-    if (
-        typeof p.money !== "number"
-    ) {
-        p.money = 0;
-    }
-    if (
-        typeof p.fame !== "number"
-    ) {
-        p.fame = 0;
+        window.player =
+            createDefaultPlayer();
     }
 }
 /* =========================================================
@@ -170,10 +70,6 @@ function normalizePlayerData() {
 ========================================================= */
 function saveGame() {
     ensurePlayer();
-    normalizePlayerData();
-    if (!window.player) {
-        return;
-    }
     localStorage.setItem(
         "mmaLifePlayer",
         JSON.stringify(window.player)
@@ -214,12 +110,26 @@ function loadGame() {
                 ...base.trainingPlan,
                 ...(data.trainingPlan || {})
             },
+            currentContract: {
+                ...(base.currentContract || {}),
+                ...(data.currentContract || {})
+            },
             promotionHistory: {
                 ...(base.promotionHistory || {}),
                 ...(data.promotionHistory || {})
             }
         };
-        normalizePlayerData();
+        /*
+         * Se não houver contrato salvo,
+         * não deixamos um objeto vazio ser tratado
+         * como contrato ativo.
+         */
+        if (
+            !data.currentContract
+        ) {
+            window.player.currentContract =
+                base.currentContract || null;
+        }
         return true;
     } catch (error) {
         console.error(
@@ -239,6 +149,8 @@ function startGame() {
         getElement("creator");
     const game =
         getElement("game");
+    const tabs =
+        getElement("tabs");
     if (
         !creation ||
         !creator ||
@@ -289,6 +201,7 @@ function startGame() {
 }
 /* =========================================================
    CRIAÇÃO DO LUTADOR
+   NOME OFICIAL: openCharacterCreation
 ========================================================= */
 function openCharacterCreation() {
     showCreation();
@@ -369,13 +282,11 @@ function openCharacterCreation() {
                 </option>
             </select>
             <button
-                type="button"
                 class="green"
                 onclick="createNewPlayer()">
                 🥊 CRIAR LUTADOR
             </button>
             <button
-                type="button"
                 class="gray"
                 onclick="startGame()">
                 ← VOLTAR
@@ -428,9 +339,6 @@ function createNewPlayer() {
         newPlayer.style =
             style.value;
     }
-    /* =========================
-       INÍCIO DA CARREIRA
-    ========================= */
     newPlayer.age = 15;
     newPlayer.week = 1;
     newPlayer.year = 2026;
@@ -438,29 +346,28 @@ function createNewPlayer() {
     newPlayer.fame = 0;
     newPlayer.health = 100;
     newPlayer.fatigue = 0;
-    newPlayer.careerStage =
-        "amateur";
-    newPlayer.professional =
-        newPlayer.professional || {};
-    newPlayer.professional.active =
-        false;
+    /*
+     * Garante estruturas utilizadas
+     * pelos novos sistemas.
+     */
+    if (!newPlayer.promotionHistory) {
+        newPlayer.promotionHistory = {};
+    }
+    if (
+        typeof newPlayer.currentContract ===
+        "undefined"
+    ) {
+        newPlayer.currentContract = null;
+    }
     newPlayer.log = [
         `🥊 ${name} iniciou sua carreira no MMA.`
     ];
-    /* =========================
-       CONTRATOS
-    ========================= */
-    newPlayer.promotionHistory =
-        {};
-    newPlayer.currentPromotion =
-        null;
-    newPlayer.currentContract =
-        null;
     window.player =
         newPlayer;
-    /* =========================
-       NOVO MUNDO MMA
-    ========================= */
+    /*
+     * Reinicia o mundo independente
+     * quando uma nova carreira começa.
+     */
     if (
         typeof window.mmaWorld !==
         "undefined"
@@ -477,7 +384,6 @@ function createNewPlayer() {
             [];
     }
     saveGame();
-    /* ENTRA NO JOGO */
     showGame();
     home();
 }
@@ -486,8 +392,10 @@ function createNewPlayer() {
 ========================================================= */
 function getOverall() {
     ensurePlayer();
-    const player =
-        window.player;
+    const player = window.player;
+    /*
+     * O OVR inicial é o valor sorteado na criação.
+     */
     if (
         typeof player.overall === "number" &&
         !player._overallStarted
@@ -517,9 +425,7 @@ function getOverall() {
             0
         ) / values.length;
     return Math.min(
-        Number(
-            player.potential || 90
-        ),
+        Number(player.potential || 90),
         Math.round(average)
     );
 }
@@ -528,7 +434,6 @@ function getOverall() {
 ========================================================= */
 function home() {
     ensurePlayer();
-    normalizePlayerData();
     const content =
         getContent();
     if (!content) {
@@ -732,70 +637,6 @@ function home() {
         </div>
         <div class="card">
             <div class="title">
-                🏆 CARREIRA MMA
-            </div>
-            <div class="statline">
-                <span>
-                    Estágio
-                </span>
-                <b>
-                    ${
-                        typeof getCareerStageLabel ===
-                        "function"
-                            ? getCareerStageLabel()
-                            : (
-                                player.careerStage ||
-                                "Amador"
-                            )
-                    }
-                </b>
-            </div>
-            ${
-                player.currentContract &&
-                player.currentContract.active
-                ?
-                `
-                    <div class="statline">
-                        <span>
-                            Organização
-                        </span>
-                        <b>
-                            ${player.currentContract.promotionName}
-                        </b>
-                    </div>
-                    <div class="statline">
-                        <span>
-                            Contrato
-                        </span>
-                        <b>
-                            ${
-                                player.currentContract.fightsCompleted
-                                || 0
-                            }
-                            /
-                            ${
-                                player.currentContract.fights
-                                || 0
-                            }
-                            lutas
-                        </b>
-                    </div>
-                `
-                :
-                `
-                    <div class="statline">
-                        <span>
-                            Contrato
-                        </span>
-                        <b>
-                            Nenhum contrato ativo
-                        </b>
-                    </div>
-                `
-            }
-        </div>
-        <div class="card">
-            <div class="title">
                 ⚙️ JOGO
             </div>
             <button
@@ -817,14 +658,23 @@ function tab(name) {
     if (!content) {
         return;
     }
+    /* =========================
+       INÍCIO
+    ========================= */
     if (name === "home") {
         home();
         return;
     }
+    /* =========================
+       CARREIRA
+    ========================= */
     if (name === "career") {
         career();
         return;
     }
+    /* =========================
+       TREINO
+    ========================= */
     if (name === "train") {
         if (
             typeof window.training ===
@@ -834,6 +684,9 @@ function tab(name) {
         }
         return;
     }
+    /* =========================
+       LUTAS
+    ========================= */
     if (name === "fight") {
         if (
             typeof window.fightScreen ===
@@ -843,6 +696,9 @@ function tab(name) {
         }
         return;
     }
+    /* =========================
+       EQUIPE
+    ========================= */
     if (name === "team") {
         if (
             typeof window.teamScreen ===
@@ -852,19 +708,27 @@ function tab(name) {
         }
         return;
     }
+    /* =========================
+       VIDA
+    ========================= */
     if (name === "life") {
+        showGame();
         if (
             typeof window.lifeScreen ===
             "function"
         ) {
             window.lifeScreen();
-        } else {
+        }
+        else {
             console.error(
                 "lifeScreen() não encontrada."
             );
         }
         return;
     }
+    /* =========================
+       RANKING
+    ========================= */
     if (name === "ranking") {
         if (
             typeof window.rankingScreen ===
@@ -876,64 +740,33 @@ function tab(name) {
     }
 }
 /* =========================================================
-   PROCESSAR TREINO
+   PRÓXIMA SEMANA
 ========================================================= */
-function processTrainingWeek() {
+function nextWeek() {
     ensurePlayer();
     const player =
         window.player;
-    const plan =
-        player.trainingPlan &&
-        player.trainingPlan.weeks
-            ? player.trainingPlan.weeks[player.week]
-            : [];
+    /* =====================================================
+       VIDA
+       ===================================================== */
     if (
-        !Array.isArray(plan)
+        typeof window.processLifeWeek ===
+        "function"
     ) {
-        return;
+        window.processLifeWeek();
     }
-    plan.forEach(
-        function(training) {
-            const attribute =
-                training.attribute;
-            if (!attribute) {
-                return;
-            }
-            const current =
-                Number(
-                    player.attributes[attribute] || 60
-                );
-            const potential =
-                Number(
-                    player.potential || 90
-                );
-            if (
-                current >= potential
-            ) {
-                return;
-            }
-            const gain =
-                Math.min(
-                    Number(
-                        training.gain || 0.5
-                    ),
-                    potential - current
-                );
-            player.attributes[attribute] =
-                Number(
-                    (
-                        current + gain
-                    ).toFixed(2)
-                );
-        }
-    );
-}
-/* =========================================================
-   MUNDO DO MMA
-========================================================= */
-function processMMAWorldWeek() {
+    /* =====================================================
+       MUNDO MMA
+       ===================================================== */
     /*
-     * O mundo roda de forma independente.
+     * O mundo funciona de forma independente.
+     *
+     * Se o arquivo do Mundo MMA estiver carregado,
+     * uma semana é simulada junto com o avanço
+     * da carreira do jogador.
+     *
+     * Se o sistema ainda não estiver carregado,
+     * simplesmente continua normalmente.
      */
     if (
         typeof window.simulateMMWorldWeek ===
@@ -943,119 +776,61 @@ function processMMAWorldWeek() {
             window.simulateMMWorldWeek();
         } catch (error) {
             console.error(
-                "Erro ao simular mundo do MMA:",
+                "Erro ao simular Mundo MMA:",
                 error
             );
         }
     }
-}
-/* =========================================================
-   CONTRATOS / OPORTUNIDADES
-========================================================= */
-function processContractOpportunities() {
-    ensurePlayer();
-    const player =
-        window.player;
-    /*
-     * Só procura propostas para
-     * lutador profissional ativo.
-     */
+    /* =====================================================
+       TREINAMENTO
+       ===================================================== */
+    const plan =
+        player.trainingPlan &&
+        player.trainingPlan.weeks
+            ? player.trainingPlan.weeks[player.week]
+            : [];
     if (
-        !player.professional ||
-        !player.professional.active
+        Array.isArray(plan)
     ) {
-        return;
-    }
-    /*
-     * Não cria novas propostas se
-     * já existe contrato ativo.
-     */
-    if (
-        player.currentContract &&
-        player.currentContract.active
-    ) {
-        return;
-    }
-    /*
-     * O sistema de contratos continua
-     * responsável por gerar as ofertas.
-     */
-    if (
-        typeof window.generateContractOffers !==
-        "function"
-    ) {
-        return;
-    }
-    try {
-        const offers =
-            window.generateContractOffers();
-        if (
-            !Array.isArray(offers) ||
-            offers.length === 0
-        ) {
-            return;
-        }
-        /*
-         * Guarda as ofertas para a tela
-         * de carreira/equipe poder utilizar.
-         */
-        player.contractOffers =
-            offers;
-    } catch (error) {
-        console.error(
-            "Erro ao gerar ofertas:",
-            error
+        plan.forEach(
+            function(training) {
+                const attribute =
+                    training.attribute;
+                if (!attribute) {
+                    return;
+                }
+                const current =
+                    Number(
+                        player.attributes[attribute] || 60
+                    );
+                const potential =
+                    Number(
+                        player.potential || 90
+                    );
+                if (
+                    current >= potential
+                ) {
+                    return;
+                }
+                const gain =
+                    Math.min(
+                        Number(
+                            training.gain || 0.5
+                        ),
+                        potential - current
+                    );
+                player.attributes[attribute] =
+                    Number(
+                        (
+                            current + gain
+                        ).toFixed(2)
+                    );
+            }
         );
     }
-}
-/* =========================================================
-   PRÓXIMA SEMANA
-========================================================= */
-function nextWeek() {
-    ensurePlayer();
-    const player =
-        window.player;
-    if (!player) {
-        return;
-    }
-    /*
-     * =====================================================
-     * VIDA
-     * =====================================================
-     */
-    if (
-        typeof window.processLifeWeek ===
-        "function"
-    ) {
-        try {
-            window.processLifeWeek();
-        } catch (error) {
-            console.error(
-                "Erro ao processar semana da vida:",
-                error
-            );
-        }
-    }
-    /*
-     * =====================================================
-     * TREINAMENTO
-     * =====================================================
-     */
-    processTrainingWeek();
-    /*
-     * =====================================================
-     * MUNDO DO MMA
-     * =====================================================
-     *
-     * O mundo acontece independentemente
-     * do jogador.
-     */
-    processMMAWorldWeek();
-    /*
-     * =====================================================
-     * RECUPERAÇÃO
-     * =====================================================
-     */
+    /* =====================================================
+       RECUPERAÇÃO
+       ===================================================== */
     player.fatigue =
         Math.max(
             0,
@@ -1070,26 +845,16 @@ function nextWeek() {
                 player.health || 100
             ) + 3
         );
-    /*
-     * =====================================================
-     * OPORTUNIDADES
-     * =====================================================
-     */
-    processContractOpportunities();
-    /*
-     * =====================================================
-     * AVANÇA SEMANA
-     * =====================================================
-     */
+    /* =====================================================
+       AVANÇA SEMANA
+       ===================================================== */
     player.week =
         Number(
             player.week || 1
         ) + 1;
-    /*
-     * =====================================================
-     * NOVO ANO
-     * =====================================================
-     */
+    /* =====================================================
+       NOVO ANO
+       ===================================================== */
     if (
         player.week > 52
     ) {
@@ -1108,17 +873,7 @@ function nextWeek() {
             `🎆 Começou o Ano ${player.year}.`
         );
     }
-    /*
-     * =====================================================
-     * SALVAR
-     * =====================================================
-     */
     saveGame();
-    /*
-     * =====================================================
-     * ATUALIZAR TELA
-     * =====================================================
-     */
     home();
 }
 /* =========================================================
@@ -1128,9 +883,6 @@ function rest() {
     ensurePlayer();
     const player =
         window.player;
-    if (!player) {
-        return;
-    }
     player.fatigue =
         Math.max(
             0,
@@ -1158,13 +910,19 @@ function resetGame() {
     if (!confirmed) {
         return;
     }
+    /*
+     * Apaga a carreira salva.
+     */
     localStorage.removeItem(
         "mmaLifePlayer"
     );
+    /*
+     * Cria jogador novo.
+     */
     window.player =
         createDefaultPlayer();
     /*
-     * Reinicia também o mundo do MMA.
+     * Reinicia Mundo MMA.
      */
     if (
         typeof window.mmaWorld !==
@@ -1181,80 +939,72 @@ function resetGame() {
         window.mmaWorld.news =
             [];
     }
+    /*
+     * Esconde o jogo.
+     */
     const game =
         getElement("game");
     const tabs =
         getElement("tabs");
     if (game) {
         game.classList.add("hidden");
-        game.style.display =
-            "none";
+        game.style.display = "none";
     }
     if (tabs) {
         tabs.classList.add("hidden");
-        tabs.style.display =
-            "none";
+        tabs.style.display = "none";
     }
+    /*
+     * Mostra tela inicial.
+     */
     const creation =
         getElement("creation");
     if (creation) {
         creation.classList.remove("hidden");
-        creation.style.display =
-            "block";
+        creation.style.display = "block";
     }
     startGame();
 }
-/* =========================================================
-   COMPATIBILIDADE
-========================================================= */
-window.save =
-    saveGame;
-window.createPlayer =
-    createNewPlayer;
-window.createPlayerFromScreen =
-    createNewPlayer;
-/* =========================================================
-   FUNÇÕES GLOBAIS
-========================================================= */
-window.startGame =
-    startGame;
-window.openCharacterCreation =
-    openCharacterCreation;
-window.createNewPlayer =
-    createNewPlayer;
-window.home =
-    home;
-window.tab =
-    tab;
-window.nextWeek =
-    nextWeek;
-window.advanceWeek =
-    nextWeek;
-window.rest =
-    rest;
-window.resetGame =
-    resetGame;
-window.getOverall =
-    getOverall;
-window.saveGame =
-    saveGame;
 /* =========================================================
    CARREIRA
 ========================================================= */
 function career() {
     ensurePlayer();
-    normalizePlayerData();
     const content =
         getElement("content");
-    if (!content) {
-        return;
-    }
+    if (!content) return;
     const p =
         window.player;
     const amateur =
         p.amateur || {};
     const professional =
         p.professional || {};
+    /*
+     * Estágio da carreira.
+     */
+    let careerStage =
+        p.careerStage ||
+        "amateur";
+    const stageLabels = {
+        amateur:
+            "🥋 Amador",
+        regional:
+            "🏟️ Regional",
+        national:
+            "🇧🇷 Nacional",
+        international:
+            "🌎 Internacional",
+        elite:
+            "👑 Elite"
+    };
+    const stageLabel =
+        stageLabels[careerStage] ||
+        "🥋 Amador";
+    /*
+     * Contrato atual.
+     */
+    const contract =
+        p.currentContract;
     content.innerHTML = `
         <div class="card">
             <div class="title">
@@ -1266,31 +1016,6 @@ function career() {
         </div>
         <div class="card">
             <div class="title">
-                📊 RECORDES
-            </div>
-            <div class="statline">
-                <span>
-                    Amador
-                </span>
-                <b>
-                    ${amateur.wins || 0}-
-                    ${amateur.losses || 0}-
-                    ${amateur.draws || 0}
-                </b>
-            </div>
-            <div class="statline">
-                <span>
-                    Profissional
-                </span>
-                <b>
-                    ${professional.wins || 0}-
-                    ${professional.losses || 0}-
-                    ${professional.draws || 0}
-                </b>
-            </div>
-        </div>
-        <div class="card">
-            <div class="title">
                 📈 STATUS
             </div>
             <div class="statline">
@@ -1298,15 +1023,7 @@ function career() {
                     Estágio
                 </span>
                 <b>
-                    ${
-                        typeof getCareerStageLabel ===
-                        "function"
-                            ? getCareerStageLabel()
-                            : (
-                                p.careerStage ||
-                                "amateur"
-                            )
-                    }
+                    ${stageLabel}
                 </b>
             </div>
             <div class="statline">
@@ -1336,11 +1053,36 @@ function career() {
         </div>
         <div class="card">
             <div class="title">
-                📄 CONTRATO
+                📊 RECORDES
+            </div>
+            <div class="statline">
+                <span>
+                    Amador
+                </span>
+                <b>
+                    ${amateur.wins || 0}-
+                    ${amateur.losses || 0}-
+                    ${amateur.draws || 0}
+                </b>
+            </div>
+            <div class="statline">
+                <span>
+                    Profissional
+                </span>
+                <b>
+                    ${professional.wins || 0}-
+                    ${professional.losses || 0}-
+                    ${professional.draws || 0}
+                </b>
+            </div>
+        </div>
+        <div class="card">
+            <div class="title">
+                📄 CONTRATO ATUAL
             </div>
             ${
-                p.currentContract &&
-                p.currentContract.active
+                contract &&
+                contract.active
                 ?
                 `
                     <div class="statline">
@@ -1348,7 +1090,7 @@ function career() {
                             Organização
                         </span>
                         <b>
-                            ${p.currentContract.promotionName}
+                            ${contract.promotionName}
                         </b>
                     </div>
                     <div class="statline">
@@ -1356,15 +1098,9 @@ function career() {
                             Lutas
                         </span>
                         <b>
-                            ${
-                                p.currentContract.fightsCompleted ||
-                                0
-                            }
+                            ${contract.fightsCompleted || 0}
                             /
-                            ${
-                                p.currentContract.fights ||
-                                0
-                            }
+                            ${contract.fights || 0}
                         </b>
                     </div>
                     <div class="statline">
@@ -1372,40 +1108,23 @@ function career() {
                             Bolsa
                         </span>
                         <b>
-                            $${Math.round(
-                                p.currentContract.purse || 0
-                            )}
+                            $${Math.round(contract.purse || 0)}
+                        </b>
+                    </div>
+                    <div class="statline">
+                        <span>
+                            Bônus por vitória
+                        </span>
+                        <b>
+                            $${Math.round(contract.winBonus || 0)}
                         </b>
                     </div>
                 `
                 :
                 `
                     <p>
-                        Nenhum contrato ativo.
+                        Nenhum contrato profissional ativo.
                     </p>
-                    ${
-                        p.contractOffers &&
-                        p.contractOffers.length > 0
-                        ?
-                        `
-                            <p>
-                                📬 Existem
-                                ${
-                                    p.contractOffers.length
-                                }
-                                oportunidade(s)
-                                disponíveis.
-                            </p>
-                        `
-                        :
-                        `
-                            <p>
-                                Continue sua carreira
-                                para receber novas
-                                oportunidades.
-                            </p>
-                        `
-                    }
                 `
             }
         </div>
@@ -1423,6 +1142,37 @@ function career() {
         </div>
     `;
 }
+/* =========================================================
+   FUNÇÕES GLOBAIS
+========================================================= */
+window.startGame =
+    startGame;
+window.openCharacterCreation =
+    openCharacterCreation;
+window.createNewPlayer =
+    createNewPlayer;
+window.home =
+    home;
+window.tab =
+    tab;
+window.nextWeek =
+    nextWeek;
+window.advanceWeek =
+    nextWeek;
+window.rest =
+    rest;
+window.resetGame =
+    resetGame;
+window.getOverall =
+    getOverall;
+window.saveGame =
+    saveGame;
+window.save =
+    saveGame;
+window.createPlayer =
+    createNewPlayer;
+window.createPlayerFromScreen =
+    createNewPlayer;
 window.career =
     career;
 /* =========================================================
@@ -1434,7 +1184,7 @@ function initializeMmaLife() {
             "mmaLifePlayer"
         );
     /*
-     * CARREIRA SALVA
+     * EXISTE UMA CARREIRA SALVA
      */
     if (saved) {
         if (
@@ -1448,7 +1198,7 @@ function initializeMmaLife() {
         }
     }
     /*
-     * NOVA CARREIRA
+     * NÃO EXISTE CARREIRA
      */
     window.player =
         null;
@@ -1466,6 +1216,7 @@ if (
         "DOMContentLoaded",
         initializeMmaLife
     );
-} else {
+}
+else {
     initializeMmaLife();
 }
