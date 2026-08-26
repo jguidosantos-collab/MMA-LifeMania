@@ -719,25 +719,37 @@ ${overallText()}
 
         <div class="quick-grid">
 
-            <button onclick="career()">
-                🏆
-                <span>Carreira</span>
-            </button>
+    <button onclick="career()">
+        🏆
+        <span>Carreira</span>
+    </button>
 
-            <button onclick="training()">
-                🏋️
-                <span>Treinar</span>
-            </button>
+    <button onclick="fightScreen()">
+        👊
+        <span>Lutas</span>
+    </button>
 
-            <button onclick="fightScreen()">
-                👊
-                <span>Lutar</span>
-            </button>
+    <button onclick="teamScreen()">
+        🏢
+        <span>Equipe</span>
+    </button>
 
-            <button onclick="familyScreen()">
-                ❤️
-                <span>Vida</span>
-            </button>
+    <button onclick="familyScreen()">
+        ❤️
+        <span>Vida</span>
+    </button>
+
+    <button onclick="advancedAttributesScreen()">
+        📊
+        <span>Atributos</span>
+    </button>
+
+    <button onclick="rankingScreen()">
+        🏆
+        <span>Ranking</span>
+    </button>
+
+</div>
 
         </div>
 
