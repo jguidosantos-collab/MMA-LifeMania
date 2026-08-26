@@ -34,44 +34,83 @@ function tab(name) {
 ========================= */
 
 function startGame() {
+
+    const creation =
+        document.getElementById("creation");
+
+    const game =
+        document.getElementById("game");
+
+    const tabs =
+        document.getElementById("tabs");
+
     const content =
         document.getElementById("content");
+
     if (!content) {
         return;
     }
+
+    // Mostra a área principal do jogo
+    if (creation) {
+        creation.classList.add("hidden");
+    }
+
+    if (game) {
+        game.classList.remove("hidden");
+    }
+
+    if (tabs) {
+        tabs.classList.add("hidden");
+    }
+
     content.innerHTML = `
         <div class="start-screen">
+
             <div class="start-logo">
                 🥊
             </div>
+
             <h1>
                 MMA LIFE
             </h1>
+
             <p class="start-subtitle">
                 CONSTRUA SUA CARREIRA.<br>
                 ESCREVA SEU LEGADO.
             </p>
+
             <div class="start-preview">
+
                 <div class="start-fighter">
                     🥊
                 </div>
+
                 <div class="start-preview-text">
+
                     <strong>
                         SUA HISTÓRIA COMEÇA AQUI
                     </strong>
+
                     <span>
                         Comece como amador,
                         construa sua reputação,
                         conquiste contratos
                         e chegue ao topo do MMA.
                     </span>
+
                 </div>
+
             </div>
+
             <button
                 class="start-button"
                 onclick="openCharacterCreation()">
+
                 🆕 CRIAR NOVO LUTADOR
+
             </button>
+
             <div class="start-footer">
                 AMADOR
                 →
@@ -83,6 +122,7 @@ function startGame() {
                 →
                 UFC
             </div>
+
         </div>
     `;
 }
