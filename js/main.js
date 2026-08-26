@@ -1027,113 +1027,16 @@ function tab(name) {
 
     if (name === "life") {
 
-        ensurePlayer();
+    showGame();
 
-        const p = window.player;
-
-        content.innerHTML = `
-
-            <div class="card">
-
-                <div class="title">
-                    ❤️ VIDA
-                </div>
-
-                <p>
-                    Sua vida fora do octógono.
-                </p>
-
-            </div>
-
-
-            <div class="card">
-
-                <div class="title">
-                    💕 RELACIONAMENTO
-                </div>
-
-                <div class="statline">
-
-                    <span>
-                        Status
-                    </span>
-
-                    <b>
-                        ${p.relationship || "Solteiro"}
-                    </b>
-
-                </div>
-
-                <div class="statline">
-
-                    <span>
-                        Parceiro
-                    </span>
-
-                    <b>
-                        ${p.partner || "Nenhum"}
-                    </b>
-
-                </div>
-
-                <div class="statline">
-
-                    <span>
-                        Casado
-                    </span>
-
-                    <b>
-                        ${p.married ? "Sim" : "Não"}
-                    </b>
-
-                </div>
-
-            </div>
-
-
-            <div class="card">
-
-                <div class="title">
-                    👶 FAMÍLIA
-                </div>
-
-                <div class="statline">
-
-                    <span>
-                        Filhos
-                    </span>
-
-                    <b>
-                        ${
-                            Array.isArray(p.children)
-                                ? p.children.length
-                                : 0
-                        }
-                    </b>
-
-                </div>
-
-            </div>
-
-
-            <div class="card">
-
-                <div class="title">
-                    🧬 LEGADO
-                </div>
-
-                <p>
-                    Construa sua família, tenha filhos
-                    e deixe seu legado para a próxima geração.
-                </p>
-
-            </div>
-
-        `;
-
-        return;
+    if (typeof window.lifeScreen === "function") {
+        window.lifeScreen();
+    } else {
+        console.error("lifeScreen() não encontrada.");
     }
 
+    return;
+}
 
     /* =========================
        RANKING
