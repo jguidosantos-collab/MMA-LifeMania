@@ -457,6 +457,13 @@ function home() {
                     </strong>
                 </div>
             </div>
+        <div class="restart-section">
+    <button
+        class="main-button gray"
+        onclick="resetGame()">
+        🔄 REINICIAR JOGO
+    </button>
+</div>
         </div>
     `;
 }
