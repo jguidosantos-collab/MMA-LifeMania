@@ -1,5 +1,6 @@
 /* =========================================================
    CONTRATOS — MMA LIFE DYNASTY
+   SISTEMA DEFINITIVO DE CONTRATOS
 ========================================================= */
 
 
@@ -97,22 +98,12 @@ function getNegotiationMultiplier() {
         getManagerNegotiation();
 
 
-    /*
-     * Sem empresário:
-     * negociação mínima.
-     */
-
     if (!player.manager) {
 
         return 1;
 
     }
 
-
-    /*
-     * Empresário aumenta progressivamente
-     * a capacidade de negociação.
-     */
 
     return (
         1 +
@@ -128,11 +119,15 @@ function getNegotiationMultiplier() {
 
 function getPerformanceMultiplier() {
 
+    const professional =
+        player.professional || {};
+
+
     const wins =
-        player.professional.wins || 0;
+        professional.wins || 0;
 
     const losses =
-        player.professional.losses || 0;
+        professional.losses || 0;
 
 
     const fights =
@@ -149,11 +144,6 @@ function getPerformanceMultiplier() {
     const winRate =
         wins / fights;
 
-
-    /*
-     * Cartel vencedor gera pequeno
-     * aumento na negociação.
-     */
 
     if (winRate >= 0.80) {
 
@@ -192,12 +182,6 @@ function getPromotionMultiplier(promotion) {
             promotion.id
         );
 
-
-    /*
-     * Quanto mais o lutador luta
-     * pela organização, maior a chance
-     * de uma renovação melhor.
-     */
 
     if (history.contracts <= 0) {
 
@@ -281,8 +265,9 @@ function calculateBaseWinBonus(promotion) {
 
 
 /* =========================================================
-   OFERTA DE CONTRATO
+   ESTÁGIO DA CARREIRA
 ========================================================= */
+
 function getCareerStageLabel() {
 
     const stage =
@@ -317,16 +302,19 @@ function getCareerStageLabel() {
 
 }
 
+
+/* =========================================================
+   OFERTA DE CONTRATO
+========================================================= */
+
 function calculateContractOffer(promotion) {
 
     let multiplier = 1;
 
 
-    /*
-     * =====================================================
-     * EMPRESÁRIO
-     * =====================================================
-     */
+    /* =====================================================
+       EMPRESÁRIO
+    ===================================================== */
 
     if (player.manager) {
 
@@ -336,11 +324,6 @@ function calculateContractOffer(promotion) {
                 0
             ) / 200;
 
-
-        /*
-         * Empresário também consegue
-         * negociar melhor conforme o nível.
-         */
 
         if (
             player.manager.level
@@ -356,8 +339,7 @@ function calculateContractOffer(promotion) {
                 level.includes("elite")
             ) {
 
-                multiplier +=
-                    0.25;
+                multiplier += 0.25;
 
             }
 
@@ -366,8 +348,7 @@ function calculateContractOffer(promotion) {
                 level.includes("high")
             ) {
 
-                multiplier +=
-                    0.15;
+                multiplier += 0.15;
 
             }
 
@@ -376,11 +357,9 @@ function calculateContractOffer(promotion) {
     }
 
 
-    /*
-     * =====================================================
-     * FAMA
-     * =====================================================
-     */
+    /* =====================================================
+       FAMA
+    ===================================================== */
 
     multiplier +=
         (
@@ -389,11 +368,9 @@ function calculateContractOffer(promotion) {
         ) / 500;
 
 
-    /*
-     * =====================================================
-     * HISTÓRICO COM A ORGANIZAÇÃO
-     * =====================================================
-     */
+    /* =====================================================
+       HISTÓRICO
+    ===================================================== */
 
     let previousContracts = 0;
 
@@ -409,23 +386,15 @@ function calculateContractOffer(promotion) {
             );
 
 
-        if (
-            history
-        ) {
+        if (history) {
 
             previousContracts =
-                history.contracts ||
-                0;
+                history.contracts || 0;
 
         }
 
     }
 
-
-    /*
-     * Segundo contrato e seguintes
-     * ficam mais valiosos.
-     */
 
     if (
         previousContracts > 0
@@ -434,95 +403,64 @@ function calculateContractOffer(promotion) {
         multiplier +=
             Math.min(
                 0.50,
-                previousContracts *
-                0.10
+                previousContracts * 0.10
             );
 
     }
 
 
-    /*
-     * =====================================================
-     * DESEMPENHO
-     * =====================================================
-     */
+    /* =====================================================
+       DESEMPENHO
+    ===================================================== */
 
-    const wins =
-        player.professional
-        ? (
-            player.professional.wins ||
-            0
-        )
-        : 0;
+    const performance =
+        getPerformanceMultiplier();
 
 
-    const losses =
-        player.professional
-        ? (
-            player.professional.losses ||
-            0
-        )
-        : 0;
+    multiplier *=
+        performance;
 
 
-    /*
-     * Cartel positivo aumenta poder
-     * de negociação.
-     */
-
-    if (
-        wins > losses
-    ) {
-
-        multiplier +=
-            Math.min(
-                0.30,
-                (
-                    wins -
-                    losses
-                ) / 30
-            );
-
-    }
-
-
-    /*
-     * =====================================================
-     * NÚMERO DE LUTAS
-     * =====================================================
-     *
-     * Entre 3 e 5.
-     */
+    /* =====================================================
+       NÚMERO DE LUTAS
+    ===================================================== */
 
     const fights =
-        3 +
-        Math.floor(
-            Math.random() * 3
+        generateContractLength(
+            promotion
         );
 
 
-    /*
-     * =====================================================
-     * BOLSA
-     * =====================================================
-     */
+    /* =====================================================
+       BOLSA
+    ===================================================== */
+
+    const basePurse =
+        calculateBasePurse(
+            promotion
+        );
+
 
     const purse =
         Math.round(
-            promotion.basePurse *
+            basePurse *
             multiplier
         );
 
 
-    /*
-     * =====================================================
-     * BÔNUS
-     * =====================================================
-     */
+    /* =====================================================
+       BÔNUS DE VITÓRIA
+    ===================================================== */
+
+    const baseWinBonus =
+        calculateBaseWinBonus(
+            promotion
+        );
+
 
     const winBonus =
         Math.round(
-            promotion.basePurse *
+            baseWinBonus *
             multiplier
         );
 
@@ -547,6 +485,7 @@ function calculateContractOffer(promotion) {
     };
 
 }
+
 
 /* =========================================================
    VERIFICAÇÃO DE OFERTA
@@ -588,7 +527,7 @@ function canReceiveOffer(promotion) {
 
 
     /* =====================================================
-       🏟️ REGIONAL
+       REGIONAL
     ===================================================== */
 
     if (
@@ -607,7 +546,7 @@ function canReceiveOffer(promotion) {
 
 
     /* =====================================================
-       🇧🇷 NACIONAL
+       NACIONAL
     ===================================================== */
 
     if (
@@ -637,18 +576,13 @@ function canReceiveOffer(promotion) {
 
 
     /* =====================================================
-       🌎 INTERNACIONAL
+       INTERNACIONAL
     ===================================================== */
 
     if (
         promotion.careerStage ===
         "international"
     ) {
-
-        /*
-         * Empresário é praticamente obrigatório
-         * para conseguir uma oportunidade internacional.
-         */
 
         if (!manager) {
 
@@ -670,12 +604,6 @@ function canReceiveOffer(promotion) {
         }
 
 
-        /*
-         * CAMINHO NORMAL
-         *
-         * Nacional → Internacional
-         */
-
         if (
             stage === "international" ||
             stage === "elite"
@@ -689,13 +617,9 @@ function canReceiveOffer(promotion) {
         }
 
 
-        /*
-         * =================================================
-         * 🚀 SALTO REGIONAL → INTERNACIONAL
-         * =================================================
-         *
-         * Extremamente bom + empresário forte.
-         */
+        /* =================================================
+           SALTO REGIONAL → INTERNACIONAL
+        ================================================= */
 
         if (
             stage === "regional"
@@ -723,17 +647,13 @@ function canReceiveOffer(promotion) {
 
 
     /* =====================================================
-       👑 ELITE / UFC
+       ELITE / UFC
     ===================================================== */
 
     if (
         promotion.careerStage ===
         "elite"
     ) {
-
-        /*
-         * UFC exige empresário forte.
-         */
 
         if (!manager) {
 
@@ -755,11 +675,9 @@ function canReceiveOffer(promotion) {
         }
 
 
-        /*
-         * CAMINHO NORMAL
-         *
-         * Internacional → Elite
-         */
+        /* =================================================
+           INTERNACIONAL → ELITE
+        ================================================= */
 
         if (
             stage === "international"
@@ -783,11 +701,9 @@ function canReceiveOffer(promotion) {
         }
 
 
-        /*
-         * =================================================
-         * 🚀 NACIONAL → UFC
-         * =================================================
-         */
+        /* =================================================
+           NACIONAL → ELITE
+        ================================================= */
 
         if (
             stage === "national"
@@ -812,13 +728,9 @@ function canReceiveOffer(promotion) {
         }
 
 
-        /*
-         * =================================================
-         * 🚀 REGIONAL → UFC
-         * =================================================
-         *
-         * Extremamente raro.
-         */
+        /* =================================================
+           REGIONAL → ELITE
+        ================================================= */
 
         if (
             stage === "regional"
@@ -843,9 +755,9 @@ function canReceiveOffer(promotion) {
         }
 
 
-        /*
-         * Já está na elite.
-         */
+        /* =================================================
+           JÁ ESTÁ NA ELITE
+        ================================================= */
 
         if (
             stage === "elite"
@@ -865,8 +777,9 @@ function canReceiveOffer(promotion) {
 
 }
 
+
 /* =========================================================
-   OPORTUNIDADES ESTRANGEIRAS RARAS
+   OPORTUNIDADES ESTRANGEIRAS
 ========================================================= */
 
 function foreignOpportunityChance(
@@ -889,11 +802,6 @@ function foreignOpportunityChance(
     let chance =
         promotion.foreignChance || 0;
 
-
-    /*
-     * Empresário melhora muito a chance
-     * de encontrar oportunidades fora.
-     */
 
     if (
         contacts >= 60
@@ -939,12 +847,6 @@ function promotionMatchesPlayer(
     promotion
 ) {
 
-    /*
-     * Organizações internacionais:
-     * podem aparecer normalmente quando
-     * o lutador já chegou ao internacional.
-     */
-
     if (
         promotion.international
     ) {
@@ -953,11 +855,6 @@ function promotionMatchesPlayer(
 
     }
 
-
-    /*
-     * Se não houver país salvo,
-     * não bloqueia a oferta.
-     */
 
     if (
         !player.country
@@ -968,10 +865,6 @@ function promotionMatchesPlayer(
     }
 
 
-    /*
-     * Oferta do mesmo país.
-     */
-
     if (
         promotion.country ===
         player.country
@@ -981,12 +874,6 @@ function promotionMatchesPlayer(
 
     }
 
-
-    /*
-     * Organização estrangeira:
-     * só pode aparecer como oportunidade
-     * especial e rara.
-     */
 
     const chance =
         foreignOpportunityChance(
@@ -1010,93 +897,45 @@ function promotionMatchesPlayer(
 function generateContractOffers() {
 
     if (
-
         !player.professional ||
-
         !player.professional.active
-
     ) {
 
         return [];
 
     }
 
-    /*
-
-     * Estágio atual do lutador.
-
-     *
-
-     * Não alteramos automaticamente o estágio.
-
-     * Uma proposta maior pode aparecer antes da hora.
-
-     */
 
     const stage =
-
         player.careerStage ||
-
         "regional";
 
-    /*
-
-     * Procura organizações que o lutador
-
-     * pode receber proposta.
-
-     */
 
     const possible =
-
         promotions.filter(
 
             promotion => {
 
-                /*
-
-                 * Verifica requisitos.
-
-                 */
-
                 if (
-
                     !canReceiveOffer(
-
                         promotion
-
                     )
-
                 ) {
 
                     return false;
 
                 }
 
-                /*
-
-                 * Verifica se a organização
-
-                 * combina com o jogador.
-
-                 */
 
                 if (
-
                     typeof promotionMatchesPlayer ===
-
                     "function"
-
                 ) {
 
                     if (
-
                         !promotionMatchesPlayer(
-
                             promotion
-
                         )
-
                     ) {
 
                         return false;
@@ -1105,33 +944,17 @@ function generateContractOffers() {
 
                 }
 
+
                 return true;
 
             }
 
         );
 
-    /*
 
-     * =====================================================
-
-     * ORDENAÇÃO DAS OPORTUNIDADES
-
-     * =====================================================
-
-     *
-
-     * Organizações próximas do estágio atual
-
-     * aparecem com mais frequência.
-
-     *
-
-     * Propostas acima do estágio são possíveis,
-
-     * mas mais raras.
-
-     */
+    /* =====================================================
+       NÍVEIS
+    ===================================================== */
 
     const stageLevel = {
 
@@ -1147,146 +970,86 @@ function generateContractOffers() {
 
     };
 
-    const currentLevel =
 
+    const currentLevel =
         stageLevel[stage] || 1;
 
-    const scored =
 
+    const scored =
         possible.map(
 
             promotion => {
 
-                let level =
-
+                const level =
                     promotion.level || 1;
+
 
                 let score = 100;
 
-                /*
-
-                 * Organização abaixo/acima
-
-                 * do estágio.
-
-                 */
 
                 if (
-
                     level <
-
                     currentLevel
-
                 ) {
 
                     score -=
-
                         (
-
                             currentLevel -
-
                             level
-
                         ) * 20;
 
                 }
 
+
                 if (
-
                     level >
-
                     currentLevel
-
                 ) {
 
-                    /*
-
-                     * Quanto maior o salto,
-
-                     * mais difícil aparecer.
-
-                     */
-
                     score -=
-
                         (
-
                             level -
-
                             currentLevel
-
                         ) * 35;
 
                 }
 
-                /*
-
-                 * Fama ajuda a chamar
-
-                 * organizações maiores.
-
-                 */
 
                 score +=
+                    (
+                        player.fame || 0
+                    ) / 5;
 
-                    player.fame / 5;
-
-                /*
-
-                 * Empresário aumenta muito
-
-                 * a chance de oportunidades.
-
-                 */
 
                 if (
-
                     player.manager
-
                 ) {
 
                     score +=
-
                         (
-
                             player.manager.contacts ||
-
                             0
-
                         ) / 2;
 
                 }
 
-                /*
-
-                 * Prestígio da organização.
-
-                 */
 
                 score +=
-
                     (
-
                         promotion.prestige ||
-
                         0
-
                     ) / 3;
+
 
                 return {
 
                     promotion:
-
                         promotion,
 
                     score:
-
                         Math.max(
-
                             1,
-
                             score
-
                         )
 
                 };
@@ -1295,58 +1058,43 @@ function generateContractOffers() {
 
         );
 
-    /*
 
-     * =====================================================
-
-     * SORTEIO PONDERADO
-
-     * =====================================================
-
-     */
+    /* =====================================================
+       SORTEIO PONDERADO
+    ===================================================== */
 
     function weightedRandom(list) {
 
         const total =
-
             list.reduce(
 
                 (
-
                     sum,
-
                     item
-
                 ) =>
-
                     sum +
-
                     item.score,
 
                 0
 
             );
 
+
         let random =
-
             Math.random() *
-
             total;
 
+
         for (
-
             const item of list
-
         ) {
 
             random -=
-
                 item.score;
 
+
             if (
-
                 random <= 0
-
             ) {
 
                 return item;
@@ -1355,41 +1103,34 @@ function generateContractOffers() {
 
         }
 
+
         return list[
-
             list.length - 1
-
         ];
 
     }
 
+
     const selected = [];
 
     const pool =
-
         [...scored];
 
-    /*
 
-     * No máximo 3 propostas.
-
-     */
+    /* =====================================================
+       NO MÁXIMO 3 PROPOSTAS
+    ===================================================== */
 
     while (
-
         pool.length > 0 &&
-
         selected.length < 3
-
     ) {
 
         const chosen =
-
             weightedRandom(
-
                 pool
-
             );
+
 
         if (!chosen) {
 
@@ -1397,54 +1138,37 @@ function generateContractOffers() {
 
         }
 
+
         selected.push(
-
             chosen.promotion
-
         );
 
+
         const index =
-
             pool.indexOf(
-
                 chosen
-
             );
 
+
         if (
-
             index >= 0
-
         ) {
 
             pool.splice(
-
                 index,
-
                 1
-
             );
 
         }
 
     }
 
-    /*
-
-     * Transforma organizações
-
-     * em ofertas financeiras.
-
-     */
 
     return selected.map(
 
         promotion =>
-
             calculateContractOffer(
-
                 promotion
-
             )
 
     );
@@ -1457,6 +1181,9 @@ function generateContractOffers() {
 ========================================================= */
 
 function acceptPromotion(id) {
+
+    ensureContractPlayer();
+
 
     const promotion =
         promotions.find(
@@ -1493,7 +1220,8 @@ function acceptPromotion(id) {
         fights:
             offer.fights,
 
-        fightsCompleted: 0,
+        fightsCompleted:
+            0,
 
         purse:
             offer.purse,
@@ -1501,7 +1229,8 @@ function acceptPromotion(id) {
         winBonus:
             offer.winBonus,
 
-        active: true,
+        active:
+            true,
 
         contractNumber:
             (
@@ -1513,10 +1242,6 @@ function acceptPromotion(id) {
     };
 
 
-    /*
-     * Atualiza histórico.
-     */
-
     const history =
         getPromotionHistory(
             promotion.id
@@ -1524,6 +1249,10 @@ function acceptPromotion(id) {
 
 
     history.contracts++;
+
+
+    player.log =
+        player.log || [];
 
 
     player.log.unshift(
@@ -1571,6 +1300,9 @@ function registerContractFight(
     won
 ) {
 
+    ensureContractPlayer();
+
+
     if (
         !player.currentContract ||
         !player.currentContract.active
@@ -1601,10 +1333,17 @@ function registerContractFight(
 
         history.wins++;
 
-        player.money +=
-            contract.winBonus;
+
+        player.money =
+            Number(
+                player.money || 0
+            ) +
+            Number(
+                contract.winBonus || 0
+            );
 
     }
+
     else {
 
         history.losses++;
@@ -1612,17 +1351,24 @@ function registerContractFight(
     }
 
 
-    /*
-     * Bolsa da luta é paga sempre.
-     */
+    /* =====================================================
+       BOLSA DA LUTA
+       É PAGA SEMPRE
+    ===================================================== */
 
-    player.money +=
-        contract.purse;
+    player.money =
+        Number(
+            player.money || 0
+        ) +
+        Number(
+            contract.purse || 0
+        );
 
 
-    /*
-     * Contrato terminou?
-     */
+    /* =====================================================
+       CONTRATO TERMINOU
+       NÃO RENOVA AUTOMATICAMENTE
+    ===================================================== */
 
     if (
         contract.fightsCompleted >=
@@ -1633,18 +1379,30 @@ function registerContractFight(
             false;
 
 
+        contract.status =
+            "finished";
+
+
+        player.contractNegotiation =
+            true;
+
+
+        player.log =
+            player.log || [];
+
+
         player.log.unshift(
 
-            "📄 Seu contrato com " +
-            contract.promotionName +
-            " terminou."
+            "📄 CONTRATO ENCERRADO: " +
+            contract.promotionName
 
         );
 
 
         player.log.unshift(
 
-            "📈 Uma nova negociação está disponível."
+            "🤝 Você pode aceitar uma nova proposta, " +
+            "recusar ou negociar."
 
         );
 
@@ -1657,13 +1415,179 @@ function registerContractFight(
 
 
 /* =========================================================
-   RENOVAÇÃO
+   VERIFICAR SE EXISTE CONTRATO ENCERRADO
+========================================================= */
+
+function isContractFinished() {
+
+    if (
+        !player.currentContract
+    ) {
+
+        return false;
+
+    }
+
+
+    return (
+        player.currentContract.active === false &&
+        player.currentContract.status === "finished"
+    );
+
+}
+
+
+/* =========================================================
+   NOVA NEGOCIAÇÃO
+========================================================= */
+
+function negotiateContract() {
+
+    ensureContractPlayer();
+
+
+    if (
+        !isContractFinished()
+    ) {
+
+        return null;
+
+    }
+
+
+    const offers =
+        generateContractOffers();
+
+
+    player.contractNegotiation =
+        true;
+
+
+    save();
+
+
+    return offers;
+
+}
+
+
+/* =========================================================
+   RECUSAR RENOVAÇÃO
+========================================================= */
+
+function declineContract() {
+
+    ensureContractPlayer();
+
+
+    if (
+        !player.currentContract
+    ) {
+
+        return;
+
+    }
+
+
+    if (
+        player.currentContract.active
+    ) {
+
+        return;
+
+    }
+
+
+    player.contractNegotiation =
+        false;
+
+
+    player.currentContract =
+        null;
+
+
+    player.currentPromotion =
+        null;
+
+
+    player.log =
+        player.log || [];
+
+
+    player.log.unshift(
+
+        "❌ Proposta de continuidade recusada."
+
+    );
+
+
+    save();
+
+
+    if (
+        typeof career ===
+        "function"
+    ) {
+
+        career();
+
+    }
+
+}
+
+
+/* =========================================================
+   NOVA OFERTA APÓS CONTRATO
+========================================================= */
+
+function generatePostContractOffers() {
+
+    ensureContractPlayer();
+
+
+    if (
+        !player.currentContract
+    ) {
+
+        return [];
+
+    }
+
+
+    if (
+        player.currentContract.active
+    ) {
+
+        return [];
+
+    }
+
+
+    return generateContractOffers();
+
+}
+
+
+/* =========================================================
+   GERAR OFERTA DE RENOVAÇÃO
 ========================================================= */
 
 function generateRenewalOffer() {
 
+    ensureContractPlayer();
+
+
     if (
         !player.currentContract
+    ) {
+
+        return null;
+
+    }
+
+
+    if (
+        player.currentContract.active
     ) {
 
         return null;
@@ -1695,10 +1619,13 @@ function generateRenewalOffer() {
 
 
 /* =========================================================
-   RENOVAR
+   RENOVAR CONTRATO
 ========================================================= */
 
 function renewContract() {
+
+    ensureContractPlayer();
+
 
     const offer =
         generateRenewalOffer();
@@ -1722,7 +1649,8 @@ function renewContract() {
         fights:
             offer.fights,
 
-        fightsCompleted: 0,
+        fightsCompleted:
+            0,
 
         purse:
             offer.purse,
@@ -1730,7 +1658,11 @@ function renewContract() {
         winBonus:
             offer.winBonus,
 
-        active: true,
+        active:
+            true,
+
+        status:
+            "active",
 
         contractNumber:
             (
@@ -1751,6 +1683,18 @@ function renewContract() {
     history.contracts++;
 
 
+    player.contractNegotiation =
+        false;
+
+
+    player.currentPromotion =
+        offer.promotion;
+
+
+    player.log =
+        player.log || [];
+
+
     player.log.unshift(
 
         "🔄 Contrato renovado com " +
@@ -1762,11 +1706,131 @@ function renewContract() {
     player.log.unshift(
 
         "💰 Nova bolsa: $" +
-        offer.purse
+        offer.purse +
+        " + $" +
+        offer.winBonus +
+        " por vitória."
 
     );
 
 
     save();
 
+
+    if (
+        typeof career ===
+        "function"
+    ) {
+
+        career();
+
+    }
+
 }
+
+
+/* =========================================================
+   GARANTIR PLAYER
+   Evita erro caso contracts.js seja carregado
+   antes de player.js em alguma situação.
+========================================================= */
+
+function ensureContractPlayer() {
+
+    if (
+        typeof window.player ===
+        "undefined" ||
+        !window.player
+    ) {
+
+        if (
+            typeof createDefaultPlayer ===
+            "function"
+        ) {
+
+            window.player =
+                createDefaultPlayer();
+
+        }
+
+    }
+
+
+    if (!player.log) {
+
+        player.log = [];
+
+    }
+
+}
+
+
+/* =========================================================
+   COMPATIBILIDADE GLOBAL
+========================================================= */
+
+window.getPromotionHistory =
+    getPromotionHistory;
+
+window.getManagerNegotiation =
+    getManagerNegotiation;
+
+window.getNegotiationMultiplier =
+    getNegotiationMultiplier;
+
+window.getPerformanceMultiplier =
+    getPerformanceMultiplier;
+
+window.getPromotionMultiplier =
+    getPromotionMultiplier;
+
+window.generateContractLength =
+    generateContractLength;
+
+window.calculateBasePurse =
+    calculateBasePurse;
+
+window.calculateBaseWinBonus =
+    calculateBaseWinBonus;
+
+window.getCareerStageLabel =
+    getCareerStageLabel;
+
+window.calculateContractOffer =
+    calculateContractOffer;
+
+window.canReceiveOffer =
+    canReceiveOffer;
+
+window.foreignOpportunityChance =
+    foreignOpportunityChance;
+
+window.promotionMatchesPlayer =
+    promotionMatchesPlayer;
+
+window.generateContractOffers =
+    generateContractOffers;
+
+window.acceptPromotion =
+    acceptPromotion;
+
+window.registerContractFight =
+    registerContractFight;
+
+window.isContractFinished =
+    isContractFinished;
+
+window.negotiateContract =
+    negotiateContract;
+
+window.declineContract =
+    declineContract;
+
+window.generatePostContractOffers =
+    generatePostContractOffers;
+
+window.generateRenewalOffer =
+    generateRenewalOffer;
+
+window.renewContract =
+    renewContract;
