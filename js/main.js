@@ -798,9 +798,11 @@ function home() {
                     ${player.name || "Lutador"}
                 </h2>
 
+
                 <p>
                     ${player.country || "Brasil"}
                 </p>
+
 
                 <p>
                     ${player.weight || "Peso Leve"}
@@ -1221,12 +1223,98 @@ function tab(name) {
 
     if (name === "team") {
 
+        ensurePlayer();
+
+        showGame();
+
         if (
             typeof window.teamScreen ===
             "function"
         ) {
 
-            window.teamScreen();
+            try {
+
+                window.teamScreen();
+
+            }
+            catch (error) {
+
+                console.error(
+                    "Erro ao abrir a tela de Equipe:",
+                    error
+                );
+
+                const content =
+                    getElement("content");
+
+                if (content) {
+
+                    content.innerHTML = `
+
+                        <div class="card">
+
+                            <div class="title">
+                                🏢 EQUIPE
+                            </div>
+
+                            <p>
+                                Ocorreu um erro ao abrir
+                                a tela de equipe.
+                            </p>
+
+                            <button
+                                class="main-button"
+                                onclick="tab('home')">
+
+                                🏠 VOLTAR AO INÍCIO
+
+                            </button>
+
+                        </div>
+
+                    `;
+
+                }
+
+            }
+
+        }
+        else {
+
+            console.error(
+                "teamScreen() não encontrada."
+            );
+
+            const content =
+                getElement("content");
+
+            if (content) {
+
+                content.innerHTML = `
+
+                    <div class="card">
+
+                        <div class="title">
+                            🏢 EQUIPE
+                        </div>
+
+                        <p>
+                            Sistema de equipe não carregado.
+                        </p>
+
+                        <button
+                            class="main-button"
+                            onclick="tab('home')">
+
+                            🏠 VOLTAR AO INÍCIO
+
+                        </button>
+
+                    </div>
+
+                `;
+
+            }
 
         }
 
