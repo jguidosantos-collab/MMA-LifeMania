@@ -1660,35 +1660,28 @@ window.lifeScreen = lifeScreen;
 
 function initializeMmaLife() {
 
-    const loaded =
-        loadGame();
+    const saved =
+        localStorage.getItem("mmaLifePlayer");
 
+    // EXISTE UMA CARREIRA SALVA
+    if (saved) {
 
-    /*
-     * JOGADOR EXISTE
-     */
+        if (loadGame() &&
+            window.player &&
+            window.player.name) {
 
-    if (
-        loaded &&
-        window.player &&
-        window.player.name
-    ) {
+            showGame();
 
-        showGame();
+            home();
 
-        home();
-
-        return;
+            return;
+        }
     }
 
+    // NÃO EXISTE CARREIRA
+    window.player = null;
 
-    /*
-     * NOVO JOGO
-     */
-
-    window.player =
-        createDefaultPlayer();
-
+    showCreation();
 
     startGame();
 }
@@ -1698,10 +1691,7 @@ function initializeMmaLife() {
    DOM READY
 ========================================================= */
 
-if (
-    document.readyState ===
-    "loading"
-) {
+if (document.readyState === "loading") {
 
     document.addEventListener(
         "DOMContentLoaded",
