@@ -2,6 +2,7 @@
    MMA LIFE DYNASTY
    PFL.JS
    SISTEMA PFL GRAND PRIX
+   VERSÃO ATUALIZADA
 ========================================================= */
 /* =========================================================
    CONFIGURAÇÃO
@@ -32,21 +33,118 @@ function ensurePFL() {
         window.player;
     if (!player.pfl) {
         player.pfl = {
-            invited: false,
-            accepted: false,
-            active: false,
-            year: null,
-            division: null,
-            round: null,
-            wins: 0,
-            losses: 0,
-            champion: false,
-            eliminated: false,
-            opponent: null,
-            bracket: [],
-            prize: 0
+            invited:
+                false,
+            accepted:
+                false,
+            active:
+                false,
+            year:
+                null,
+            division:
+                null,
+            round:
+                null,
+            wins:
+                0,
+            losses:
+                0,
+            champion:
+                false,
+            eliminated:
+                false,
+            opponent:
+                null,
+            bracket:
+                [],
+            prize:
+                0,
+            fightOffer:
+                null,
+            nextFightWeek:
+                null,
+            recoveryWeeks:
+                0,
+            recoveryUntilWeek:
+                null
         };
     }
+    /*
+     * Compatibilidade com saves antigos.
+     */
+    if (
+        typeof player.pfl.fightOffer ===
+        "undefined"
+    ) {
+        player.pfl.fightOffer =
+            null;
+    }
+    if (
+        typeof player.pfl.bracket ===
+        "undefined"
+    ) {
+        player.pfl.bracket =
+            [];
+    }
+    if (
+        typeof player.pfl.recoveryWeeks ===
+        "undefined"
+    ) {
+        player.pfl.recoveryWeeks =
+            0;
+    }
+    if (
+        typeof player.pfl.recoveryUntilWeek ===
+        "undefined"
+    ) {
+        player.pfl.recoveryUntilWeek =
+            null;
+    }
+}
+/* =========================================================
+   VERIFICAR RECUPERAÇÃO
+========================================================= */
+function isPFLRecovering() {
+    ensurePFL();
+    const player =
+        window.player;
+    if (
+        !player.pfl.active
+    ) {
+        return false;
+    }
+    if (
+        !player.pfl.recoveryUntilWeek
+    ) {
+        return false;
+    }
+    return (
+        Number(player.week || 1)
+        <
+        Number(player.pfl.recoveryUntilWeek)
+    );
+}
+/* =========================================================
+   SEMANAS RESTANTES
+========================================================= */
+function getPFLRecoveryRemaining() {
+    ensurePFL();
+    const player =
+        window.player;
+    if (
+        !isPFLRecovering()
+    ) {
+        return 0;
+    }
+    return Math.max(
+        0,
+        Number(
+            player.pfl.recoveryUntilWeek
+        ) -
+        Number(
+            player.week || 1
+        )
+    );
 }
 /* =========================================================
    EMPRESÁRIO APRESENTA GP
@@ -64,33 +162,28 @@ function managerOfferPFLGrandPrix() {
         );
         return;
     }
-    if (
-        !player.manager
-    ) {
+    if (!player.manager) {
         alert(
             "Você precisa ter um empresário para receber um convite do PFL."
         );
         return;
     }
-    if (
-        player.pfl.active
-    ) {
+    if (player.pfl.active) {
         alert(
             "Você já está participando do PFL Grand Prix."
         );
         return;
     }
-    if (
-        player.fightOffer
-    ) {
+    if (player.fightOffer) {
         alert(
-            "Seu empresário já possui uma oferta de luta para você."
+            "Seu empresário já possui outra oferta de luta para você."
         );
         return;
     }
-    /*
-     * O empresário apresenta a oportunidade.
-     */
+    if (player.pfl.invited) {
+        pflScreen();
+        return;
+    }
     player.pfl.invited =
         true;
     player.pfl.year =
@@ -106,6 +199,57 @@ function managerOfferPFLGrandPrix() {
     pflScreen();
 }
 /* =========================================================
+   CRIAR BRACKET
+========================================================= */
+function generatePFLBracket() {
+    ensurePFL();
+    const player =
+        window.player;
+    const fighters = [];
+    /*
+     * O jogador é um dos 8 participantes.
+     */
+    fighters.push({
+        displayName:
+            player.name,
+        power:
+            getOverall(),
+        player:
+            true,
+        wins:
+            0,
+        losses:
+            0
+    });
+    /*
+     * Cria os outros 7 lutadores.
+     */
+    for (
+        let i = 1;
+        i < PFL_CONFIG.fightersPerDivision;
+        i++
+    ) {
+        const fighter =
+            generatePFLOpponent();
+        fighter.player =
+            false;
+        fighters.push(
+            fighter
+        );
+    }
+    /*
+     * Embaralha.
+     */
+    fighters.sort(
+        function() {
+            return Math.random() - 0.5;
+        }
+    );
+    player.pfl.bracket =
+        fighters;
+    return fighters;
+}
+/* =========================================================
    ACEITAR GP
 ========================================================= */
 function acceptPFLGrandPrix() {
@@ -113,7 +257,6 @@ function acceptPFLGrandPrix() {
     const player =
         window.player;
     if (
-        !player.pfl ||
         !player.pfl.invited
     ) {
         return;
@@ -126,6 +269,8 @@ function acceptPFLGrandPrix() {
         true;
     player.pfl.year =
         player.year;
+    player.pfl.division =
+        player.weight;
     player.pfl.round =
         "Quartas de final";
     player.pfl.wins =
@@ -138,11 +283,23 @@ function acceptPFLGrandPrix() {
         false;
     player.pfl.prize =
         0;
+    player.pfl.fightOffer =
+        null;
+    player.pfl.recoveryWeeks =
+        0;
+    player.pfl.recoveryUntilWeek =
+        null;
+    generatePFLBracket();
     /*
-     * Gera o primeiro adversário.
+     * Escolhe o primeiro adversário.
      */
     player.pfl.opponent =
-        generatePFLOpponent();
+        findPFLFirstOpponent();
+    /*
+     * A primeira luta será apresentada
+     * como oferta do empresário.
+     */
+    createPFLFightOffer();
     player.log =
         player.log || [];
     player.log.unshift(
@@ -153,6 +310,26 @@ function acceptPFLGrandPrix() {
     pflScreen();
 }
 /* =========================================================
+   PRIMEIRO ADVERSÁRIO
+========================================================= */
+function findPFLFirstOpponent() {
+    ensurePFL();
+    const player =
+        window.player;
+    const bracket =
+        player.pfl.bracket || [];
+    const opponents =
+        bracket.filter(
+            function(fighter) {
+                return !fighter.player;
+            }
+        );
+    if (!opponents.length) {
+        return generatePFLOpponent();
+    }
+    return opponents[0];
+}
+/* =========================================================
    RECUSAR GP
 ========================================================= */
 function declinePFLGrandPrix() {
@@ -160,7 +337,6 @@ function declinePFLGrandPrix() {
     const player =
         window.player;
     if (
-        !player.pfl ||
         !player.pfl.invited
     ) {
         return;
@@ -176,7 +352,7 @@ function declinePFLGrandPrix() {
     pflScreen();
 }
 /* =========================================================
-   GERAR ADVERSÁRIO DO GP
+   GERAR ADVERSÁRIO
 ========================================================= */
 function generatePFLOpponent() {
     ensurePlayer();
@@ -200,12 +376,11 @@ function generatePFLOpponent() {
                 0
         };
     }
-    /*
-     * O GP deve ter adversários fortes.
-     */
     opponent.power =
         Math.max(
-            opponent.power || 0,
+            Number(
+                opponent.power || 0
+            ),
             65
         );
     opponent.power +=
@@ -213,7 +388,7 @@ function generatePFLOpponent() {
     return opponent;
 }
 /* =========================================================
-   RISCO DO GP
+   RISCO
 ========================================================= */
 function getPFLRisk() {
     ensurePFL();
@@ -225,21 +400,33 @@ function getPFLRisk() {
         return 50;
     }
     let risk =
-        45;
+        40;
+    const playerOverall =
+        getOverall();
     const difference =
         Math.abs(
-            getOverall() -
+            playerOverall -
             opponent.power
         );
     if (
         opponent.power >
-        getOverall()
+        playerOverall
     ) {
         risk +=
             15;
     }
     if (
         difference < 5
+    ) {
+        risk +=
+            10;
+    }
+    /*
+     * A final é mais perigosa.
+     */
+    if (
+        player.pfl.round ===
+        "Final"
     ) {
         risk +=
             10;
@@ -255,7 +442,7 @@ function getPFLRisk() {
     return risk;
 }
 /* =========================================================
-   RECUPERAÇÃO DO GP
+   RECUPERAÇÃO
 ========================================================= */
 function getPFLRecovery() {
     const risk =
@@ -263,19 +450,189 @@ function getPFLRecovery() {
     if (
         risk < 40
     ) {
-        return 6;
+        return 4;
     }
     if (
         risk < 55
     ) {
-        return 8;
+        return 6;
     }
     if (
         risk < 70
     ) {
+        return 8;
+    }
+    if (
+        risk < 80
+    ) {
         return 10;
     }
     return 12;
+}
+/* =========================================================
+   CRIAR OFERTA DE LUTA
+========================================================= */
+function createPFLFightOffer() {
+    ensurePFL();
+    const player =
+        window.player;
+    if (
+        !player.pfl.active
+    ) {
+        return;
+    }
+    if (
+        !player.pfl.opponent
+    ) {
+        return;
+    }
+    if (
+        isPFLRecovering()
+    ) {
+        return;
+    }
+    const risk =
+        getPFLRisk();
+    const recovery =
+        getPFLRecovery();
+    /*
+     * A luta é proposta depois
+     * do período de preparação.
+     */
+    const proposedWeek =
+        Number(player.week || 1) + 2;
+    player.pfl.fightOffer = {
+        opponent:
+            player.pfl.opponent,
+        round:
+            player.pfl.round,
+        risk:
+            risk,
+        recoveryWeeks:
+            recovery,
+        proposedWeek:
+            proposedWeek,
+        prizeIfWinner:
+            getPFLRoundPrize()
+    };
+    player.pfl.nextFightWeek =
+        proposedWeek;
+    player.log =
+        player.log || [];
+    player.log.unshift(
+        "📩 Seu empresário apresentou uma luta do PFL Grand Prix."
+    );
+    save();
+}
+/* =========================================================
+   PREMIAÇÃO POR FASE
+========================================================= */
+function getPFLRoundPrize() {
+    ensurePFL();
+    const player =
+        window.player;
+    if (
+        player.pfl.round ===
+        "Quartas de final"
+    ) {
+        return 100000;
+    }
+    if (
+        player.pfl.round ===
+        "Semifinal"
+    ) {
+        return 250000;
+    }
+    if (
+        player.pfl.round ===
+        "Final"
+    ) {
+        return PFL_CONFIG.prize;
+    }
+    return 0;
+}
+/* =========================================================
+   ACEITAR OFERTA DO GP
+========================================================= */
+function acceptPFLFightOffer() {
+    ensurePFL();
+    const player =
+        window.player;
+    const offer =
+        player.pfl.fightOffer;
+    if (!offer) {
+        return;
+    }
+    if (
+        isPFLRecovering()
+    ) {
+        alert(
+            "Você ainda está se recuperando da última luta."
+        );
+        return;
+    }
+    player.pfl.fightOffer =
+        null;
+    player.nextFight = {
+        opponent:
+            offer.opponent,
+        event: {
+            name:
+                "PFL Grand Prix",
+            level:
+                5,
+            purse:
+                0
+        },
+        purse:
+            0,
+        week:
+            offer.proposedWeek,
+        risk:
+            offer.risk,
+        recoveryWeeks:
+            offer.recoveryWeeks,
+        amateur:
+            false,
+        pflGrandPrix:
+            true,
+        pflRound:
+            offer.round
+    };
+    player.log =
+        player.log || [];
+    player.log.unshift(
+        "📅 Luta do PFL Grand Prix aceita: " +
+        offer.round
+    );
+    save();
+    pflScreen();
+}
+/* =========================================================
+   RECUSAR OFERTA DO GP
+========================================================= */
+function declinePFLFightOffer() {
+    ensurePFL();
+    const player =
+        window.player;
+    if (
+        !player.pfl.fightOffer
+    ) {
+        return;
+    }
+    player.log =
+        player.log || [];
+    player.log.unshift(
+        "❌ Oferta do PFL Grand Prix recusada."
+    );
+    player.pfl.fightOffer =
+        null;
+    /*
+     * O GP continua, mas o empresário
+     * poderá apresentar outra oportunidade.
+     */
+    save();
+    pflScreen();
 }
 /* =========================================================
    LUTAR NO GP
@@ -285,9 +642,29 @@ function fightPFL() {
     const player =
         window.player;
     if (
-        !player.pfl ||
         !player.pfl.active
     ) {
+        return;
+    }
+    if (
+        !player.nextFight ||
+        !player.nextFight.pflGrandPrix
+    ) {
+        alert(
+            "Você ainda não possui uma luta do GP aceita."
+        );
+        return;
+    }
+    if (
+        Number(player.week || 1)
+        <
+        Number(player.nextFight.week)
+    ) {
+        alert(
+            "Esta luta está marcada para a semana " +
+            player.nextFight.week +
+            "."
+        );
         return;
     }
     const opponent =
@@ -315,11 +692,17 @@ function fightPFL() {
         Math.random() * 20 - 10;
     const won =
         fighterPower >=
-        opponent.power;
+        Number(opponent.power);
     const risk =
-        getPFLRisk();
+        Number(
+            player.nextFight.risk ||
+            getPFLRisk()
+        );
     const recovery =
-        getPFLRecovery();
+        Number(
+            player.nextFight.recoveryWeeks ||
+            getPFLRecovery()
+        );
     /* =====================================================
        VITÓRIA
     ===================================================== */
@@ -335,7 +718,7 @@ function fightPFL() {
                 ) + 4
             );
         /*
-         * Próxima fase
+         * QUARTAS
          */
         if (
             player.pfl.round ===
@@ -343,31 +726,41 @@ function fightPFL() {
         ) {
             player.pfl.round =
                 "Semifinal";
-            player.pfl.opponent =
-                generatePFLOpponent();
             player.pfl.prize =
                 100000;
+            player.pfl.opponent =
+                generatePFLOpponent();
+            player.pfl.fightOffer =
+                null;
             player.log.unshift(
-                "🏆 Vitória no PFL Grand Prix! Você avançou para a semifinal."
+                "🏆 Vitória nas quartas do PFL Grand Prix! Você avançou para a semifinal."
             );
             alert(
                 "🏆 VITÓRIA NO PFL GRAND PRIX!\n\n" +
                 opponent.displayName +
                 "\n\n" +
                 "Você avançou para a SEMIFINAL.\n\n" +
-                "Premiação acumulada: $100.000"
+                "Premiação acumulada: $100.000\n\n" +
+                "🩹 Recuperação: " +
+                recovery +
+                " semanas."
             );
         }
+        /*
+         * SEMIFINAL
+         */
         else if (
             player.pfl.round ===
             "Semifinal"
         ) {
             player.pfl.round =
                 "Final";
-            player.pfl.opponent =
-                generatePFLOpponent();
             player.pfl.prize =
                 250000;
+            player.pfl.opponent =
+                generatePFLOpponent();
+            player.pfl.fightOffer =
+                null;
             player.log.unshift(
                 "🔥 Vitória na semifinal do PFL! Você está na FINAL."
             );
@@ -375,9 +768,15 @@ function fightPFL() {
                 "🔥 VOCÊ ESTÁ NA FINAL!\n\n" +
                 opponent.displayName +
                 "\n\n" +
-                "Premiação acumulada: $250.000"
+                "Premiação acumulada: $250.000\n\n" +
+                "🩹 Recuperação: " +
+                recovery +
+                " semanas."
             );
         }
+        /*
+         * FINAL
+         */
         else if (
             player.pfl.round ===
             "Final"
@@ -439,17 +838,31 @@ function fightPFL() {
         );
         alert(
             "❌ ELIMINADO DO PFL GRAND PRIX\n\n" +
-            opponent.displayName
+            opponent.displayName +
+            "\n\n" +
+            "🩹 Recuperação: " +
+            recovery +
+            " semanas."
         );
     }
     /* =====================================================
        RECUPERAÇÃO
     ===================================================== */
-    player.recoveryWeeks =
-        recovery;
-    player.recoveryUntilWeek =
+    player.pfl.recoveryWeeks =
+        Math.max(
+            PFL_CONFIG.recoveryMin,
+            Math.min(
+                PFL_CONFIG.recoveryMax,
+                recovery
+            )
+        );
+    player.pfl.recoveryUntilWeek =
         Number(player.week || 1) +
-        recovery;
+        player.pfl.recoveryWeeks;
+    player.recoveryWeeks =
+        player.pfl.recoveryWeeks;
+    player.recoveryUntilWeek =
+        player.pfl.recoveryUntilWeek;
     player.health =
         Math.max(
             20,
@@ -464,8 +877,55 @@ function fightPFL() {
             100,
             Number(player.fatigue || 0) + 35
         );
+    /*
+     * Limpa a luta atual.
+     */
+    player.nextFight =
+        null;
     save();
+    /*
+     * Se ainda estiver no GP,
+     * o empresário só apresenta a
+     * próxima luta quando terminar
+     * a recuperação.
+     */
     pflScreen();
+}
+/* =========================================================
+   PREPARAR PRÓXIMA OFERTA
+========================================================= */
+function processPFLWeek() {
+    ensurePFL();
+    const player =
+        window.player;
+    if (
+        !player.pfl.active
+    ) {
+        return;
+    }
+    if (
+        player.pfl.fightOffer
+    ) {
+        return;
+    }
+    if (
+        player.nextFight
+    ) {
+        return;
+    }
+    if (
+        isPFLRecovering()
+    ) {
+        return;
+    }
+    if (
+        !player.pfl.opponent
+    ) {
+        player.pfl.opponent =
+            generatePFLOpponent();
+    }
+    createPFLFightOffer();
+    save();
 }
 /* =========================================================
    TELA PFL
@@ -520,10 +980,18 @@ function pflScreen() {
                 </div>
                 <div class="statline">
                     <span>
+                        Participantes
+                    </span>
+                    <b>
+                        8 lutadores
+                    </b>
+                </div>
+                <div class="statline">
+                    <span>
                         Formato
                     </span>
                     <b>
-                        8 lutadores — mata-mata
+                        Quartas → Semifinal → Final
                     </b>
                 </div>
                 <div class="statline">
@@ -567,6 +1035,14 @@ function pflScreen() {
                 </div>
                 <div class="statline">
                     <span>
+                        Categoria
+                    </span>
+                    <b>
+                        ${pfl.division}
+                    </b>
+                </div>
+                <div class="statline">
+                    <span>
                         Fase
                     </span>
                     <b>
@@ -591,7 +1067,7 @@ function pflScreen() {
                             ?
                             pfl.opponent.displayName
                             :
-                            "Definindo..."
+                            "A definir"
                         }
                     </b>
                 </div>
@@ -609,31 +1085,111 @@ function pflScreen() {
                             )}
                         </b>
                     </div>
-                    <div class="statline">
-                        <span>
-                            Risco
-                        </span>
-                        <b>
-                            ${getPFLRisk()}%
-                        </b>
-                    </div>
+                    `
+                    :
+                    ""
+                }
+                ${
+                    isPFLRecovering()
+                    ?
+                    `
                     <div class="statline">
                         <span>
                             Recuperação
                         </span>
                         <b>
-                            ${getPFLRecovery()} semanas
+                            ${getPFLRecoveryRemaining()}
+                            semanas restantes
                         </b>
                     </div>
-                    <button
-                        class="main-button"
-                        onclick="fightPFL()">
-                        👊 LUTAR NO GP
-                    </button>
+                    <p>
+                        🩹 Você ainda está se recuperando.
+                        Seu empresário apresentará a próxima luta
+                        quando estiver liberado.
+                    </p>
                     `
                     :
                     ""
                 }
+            </div>
+            `
+            :
+            ""
+        }
+        ${
+            pfl.active &&
+            pfl.fightOffer
+            ?
+            `
+            <div class="card">
+                <div class="title">
+                    📩 OFERTA DO EMPRESÁRIO
+                </div>
+                <p>
+                    Seu empresário encontrou
+                    sua próxima luta no GP.
+                </p>
+                <div class="statline">
+                    <span>
+                        Fase
+                    </span>
+                    <b>
+                        ${pfl.fightOffer.round}
+                    </b>
+                </div>
+                <div class="statline">
+                    <span>
+                        Adversário
+                    </span>
+                    <b>
+                        ${pfl.fightOffer.opponent.displayName}
+                    </b>
+                </div>
+                <div class="statline">
+                    <span>
+                        OVR
+                    </span>
+                    <b>
+                        ${Math.round(
+                            pfl.fightOffer.opponent.power
+                        )}
+                    </b>
+                </div>
+                <div class="statline">
+                    <span>
+                        Risco
+                    </span>
+                    <b>
+                        ${pfl.fightOffer.risk}%
+                    </b>
+                </div>
+                <div class="statline">
+                    <span>
+                        Recuperação estimada
+                    </span>
+                    <b>
+                        ${pfl.fightOffer.recoveryWeeks}
+                        semanas
+                    </b>
+                </div>
+                <div class="statline">
+                    <span>
+                        Semana da luta
+                    </span>
+                    <b>
+                        ${pfl.fightOffer.proposedWeek}
+                    </b>
+                </div>
+                <button
+                    class="green"
+                    onclick="acceptPFLFightOffer()">
+                    ✅ ACEITAR LUTA
+                </button>
+                <button
+                    class="gray"
+                    onclick="declinePFLFightOffer()">
+                    ❌ RECUSAR
+                </button>
             </div>
             `
             :
@@ -690,9 +1246,21 @@ window.acceptPFLGrandPrix =
     acceptPFLGrandPrix;
 window.declinePFLGrandPrix =
     declinePFLGrandPrix;
+window.acceptPFLFightOffer =
+    acceptPFLFightOffer;
+window.declinePFLFightOffer =
+    declinePFLFightOffer;
 window.fightPFL =
     fightPFL;
 window.pflScreen =
     pflScreen;
 window.ensurePFL =
     ensurePFL;
+window.processPFLWeek =
+    processPFLWeek;
+window.getPFLRisk =
+    getPFLRisk;
+window.getPFLRecovery =
+    getPFLRecovery;
+window.getPFLRecoveryRemaining =
+    getPFLRecoveryRemaining;
