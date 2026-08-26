@@ -1,3 +1,4 @@
+alert("FIGHTS TESTE");
 let currentOpponent = null;
 let currentEvent = null;
 
@@ -862,5 +863,3 @@ function fightScreen() {
 window.findFight = findFight;
 window.fight = fight;
 window.fightScreen = fightScreen;
-
-alert("FIGHTS.JS CARREGOU");
