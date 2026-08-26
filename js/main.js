@@ -1480,7 +1480,105 @@ function career() {
 /* =========================
    TREINAMENTO / CAMP
 ========================= */
+/* =========================
+   AVANÇAR SEMANA
+========================= */
 
+function nextWeek() {
+
+    player.week = player.week || 1;
+    player.year = player.year || 1;
+
+    /* Executa os treinos programados */
+    const plan =
+        player.trainingPlan &&
+        player.trainingPlan.weeks
+        ? player.trainingPlan.weeks[player.week]
+        : [];
+
+    if (plan && plan.length) {
+
+        player.attributes =
+            player.attributes || {};
+
+        plan.forEach(treino => {
+
+            const attribute =
+                treino.attribute;
+
+            if (
+                typeof player.attributes[attribute]
+                !== "number"
+            ) {
+                player.attributes[attribute] = 50;
+            }
+
+            const potential =
+                player.potential || 90;
+
+            const current =
+                player.attributes[attribute];
+
+            if (current < potential) {
+
+                const gain =
+                    Math.min(
+                        treino.gain || 0.5,
+                        potential - current
+                    );
+
+                player.attributes[attribute] += gain;
+            }
+
+        });
+    }
+
+    /* Recuperação */
+    player.fatigue =
+        Math.max(
+            0,
+            (player.fatigue || 0) - 10
+        );
+
+    player.health =
+        Math.min(
+            100,
+            (player.health || 100) + 3
+        );
+
+    /* Avança uma semana */
+    player.week++;
+
+    /* Começou um novo ano */
+    if (player.week > 52) {
+
+        player.week = 1;
+
+        player.year++;
+
+        player.log =
+            player.log || [];
+
+        player.log.unshift(
+            `🎆 Começou o Ano ${player.year}.`
+        );
+    }
+
+    save();
+
+    home();
+}
+
+
+/* =========================
+   DESCANSAR
+========================= */
+
+function rest() {
+
+    nextWeek();
+
+}
 function training() {
 
     const content = document.getElementById("content");
