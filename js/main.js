@@ -534,81 +534,46 @@ function getOverall() {
 
     ensurePlayer();
 
+    const player = window.player;
+
+    // O OVR inicial é o valor sorteado na criação
+    if (
+        typeof player.overall === "number" &&
+        !player._overallStarted
+    ) {
+        return player.overall;
+    }
+
     const attributes =
-        window.player.attributes || {};
+        player.attributes || {};
 
     const values = [
 
-        Number(
-            attributes.strength || 60
-        ),
-
-        Number(
-            attributes.striking || 60
-        ),
-
-        Number(
-            attributes.wrestling || 60
-        ),
-
-        Number(
-            attributes.grappling || 60
-        ),
-
-        Number(
-            attributes.cardio || 60
-        ),
-
-        Number(
-            attributes.technique || 60
-        ),
-
-        Number(
-            attributes.defense || 60
-        ),
-
-        Number(
-            attributes.fightIQ || 60
-        ),
-
-        Number(
-            attributes.chin || 60
-        ),
-
-        Number(
-            attributes.offense || 60
-        ),
-
-        Number(
-            attributes.blocking || 60
-        )
+        Number(attributes.strength || 40),
+        Number(attributes.striking || 40),
+        Number(attributes.wrestling || 40),
+        Number(attributes.grappling || 40),
+        Number(attributes.cardio || 40),
+        Number(attributes.technique || 40),
+        Number(attributes.defense || 40),
+        Number(attributes.fightIQ || 40),
+        Number(attributes.chin || 40),
+        Number(attributes.offense || 40),
+        Number(attributes.blocking || 40)
 
     ];
 
     const average =
         values.reduce(
-            function (
-                total,
-                value
-            ) {
-
+            function(total, value) {
                 return total + value;
-
             },
             0
         ) / values.length;
 
-
     return Math.min(
-
-        Number(
-            window.player.potential || 98
-        ),
-
-        Math.round(
-            average
-        )
-
+        Number(player.potential || 90),
+        Math.round(average)
     );
 }
 
