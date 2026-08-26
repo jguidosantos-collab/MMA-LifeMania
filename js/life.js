@@ -1,161 +1,105 @@
-const WEEKLY_FAMILY_COST = 25;
+/* =========================================================
+   MMA LIFE DYNASTY
+   LIFE.JS
+========================================================= */
 
+function lifeScreen() {
 
-function advanceWeek() {
-
-    player.week++;
-
-
-    /*
-     * 52 semanas = 1 ano
-     */
-
-    if (player.week % 52 === 0) {
-
-        player.age++;
-
-        player.year++;
-
-
-        player.children.forEach(child => {
-
-            child.age++;
-
-        });
-
-
-        player.log.unshift(
-
-            "🎂 Você completou " +
-            player.age +
-            " anos."
-
-        );
-
-
-        /*
-         * Experiência melhora a inteligência
-         * de luta com o passar dos anos.
-         */
-
-        if (
-            player.professional.active
-        ) {
-
-            player.attributes.fightIQ =
-                Math.min(
-                    100,
-                    player.attributes.fightIQ + 0.5
-                );
-
-        }
-
+    if (typeof window.player === "undefined" || !window.player) {
+        return;
     }
 
+    const content = document.getElementById("content");
 
-    /*
-     * RECUPERAÇÃO
-     */
-
-    player.fatigue =
-        Math.max(
-            0,
-            player.fatigue - 8
-        );
-
-
-    player.health =
-        Math.min(
-            100,
-            player.health + 3
-        );
-
-
-    /*
-     * CUSTO DA EQUIPE
-     */
-
-    if (player.team) {
-
-        player.money -=
-            Math.floor(
-                player.team.fee / 4
-            );
-
+    if (!content) {
+        return;
     }
 
+    const player = window.player;
 
-    /*
-     * CUSTO DA FAMÍLIA
-     */
+    content.innerHTML = `
 
-    if (
-        player.married
-    ) {
+        <div class="card">
 
-        player.money -=
-            WEEKLY_FAMILY_COST;
+            <div class="title">
+                ❤️ VIDA
+            </div>
 
-    }
+            <p>
+                Sua vida fora do octógono.
+            </p>
 
+        </div>
 
-    /*
-     * EVITA DINHEIRO NEGATIVO
-     */
+        <div class="card">
 
-    if (player.money < 0) {
+            <div class="title">
+                👤 VIDA PESSOAL
+            </div>
 
-        player.money = 0;
+            <div class="statline">
+                <span>Idade</span>
+                <b>${player.age || 18} anos</b>
+            </div>
 
-    }
+            <div class="statline">
+                <span>Dinheiro</span>
+                <b>$${Math.round(player.money || 0)}</b>
+            </div>
 
+            <div class="statline">
+                <span>Fama</span>
+                <b>${Math.round(player.fame || 0)}</b>
+            </div>
 
-    save();
+        </div>
 
-    home();
+        <div class="card">
 
+            <div class="title">
+                ❤️ RELACIONAMENTOS
+            </div>
+
+            <p>
+                Você ainda está construindo sua vida pessoal.
+            </p>
+
+            <button
+                class="main-button"
+                onclick="familyScreen()">
+
+                👨‍👩‍👧 FAMÍLIA
+
+            </button>
+
+        </div>
+
+        <div class="card">
+
+            <div class="title">
+                🏠 ROTINA
+            </div>
+
+            <p>
+                Cuide da sua saúde, carreira e vida pessoal.
+            </p>
+
+            <button
+                class="main-button"
+                onclick="rest()">
+
+                😴 DESCANSAR
+
+            </button>
+
+        </div>
+
+    `;
 }
 
 
-function turnProfessional() {
+/* =========================================================
+   FUNÇÃO GLOBAL
+========================================================= */
 
-    if (player.age < 18) {
-
-        alert(
-            "🥊 Você precisa ter 18 anos para virar profissional."
-        );
-
-        return;
-
-    }
-
-
-    if (
-        player.professional.active
-    ) {
-
-        return;
-
-    }
-
-
-    player.professional.active =
-        true;
-
-
-    player.professional.ranking =
-        50;
-
-
-    player.log.unshift(
-
-        "🏆 Você se tornou lutador profissional!"
-
-    );
-
-
-    save();
-
-    home();
-
-}
+window.lifeScreen = lifeScreen;
