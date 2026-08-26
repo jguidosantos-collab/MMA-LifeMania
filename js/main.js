@@ -1,13 +1,11 @@
-main.js — versão limpa
-
 /* =========================================================
-   MMA LIFE
-   MAIN.JS — VERSÃO LIMPA
+   MMA LIFE DYNASTY
+   MAIN.JS — VERSÃO LIMPA E CORRIGIDA
 ========================================================= */
 /* =========================================================
-   ESTADO INICIAL
+   ESTADO PADRÃO
 ========================================================= */
-let player = {
+const DEFAULT_PLAYER = {
     name: "",
     country: "Brasil",
     weight: "Peso Leve",
@@ -19,7 +17,6 @@ let player = {
     fame: 0,
     health: 100,
     fatigue: 0,
-    overall: 60,
     potential: 90,
     relationship: "Solteiro",
     married: false,
@@ -62,167 +59,147 @@ let player = {
     log: []
 };
 /* =========================================================
-   UTILIDADES
+   PLAYER
 ========================================================= */
-function getContent() {
-    return document.getElementById("content");
-}
-function save() {
-    localStorage.setItem(
-        "mmaLifePlayer",
-        JSON.stringify(player)
+let player = createDefaultPlayer();
+function createDefaultPlayer() {
+    return JSON.parse(
+        JSON.stringify(DEFAULT_PLAYER)
     );
 }
+/* =========================================================
+   ELEMENTOS
+========================================================= */
+function $(id) {
+    return document.getElementById(id);
+}
+/* =========================================================
+   SALVAR
+========================================================= */
+function save() {
+    try {
+        localStorage.setItem(
+            "mmaLifePlayer",
+            JSON.stringify(player)
+        );
+    } catch (error) {
+        console.error(
+            "Erro ao salvar:",
+            error
+        );
+    }
+}
+/* =========================================================
+   CARREGAR
+========================================================= */
 function load() {
     const saved =
-        localStorage.getItem("mmaLifePlayer");
+        localStorage.getItem(
+            "mmaLifePlayer"
+        );
     if (!saved) {
         return false;
     }
     try {
         const data =
             JSON.parse(saved);
+        const base =
+            createDefaultPlayer();
         player = {
-            ...player,
+            ...base,
             ...data,
-            attributes: {
-                ...player.attributes,
-                ...(data.attributes || {})
-            },
             professional: {
-                ...player.professional,
+                ...base.professional,
                 ...(data.professional || {})
             },
             amateur: {
-                ...player.amateur,
+                ...base.amateur,
                 ...(data.amateur || {})
             },
+            attributes: {
+                ...base.attributes,
+                ...(data.attributes || {})
+            },
             trainingPlan: {
-                ...player.trainingPlan,
+                ...base.trainingPlan,
                 ...(data.trainingPlan || {})
             }
         };
-        return true;
+        return !!player.name;
     } catch (error) {
         console.error(
-            "Erro ao carregar jogador:",
+            "Erro ao carregar:",
             error
         );
         return false;
     }
 }
 /* =========================================================
-   RESETAR JOGO
+   MOSTRAR JOGO
 ========================================================= */
-function resetGame() {
-    const confirmReset =
-        confirm(
-            "Tem certeza que deseja apagar sua carreira e começar novamente?"
+function showGame() {
+    const creation =
+        $("creation");
+    const game =
+        $("game");
+    const tabs =
+        $("tabs");
+    if (creation) {
+        creation.classList.add(
+            "hidden"
         );
-    if (!confirmReset) {
-        return;
     }
-    localStorage.removeItem(
-        "mmaLifePlayer"
-    );
-    player = {
-        name: "",
-        country: "Brasil",
-        weight: "Peso Leve",
-        style: "Completo",
-        age: 18,
-        week: 1,
-        year: 1,
-        money: 0,
-        fame: 0,
-        health: 100,
-        fatigue: 0,
-        overall: 60,
-        potential: 90,
-        relationship: "Solteiro",
-        married: false,
-        children: [],
-        team: null,
-        manager: null,
-        nextFight: null,
-        careerStage: "amateur",
-        currentPromotion: null,
-        currentContract: null,
-        professional: {
-            active: false,
-            wins: 0,
-            losses: 0,
-            draws: 0
-        },
-        amateur: {
-            wins: 0,
-            losses: 0,
-            draws: 0
-        },
-        attributes: {
-            strength: 60,
-            striking: 60,
-            wrestling: 60,
-            grappling: 60,
-            cardio: 60,
-            technique: 60,
-            defense: 60,
-            fightIQ: 60,
-            chin: 60,
-            offense: 60,
-            blocking: 60
-        },
-        trainingPlan: {
-            weeks: {},
-            automatic: false
-        },
-        teamOffers: [],
-        log: []
-    };
-    startGame();
+    if (game) {
+        game.classList.remove(
+            "hidden"
+        );
+    }
+    if (tabs) {
+        tabs.classList.remove(
+            "hidden"
+        );
+    }
 }
 /* =========================================================
-   NAVEGAÇÃO
+   MOSTRAR CRIAÇÃO
 ========================================================= */
-function tab(name) {
-    switch (name) {
-        case "home":
-            home();
-            break;
-        case "career":
-            career();
-            break;
-        case "train":
-            training();
-            break;
-        case "fight":
-            fightScreen();
-            break;
-        case "team":
-            teamScreen();
-            break;
-        case "life":
-            familyScreen();
-            break;
-        case "ranking":
-            rankingScreen();
-            break;
-        default:
-            home();
+function showCreation() {
+    const creation =
+        $("creation");
+    const game =
+        $("game");
+    const tabs =
+        $("tabs");
+    if (creation) {
+        creation.classList.remove(
+            "hidden"
+        );
+    }
+    if (game) {
+        game.classList.add(
+            "hidden"
+        );
+    }
+    if (tabs) {
+        tabs.classList.add(
+            "hidden"
+        );
     }
 }
 /* =========================================================
-   TELA DE INÍCIO
+   TELA INICIAL
 ========================================================= */
 function startGame() {
-    const content = getContent();
-    if (!content) {
+    showCreation();
+    const creator =
+        $("creator");
+    if (!creator) {
         console.error(
-            "Elemento #content não encontrado."
+            "Elemento #creator não encontrado."
         );
         return;
     }
-    content.innerHTML = `
+    creator.innerHTML = `
         <div class="start-screen">
             <div class="start-logo">
                 🥊
@@ -230,7 +207,10 @@ function startGame() {
             <h1>
                 MMA LIFE
             </h1>
-            <p class="start-subtitle">
+            <div class="start-subtitle">
+                DYNASTY
+            </div>
+            <p>
                 CONSTRUA SUA CARREIRA.<br>
                 ESCREVA SEU LEGADO.
             </p>
@@ -238,16 +218,16 @@ function startGame() {
                 <div class="start-fighter">
                     🥊
                 </div>
-                <div class="start-preview-text">
+                <div>
                     <strong>
                         SUA HISTÓRIA COMEÇA AQUI
                     </strong>
                     <span>
                         Comece como amador,
                         evolua seu lutador,
-                        consiga contratos,
-                        conquiste títulos
-                        e construa seu legado.
+                        conquiste contratos,
+                        títulos e construa
+                        sua própria dinastia.
                     </span>
                 </div>
             </div>
@@ -274,11 +254,13 @@ function startGame() {
    CRIAÇÃO DO LUTADOR
 ========================================================= */
 function openCharacterCreation() {
-    const content = getContent();
-    if (!content) {
+    showCreation();
+    const creator =
+        $("creator");
+    if (!creator) {
         return;
     }
-    content.innerHTML = `
+    creator.innerHTML = `
         <div class="card">
             <div class="title">
                 🥊 CRIAR NOVO LUTADOR
@@ -288,6 +270,7 @@ function openCharacterCreation() {
             </p>
             <input
                 id="playerName"
+                type="text"
                 placeholder="Nome do lutador"
             >
             <select id="country">
@@ -361,17 +344,11 @@ function openCharacterCreation() {
     `;
 }
 /* =========================================================
-   CRIAR JOGADOR
+   CRIAR LUTADOR
 ========================================================= */
 function createPlayerFromScreen() {
     const nameElement =
-        document.getElementById("playerName");
-    const countryElement =
-        document.getElementById("country");
-    const weightElement =
-        document.getElementById("weight");
-    const styleElement =
-        document.getElementById("style");
+        $("playerName");
     if (!nameElement) {
         return;
     }
@@ -383,89 +360,88 @@ function createPlayerFromScreen() {
         );
         return;
     }
+    player =
+        createDefaultPlayer();
     player.name =
         name;
+    const country =
+        $("country");
+    const weight =
+        $("weight");
+    const style =
+        $("style");
     player.country =
-        countryElement
-        ? countryElement.value
+        country
+        ? country.value
         : "Brasil";
     player.weight =
-        weightElement
-        ? weightElement.value
+        weight
+        ? weight.value
         : "Peso Leve";
     player.style =
-        styleElement
-        ? styleElement.value
+        style
+        ? style.value
         : "Completo";
-    player.age = 18;
-    player.week = 1;
-    player.year = 1;
-    player.money = 0;
-    player.fame = 0;
-    player.health = 100;
-    player.fatigue = 0;
-    player.overall = 60;
     /*
-     * POTENCIAL
+     * O lutador começa com OVR 60.
      *
-     * O lutador começa com OVR 60,
-     * mas pode nascer com potencial entre
-     * 78 e 98.
+     * O potencial é separado.
      */
     player.potential =
         78 +
         Math.floor(
             Math.random() * 21
         );
-    player.relationship =
-        "Solteiro";
-    player.married =
-        false;
-    player.children =
-        [];
-    player.careerStage =
-        "amateur";
-    player.professional = {
-        active: false,
-        wins: 0,
-        losses: 0,
-        draws: 0
-    };
-    player.amateur = {
-        wins: 0,
-        losses: 0,
-        draws: 0
-    };
-    player.attributes = {
-        strength: 60,
-        striking: 60,
-        wrestling: 60,
-        grappling: 60,
-        cardio: 60,
-        technique: 60,
-        defense: 60,
-        fightIQ: 60,
-        chin: 60,
-        offense: 60,
-        blocking: 60
-    };
-    player.trainingPlan = {
-        weeks: {},
-        automatic: false
-    };
-    player.team = null;
-    player.manager = null;
-    player.nextFight = null;
-    player.log = [];
     player.log.unshift(
         `🥊 ${player.name} iniciou sua carreira no MMA.`
     );
     save();
     /*
      * IMPORTANTE:
-     * vai diretamente para o jogo.
+     *
+     * Vai para o JOGO,
+     * não para #creation.
      */
+    showGame();
     home();
+}
+/* =========================================================
+   NAVEGAÇÃO
+========================================================= */
+function tab(name) {
+    if (!player.name) {
+        startGame();
+        return;
+    }
+    showGame();
+    switch (name) {
+        case "home":
+            home();
+            break;
+        case "career":
+            career();
+            break;
+        case "train":
+            training();
+            break;
+        case "fight":
+            fightScreen();
+            break;
+        case "team":
+            teamScreen();
+            break;
+        case "life":
+            familyScreen();
+            break;
+        case "ranking":
+            rankingScreen();
+            break;
+        case "calendar":
+            calendarScreen();
+            break;
+        default:
+            home();
+    }
 }
 /* =========================================================
    OVERALL
@@ -474,34 +450,43 @@ function getOverall() {
     const a =
         player.attributes || {};
     const values = [
-        a.strength || 60,
-        a.striking || 60,
-        a.wrestling || 60,
-        a.grappling || 60,
-        a.cardio || 60,
-        a.technique || 60,
-        a.defense || 60,
-        a.fightIQ || 60
-    ];
+        a.strength,
+        a.striking,
+        a.wrestling,
+        a.grappling,
+        a.cardio,
+        a.technique,
+        a.defense,
+        a.fightIQ
+    ].map(
+        value =>
+            Number(value) || 60
+    );
     const total =
         values.reduce(
             (sum, value) =>
                 sum + value,
             0
         );
+    const overall =
+        total /
+        values.length;
     return Math.min(
-        player.potential || 98,
+        Number(
+            player.potential || 98
+        ),
         Math.round(
-            total / values.length
+            overall
         )
     );
 }
 /* =========================================================
-   TELA PRINCIPAL
+   HOME
 ========================================================= */
 function home() {
+    showGame();
     const content =
-        getContent();
+        $("content");
     if (!content) {
         return;
     }
@@ -509,10 +494,6 @@ function home() {
         player.professional || {};
     const amateur =
         player.amateur || {};
-    const recordPro =
-        `${pro.wins || 0}-${pro.losses || 0}-${pro.draws || 0}`;
-    const recordAmateur =
-        `${amateur.wins || 0}-${amateur.losses || 0}-${amateur.draws || 0}`;
     content.innerHTML = `
         <div class="home-container">
             <div class="fighter-header">
@@ -521,7 +502,7 @@ function home() {
                 </div>
                 <div class="fighter-info">
                     <div class="fighter-name">
-                        ${player.name || "Lutador"}
+                        ${player.name}
                     </div>
                     <div>
                         ${player.country}
@@ -533,29 +514,35 @@ function home() {
             </div>
             <div class="stats-grid">
                 <div class="stat-card">
-                    <span>IDADE</span>
+                    <span>
+                        IDADE
+                    </span>
                     <strong>
                         ${player.age}
                     </strong>
                 </div>
                 <div class="stat-card">
-                    <span>OVR</span>
+                    <span>
+                        OVR
+                    </span>
                     <strong>
                         ${getOverall()}
                     </strong>
                 </div>
                 <div class="stat-card">
-                    <span>POTENCIAL</span>
+                    <span>
+                        POTENCIAL
+                    </span>
                     <strong>
                         ${player.potential}
                     </strong>
                 </div>
                 <div class="stat-card">
-                    <span>FAMA</span>
+                    <span>
+                        SEMANA
+                    </span>
                     <strong>
-                        ${Math.round(
-                            player.fame
-                        )}
+                        ${player.week}/52
                     </strong>
                 </div>
             </div>
@@ -576,7 +563,9 @@ function home() {
                         Profissional
                     </span>
                     <b>
-                        ${recordPro}
+                        ${pro.wins || 0} -
+                        ${pro.losses || 0} -
+                        ${pro.draws || 0}
                     </b>
                 </div>
                 <div class="statline">
@@ -584,13 +573,15 @@ function home() {
                         Amador
                     </span>
                     <b>
-                        ${recordAmateur}
+                        ${amateur.wins || 0} -
+                        ${amateur.losses || 0} -
+                        ${amateur.draws || 0}
                     </b>
                 </div>
                 <button
                     class="main-button"
                     onclick="career()">
-                    🏆 ABRIR CARREIRA
+                    🏆 CARREIRA
                 </button>
             </div>
             <div class="card">
@@ -610,28 +601,28 @@ function home() {
                         Semana
                     </span>
                     <b>
-                        ${player.week} / 52
+                        ${player.week}/52
                     </b>
                 </div>
                 <button
                     class="main-button"
-                    onclick="training()">
-                    🏋️ CAMP DE TREINAMENTO
+                    onclick="calendarScreen()">
+                    📅 VER CALENDÁRIO
                 </button>
                 <button
                     class="main-button"
-                    onclick="nextWeek()">
-                    ⏭️ PRÓXIMA SEMANA
+                    onclick="training()">
+                    🏋️ CAMP
                 </button>
             </div>
             <div class="card">
                 <div class="title">
-                    🥊 MUNDO DO MMA
+                    🥊 MENU
                 </div>
                 <button
                     class="main-button"
                     onclick="fightScreen()">
-                    👊 LUTAS
+                    ⚔️ LUTAS
                 </button>
                 <button
                     class="main-button"
@@ -646,7 +637,7 @@ function home() {
                 <button
                     class="main-button"
                     onclick="rankingScreen()">
-                    🏆 RANKINGS
+                    🏆 RANKING
                 </button>
             </div>
             <div class="card">
@@ -701,60 +692,34 @@ function home() {
    CARREIRA
 ========================================================= */
 function career() {
+    showGame();
     const content =
-        getContent();
-    if (!content) {
-        return;
-    }
+        $("content");
     content.innerHTML = `
         <div class="card">
             <div class="title">
                 🏆 MINHA CARREIRA
             </div>
             <div class="statline">
-                <span>Status</span>
-                <b>
-                    ${
-                        player.professional.active
-                        ? "Profissional"
-                        : "Amador"
-                    }
-                </b>
-            </div>
-            <div class="statline">
-                <span>Estágio</span>
-                <b>
-                    ${player.careerStage}
-                </b>
-            </div>
-            <div class="statline">
                 <span>OVR</span>
-                <b>
-                    ${getOverall()}
-                </b>
+                <b>${getOverall()}</b>
             </div>
             <div class="statline">
                 <span>Potencial</span>
-                <b>
-                    ${player.potential}
-                </b>
+                <b>${player.potential}</b>
             </div>
             <div class="statline">
-                <span>Vitórias</span>
-                <b>
-                    ${player.professional.wins}
-                </b>
+                <span>Estágio</span>
+                <b>${player.careerStage}</b>
             </div>
             <div class="statline">
-                <span>Derrotas</span>
-                <b>
-                    ${player.professional.losses}
-                </b>
+                <span>Idade</span>
+                <b>${player.age}</b>
             </div>
         </div>
         <div class="card">
             <div class="title">
-                📈 ATRIBUTOS
+                📊 ATRIBUTOS
             </div>
             ${attributeRow("💪 Força", "strength")}
             ${attributeRow("🥊 Striking", "striking")}
@@ -777,10 +742,18 @@ function career() {
         </div>
     `;
 }
-function attributeRow(name, attribute) {
+/* =========================================================
+   ATRIBUTO
+========================================================= */
+function attributeRow(
+    name,
+    attribute
+) {
     const value =
-        Math.round(
-            player.attributes[attribute] || 60
+        Number(
+            player.attributes[
+                attribute
+            ] || 60
         );
     return `
         <div class="statline">
@@ -788,59 +761,73 @@ function attributeRow(name, attribute) {
                 ${name}
             </span>
             <b>
-                ${value}
+                ${value.toFixed(2)}
             </b>
         </div>
     `;
 }
 /* =========================================================
-   TREINAMENTO / CAMP
+   TREINAMENTO
 ========================================================= */
 function training() {
-    const content =
-        getContent();
-    if (!content) {
-        return;
-    }
+    showGame();
     player.trainingPlan =
         player.trainingPlan || {
             weeks: {},
             automatic: false
         };
-    const weekPlan =
+    const plan =
         player.trainingPlan.weeks[
             player.week
         ] || [];
+    const content =
+        $("content");
     content.innerHTML = `
         <div class="card">
             <div class="title">
                 🏋️ CAMP DE TREINAMENTO
             </div>
             <div class="statline">
-                <span>Ano</span>
-                <b>${player.year}</b>
+                <span>
+                    Ano
+                </span>
+                <b>
+                    ${player.year}
+                </b>
             </div>
             <div class="statline">
-                <span>Semana</span>
-                <b>${player.week} / 52</b>
+                <span>
+                    Semana
+                </span>
+                <b>
+                    ${player.week}/52
+                </b>
             </div>
             <div class="statline">
-                <span>OVR</span>
-                <b>${getOverall()}</b>
+                <span>
+                    OVR
+                </span>
+                <b>
+                    ${getOverall()}
+                </b>
             </div>
             <div class="statline">
-                <span>Potencial</span>
-                <b>${player.potential}</b>
+                <span>
+                    Potencial
+                </span>
+                <b>
+                    ${player.potential}
+                </b>
             </div>
         </div>
         <div class="card">
             <div class="title">
-                📅 TREINO DA SEMANA ${player.week}
+                📅 PLANO DA SEMANA ${player.week}
             </div>
             ${
-                weekPlan.length
+                plan.length
                 ?
-                weekPlan.map(
+                plan.map(
                     treino => `
                         <div class="statline">
                             <span>
@@ -877,7 +864,6 @@ function training() {
                 ✏️ PROGRAMAR TREINO
             </button>
             <button
-                class="gray"
                 onclick="nextWeek()">
                 ⏭️ PRÓXIMA SEMANA
             </button>
@@ -887,12 +873,24 @@ function training() {
                 ❤️ CONDIÇÃO
             </div>
             <div class="statline">
-                <span>Saúde</span>
-                <b>${Math.round(player.health)}%</b>
+                <span>
+                    Saúde
+                </span>
+                <b>
+                    ${Math.round(
+                        player.health
+                    )}%
+                </b>
             </div>
             <div class="statline">
-                <span>Fadiga</span>
-                <b>${Math.round(player.fatigue)}%</b>
+                <span>
+                    Fadiga
+                </span>
+                <b>
+                    ${Math.round(
+                        player.fatigue
+                    )}%
+                </b>
             </div>
         </div>
         <div class="card">
@@ -905,51 +903,65 @@ function training() {
     `;
 }
 /* =========================================================
-   GERAR CAMP AUTOMÁTICO
+   OPÇÕES DE TREINO
+========================================================= */
+const TRAINING_OPTIONS = [
+    ["strength", "💪", "Força"],
+    ["striking", "🥊", "Striking"],
+    ["wrestling", "🤼", "Wrestling"],
+    ["grappling", "🥋", "Grappling"],
+    ["cardio", "🏃", "Cardio"],
+    ["technique", "🎯", "Técnica"],
+    ["defense", "🛡️", "Defesa"],
+    ["fightIQ", "🧠", "Fight IQ"],
+    ["chin", "🦷", "Queixo"],
+    ["offense", "⚔️", "Ofensivo"],
+    ["blocking", "🛡️", "Bloqueio"]
+];
+/* =========================================================
+   GERAR CAMP
 ========================================================= */
 function generateTrainingPlan() {
     player.trainingPlan =
         player.trainingPlan || {
             weeks: {},
-            automatic: true
+            automatic: false
         };
-    const options = [
-        ["strength", "💪", "Força"],
-        ["striking", "🥊", "Striking"],
-        ["wrestling", "🤼", "Wrestling"],
-        ["grappling", "🥋", "Grappling"],
-        ["cardio", "🏃", "Cardio"],
-        ["technique", "🎯", "Técnica"],
-        ["defense", "🛡️", "Defesa"],
-        ["fightIQ", "🧠", "Fight IQ"],
-        ["chin", "🦷", "Queixo"],
-        ["offense", "⚔️", "Ofensivo"],
-        ["blocking", "🛡️", "Bloqueio"]
-    ];
     const selected = [];
-    for (let i = 0; i < 5; i++) {
+    while (
+        selected.length < 5
+    ) {
         const option =
-            options[
+            TRAINING_OPTIONS[
                 Math.floor(
                     Math.random() *
-                    options.length
+                    TRAINING_OPTIONS.length
                 )
             ];
-        selected.push({
-            attribute:
-                option[0],
-            icon:
-                option[1],
-            name:
-                option[2],
-            gain:
-                Number(
-                    (
-                        0.50 +
-                        Math.random() * 0.50
-                    ).toFixed(2)
-                )
-        });
+        if (
+            !selected.some(
+                item =>
+                    item.attribute ===
+                    option[0]
+            )
+        ) {
+            selected.push({
+                attribute:
+                    option[0],
+                icon:
+                    option[1],
+                name:
+                    option[2],
+                gain:
+                    Number(
+                        (
+                            0.50 +
+                            Math.random() *
+                            0.50
+                        ).toFixed(2)
+                    )
+            });
+        }
     }
     player.trainingPlan.weeks[
         player.week
@@ -963,36 +975,28 @@ function generateTrainingPlan() {
    PROGRAMAR TREINO
 ========================================================= */
 function programTraining() {
-    const options = [
-        ["strength", "💪 Força"],
-        ["striking", "🥊 Striking"],
-        ["wrestling", "🤼 Wrestling"],
-        ["grappling", "🥋 Grappling"],
-        ["cardio", "🏃 Cardio"],
-        ["technique", "🎯 Técnica"],
-        ["defense", "🛡️ Defesa"],
-        ["fightIQ", "🧠 Fight IQ"],
-        ["chin", "🦷 Queixo"],
-        ["offense", "⚔️ Ofensivo"],
-        ["blocking", "🛡️ Bloqueio"]
-    ];
+    const content =
+        $("content");
     let html = `
         <div class="card">
             <div class="title">
                 ✏️ PROGRAMAR TREINO
             </div>
             <p>
-                Escolha os treinos da semana ${player.week}.
+                Semana ${player.week}
             </p>
     `;
-    options.forEach(option => {
-        html += `
-            <button
-                onclick="addTraining('${option[0]}')">
-                ${option[1]}
-            </button>
-        `;
-    });
+    TRAINING_OPTIONS.forEach(
+        option => {
+            html += `
+                <button
+                    onclick="addTraining('${option[0]}')">
+                    ${option[1]}
+                    ${option[2]}
+                </button>
+            `;
+        }
+    );
     html += `
             <button
                 class="gray"
@@ -1001,27 +1005,22 @@ function programTraining() {
             </button>
         </div>
     `;
-    getContent().innerHTML =
+    content.innerHTML =
         html;
 }
 /* =========================================================
    ADICIONAR TREINO
 ========================================================= */
-function addTraining(attribute) {
-    const names = {
-        strength: ["💪", "Força"],
-        striking: ["🥊", "Striking"],
-        wrestling: ["🤼", "Wrestling"],
-        grappling: ["🥋", "Grappling"],
-        cardio: ["🏃", "Cardio"],
-        technique: ["🎯", "Técnica"],
-        defense: ["🛡️", "Defesa"],
-        fightIQ: ["🧠", "Fight IQ"],
-        chin: ["🦷", "Queixo"],
-        offense: ["⚔️", "Ofensivo"],
-        blocking: ["🛡️", "Bloqueio"]
-    };
-    if (!names[attribute]) {
+function addTraining(
+    attribute
+) {
+    const option =
+        TRAINING_OPTIONS.find(
+            item =>
+                item[0] ===
+                attribute
+        );
+    if (!option) {
         return;
     }
     player.trainingPlan =
@@ -1035,20 +1034,32 @@ function addTraining(attribute) {
         player.trainingPlan.weeks[
             player.week
         ] || [];
-    player.trainingPlan.weeks[
-        player.week
-    ].push({
+    const current =
+        player.trainingPlan.weeks[
+            player.week
+        ];
+    if (
+        current.length >= 5
+    ) {
+        alert(
+            "Você já programou 5 treinos para esta semana."
+        );
+        training();
+        return;
+    }
+    current.push({
         attribute:
-            attribute,
+            option[0],
         icon:
-            names[attribute][0],
+            option[1],
         name:
-            names[attribute][1],
+            option[2],
         gain:
             Number(
                 (
                     0.50 +
-                    Math.random() * 0.50
+                    Math.random() *
+                    0.50
                 ).toFixed(2)
             )
     });
@@ -1060,137 +1071,272 @@ function addTraining(attribute) {
 ========================================================= */
 function nextWeek() {
     player.week =
-        player.week || 1;
+        Number(
+            player.week || 1
+        );
     player.year =
-        player.year || 1;
+        Number(
+            player.year || 1
+        );
     const plan =
         player.trainingPlan &&
         player.trainingPlan.weeks
-        ?
-        player.trainingPlan.weeks[
+        ? player.trainingPlan.weeks[
             player.week
-        ]
-        :
-        [];
-    if (plan && plan.length) {
-        plan.forEach(
-            treino => {
-                const attribute =
-                    treino.attribute;
-                const current =
-                    Number(
-                        player.attributes[
-                            attribute
-                        ] || 60
-                    );
-                const potential =
-                    Number(
-                        player.potential || 90
-                    );
-                if (
-                    current <
-                    potential
-                ) {
-                    const room =
-                        potential -
-                        current;
-                    const gain =
-                        Math.min(
-                            Number(
-                                treino.gain
-                            ),
-                            room
-                        );
+        ] || []
+        : [];
+    /*
+     * APLICA TREINAMENTO
+     */
+    plan.forEach(
+        treino => {
+            const attribute =
+                treino.attribute;
+            const current =
+                Number(
                     player.attributes[
                         attribute
-                    ] =
-                        Number(
-                            (
-                                current +
-                                gain
-                            ).toFixed(2)
-                        );
-                }
+                    ] || 60
+                );
+            const potential =
+                Number(
+                    player.potential || 90
+                );
+            if (
+                current >=
+                potential
+            ) {
+                return;
             }
-        );
-    }
+            const room =
+                potential -
+                current;
+            const gain =
+                Math.min(
+                    Number(
+                        treino.gain
+                    ),
+                    room
+                );
+            player.attributes[
+                attribute
+            ] =
+                Number(
+                    (
+                        current +
+                        gain
+                    ).toFixed(2)
+                );
+            /*
+             * Fadiga do treinamento.
+             */
+            player.fatigue =
+                Math.min(
+                    100,
+                    player.fatigue + 4
+                );
+        }
+    );
     /*
-     * Recuperação.
+     * RECUPERAÇÃO
      */
     player.fatigue =
         Math.max(
             0,
-            (player.fatigue || 0) - 10
+            player.fatigue - 10
         );
     player.health =
         Math.min(
             100,
-            (player.health || 100) + 3
+            player.health + 3
         );
     /*
-     * Avança calendário.
+     * AVANÇA A SEMANA
      */
     player.week++;
-    if (player.week > 52) {
+    /*
+     * NOVO ANO
+     */
+    if (
+        player.week > 52
+    ) {
         player.week = 1;
         player.year++;
-        player.log =
-            player.log || [];
+        player.age++;
         player.log.unshift(
             `🎆 Começou o Ano ${player.year}.`
         );
     }
     save();
+    /*
+     * IMPORTANTE:
+     *
+     * Nunca volta para
+     * a tela de criação.
+     */
     home();
+}
+/* =========================================================
+   DESCANSAR
+========================================================= */
+function rest() {
+    /*
+     * Descansar agora significa
+     * avançar a semana.
+     */
+    nextWeek();
+}
+/* =========================================================
+   CALENDÁRIO
+========================================================= */
+function calendarScreen() {
+    showGame();
+    const content =
+        $("content");
+    let html = `
+        <div class="card">
+            <div class="title">
+                📅 CALENDÁRIO DA TEMPORADA
+            </div>
+            <div class="statline">
+                <span>
+                    Ano
+                </span>
+                <b>
+                    ${player.year}
+                </b>
+            </div>
+            <div class="statline">
+                <span>
+                    Semana atual
+                </span>
+                <b>
+                    ${player.week}/52
+                </b>
+            </div>
+        </div>
+        <div class="card">
+            <div class="title">
+                📆 SEMANAS
+            </div>
+    `;
+    for (
+        let week = 1;
+        week <= 52;
+        week++
+    ) {
+        const isCurrent =
+            week ===
+            Number(player.week);
+        const plan =
+            player.trainingPlan &&
+            player.trainingPlan.weeks
+            ? player.trainingPlan.weeks[
+                week
+            ] || []
+            : [];
+        html += `
+            <div class="statline">
+                <span>
+                    ${isCurrent ? "👉" : "📅"}
+                    Semana ${week}
+                </span>
+                <b>
+                    ${
+                        plan.length
+                        ? `${plan.length} treinos`
+                        : "Livre"
+                    }
+                </b>
+            </div>
+        `;
+    }
+    html += `
+        </div>
+        <div class="card">
+            <button
+                onclick="training()">
+                🏋️ CAMP
+            </button>
+            <button
+                onclick="nextWeek()">
+                ⏭️ PRÓXIMA SEMANA
+            </button>
+            <button
+                class="gray"
+                onclick="home()">
+                ← VOLTAR
+            </button>
+        </div>
+    `;
+    content.innerHTML =
+        html;
 }
 /* =========================================================
    LUTAS
 ========================================================= */
 function fightScreen() {
+    showGame();
     const content =
-        getContent();
+        $("content");
+    const fight =
+        player.nextFight;
     content.innerHTML = `
         <div class="card">
             <div class="title">
-                👊 LUTAS
+                ⚔️ LUTAS
             </div>
             ${
-                player.nextFight
+                fight
                 ?
                 `
-                <div class="statline">
-                    <span>Evento</span>
-                    <b>
-                        ${player.nextFight.event.name}
-                    </b>
-                </div>
-                <div class="statline">
-                    <span>Adversário</span>
-                    <b>
-                        ${player.nextFight.opponent.displayName}
-                    </b>
-                </div>
-                <div class="statline">
-                    <span>OVR</span>
-                    <b>
-                        ${player.nextFight.opponent.power}
-                    </b>
-                </div>
-                <button
-                    class="green"
-                    onclick="fight()">
-                    🔥 LUTAR AGORA
-                </button>
+                    <div class="statline">
+                        <span>
+                            Evento
+                        </span>
+                        <b>
+                            ${fight.event.name}
+                        </b>
+                    </div>
+                    <div class="statline">
+                        <span>
+                            Adversário
+                        </span>
+                        <b>
+                            ${fight.opponent.displayName}
+                        </b>
+                    </div>
+                    <div class="statline">
+                        <span>
+                            Seu OVR
+                        </span>
+                        <b>
+                            ${getOverall()}
+                        </b>
+                    </div>
+                    <div class="statline">
+                        <span>
+                            OVR adversário
+                        </span>
+                        <b>
+                            ${fight.opponent.power}
+                        </b>
+                    </div>
+                    <button
+                        class="green"
+                        onclick="fight()">
+                        🔥 LUTAR
+                    </button>
                 `
                 :
                 `
-                <p>
-                    Nenhuma luta marcada.
-                </p>
-                <button
-                    onclick="findFight()">
-                    🔎 PROCURAR ADVERSÁRIO
-                </button>
+                    <p>
+                        Nenhuma luta marcada.
+                    </p>
+                    <button
+                        onclick="findFight()">
+                        🔎 PROCURAR ADVERSÁRIO
+                    </button>
                 `
             }
         </div>
@@ -1199,14 +1345,16 @@ function fightScreen() {
                 📅 CALENDÁRIO
             </div>
             <div class="statline">
-                <span>Semana atual</span>
+                <span>
+                    Semana
+                </span>
                 <b>
-                    ${player.week} / 52
+                    ${player.week}/52
                 </b>
             </div>
             <button
-                onclick="nextWeek()">
-                ⏭️ AVANÇAR SEMANA
+                onclick="calendarScreen()">
+                📅 VER CALENDÁRIO
             </button>
         </div>
         <div class="card">
@@ -1219,11 +1367,107 @@ function fightScreen() {
     `;
 }
 /* =========================================================
+   PROCURAR LUTA
+========================================================= */
+function findFight() {
+    const myOVR =
+        getOverall();
+    const opponentOVR =
+        Math.max(
+            50,
+            myOVR +
+            Math.floor(
+                Math.random() * 21
+            ) -
+            10
+        );
+    player.nextFight = {
+        event: {
+            name:
+                `MMA Fight Night — Semana ${player.week}`
+        },
+        week:
+            player.week,
+        purse:
+            500 +
+            Math.floor(
+                Math.random() * 1000
+            ),
+        opponent: {
+            displayName:
+                "Adversário Regional",
+            country:
+                "Brasil",
+            power:
+                opponentOVR
+        }
+    };
+    save();
+    fightScreen();
+}
+/* =========================================================
+   REALIZAR LUTA
+========================================================= */
+function fight() {
+    if (
+        !player.nextFight
+    ) {
+        findFight();
+        return;
+    }
+    const myPower =
+        getOverall();
+    const enemyPower =
+        Number(
+            player.nextFight
+                .opponent
+                .power
+        );
+    const chance =
+        myPower /
+        (
+            myPower +
+            enemyPower
+        );
+    const win =
+        Math.random() <
+        chance;
+    if (win) {
+        player.professional.wins++;
+        player.money +=
+            player.nextFight.purse;
+        player.fame += 3;
+        player.log.unshift(
+            "🥊 Você venceu sua última luta!"
+        );
+    } else {
+        player.professional.losses++;
+        player.fame =
+            Math.max(
+                0,
+                player.fame - 1
+            );
+        player.log.unshift(
+            "💥 Você perdeu sua última luta."
+        );
+    }
+    player.nextFight =
+        null;
+    save();
+    alert(
+        win
+        ? "🥊 VITÓRIA!"
+        : "💥 DERROTA!"
+    );
+    home();
+}
+/* =========================================================
    EQUIPE
 ========================================================= */
 function teamScreen() {
+    showGame();
     const content =
-        getContent();
+        $("content");
     content.innerHTML = `
         <div class="card">
             <div class="title">
@@ -1266,34 +1510,40 @@ function teamScreen() {
                 player.teamOffers &&
                 player.teamOffers.length
                 ?
-                player.teamOffers
-                    .map(
-                        (team, index) => `
-                            <div class="card">
-                                <div class="title">
-                                    🥊 ${team.name}
-                                </div>
-                                <div class="statline">
-                                    <span>OVR da equipe</span>
-                                    <b>${team.quality}</b>
-                                </div>
-                                <div class="statline">
-                                    <span>Reputação</span>
-                                    <b>${team.reputation}</b>
-                                </div>
-                                <button
-                                    class="green"
-                                    onclick="joinTeam(${index})">
-                                    ✅ ENTRAR
-                                </button>
+                player.teamOffers.map(
+                    (team, index) => `
+                        <div class="card">
+                            <div class="title">
+                                🥊 ${team.name}
                             </div>
-                        `
-                    )
-                    .join("")
+                            <div class="statline">
+                                <span>
+                                    OVR equipe
+                                </span>
+                                <b>
+                                    ${team.quality}
+                                </b>
+                            </div>
+                            <div class="statline">
+                                <span>
+                                    Reputação
+                                </span>
+                                <b>
+                                    ${team.reputation}
+                                </b>
+                            </div>
+                            <button
+                                class="green"
+                                onclick="joinTeam(${index})">
+                                ✅ ENTRAR
+                            </button>
+                        </div>
+                    `
+                ).join("")
                 :
                 `
                     <p>
-                        Nenhuma academia encontrada.
+                        Nenhuma oferta.
                     </p>
                 `
             }
@@ -1308,41 +1558,53 @@ function teamScreen() {
     `;
 }
 /* =========================================================
-   OFERTAS DE ACADEMIA
+   OFERTAS DE EQUIPE
 ========================================================= */
 function generateTeamOffers() {
     player.teamOffers = [
         {
-            name: "Chute Boxe",
-            country: "Brasil",
-            city: "Curitiba",
-            reputation: 88,
-            quality: 90,
-            monthlyCost: 300,
-            fightFee: 5
+            name:
+                "Chute Boxe",
+            country:
+                "Brasil",
+            city:
+                "Curitiba",
+            reputation:
+                88,
+            quality:
+                90
         },
         {
-            name: "Nova União",
-            country: "Brasil",
-            city: "Rio de Janeiro",
-            reputation: 92,
-            quality: 94,
-            monthlyCost: 400,
-            fightFee: 7
+            name:
+                "Nova União",
+            country:
+                "Brasil",
+            city:
+                "Rio de Janeiro",
+            reputation:
+                92,
+            quality:
+                94
         },
         {
-            name: "American Top Team",
-            country: "Estados Unidos",
-            city: "Florida",
-            reputation: 96,
-            quality: 97,
-            monthlyCost: 700,
-            fightFee: 10
+            name:
+                "American Top Team",
+            country:
+                "Estados Unidos",
+            city:
+                "Florida",
+            reputation:
+                96,
+            quality:
+                97
         }
     ];
     save();
     teamScreen();
 }
+/* =========================================================
+   ENTRAR NA EQUIPE
+========================================================= */
 function joinTeam(index) {
     if (
         !player.teamOffers ||
@@ -1362,31 +1624,46 @@ function joinTeam(index) {
     teamScreen();
 }
 /* =========================================================
-   VIDA / FAMÍLIA
+   VIDA
 ========================================================= */
 function familyScreen() {
+    showGame();
     const content =
-        getContent();
+        $("content");
     content.innerHTML = `
         <div class="card">
             <div class="title">
                 ❤️ VIDA
             </div>
             <div class="statline">
-                <span>Idade</span>
-                <b>${player.age}</b>
+                <span>
+                    Idade
+                </span>
+                <b>
+                    ${player.age}
+                </b>
             </div>
             <div class="statline">
-                <span>Relacionamento</span>
-                <b>${player.relationship}</b>
+                <span>
+                    Relacionamento
+                </span>
+                <b>
+                    ${player.relationship}
+                </b>
             </div>
             <div class="statline">
-                <span>Dinheiro</span>
-                <b>$${Math.round(player.money)}</b>
+                <span>
+                    Dinheiro
+                </span>
+                <b>
+                    $${Math.round(
+                        player.money
+                    )}
+                </b>
             </div>
             ${
-                player.age >= 18 &&
-                player.relationship === "Solteiro"
+                player.relationship ===
+                "Solteiro"
                 ?
                 `
                     <button
@@ -1398,7 +1675,8 @@ function familyScreen() {
                 ""
             }
             ${
-                player.relationship === "Namorando"
+                player.relationship ===
+                "Namorando"
                 ?
                 `
                     <button
@@ -1428,17 +1706,9 @@ function familyScreen() {
                 👑 DINASTIA
             </div>
             <div class="statline">
-                <span>Geração</span>
-                <b>
-                    ${
-                        player.children.length
-                        ? "2ª geração"
-                        : "1ª geração"
-                    }
-                </b>
-            </div>
-            <div class="statline">
-                <span>Filhos</span>
+                <span>
+                    Filhos
+                </span>
                 <b>
                     ${player.children.length}/5
                 </b>
@@ -1446,20 +1716,18 @@ function familyScreen() {
             ${
                 player.children.length
                 ?
-                player.children
-                    .map(
-                        child => `
-                            <div class="statline">
-                                <span>
-                                    👶 ${child.name}
-                                </span>
-                                <b>
-                                    ${child.age} anos
-                                </b>
-                            </div>
-                        `
-                    )
-                    .join("")
+                player.children.map(
+                    child => `
+                        <div class="statline">
+                            <span>
+                                👶 ${child.name}
+                            </span>
+                            <b>
+                                ${child.age} anos
+                            </b>
+                        </div>
+                    `
+                ).join("")
                 :
                 `
                     <p>
@@ -1477,12 +1745,18 @@ function familyScreen() {
         </div>
     `;
 }
+/* =========================================================
+   RELACIONAMENTO
+========================================================= */
 function dating() {
     player.relationship =
         "Namorando";
     save();
     familyScreen();
 }
+/* =========================================================
+   CASAMENTO
+========================================================= */
 function marry() {
     player.relationship =
         "Casado";
@@ -1491,8 +1765,13 @@ function marry() {
     save();
     familyScreen();
 }
+/* =========================================================
+   FILHO
+========================================================= */
 function haveChild() {
-    if (!player.married) {
+    if (
+        !player.married
+    ) {
         alert(
             "Você precisa estar casado."
         );
@@ -1506,11 +1785,11 @@ function haveChild() {
         );
         return;
     }
-    const childNumber =
+    const number =
         player.children.length + 1;
     player.children.push({
         name:
-            `Filho ${childNumber}`,
+            `Filho ${number}`,
         age:
             0
     });
@@ -1521,8 +1800,9 @@ function haveChild() {
    RANKINGS
 ========================================================= */
 function rankingScreen() {
+    showGame();
     const content =
-        getContent();
+        $("content");
     content.innerHTML = `
         <div class="card">
             <div class="title">
@@ -1580,60 +1860,75 @@ function rankingScreen() {
         </div>
     `;
 }
+/* =========================================================
+   RANKING DA ORGANIZAÇÃO
+========================================================= */
 function showRankingOrganization(
     organization
 ) {
     const fighters = [
         {
-            name: "Carlos Silva",
-            wins: 18,
-            losses: 3,
-            ovr: 86
+            name:
+                "Carlos Silva",
+            wins:
+                18,
+            losses:
+                3,
+            ovr:
+                86
         },
         {
-            name: "Rafael Santos",
-            wins: 16,
-            losses: 4,
-            ovr: 84
+            name:
+                "Rafael Santos",
+            wins:
+                16,
+            losses:
+                4,
+            ovr:
+                84
         },
         {
-            name: "Lucas Almeida",
-            wins: 15,
-            losses: 5,
-            ovr: 82
+            name:
+                "Lucas Almeida",
+            wins:
+                15,
+            losses:
+                5,
+            ovr:
+                82
         },
         {
-            name: "Mateus Costa",
-            wins: 13,
-            losses: 4,
-            ovr: 81
+            name:
+                "Mateus Costa",
+            wins:
+                13,
+            losses:
+                4,
+            ovr:
+                81
         },
         {
-            name: "André Lima",
-            wins: 12,
-            losses: 3,
-            ovr: 80
+            name:
+                "André Lima",
+            wins:
+                12,
+            losses:
+                3,
+            ovr:
+                80
         }
     ];
-    getContent().innerHTML = `
+    $("content").innerHTML = `
         <div class="card">
             <div class="title">
                 🏆 ${organization}
             </div>
             <div class="statline">
                 <span>
-                    Categoria
+                    Sua posição
                 </span>
                 <b>
-                    ${player.weight}
-                </b>
-            </div>
-            <div class="statline">
-                <span>
-                    Seu OVR
-                </span>
-                <b>
-                    ${getOverall()}
+                    OVR ${getOverall()}
                 </b>
             </div>
         </div>
@@ -1667,16 +1962,12 @@ function showRankingOrganization(
     `;
 }
 /* =========================================================
-   PROFISSIONAL
+   VIRAR PROFISSIONAL
 ========================================================= */
 function turnProfessional() {
-    if (player.age < 18) {
-        alert(
-            "Você precisa ter 18 anos."
-        );
-        return;
-    }
-    if (player.professional.active) {
+    if (
+        player.professional.active
+    ) {
         alert(
             "Você já é profissional."
         );
@@ -1690,35 +1981,49 @@ function turnProfessional() {
         "🥊 Você se tornou profissional."
     );
     save();
-    alert(
-        "🥊 Parabéns! Você agora é profissional."
-    );
     home();
 }
 /* =========================================================
-   FUNÇÕES DE COMPATIBILIDADE
-   COM O RESTANTE DO JOGO
+   TREINO MANUAL — COMPATIBILIDADE
 ========================================================= */
-function train(attribute) {
-    if (!player.attributes[attribute]) {
-        player.attributes[attribute] = 60;
-    }
-    const potential =
-        player.potential || 90;
+function train(
+    attribute
+) {
     if (
-        player.attributes[attribute] <
+        !player.attributes[
+            attribute
+        ]
+    ) {
+        player.attributes[
+            attribute
+        ] = 60;
+    }
+    const current =
+        Number(
+            player.attributes[
+                attribute
+            ]
+        );
+    const potential =
+        Number(
+            player.potential || 90
+        );
+    if (
+        current <
         potential
     ) {
         const gain =
             Math.min(
-                0.5,
+                0.50,
                 potential -
-                player.attributes[attribute]
+                current
             );
-        player.attributes[attribute] =
+        player.attributes[
+            attribute
+        ] =
             Number(
                 (
-                    player.attributes[attribute] +
+                    current +
                     gain
                 ).toFixed(2)
             );
@@ -1731,98 +2036,23 @@ function train(attribute) {
     save();
     training();
 }
-function rest() {
-    player.fatigue =
-        Math.max(
-            0,
-            player.fatigue - 15
+/* =========================================================
+   REINICIAR JOGO
+========================================================= */
+function resetGame() {
+    const confirmed =
+        confirm(
+            "Tem certeza que deseja apagar toda a carreira e criar um novo lutador?"
         );
-    player.health =
-        Math.min(
-            100,
-            player.health + 5
-        );
-    save();
-    /*
-     * DESCANSAR NÃO VOLTA PARA O INÍCIO.
-     * Agora avançamos a semana.
-     */
-    nextWeek();
-}
-function findFight() {
-    player.nextFight = {
-        event: {
-            name:
-                `MMA Fight Night — Semana ${player.week}`
-        },
-        week:
-            player.week,
-        purse:
-            500,
-        opponent: {
-            displayName:
-                "Adversário Regional",
-            country:
-                "Brasil",
-            power:
-                Math.max(
-                    55,
-                    getOverall() +
-                    Math.floor(
-                        Math.random() * 11
-                    ) - 5
-                )
-        }
-    };
-    save();
-    fightScreen();
-}
-function fight() {
-    if (!player.nextFight) {
-        findFight();
+    if (!confirmed) {
         return;
     }
-    const myPower =
-        getOverall();
-    const enemyPower =
-        player.nextFight.opponent.power;
-    const chance =
-        myPower /
-        (
-            myPower +
-            enemyPower
-        );
-    const win =
-        Math.random() <
-        chance;
-    if (win) {
-        player.professional.wins++;
-        player.money +=
-            player.nextFight.purse;
-        player.fame += 3;
-        player.log.unshift(
-            "🥊 Você venceu sua última luta!"
-        );
-    } else {
-        player.professional.losses++;
-        player.fame =
-            Math.max(
-                0,
-                player.fame - 1
-            );
-        player.log.unshift(
-            "💥 Você perdeu sua última luta."
-        );
-    }
-    player.nextFight =
-        null;
-    save();
-    alert(
-        win
-        ? "🥊 VITÓRIA!"
-        : "💥 DERROTA!"
+    localStorage.removeItem(
+        "mmaLifePlayer"
     );
-    home();
+    player =
+        createDefaultPlayer();
+    startGame();
 }
 /* =========================================================
    INICIALIZAÇÃO
@@ -1832,17 +2062,11 @@ document.addEventListener(
     function () {
         const loaded =
             load();
-        /*
-         * Se existir jogador salvo,
-         * abre o jogo.
-         *
-         * Se não existir,
-         * mostra a tela CRIAR NOVO LUTADOR.
-         */
         if (
             loaded &&
             player.name
         ) {
+            showGame();
             home();
         } else {
             startGame();
