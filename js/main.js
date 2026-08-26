@@ -1097,7 +1097,79 @@ function tab(name) {
     }
 
     if (name === "life") {
-    lifeScreen();
+
+    ensurePlayer();
+
+    const content = getElement("content");
+
+    if (!content) return;
+
+    const p = window.player;
+
+    const children = Array.isArray(p.children)
+        ? p.children
+        : [];
+
+    content.innerHTML = `
+
+        <div class="card">
+
+            <div class="title">
+                ❤️ VIDA
+            </div>
+
+            <p>
+                Sua vida fora do octógono.
+            </p>
+
+        </div>
+
+        <div class="card">
+
+            <div class="title">
+                💕 RELACIONAMENTO
+            </div>
+
+            <div class="statline">
+                <span>Status</span>
+                <b>${p.relationship || "Solteiro"}</b>
+            </div>
+
+            <div class="statline">
+                <span>Casado</span>
+                <b>${p.married ? "Sim" : "Não"}</b>
+            </div>
+
+        </div>
+
+        <div class="card">
+
+            <div class="title">
+                👶 FILHOS
+            </div>
+
+            <div class="statline">
+                <span>Total</span>
+                <b>${children.length}</b>
+            </div>
+
+        </div>
+
+        <div class="card">
+
+            <div class="title">
+                🧬 LEGADO
+            </div>
+
+            <p>
+                Construa sua família e deixe seu legado
+                através das próximas gerações.
+            </p>
+
+        </div>
+
+    `;
+
     return;
 }
 
