@@ -1276,82 +1276,97 @@ function rest() {
 ========================================================= */
 function resetGame() {
 
-    const confirmed = confirm(
-        "Apagar esta carreira e voltar para a tela de criação?"
-    );
-
-    if (!confirmed) {
+    if (!confirm("Apagar esta carreira e começar novamente?")) {
         return;
     }
 
-    // Apaga o jogador salvo
+    // Apaga o save
     localStorage.removeItem("mmaLifePlayer");
 
-    // Cria um jogador vazio apenas para manter o sistema funcionando
-    window.player = createDefaultPlayer();
+    // Limpa o jogador atual
+    window.player = null;
 
-    // Mostra a tela de criação imediatamente
-    showCreation();
+    // Esconde o jogo
+    const game = getElement("game");
+    const tabs = getElement("tabs");
 
-    const creator = getElement("creator");
-
-    if (!creator) {
-        return;
+    if (game) {
+        game.classList.add("hidden");
+        game.style.display = "none";
     }
 
-    creator.innerHTML = `
+    if (tabs) {
+        tabs.classList.add("hidden");
+        tabs.style.display = "none";
+    }
 
-        <div class="start-screen">
+    // Mostra a criação
+    const creation = getElement("creation");
+    const creator = getElement("creator");
 
-            <div class="start-logo">
-                🥊
-            </div>
+    if (creation) {
+        creation.classList.remove("hidden");
+        creation.style.display = "block";
+        creation.style.visibility = "visible";
+        creation.style.opacity = "1";
+    }
 
-            <h1>
-                MMA LIFE
-            </h1>
+    // Recria a tela inicial
+    if (creator) {
 
-            <p class="start-subtitle">
-                CONSTRUA SUA CARREIRA.<br>
-                ESCREVA SEU LEGADO.
-            </p>
+        creator.innerHTML = `
 
-            <div class="start-preview">
+            <div class="start-screen">
 
-                <div class="start-fighter">
+                <div class="start-logo">
                     🥊
                 </div>
 
-                <div class="start-preview-text">
+                <h1>
+                    MMA LIFE
+                </h1>
 
-                    <strong>
-                        SUA HISTÓRIA COMEÇA AQUI
-                    </strong>
+                <p class="start-subtitle">
+                    CONSTRUA SUA CARREIRA.<br>
+                    ESCREVA SEU LEGADO.
+                </p>
 
-                    <span>
-                        Comece como amador,
-                        evolua seu lutador,
-                        consiga contratos,
-                        conquiste títulos
-                        e construa seu legado.
-                    </span>
+                <div class="start-preview">
+
+                    <div class="start-fighter">
+                        🥊
+                    </div>
+
+                    <div class="start-preview-text">
+
+                        <strong>
+                            SUA HISTÓRIA COMEÇA AQUI
+                        </strong>
+
+                        <span>
+                            Comece como amador,
+                            evolua seu lutador,
+                            consiga contratos,
+                            conquiste títulos
+                            e construa seu legado.
+                        </span>
+
+                    </div>
 
                 </div>
 
+                <button
+                    class="start-button"
+                    onclick="openCharacterCreation()">
+
+                    🆕 CRIAR NOVO LUTADOR
+
+                </button>
+
             </div>
 
-            <button
-                class="start-button"
-                onclick="openCharacterCreation()">
-
-                🆕 CRIAR NOVO LUTADOR
-
-            </button>
-
-        </div>
-
-    `;
-
+        `;
+    }
 }
 
 
