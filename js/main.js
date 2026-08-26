@@ -2598,3 +2598,24 @@ function showRankingOrganization(
         `;
 
 }
+/* =========================
+   INICIALIZAÇÃO
+========================= */
+window.addEventListener("load", function () {
+    if (
+        typeof load === "function"
+    ) {
+        load();
+    }
+    setTimeout(function () {
+        if (
+            typeof player !== "undefined" &&
+            player &&
+            player.name
+        ) {
+            home();
+        } else {
+            startGame();
+        }
+    }, 100);
+});
