@@ -171,12 +171,6 @@ function loadGame() {
         };
 
 
-        /*
-         * Se não houver contrato salvo,
-         * não deixamos um objeto vazio ser tratado
-         * como contrato ativo.
-         */
-
         if (
             !data.currentContract
         ) {
@@ -300,7 +294,6 @@ function startGame() {
 
 /* =========================================================
    CRIAÇÃO DO LUTADOR
-   NOME OFICIAL: openCharacterCreation
 ========================================================= */
 
 function openCharacterCreation() {
@@ -497,26 +490,20 @@ function createNewPlayer() {
 
 
     if (country) {
-
         newPlayer.country =
             country.value;
-
     }
 
 
     if (weight) {
-
         newPlayer.weight =
             weight.value;
-
     }
 
 
     if (style) {
-
         newPlayer.style =
             style.value;
-
     }
 
 
@@ -529,15 +516,8 @@ function createNewPlayer() {
     newPlayer.fatigue = 0;
 
 
-    /*
-     * Garante estruturas utilizadas
-     * pelos novos sistemas.
-     */
-
     if (!newPlayer.promotionHistory) {
-
         newPlayer.promotionHistory = {};
-
     }
 
 
@@ -551,6 +531,28 @@ function createNewPlayer() {
     }
 
 
+    /*
+     * NOVO SISTEMA
+     * OFERTA DE LUTA
+     */
+
+    newPlayer.fightOffer =
+        null;
+
+
+    /*
+     * NOVO SISTEMA
+     * OFERTA DE PATROCÍNIO
+     */
+
+    newPlayer.sponsorshipOffer =
+        null;
+
+
+    newPlayer.sponsorships =
+        newPlayer.sponsorships || [];
+
+
     newPlayer.log = [
 
         `🥊 ${name} iniciou sua carreira no MMA.`
@@ -561,11 +563,6 @@ function createNewPlayer() {
     window.player =
         newPlayer;
 
-
-    /*
-     * Reinicia o mundo independente
-     * quando uma nova carreira começa.
-     */
 
     if (
         typeof window.mmaWorld !==
@@ -611,10 +608,6 @@ function getOverall() {
         window.player;
 
 
-    /*
-     * O OVR inicial é o valor sorteado na criação.
-     */
-
     if (
         typeof player.overall === "number" &&
         !player._overallStarted
@@ -632,25 +625,15 @@ function getOverall() {
     const values = [
 
         Number(attributes.strength || 40),
-
         Number(attributes.striking || 40),
-
         Number(attributes.wrestling || 40),
-
         Number(attributes.grappling || 40),
-
         Number(attributes.cardio || 40),
-
         Number(attributes.technique || 40),
-
         Number(attributes.defense || 40),
-
         Number(attributes.fightIQ || 40),
-
         Number(attributes.chin || 40),
-
         Number(attributes.offense || 40),
-
         Number(attributes.blocking || 40)
 
     ];
@@ -670,8 +653,468 @@ function getOverall() {
     return Math.min(
 
         Number(player.potential || 90),
-
         Math.round(average)
+
+    );
+
+}
+
+
+/* =========================================================
+   EMPRESÁRIO — PROCURAR PATROCÍNIO
+========================================================= */
+
+function managerFindSponsorship() {
+
+    ensurePlayer();
+
+    const player =
+        window.player;
+
+
+    /*
+     * Somente profissional.
+     */
+
+    if (
+        !player.professional ||
+        !player.professional.active
+    ) {
+
+        return;
+
+    }
+
+
+    /*
+     * Precisa ter empresário.
+     */
+
+    if (!player.manager) {
+
+        return;
+
+    }
+
+
+    /*
+     * Já existe oferta.
+     */
+
+    if (player.sponsorshipOffer) {
+
+        return;
+
+    }
+
+
+    /*
+     * Quantidade de fama influencia
+     * o valor do patrocínio.
+     */
+
+    const fame =
+        Number(player.fame || 0);
+
+
+    const overall =
+        Number(getOverall());
+
+
+    let sponsorLevel;
+
+
+    if (
+        fame >= 80 &&
+        overall >= 80
+    ) {
+
+        sponsorLevel =
+            "Grande Marca";
+
+    }
+    else if (
+        fame >= 45 ||
+        overall >= 65
+    ) {
+
+        sponsorLevel =
+            "Marca Nacional";
+
+    }
+    else {
+
+        sponsorLevel =
+            "Marca Regional";
+
+    }
+
+
+    let weeklyPayment =
+        100 +
+        (overall * 8) +
+        (fame * 10);
+
+
+    /*
+     * Pequena variação para não deixar
+     * todos os contratos iguais.
+     */
+
+    weeklyPayment *=
+        0.85 +
+        Math.random() * 0.30;
+
+
+    weeklyPayment =
+        Math.round(
+            weeklyPayment
+        );
+
+
+    let duration =
+        8;
+
+
+    if (sponsorLevel === "Marca Nacional") {
+        duration = 12;
+    }
+
+
+    if (sponsorLevel === "Grande Marca") {
+        duration = 16;
+    }
+
+
+    const brands = {
+
+        "Marca Regional": [
+            "Arena Nutrition",
+            "Fight Energy",
+            "Warrior Gear",
+            "Combat Fuel"
+        ],
+
+        "Marca Nacional": [
+            "Power Combat",
+            "Brasil Fight",
+            "Champion Nutrition",
+            "MMA Force"
+        ],
+
+        "Grande Marca": [
+            "Global Combat",
+            "Elite Performance",
+            "Titan Sports",
+            "World Fighter"
+        ]
+
+    };
+
+
+    const brandList =
+        brands[sponsorLevel];
+
+
+    const brand =
+        brandList[
+            Math.floor(
+                Math.random() *
+                brandList.length
+            )
+        ];
+
+
+    player.sponsorshipOffer = {
+
+        brand:
+            brand,
+
+        level:
+            sponsorLevel,
+
+        weeklyPayment:
+            weeklyPayment,
+
+        durationWeeks:
+            duration,
+
+        proposedWeek:
+            player.week,
+
+        reputation:
+            Math.round(
+                overall +
+                fame / 2
+            )
+
+    };
+
+
+    player.log =
+        player.log || [];
+
+
+    player.log.unshift(
+
+        "💰 Seu empresário recebeu uma proposta de patrocínio da " +
+        brand +
+        "."
+
+    );
+
+
+    saveGame();
+
+}
+
+
+/* =========================================================
+   ACEITAR PATROCÍNIO
+========================================================= */
+
+function acceptSponsorshipOffer() {
+
+    ensurePlayer();
+
+    const player =
+        window.player;
+
+
+    if (!player.sponsorshipOffer) {
+        return;
+    }
+
+
+    const offer =
+        player.sponsorshipOffer;
+
+
+    if (!player.sponsorships) {
+        player.sponsorships = [];
+    }
+
+
+    /*
+     * Encerra patrocínios antigos
+     * do mesmo tipo.
+     */
+
+    player.sponsorships.forEach(
+        function(sponsorship) {
+
+            sponsorship.active =
+                false;
+
+        }
+    );
+
+
+    player.currentSponsorship = {
+
+        brand:
+            offer.brand,
+
+        level:
+            offer.level,
+
+        weeklyPayment:
+            offer.weeklyPayment,
+
+        durationWeeks:
+            offer.durationWeeks,
+
+        startWeek:
+            player.week,
+
+        endWeek:
+            player.week +
+            offer.durationWeeks,
+
+        active:
+            true
+
+    };
+
+
+    player.sponsorships.push(
+
+        player.currentSponsorship
+
+    );
+
+
+    player.log.unshift(
+
+        "💰 Patrocínio assinado com " +
+        offer.brand +
+        "."
+
+    );
+
+
+    player.sponsorshipOffer =
+        null;
+
+
+    saveGame();
+
+
+    alert(
+
+        "💰 PATROCÍNIO ASSINADO!\n\n" +
+
+        offer.brand +
+
+        "\n\n" +
+
+        "Pagamento semanal: $" +
+        Math.round(
+            offer.weeklyPayment
+        ) +
+
+        "\n" +
+
+        "Duração: " +
+        offer.durationWeeks +
+        " semanas."
+
+    );
+
+
+    home();
+
+}
+
+
+/* =========================================================
+   RECUSAR PATROCÍNIO
+========================================================= */
+
+function declineSponsorshipOffer() {
+
+    ensurePlayer();
+
+    const player =
+        window.player;
+
+
+    if (!player.sponsorshipOffer) {
+        return;
+    }
+
+
+    const brand =
+        player.sponsorshipOffer.brand;
+
+
+    player.log =
+        player.log || [];
+
+
+    player.log.unshift(
+
+        "❌ Oferta de patrocínio recusada: " +
+        brand
+
+    );
+
+
+    player.sponsorshipOffer =
+        null;
+
+
+    saveGame();
+
+
+    home();
+
+}
+
+
+/* =========================================================
+   PAGAR PATROCÍNIO
+========================================================= */
+
+function processSponsorshipWeek() {
+
+    ensurePlayer();
+
+    const player =
+        window.player;
+
+
+    const sponsorship =
+        player.currentSponsorship;
+
+
+    if (
+        !sponsorship ||
+        !sponsorship.active
+    ) {
+
+        return;
+
+    }
+
+
+    /*
+     * Verifica duração.
+     */
+
+    if (
+        player.week >
+        sponsorship.endWeek
+    ) {
+
+        sponsorship.active =
+            false;
+
+
+        player.log =
+            player.log || [];
+
+
+        player.log.unshift(
+
+            "📄 O contrato de patrocínio com " +
+            sponsorship.brand +
+            " terminou."
+
+        );
+
+
+        player.currentSponsorship =
+            null;
+
+
+        return;
+
+    }
+
+
+    /*
+     * Recebe pagamento semanal.
+     */
+
+    player.money +=
+        Number(
+            sponsorship.weeklyPayment || 0
+        );
+
+
+    player.log =
+        player.log || [];
+
+
+    player.log.unshift(
+
+        "💰 Patrocínio: +" +
+        Math.round(
+            sponsorship.weeklyPayment
+        ) +
+        " — " +
+        sponsorship.brand
 
     );
 
@@ -871,6 +1314,159 @@ function home() {
         </div>
 
 
+        ${
+            player.sponsorshipOffer
+            ?
+            `
+
+            <div class="card">
+
+                <div class="title">
+                    💰 NOVA OFERTA DE PATROCÍNIO
+                </div>
+
+
+                <div class="statline">
+
+                    <span>
+                        Marca
+                    </span>
+
+                    <b>
+                        ${player.sponsorshipOffer.brand}
+                    </b>
+
+                </div>
+
+
+                <div class="statline">
+
+                    <span>
+                        Categoria
+                    </span>
+
+                    <b>
+                        ${player.sponsorshipOffer.level}
+                    </b>
+
+                </div>
+
+
+                <div class="statline">
+
+                    <span>
+                        Pagamento semanal
+                    </span>
+
+                    <b>
+                        $${Math.round(
+                            player.sponsorshipOffer.weeklyPayment
+                        )}
+                    </b>
+
+                </div>
+
+
+                <div class="statline">
+
+                    <span>
+                        Duração
+                    </span>
+
+                    <b>
+                        ${player.sponsorshipOffer.durationWeeks}
+                        semanas
+                    </b>
+
+                </div>
+
+
+                <button
+                    class="green"
+                    onclick="acceptSponsorshipOffer()">
+
+                    ✅ ACEITAR PATROCÍNIO
+
+                </button>
+
+
+                <button
+                    class="gray"
+                    onclick="declineSponsorshipOffer()">
+
+                    ❌ RECUSAR
+
+                </button>
+
+            </div>
+
+            `
+            :
+            ""
+        }
+
+
+        ${
+            player.currentSponsorship &&
+            player.currentSponsorship.active
+            ?
+            `
+
+            <div class="card">
+
+                <div class="title">
+                    💰 PATROCÍNIO ATUAL
+                </div>
+
+
+                <div class="statline">
+
+                    <span>
+                        Marca
+                    </span>
+
+                    <b>
+                        ${player.currentSponsorship.brand}
+                    </b>
+
+                </div>
+
+
+                <div class="statline">
+
+                    <span>
+                        Pagamento semanal
+                    </span>
+
+                    <b>
+                        $${Math.round(
+                            player.currentSponsorship.weeklyPayment
+                        )}
+                    </b>
+
+                </div>
+
+
+                <div class="statline">
+
+                    <span>
+                        Término
+                    </span>
+
+                    <b>
+                        Semana ${player.currentSponsorship.endWeek}
+                    </b>
+
+                </div>
+
+            </div>
+
+            `
+            :
+            ""
+        }
+
+
         <div class="card">
 
             <div class="title">
@@ -933,13 +1529,9 @@ function home() {
                     ${
                         player.professional &&
                         player.professional.active
-
                         ?
-
                         "Profissional"
-
                         :
-
                         "Amador"
                     }
 
@@ -1029,74 +1621,6 @@ function home() {
                     </div>
 
 
-                    ${
-                        player.nextFight.risk
-                        ?
-
-                        `
-
-                        <div class="statline">
-
-                            <span>
-                                Risco
-                            </span>
-
-                            <b>
-                                ${player.nextFight.risk}%
-                            </b>
-
-                        </div>
-
-                        `
-
-                        :
-
-                        ""
-
-                    }
-
-
-                    ${
-                        player.nextFight.recoveryWeeks
-                        ?
-
-                        `
-
-                        <div class="statline">
-
-                            <span>
-                                Recuperação estimada
-                            </span>
-
-                            <b>
-                                ${player.nextFight.recoveryWeeks}
-                                semanas
-                            </b>
-
-                        </div>
-
-                        `
-
-                        :
-
-                        ""
-
-                    }
-
-
-                    <div class="statline">
-
-                        <span>
-                            Semana da luta
-                        </span>
-
-                        <b>
-                            ${player.nextFight.week}
-                        </b>
-
-                    </div>
-
-
                     <button
                         class="main-button"
                         onclick="fightScreen()">
@@ -1111,42 +1635,26 @@ function home() {
 
                 `
 
-                    ${
-                        player.professional &&
-                        player.professional.active
+                    <p>
+                        ${
+                            player.professional &&
+                            player.professional.active
+                            ?
+                            "Nenhuma luta aceita. Seu empresário está procurando oportunidades."
+                            :
+                            "Nenhuma luta marcada."
+                        }
+                    </p>
 
+
+                    ${
+                        !(
+                            player.professional &&
+                            player.professional.active
+                        )
                         ?
 
                         `
-
-                        <p>
-                            Nenhuma luta marcada.
-                        </p>
-
-                        <p>
-                            📩 Seu empresário está procurando
-                            uma oportunidade para você.
-                        </p>
-
-
-                        <button
-                            class="main-button"
-                            onclick="fightScreen()">
-
-                            👔 VER CENTRAL DE LUTAS
-
-                        </button>
-
-                        `
-
-                        :
-
-                        `
-
-                        <p>
-                            Nenhuma luta marcada.
-                        </p>
-
 
                         <button
                             class="main-button"
@@ -1157,6 +1665,10 @@ function home() {
                         </button>
 
                         `
+
+                        :
+
+                        ""
 
                     }
 
@@ -1255,10 +1767,6 @@ function tab(name) {
     }
 
 
-    /* =========================
-       INÍCIO
-    ========================= */
-
     if (name === "home") {
 
         home();
@@ -1268,10 +1776,6 @@ function tab(name) {
     }
 
 
-    /* =========================
-       CARREIRA
-    ========================= */
-
     if (name === "career") {
 
         career();
@@ -1280,10 +1784,6 @@ function tab(name) {
 
     }
 
-
-    /* =========================
-       TREINO
-    ========================= */
 
     if (name === "train") {
 
@@ -1301,10 +1801,6 @@ function tab(name) {
     }
 
 
-    /* =========================
-       LUTAS
-    ========================= */
-
     if (name === "fight") {
 
         if (
@@ -1320,10 +1816,6 @@ function tab(name) {
 
     }
 
-
-    /* =========================
-       EQUIPE
-    ========================= */
 
     if (name === "team") {
 
@@ -1348,52 +1840,6 @@ function tab(name) {
                     error
                 );
 
-                const content =
-                    getElement("content");
-
-                if (content) {
-
-                    content.innerHTML = `
-
-                        <div class="card">
-
-                            <div class="title">
-                                🏢 EQUIPE
-                            </div>
-
-                            <p>
-                                Ocorreu um erro ao abrir
-                                a tela de equipe.
-                            </p>
-
-                            <button
-                                class="main-button"
-                                onclick="tab('home')">
-
-                                🏠 VOLTAR AO INÍCIO
-
-                            </button>
-
-                        </div>
-
-                    `;
-
-                }
-
-            }
-
-        }
-        else {
-
-            console.error(
-                "teamScreen() não encontrada."
-            );
-
-            const content =
-                getElement("content");
-
-            if (content) {
-
                 content.innerHTML = `
 
                     <div class="card">
@@ -1403,7 +1849,8 @@ function tab(name) {
                         </div>
 
                         <p>
-                            Sistema de equipe não carregado.
+                            Ocorreu um erro ao abrir
+                            a tela de equipe.
                         </p>
 
                         <button
@@ -1421,15 +1868,42 @@ function tab(name) {
             }
 
         }
+        else {
+
+            console.error(
+                "teamScreen() não encontrada."
+            );
+
+            content.innerHTML = `
+
+                <div class="card">
+
+                    <div class="title">
+                        🏢 EQUIPE
+                    </div>
+
+                    <p>
+                        Sistema de equipe não carregado.
+                    </p>
+
+                    <button
+                        class="main-button"
+                        onclick="tab('home')">
+
+                        🏠 VOLTAR AO INÍCIO
+
+                    </button>
+
+                </div>
+
+            `;
+
+        }
 
         return;
 
     }
 
-
-    /* =========================
-       VIDA
-    ========================= */
 
     if (name === "life") {
 
@@ -1443,22 +1917,11 @@ function tab(name) {
             window.lifeScreen();
 
         }
-        else {
-
-            console.error(
-                "lifeScreen() não encontrada."
-            );
-
-        }
 
         return;
 
     }
 
-
-    /* =========================
-       RANKING
-    ========================= */
 
     if (name === "ranking") {
 
@@ -1493,7 +1956,7 @@ function nextWeek() {
 
     /* =====================================================
        VIDA
-       ===================================================== */
+    ===================================================== */
 
     if (
         typeof window.processLifeWeek ===
@@ -1507,18 +1970,7 @@ function nextWeek() {
 
     /* =====================================================
        MUNDO MMA
-       ===================================================== */
-
-    /*
-     * O mundo funciona de forma independente.
-     *
-     * Se o arquivo do Mundo MMA estiver carregado,
-     * uma semana é simulada junto com o avanço
-     * da carreira do jogador.
-     *
-     * Se o sistema ainda não estiver carregado,
-     * simplesmente continua normalmente.
-     */
+    ===================================================== */
 
     if (
         typeof window.simulateMMWorldWeek ===
@@ -1544,18 +1996,14 @@ function nextWeek() {
 
     /* =====================================================
        TREINAMENTO
-       ===================================================== */
+    ===================================================== */
 
     const plan =
         player.trainingPlan &&
         player.trainingPlan.weeks
-
         ?
-
         player.trainingPlan.weeks[player.week]
-
         :
-
         [];
 
 
@@ -1623,7 +2071,7 @@ function nextWeek() {
 
     /* =====================================================
        RECUPERAÇÃO
-       ===================================================== */
+    ===================================================== */
 
     player.fatigue =
         Math.max(
@@ -1651,7 +2099,7 @@ function nextWeek() {
 
     /* =====================================================
        AVANÇA SEMANA
-       ===================================================== */
+    ===================================================== */
 
     player.week =
         Number(
@@ -1660,8 +2108,161 @@ function nextWeek() {
 
 
     /* =====================================================
-       NOVO ANO
+       RECUPERAÇÃO PÓS-LUTA
+    ===================================================== */
+
+    if (
+        player.recoveryUntilWeek &&
+        player.week < player.recoveryUntilWeek
+    ) {
+
+        player.recoveryWeeks =
+            Math.max(
+
+                0,
+
+                Number(
+                    player.recoveryUntilWeek
+                ) -
+                Number(
+                    player.week
+                )
+
+            );
+
+    }
+    else {
+
+        player.recoveryWeeks =
+            0;
+
+        player.recoveryUntilWeek =
+            0;
+
+    }
+
+
+    /* =====================================================
+       PATROCÍNIO
+       
+       Recebe pagamento semanal.
        ===================================================== */
+
+    processSponsorshipWeek();
+
+
+    /* =====================================================
+       EMPRESÁRIO
+       
+       Procura LUTA automaticamente.
+       ===================================================== */
+
+    if (
+
+        player.professional &&
+        player.professional.active &&
+
+        player.manager &&
+
+        !player.nextFight &&
+
+        !player.fightOffer &&
+
+        !player.recoveryUntilWeek
+
+    ) {
+
+        const managerFightChance =
+            Math.random();
+
+
+        /*
+         * 35% de chance por semana
+         * de aparecer uma luta.
+         */
+
+        if (
+            managerFightChance <= 0.35 &&
+            typeof managerFindFight ===
+            "function"
+        ) {
+
+            try {
+
+                managerFindFight();
+
+                /*
+                 * Não retorna aqui.
+                 * O sistema continua para poder
+                 * verificar patrocínio.
+                 */
+
+            }
+            catch (error) {
+
+                console.error(
+                    "Erro ao procurar luta automaticamente:",
+                    error
+                );
+
+            }
+
+        }
+
+    }
+
+
+    /* =====================================================
+       EMPRESÁRIO
+       
+       Procura PATROCÍNIO automaticamente.
+       ===================================================== */
+
+    if (
+
+        player.professional &&
+        player.professional.active &&
+
+        player.manager &&
+
+        !player.sponsorshipOffer
+
+    ) {
+
+        const sponsorshipChance =
+            Math.random();
+
+
+        /*
+         * 20% de chance por semana.
+         */
+
+        if (
+            sponsorshipChance <= 0.20
+        ) {
+
+            try {
+
+                managerFindSponsorship();
+
+            }
+            catch (error) {
+
+                console.error(
+                    "Erro ao procurar patrocínio:",
+                    error
+                );
+
+            }
+
+        }
+
+    }
+
+
+    /* =====================================================
+       NOVO ANO
+    ===================================================== */
 
     if (
         player.week > 52
@@ -1693,17 +2294,7 @@ function nextWeek() {
 
         /* =================================================
            CONTRATO DO EMPRESÁRIO
-
-           IMPORTANTE:
-           Só processa aqui, na virada do ano.
-
-           Portanto:
-           4 anos
-           ↓
-           vira o ano
-           ↓
-           3 anos
-           ================================================= */
+        ================================================= */
 
         if (
             typeof window.processManagerContractYear ===
@@ -1729,8 +2320,16 @@ function nextWeek() {
     }
 
 
+    /* =====================================================
+       SALVAR
+    ===================================================== */
+
     saveGame();
 
+
+    /* =====================================================
+       ATUALIZAR TELA
+    ===================================================== */
 
     home();
 
@@ -1796,26 +2395,14 @@ function resetGame() {
     }
 
 
-    /*
-     * Apaga a carreira salva.
-     */
-
     localStorage.removeItem(
         "mmaLifePlayer"
     );
 
 
-    /*
-     * Cria jogador novo.
-     */
-
     window.player =
         createDefaultPlayer();
 
-
-    /*
-     * Reinicia Mundo MMA.
-     */
 
     if (
         typeof window.mmaWorld !==
@@ -1839,10 +2426,6 @@ function resetGame() {
 
     }
 
-
-    /*
-     * Esconde o jogo.
-     */
 
     const game =
         getElement("game");
@@ -1868,10 +2451,6 @@ function resetGame() {
 
     }
 
-
-    /*
-     * Mostra tela inicial.
-     */
 
     const creation =
         getElement("creation");
@@ -1919,10 +2498,6 @@ function career() {
         p.professional || {};
 
 
-    /*
-     * Estágio da carreira.
-     */
-
     let careerStage =
         p.careerStage ||
         "amateur";
@@ -1952,10 +2527,6 @@ function career() {
         stageLabels[careerStage] ||
         "🥋 Amador";
 
-
-    /*
-     * Contrato atual.
-     */
 
     const contract =
         p.currentContract;
@@ -2234,6 +2805,23 @@ window.career =
     career;
 
 
+/*
+ * PATROCÍNIO
+ */
+
+window.managerFindSponsorship =
+    managerFindSponsorship;
+
+window.acceptSponsorshipOffer =
+    acceptSponsorshipOffer;
+
+window.declineSponsorshipOffer =
+    declineSponsorshipOffer;
+
+window.processSponsorshipWeek =
+    processSponsorshipWeek;
+
+
 /* =========================================================
    INICIALIZAÇÃO
 ========================================================= */
@@ -2257,6 +2845,33 @@ function initializeMmaLife() {
             window.player &&
             window.player.name
         ) {
+
+            /*
+             * Compatibilidade com
+             * carreiras antigas.
+             */
+
+            if (
+                typeof window.player.sponsorshipOffer ===
+                "undefined"
+            ) {
+
+                window.player.sponsorshipOffer =
+                    null;
+
+            }
+
+
+            if (
+                typeof window.player.sponsorships ===
+                "undefined"
+            ) {
+
+                window.player.sponsorships =
+                    [];
+
+            }
+
 
             showGame();
 
