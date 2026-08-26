@@ -1754,3 +1754,23 @@ setTimeout(function () {
     }
 
 }, 100);
+/* =========================
+   REINICIAR JOGO
+========================= */
+
+function resetGame() {
+
+    const confirmar = confirm(
+        "⚠️ REINICIAR JOGO?\n\n" +
+        "Todo o progresso do lutador será apagado.\n\n" +
+        "Essa ação não pode ser desfeita."
+    );
+
+    if (!confirmar) {
+        return;
+    }
+
+    localStorage.clear();
+
+    location.reload();
+}
