@@ -54,130 +54,15 @@ function showGame() {
 
     if (game) {
         game.classList.remove("hidden");
+        game.style.display = "block";
     }
 
     if (tabs) {
         tabs.classList.remove("hidden");
+        tabs.style.display = "flex";
+        tabs.style.visibility = "visible";
+        tabs.style.opacity = "1";
     }
-}
-
-
-/* =========================================================
-   ESTADO PADRÃO DO JOGADOR
-========================================================= */
-
-function createDefaultPlayer() {
-
-    return {
-
-        name: "",
-
-        country: "Brasil",
-
-        weight: "Peso Leve",
-
-        style: "Completo",
-
-        age: 18,
-
-        week: 1,
-
-        year: 1,
-
-        money: 0,
-
-        fame: 0,
-
-        health: 100,
-
-        fatigue: 0,
-
-        overall: 60,
-
-        potential:
-            Math.floor(
-                Math.random() * 21
-            ) + 78,
-
-        relationship: "Solteiro",
-
-        married: false,
-
-        children: [],
-
-        team: null,
-
-        manager: null,
-
-        nextFight: null,
-
-        careerStage: "amateur",
-
-        currentPromotion: null,
-
-        currentContract: null,
-
-        professional: {
-
-            active: false,
-
-            wins: 0,
-
-            losses: 0,
-
-            draws: 0
-
-        },
-
-        amateur: {
-
-            wins: 0,
-
-            losses: 0,
-
-            draws: 0
-
-        },
-
-        attributes: {
-
-            strength: 60,
-
-            striking: 60,
-
-            wrestling: 60,
-
-            grappling: 60,
-
-            cardio: 60,
-
-            technique: 60,
-
-            defense: 60,
-
-            fightIQ: 60,
-
-            chin: 60,
-
-            offense: 60,
-
-            blocking: 60
-
-        },
-
-        trainingPlan: {
-
-            weeks: {},
-
-            automatic: false
-
-        },
-
-        teamOffers: [],
-
-        log: []
-
-    };
 }
 
 
