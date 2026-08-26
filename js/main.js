@@ -34,80 +34,49 @@ function tab(name) {
 ========================= */
 
 function startGame() {
-
-    const name =
-        document
-            .getElementById("playerName")
-            .value
-            .trim();
-
-
-    if (!name) {
-
-        alert(
-            "Digite o nome do lutador."
-        );
-
-        return;
-
-    }
-
-
-    createPlayer();
-
-
-    player.name =
-        name;
-
-
-    player.country =
-        document
-            .getElementById("country")
-            .value;
-
-
-    player.weight =
-        document
-            .getElementById("weight")
-            .value;
-
-
-    player.style =
-        document
-            .getElementById("style")
-            .value;
-
-
-    generateTeamOffers();
-
-    generateManagerOffers();
-
-
-    save();
-
-
-    document
-        .getElementById("creation")
-        .classList
-        .add("hidden");
-
-
-    document
-        .getElementById("game")
-        .classList
-        .remove("hidden");
-
-
-    document
-        .getElementById("tabs")
-        .classList
-        .remove("hidden");
-
-
-    home();
-
+    document.getElementById("content").innerHTML = `
+        <div class="start-screen">
+            <div class="start-logo">
+                🥊
+            </div>
+            <h1>
+                MMA LIFE
+            </h1>
+            <p class="start-subtitle">
+                CONSTRUA SUA CARREIRA.
+                ESCREVA SEU LEGADO.
+            </p>
+            <div class="start-preview">
+                <div class="start-fighter">
+                    👤
+                </div>
+                <div class="start-preview-text">
+                    <strong>
+                        SUA HISTÓRIA COMEÇA AQUI
+                    </strong>
+                    <span>
+                        Crie seu lutador e entre
+                        no mundo profissional do MMA.
+                    </span>
+                </div>
+            </div>
+            <button
+                class="start-button"
+                onclick="initCreation()">
+                🆕 CRIAR NOVO LUTADOR
+            </button>
+            <button
+                class="start-secondary"
+                onclick="loadGame()">
+                ▶️ CONTINUAR CARREIRA
+            </button>
+            <div class="start-footer">
+                AMADOR → REGIONAL → NACIONAL
+                → INTERNACIONAL → UFC
+            </div>
+        </div>
+    `;
 }
-
 /* =========================
    VIRAR PROFISSIONAL
 ========================= */
