@@ -942,122 +942,59 @@ function tab(name) {
 
     showGame();
 
-    switch (name) {
+    console.log("Abrindo página:", name);
 
-        case "home":
-
-            home();
-
-            break;
-
-
-        case "career":
-
-            if (
-                typeof career === "function"
-            ) {
-
-                career();
-
-            } else {
-
-                home();
-
-            }
-
-            break;
-
-
-        case "train":
-
-            if (
-                typeof training === "function"
-            ) {
-
-                training();
-
-            } else {
-
-                home();
-
-            }
-
-            break;
-
-
-        case "fight":
-
-            if (
-                typeof fightScreen === "function"
-            ) {
-
-                fightScreen();
-
-            } else {
-
-                home();
-
-            }
-
-            break;
-
-
-        case "team":
-
-            if (
-                typeof teamScreen === "function"
-            ) {
-
-                teamScreen();
-
-            } else {
-
-                home();
-
-            }
-
-            break;
-
-
-        case "life":
-
-            if (
-                typeof familyScreen === "function"
-            ) {
-
-                familyScreen();
-
-            } else {
-
-                home();
-
-            }
-
-            break;
-
-
-        case "ranking":
-
-            if (
-                typeof rankingScreen === "function"
-            ) {
-
-                rankingScreen();
-
-            } else {
-
-                home();
-
-            }
-
-            break;
-
-
-        default:
-
-            home();
-
+    if (name === "home") {
+        home();
+        return;
     }
+
+    if (name === "career") {
+        if (typeof window.career === "function") {
+            window.career();
+        } else {
+            console.error("career() não encontrada");
+        }
+        return;
+    }
+
+    if (name === "train") {
+        if (typeof window.training === "function") {
+            window.training();
+        } else {
+            console.error("training() não encontrada");
+        }
+        return;
+    }
+
+    if (name === "fight") {
+        if (typeof window.fightScreen === "function") {
+            window.fightScreen();
+        } else {
+            console.error("fightScreen() não encontrada");
+        }
+        return;
+    }
+
+    if (name === "team") {
+        if (typeof window.teamScreen === "function") {
+            window.teamScreen();
+        } else {
+            console.error("teamScreen() não encontrada");
+        }
+        return;
+    }
+
+    if (name === "life") {
+        if (typeof window.familyScreen === "function") {
+            window.familyScreen();
+        } else {
+            console.error("familyScreen() não encontrada");
+        }
+        return;
+    }
+
+    console.error("Página desconhecida:", name);
 }
 
 
