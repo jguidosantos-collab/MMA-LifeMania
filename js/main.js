@@ -1280,7 +1280,6 @@ function rest() {
 /* =========================================================
    REINICIAR JOGO
 ========================================================= */
-
 function resetGame() {
 
     const confirmed = confirm(
@@ -1295,9 +1294,7 @@ function resetGame() {
 
     window.player = createDefaultPlayer();
 
-    showCreation();
-
-    openCharacterCreation();
+    startGame();
 }
 
 
