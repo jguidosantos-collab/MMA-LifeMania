@@ -368,7 +368,7 @@ function home() {
 
         </div>
 
-
+${overallText()}
         <div class="stats-grid">
 
             <div class="stat-card">
