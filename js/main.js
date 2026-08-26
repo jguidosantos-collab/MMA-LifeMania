@@ -1406,7 +1406,221 @@ window.getOverall =
 window.saveGame =
     saveGame;
 
+/* =========================================================
+   CARREIRA
+========================================================= */
 
+function career() {
+
+    ensurePlayer();
+
+    const content = getElement("content");
+
+    if (!content) return;
+
+    const p = window.player;
+
+    const amateur = p.amateur || {};
+    const professional = p.professional || {};
+
+    content.innerHTML = `
+
+        <div class="card">
+
+            <div class="title">
+                🥊 CARREIRA
+            </div>
+
+            <p>
+                Acompanhe sua trajetória no MMA.
+            </p>
+
+        </div>
+
+        <div class="card">
+
+            <div class="title">
+                📊 RECORDES
+            </div>
+
+            <div class="statline">
+                <span>Amador</span>
+                <b>
+                    ${amateur.wins || 0}-
+                    ${amateur.losses || 0}-
+                    ${amateur.draws || 0}
+                </b>
+            </div>
+
+            <div class="statline">
+                <span>Profissional</span>
+                <b>
+                    ${professional.wins || 0}-
+                    ${professional.losses || 0}-
+                    ${professional.draws || 0}
+                </b>
+            </div>
+
+        </div>
+
+        <div class="card">
+
+            <div class="title">
+                📈 STATUS
+            </div>
+
+            <div class="statline">
+                <span>Categoria</span>
+
+                <b>
+                    ${
+                        professional.active
+                        ? "Profissional"
+                        : "Amador"
+                    }
+                </b>
+            </div>
+
+            <div class="statline">
+                <span>Idade</span>
+
+                <b>
+                    ${p.age || 18} anos
+                </b>
+            </div>
+
+            <div class="statline">
+                <span>Fama</span>
+
+                <b>
+                    ${Math.round(p.fame || 0)}
+                </b>
+            </div>
+
+            <div class="statline">
+                <span>Dinheiro</span>
+
+                <b>
+                    $${Math.round(p.money || 0)}
+                </b>
+            </div>
+
+        </div>
+
+        <div class="card">
+
+            <div class="title">
+                🏆 OBJETIVO
+            </div>
+
+            <p>
+                Comece no circuito amador,
+                evolua seu lutador,
+                conquiste vitórias,
+                torne-se profissional
+                e busque os grandes títulos.
+            </p>
+
+        </div>
+
+    `;
+}
+
+
+/* =========================================================
+   VIDA
+========================================================= */
+
+function lifeScreen() {
+
+    ensurePlayer();
+
+    const content = getElement("content");
+
+    if (!content) return;
+
+    const p = window.player;
+
+    const children =
+        Array.isArray(p.children)
+            ? p.children
+            : [];
+
+    content.innerHTML = `
+
+        <div class="card">
+
+            <div class="title">
+                ❤️ VIDA
+            </div>
+
+            <p>
+                Sua vida fora do octógono.
+            </p>
+
+        </div>
+
+        <div class="card">
+
+            <div class="title">
+                💕 RELACIONAMENTO
+            </div>
+
+            <div class="statline">
+                <span>Status</span>
+                <b>
+                    ${p.relationship || "Solteiro"}
+                </b>
+            </div>
+
+            <div class="statline">
+                <span>Casado</span>
+                <b>
+                    ${p.married ? "Sim" : "Não"}
+                </b>
+            </div>
+
+        </div>
+
+        <div class="card">
+
+            <div class="title">
+                👶 FAMÍLIA
+            </div>
+
+            <div class="statline">
+                <span>Filhos</span>
+                <b>
+                    ${children.length}
+                </b>
+            </div>
+
+        </div>
+
+        <div class="card">
+
+            <div class="title">
+                🧬 LEGADO
+            </div>
+
+            <p>
+                Construa sua família e, no futuro,
+                seu legado poderá continuar através
+                dos seus filhos.
+            </p>
+
+        </div>
+
+    `;
+}
+
+
+/* =========================================================
+   FUNÇÕES GLOBAIS
+========================================================= */
+
+window.career = career;
+window.lifeScreen = lifeScreen;
 /* =========================================================
    INICIALIZAÇÃO
 ========================================================= */
