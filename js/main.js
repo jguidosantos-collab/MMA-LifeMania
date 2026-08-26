@@ -1029,6 +1029,74 @@ function home() {
                     </div>
 
 
+                    ${
+                        player.nextFight.risk
+                        ?
+
+                        `
+
+                        <div class="statline">
+
+                            <span>
+                                Risco
+                            </span>
+
+                            <b>
+                                ${player.nextFight.risk}%
+                            </b>
+
+                        </div>
+
+                        `
+
+                        :
+
+                        ""
+
+                    }
+
+
+                    ${
+                        player.nextFight.recoveryWeeks
+                        ?
+
+                        `
+
+                        <div class="statline">
+
+                            <span>
+                                Recuperação estimada
+                            </span>
+
+                            <b>
+                                ${player.nextFight.recoveryWeeks}
+                                semanas
+                            </b>
+
+                        </div>
+
+                        `
+
+                        :
+
+                        ""
+
+                    }
+
+
+                    <div class="statline">
+
+                        <span>
+                            Semana da luta
+                        </span>
+
+                        <b>
+                            ${player.nextFight.week}
+                        </b>
+
+                    </div>
+
+
                     <button
                         class="main-button"
                         onclick="fightScreen()">
@@ -1043,18 +1111,54 @@ function home() {
 
                 `
 
-                    <p>
-                        Nenhuma luta marcada.
-                    </p>
+                    ${
+                        player.professional &&
+                        player.professional.active
+
+                        ?
+
+                        `
+
+                        <p>
+                            Nenhuma luta marcada.
+                        </p>
+
+                        <p>
+                            📩 Seu empresário está procurando
+                            uma oportunidade para você.
+                        </p>
 
 
-                    <button
-                        class="main-button"
-                        onclick="fightScreen()">
+                        <button
+                            class="main-button"
+                            onclick="fightScreen()">
 
-                        🔎 PROCURAR LUTA
+                            👔 VER CENTRAL DE LUTAS
 
-                    </button>
+                        </button>
+
+                        `
+
+                        :
+
+                        `
+
+                        <p>
+                            Nenhuma luta marcada.
+                        </p>
+
+
+                        <button
+                            class="main-button"
+                            onclick="fightScreen()">
+
+                            🔎 PROCURAR LUTA
+
+                        </button>
+
+                        `
+
+                    }
 
                 `
             }
@@ -1589,10 +1693,10 @@ function nextWeek() {
 
         /* =================================================
            CONTRATO DO EMPRESÁRIO
-           
+
            IMPORTANTE:
            Só processa aqui, na virada do ano.
-           
+
            Portanto:
            4 anos
            ↓
