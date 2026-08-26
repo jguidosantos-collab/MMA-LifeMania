@@ -968,13 +968,25 @@ function tab(name) {
     }
 
     if (name === "fight") {
-        if (typeof window.fightScreen === "function") {
-            window.fightScreen();
-        } else {
-            console.error("fightScreen() não encontrada");
-        }
-        return;
+
+    console.log("BOTÃO LUTAS CLICADO");
+
+    if (typeof window.fightScreen === "function") {
+
+        window.fightScreen();
+
+    } else {
+
+        alert("Erro: fightScreen não foi carregada.");
+
+        console.error(
+            "fightScreen() não encontrada"
+        );
+
     }
+
+    return;
+}
 
     if (name === "team") {
         if (typeof window.teamScreen === "function") {
