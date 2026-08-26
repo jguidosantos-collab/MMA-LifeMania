@@ -274,13 +274,7 @@ function startGame() {
 </button>
 
         </div>
-<button
-    class="gray"
-    onclick="resetGame()">
 
-    🔄 REINICIAR CARREIRA
-
-</button>
     `;
 }
 
