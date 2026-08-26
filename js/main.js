@@ -474,11 +474,11 @@ alert("1 - createNewPlayer foi acionada");
     }
 
 
-    newPlayer.age = 18;
+    newPlayer.age = 15;
 
     newPlayer.week = 1;
 
-    newPlayer.year = 1;
+    newPlayer.year = 2026;
 
     newPlayer.money = 0;
 
