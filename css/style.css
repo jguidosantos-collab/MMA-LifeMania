@@ -2,531 +2,559 @@
     box-sizing: border-box;
 }
 
+html,
 body {
     margin: 0;
-    background: #08090c;
-    color: #f4f4f4;
-    font-family: Arial, sans-serif;
+    padding: 0;
+    min-height: 100%;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    background: #f3f3f3;
+    color: #171717;
 }
 
-button,
-input,
-select {
-    font: inherit;
+body {
+    min-height: 100vh;
 }
 
-button {
+/* =========================
+   APP
+========================= */
+
+#game {
+    min-height: 100vh;
+}
+
+#content {
     width: 100%;
-    border: 0;
-    border-radius: 10px;
-    padding: 12px;
-    margin-top: 8px;
-    background: #d6283d;
-    color: white;
-    font-weight: 800;
-}
-
-button.green {
-    background: #168653;
-}
-
-button.gray {
-    background: #292e35;
-}
-
-button.blue {
-    background: #23639c;
+    max-width: 620px;
+    margin: 0 auto;
+    padding: 18px 14px 110px;
 }
 
 .hidden {
-    display: none;
+    display: none !important;
 }
 
-.top {
+/* =========================
+   TELA INICIAL
+========================= */
+
+.start-screen {
+    min-height: calc(100vh - 36px);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
     text-align: center;
-    padding: 18px 15px 8px;
+    padding: 30px 15px;
 }
 
-.logo {
-    font-size: 22px;
+.start-logo {
+    width: 92px;
+    height: 92px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 48px;
+    background: #111;
+    color: white;
+    margin-bottom: 18px;
+}
+
+.start-screen h1 {
+    margin: 0;
+    font-size: 38px;
+    font-weight: 900;
+    letter-spacing: -1.5px;
+}
+
+.start-subtitle {
+    color: #777;
+    font-size: 13px;
+    line-height: 1.6;
+    font-weight: 700;
+    margin: 10px 0 28px;
+}
+
+.start-preview {
+    width: 100%;
+    background: white;
+    border-radius: 18px;
+    padding: 20px;
+    display: flex;
+    gap: 16px;
+    text-align: left;
+    box-shadow: 0 2px 12px rgba(0,0,0,.06);
+    margin-bottom: 20px;
+}
+
+.start-fighter {
+    width: 60px;
+    height: 60px;
+    flex-shrink: 0;
+    border-radius: 14px;
+    background: #111;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 30px;
+}
+
+.start-preview-text {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+}
+
+.start-preview-text strong {
+    font-size: 14px;
+}
+
+.start-preview-text span {
+    color: #777;
+    font-size: 13px;
+    line-height: 1.45;
+}
+
+.start-button {
+    width: 100%;
+    border: 0;
+    border-radius: 13px;
+    padding: 16px;
+    background: #111;
+    color: white;
+    font-size: 14px;
+    font-weight: 800;
+    cursor: pointer;
+}
+
+/* =========================
+   CABEÇALHO DO LUTADOR
+========================= */
+
+.fighter-header {
+    background: white;
+    border-radius: 20px;
+    padding: 18px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    box-shadow: 0 2px 12px rgba(0,0,0,.06);
+    margin-bottom: 12px;
+}
+
+.fighter-avatar {
+    width: 70px;
+    height: 70px;
+    border-radius: 18px;
+    background: #111;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.avatar-placeholder {
+    font-size: 34px;
+}
+
+.fighter-info {
+    min-width: 0;
+}
+
+.fighter-name {
+    font-size: 21px;
+    font-weight: 900;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.fighter-country,
+.fighter-weight {
+    color: #777;
+    font-size: 12px;
+    margin-top: 4px;
+}
+
+/* =========================
+   STATUS
+========================= */
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 9px;
+    margin-bottom: 22px;
+}
+
+.stat-card {
+    background: white;
+    border-radius: 15px;
+    padding: 14px;
+    box-shadow: 0 2px 10px rgba(0,0,0,.045);
+}
+
+.stat-card span,
+.condition-card span,
+.team-preview span,
+.record span {
+    display: block;
+    color: #888;
+    font-size: 10px;
+    font-weight: 800;
+    text-transform: uppercase;
+    margin-bottom: 5px;
+}
+
+.stat-card strong {
+    font-size: 19px;
     font-weight: 900;
 }
 
-.edition {
-    color: #888;
-    font-size: 10px;
-    letter-spacing: 3px;
+/* =========================
+   TÍTULOS
+========================= */
+
+.section-title {
+    font-size: 13px;
+    font-weight: 900;
+    text-transform: uppercase;
+    margin: 22px 3px 9px;
+    color: #555;
 }
 
-main {
-    max-width: 720px;
-    margin: auto;
-    padding: 12px 12px 100px;
-}
+/* =========================
+   CARDS
+========================= */
 
-.card {
-    background: #13161b;
-    border: 1px solid #292e36;
-    border-radius: 15px;
-    padding: 14px;
+.card,
+.fight-card,
+.empty-card,
+.career-card,
+.team-preview,
+.condition-card {
+    background: white;
+    border-radius: 17px;
+    padding: 17px;
     margin-bottom: 11px;
+    box-shadow: 0 2px 10px rgba(0,0,0,.045);
 }
 
 .title {
     font-size: 17px;
     font-weight: 900;
-    margin-bottom: 10px;
+    margin-bottom: 14px;
 }
+
+.card p,
+.empty-card p {
+    color: #777;
+    line-height: 1.5;
+    font-size: 13px;
+}
+
+/* =========================
+   STATLINE
+========================= */
 
 .statline {
     display: flex;
     justify-content: space-between;
-    padding: 9px 0;
-    border-bottom: 1px solid #282d34;
+    gap: 15px;
+    padding: 11px 0;
+    border-bottom: 1px solid #eee;
     font-size: 13px;
 }
+
+.statline:last-child {
+    border-bottom: 0;
+}
+
+.statline span {
+    color: #777;
+}
+
+.statline b {
+    text-align: right;
+    font-weight: 800;
+}
+
+/* =========================
+   BOTÕES
+========================= */
+
+button {
+    width: 100%;
+    border: 0;
+    border-radius: 11px;
+    padding: 13px 15px;
+    margin-top: 9px;
+    background: #171717;
+    color: white;
+    font-size: 13px;
+    font-weight: 800;
+    cursor: pointer;
+}
+
+button:active {
+    transform: scale(.98);
+}
+
+button.green {
+    background: #168a45;
+}
+
+button.red,
+.main-button.red {
+    background: #d62828;
+}
+
+button.blue {
+    background: #1769aa;
+}
+
+button.gray,
+.main-button.gray {
+    background: #777;
+}
+
+/* =========================
+   INPUTS
+========================= */
 
 input,
 select {
     width: 100%;
-    background: #080a0d;
-    color: white;
-    border: 1px solid #414750;
-    padding: 13px;
-    border-radius: 9px;
-    margin-top: 8px;
-}
-
-.tabs {
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    z-index: 50;
-
-    background: #111419;
-
-    border-top: 1px solid #30343b;
-
-    display: grid;
-    grid-template-columns: repeat(6, 1fr);
-
-    padding: 5px;
-}
-
-.tabs button {
-    background: transparent;
-    margin: 0;
-    padding: 7px 2px;
-    font-size: 18px;
-}
-
-.tabs small {
-    display: block;
-    color: #888;
-    font-size: 8px;
-}
-/* =========================================================
-   NOVA INTERFACE — MMA LIFE
-========================================================= */
-.home-container {
-    width: 100%;
-    max-width: 720px;
-    margin: 0 auto;
-    padding: 18px 14px 90px;
-    box-sizing: border-box;
-}
-/* =========================================================
-   CABEÇALHO DO LUTADOR
-========================================================= */
-.fighter-header {
-    position: relative;
-    display: flex;
-    align-items: center;
-    gap: 16px;
-    padding: 22px;
-    margin-bottom: 16px;
-    border-radius: 22px;
-    background:
-        linear-gradient(
-            145deg,
-            #181818,
-            #090909
-        );
-    border: 1px solid #292929;
-    box-shadow:
-        0 12px 35px rgba(0,0,0,.45);
-    overflow: hidden;
-}
-.fighter-header::after {
-    content: "";
-    position: absolute;
-    width: 150px;
-    height: 150px;
-    right: -50px;
-    top: -60px;
-    background: #e11;
-    opacity: .12;
-    border-radius: 50%;
-}
-.fighter-avatar {
-    width: 92px;
-    height: 92px;
-    min-width: 92px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background:
-        linear-gradient(
-            145deg,
-            #2b2b2b,
-            #111
-        );
-    border: 2px solid #3a3a3a;
-    box-shadow:
-        0 5px 20px rgba(0,0,0,.5);
-}
-.avatar-placeholder {
-    font-size: 42px;
-}
-.fighter-info {
-    position: relative;
-    z-index: 2;
-}
-.fighter-name {
-    font-size: 25px;
-    font-weight: 900;
-    color: #fff;
-    letter-spacing: -.5px;
-}
-.fighter-country {
-    margin-top: 5px;
+    padding: 14px;
+    border: 1px solid #ddd;
+    border-radius: 11px;
+    background: #fafafa;
+    margin-bottom: 9px;
     font-size: 14px;
-    color: #bbb;
+    outline: none;
 }
-.fighter-weight {
-    display: inline-block;
-    margin-top: 9px;
-    padding: 5px 10px;
-    border-radius: 8px;
-    background: #242424;
-    color: #ddd;
-    font-size: 12px;
-    font-weight: 700;
+
+input:focus,
+select:focus {
+    border-color: #111;
+    background: white;
 }
-/* =========================================================
-   CARDS DE STATUS
-========================================================= */
-.stats-grid {
-    display: grid;
-    grid-template-columns:
-        repeat(2, 1fr);
-    gap: 10px;
-    margin-bottom: 22px;
-}
-.stat-card {
-    padding: 17px;
-    border-radius: 16px;
-    background: #141414;
-    border: 1px solid #252525;
-}
-.stat-card span {
-    display: block;
-    color: #777;
-    font-size: 10px;
-    font-weight: 800;
-    letter-spacing: 1px;
-}
-.stat-card strong {
-    display: block;
-    margin-top: 7px;
-    color: #fff;
-    font-size: 20px;
-}
-/* =========================================================
-   TÍTULOS
-========================================================= */
-.section-title {
-    margin:
-        24px
-        3px
-        10px;
-    color: #aaa;
-    font-size: 12px;
-    font-weight: 900;
-    letter-spacing: 1.4px;
-}
-/* =========================================================
-   PRÓXIMA LUTA
-========================================================= */
-.fight-card {
-    padding: 20px;
-    border-radius: 20px;
-    background:
-        linear-gradient(
-            145deg,
-            #211010,
-            #101010
-        );
-    border: 1px solid #402020;
-    box-shadow:
-        0 12px 30px rgba(0,0,0,.4);
-}
+
+/* =========================
+   LUTA
+========================= */
+
 .fight-event {
-    text-align: center;
-    color: #e5e5e5;
-    font-size: 13px;
+    color: #888;
+    font-size: 11px;
     font-weight: 800;
     text-transform: uppercase;
+    margin-bottom: 15px;
 }
+
 .fight-versus {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 10px;
-    margin: 25px 0;
+    gap: 8px;
 }
+
 .fighter-side {
-    width: 40%;
+    flex: 1;
     text-align: center;
 }
-.fighter-side strong {
-    display: block;
-    margin-top: 8px;
-    color: #fff;
-    font-size: 13px;
-}
+
 .mini-avatar {
-    width: 58px;
-    height: 58px;
-    margin: auto;
-    border-radius: 50%;
+    width: 50px;
+    height: 50px;
+    border-radius: 14px;
+    background: #f1f1f1;
     display: flex;
     align-items: center;
     justify-content: center;
-    background: #222;
-    font-size: 27px;
+    margin: 0 auto 7px;
+    font-size: 25px;
 }
+
 .vs {
-    color: #e11;
-    font-size: 18px;
-    font-weight: 1000;
+    font-size: 12px;
+    font-weight: 900;
+    color: #999;
 }
+
 .fight-details {
     display: flex;
     justify-content: space-between;
-    padding:
-        11px 0;
-    border-top: 1px solid #292929;
-    border-bottom: 1px solid #292929;
-    color: #aaa;
-    font-size: 12px;
-}
-/* =========================================================
-   BOTÕES
-========================================================= */
-.main-button {
-    width: 100%;
-    margin-top: 14px;
-    padding: 14px;
-    border: 0;
-    border-radius: 12px;
-    background: #292929;
-    color: #fff;
-    font-size: 13px;
-    font-weight: 900;
-    cursor: pointer;
-}
-.main-button:hover {
-    filter: brightness(1.15);
-}
-.main-button.red {
-    background:
-        linear-gradient(
-            135deg,
-            #d71920,
-            #8e0d12
-        );
-}
-.main-button.gray {
-    background: #202020;
-    color: #aaa;
-}
-/* =========================================================
-   CARD VAZIO
-========================================================= */
-.empty-card {
-    padding: 30px 20px;
-    text-align: center;
-    border-radius: 20px;
-    background: #141414;
-    border: 1px solid #252525;
-}
-.empty-icon {
-    font-size: 40px;
-    margin-bottom: 10px;
-}
-.empty-card strong {
-    display: block;
-    color: #fff;
-    font-size: 16px;
-}
-.empty-card p {
+    margin-top: 15px;
+    padding-top: 13px;
+    border-top: 1px solid #eee;
     color: #777;
     font-size: 12px;
 }
-/* =========================================================
+
+/* =========================
    CARREIRA
-========================================================= */
-.career-card {
-    padding: 20px;
-    border-radius: 20px;
-    background: #141414;
-    border: 1px solid #252525;
-}
+========================= */
+
 .career-stage {
-    color: #e11;
-    font-size: 13px;
+    font-size: 14px;
     font-weight: 900;
-    letter-spacing: 1px;
+    margin-bottom: 14px;
 }
+
 .record {
     display: grid;
-    grid-template-columns:
-        repeat(2, 1fr);
+    grid-template-columns: 1fr 1fr;
     gap: 10px;
-    margin-top: 18px;
+    margin-bottom: 13px;
 }
-.record div {
-    padding: 13px;
+
+.record > div {
+    background: #f6f6f6;
     border-radius: 12px;
-    background: #1c1c1c;
+    padding: 12px;
 }
-.record span {
-    display: block;
-    color: #777;
-    font-size: 9px;
-    font-weight: 800;
-}
+
 .record strong {
-    display: block;
-    margin-top: 5px;
-    color: #fff;
-    font-size: 19px;
+    font-size: 18px;
 }
-/* =========================================================
+
+/* =========================
    EQUIPE
-========================================================= */
+========================= */
+
 .team-preview {
-    padding: 18px;
-    border-radius: 18px;
-    background: #141414;
-    border: 1px solid #252525;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
 }
-.team-preview > div {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 10px 0;
-    border-bottom: 1px solid #242424;
+
+.team-preview button {
+    grid-column: 1 / -1;
 }
-.team-preview > div:last-of-type {
-    border-bottom: 0;
-}
-.team-preview span {
-    color: #777;
-    font-size: 10px;
-    font-weight: 800;
-}
-.team-preview strong {
-    color: #eee;
-    font-size: 12px;
-    text-align: right;
-}
-/* =========================================================
-   ATALHOS
-========================================================= */
+
+/* =========================
+   QUICK MENU
+========================= */
+
 .quick-grid {
     display: grid;
-    grid-template-columns:
-        repeat(2, 1fr);
-    gap: 10px;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 9px;
 }
+
 .quick-grid button {
-    min-height: 85px;
-    border: 1px solid #252525;
-    border-radius: 17px;
-    background: #141414;
-    color: #fff;
-    font-size: 28px;
-    cursor: pointer;
+    background: white;
+    color: #171717;
+    border: 1px solid #e8e8e8;
+    min-height: 82px;
+    margin: 0;
+    box-shadow: 0 2px 8px rgba(0,0,0,.035);
 }
-.quick-grid button span {
+
+.quick-grid button:first-line {
+    font-size: 25px;
+}
+
+.quick-grid span {
     display: block;
-    margin-top: 7px;
-    color: #aaa;
+    margin-top: 6px;
     font-size: 11px;
-    font-weight: 800;
+    color: #666;
 }
-/* =========================================================
-   CONDIÇÃO FÍSICA
-========================================================= */
+
+/* =========================
+   CONDIÇÃO
+========================= */
+
 .condition-card {
     display: grid;
-    grid-template-columns:
-        repeat(2, 1fr);
+    grid-template-columns: 1fr 1fr;
     gap: 10px;
 }
-.condition-card div {
-    padding: 17px;
-    border-radius: 15px;
-    background: #141414;
-    border: 1px solid #252525;
+
+.condition-card > div {
+    background: #f6f6f6;
+    border-radius: 12px;
+    padding: 12px;
 }
-.condition-card span {
-    display: block;
-    color: #777;
-    font-size: 10px;
-    font-weight: 800;
-}
+
 .condition-card strong {
-    display: block;
-    margin-top: 7px;
-    color: #fff;
-    font-size: 20px;
+    font-size: 18px;
 }
-/* =========================================================
+
+/* =========================
+   MENU INFERIOR
+========================= */
+
+#tabs {
+    position: fixed;
+    z-index: 1000;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: rgba(255,255,255,.96);
+    border-top: 1px solid #ddd;
+    backdrop-filter: blur(12px);
+    padding: 8px 8px calc(8px + env(safe-area-inset-bottom));
+}
+
+#tabs > * {
+    max-width: 620px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.tabs,
+.tab-bar {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 4px;
+    max-width: 620px;
+    margin: 0 auto;
+}
+
+#tabs button {
+    margin: 0;
+    padding: 7px 2px;
+    background: transparent;
+    color: #666;
+    border-radius: 10px;
+    font-size: 9px;
+}
+
+#tabs button:hover {
+    background: #f1f1f1;
+}
+
+/* =========================
    REINICIAR
-========================================================= */
+========================= */
+
 .restart-section {
     margin-top: 30px;
-    padding-top: 10px;
-    border-top: 1px solid #202020;
 }
-.restart-section .main-button {
-    opacity: .65;
-}
-/* =========================================================
-   CELULARES PEQUENOS
-========================================================= */
-@media (max-width: 390px) {
-    .home-container {
-        padding-left: 10px;
-        padding-right: 10px;
+
+/* =========================
+   RESPONSIVO
+========================= */
+
+@media (min-width: 700px) {
+
+    body {
+        background: #e9e9e9;
     }
-    .fighter-header {
-        padding: 17px;
+
+    #content {
+        padding-top: 30px;
     }
-    .fighter-avatar {
-        width: 76px;
-        height: 76px;
-        min-width: 76px;
+
+    .stats-grid {
+        grid-template-columns: repeat(4, 1fr);
     }
-    .fighter-name {
-        font-size: 21px;
-    }
-    .fight-versus {
-        gap: 4px;
+
+    .quick-grid {
+        grid-template-columns: repeat(4, 1fr);
     }
 }
