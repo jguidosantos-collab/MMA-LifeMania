@@ -368,8 +368,8 @@ function startGame() {
             </div>
 
             <button
-                class="start-button"
-                onclick="openCharacterCreation()">
+    class="start-button"
+    onclick="openCreation()">
 
                 🆕 CRIAR NOVO LUTADOR
 
