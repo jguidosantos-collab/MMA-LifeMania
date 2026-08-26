@@ -656,3 +656,117 @@ const promotions = [
     }
 
 ];
+/* =========================================================
+   TELA DE CARREIRA
+========================================================= */
+
+function career() {
+
+    ensurePlayer();
+
+    const content = getElement("content");
+
+    if (!content) {
+        return;
+    }
+
+    const player = window.player;
+
+    const amateur = player.amateur || {};
+    const professional = player.professional || {};
+
+    content.innerHTML = `
+
+        <div class="card">
+
+            <div class="title">
+                🥊 CARREIRA
+            </div>
+
+            <p>
+                Construa sua carreira no MMA.
+            </p>
+
+        </div>
+
+
+        <div class="card">
+
+            <div class="title">
+                📊 SEU RECORD
+            </div>
+
+            <div class="statline">
+                <span>Amador</span>
+                <b>
+                    ${amateur.wins || 0}-
+                    ${amateur.losses || 0}-
+                    ${amateur.draws || 0}
+                </b>
+            </div>
+
+            <div class="statline">
+                <span>Profissional</span>
+                <b>
+                    ${professional.wins || 0}-
+                    ${professional.losses || 0}-
+                    ${professional.draws || 0}
+                </b>
+            </div>
+
+            <div class="statline">
+                <span>Status</span>
+                <b>
+                    ${
+                        professional.active
+                            ? "Profissional"
+                            : "Amador"
+                    }
+                </b>
+            </div>
+
+        </div>
+
+
+        <div class="card">
+
+            <div class="title">
+                🏢 ORGANIZAÇÕES
+            </div>
+
+            <p>
+                Estas são as organizações disponíveis
+                ao longo da sua carreira.
+            </p>
+
+            ${promotions.map(function(promotion) {
+
+                return `
+
+                    <div class="statline">
+
+                        <span>
+                            ${promotion.name}
+                        </span>
+
+                        <b>
+                            Nível ${promotion.level}
+                        </b>
+
+                    </div>
+
+                `;
+
+            }).join("")}
+
+        </div>
+
+    `;
+}
+
+
+/* =========================================================
+   FUNÇÃO GLOBAL
+========================================================= */
+
+window.career = career;
