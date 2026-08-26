@@ -1241,17 +1241,21 @@ function rest() {
 ========================================================= */
 function resetGame() {
 
-    if (!confirm("Apagar esta carreira e começar novamente?")) {
+    const confirmed = confirm(
+        "Apagar esta carreira e criar um novo lutador?"
+    );
+
+    if (!confirmed) {
         return;
     }
 
-    // Apaga o save
+    // Apaga a carreira salva
     localStorage.removeItem("mmaLifePlayer");
 
-    // Limpa o jogador atual
-    window.player = null;
+    // Cria um jogador novo
+    window.player = createDefaultPlayer();
 
-    // Esconde o jogo
+    // Esconde o jogo e o menu
     const game = getElement("game");
     const tabs = getElement("tabs");
 
@@ -1265,73 +1269,16 @@ function resetGame() {
         tabs.style.display = "none";
     }
 
-    // Mostra a criação
+    // Mostra novamente a tela inicial
     const creation = getElement("creation");
-    const creator = getElement("creator");
 
     if (creation) {
         creation.classList.remove("hidden");
         creation.style.display = "block";
-        creation.style.visibility = "visible";
-        creation.style.opacity = "1";
     }
 
-    // Recria a tela inicial
-    if (creator) {
-
-        creator.innerHTML = `
-
-            <div class="start-screen">
-
-                <div class="start-logo">
-                    🥊
-                </div>
-
-                <h1>
-                    MMA LIFE
-                </h1>
-
-                <p class="start-subtitle">
-                    CONSTRUA SUA CARREIRA.<br>
-                    ESCREVA SEU LEGADO.
-                </p>
-
-                <div class="start-preview">
-
-                    <div class="start-fighter">
-                        🥊
-                    </div>
-
-                    <div class="start-preview-text">
-
-                        <strong>
-                            SUA HISTÓRIA COMEÇA AQUI
-                        </strong>
-
-                        <span>
-                            Comece como amador,
-                            evolua seu lutador,
-                            consiga contratos,
-                            conquiste títulos
-                            e construa seu legado.
-                        </span>
-
-                    </div>
-
-                </div>
-
-                <button
-                    class="start-button"
-                    onclick="openCharacterCreation()">
-
-                    🆕 CRIAR NOVO LUTADOR
-
-                </button>
-
-            </div>
-
-        `;
-    }
+    // Reconstrói a tela de início
+    startGame();
 }
 
 
