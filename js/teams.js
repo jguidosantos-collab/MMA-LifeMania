@@ -1,13 +1,14 @@
 /* =========================================================
    🏢 SISTEMA DE ACADEMIAS / EQUIPES
    ========================================================= */
+
+
 /* =========================================================
    🏢 BASE DE ACADEMIAS
-   ========================================================= */
+========================================================= */
+
 const teams = [
-    /* =====================================================
-       🇧🇷 BRASIL — REGIONAIS / BOAS
-       ===================================================== */
+
     {
         name: "National Combat Academy",
         country: "Brasil",
@@ -19,6 +20,7 @@ const teams = [
         monthlyCost: 120,
         fightFee: 10
     },
+
     {
         name: "Team Fortaleza MMA",
         country: "Brasil",
@@ -30,6 +32,7 @@ const teams = [
         monthlyCost: 100,
         fightFee: 10
     },
+
     {
         name: "Curitiba Fight Team",
         country: "Brasil",
@@ -41,9 +44,7 @@ const teams = [
         monthlyCost: 130,
         fightFee: 11
     },
-    /* =====================================================
-       🇧🇷 BRASIL — NÍVEL NACIONAL
-       ===================================================== */
+
     {
         name: "Nova União",
         country: "Brasil",
@@ -55,6 +56,7 @@ const teams = [
         monthlyCost: 500,
         fightFee: 12
     },
+
     {
         name: "Chute Boxe",
         country: "Brasil",
@@ -66,6 +68,7 @@ const teams = [
         monthlyCost: 550,
         fightFee: 13
     },
+
     {
         name: "Fighting Nerds",
         country: "Brasil",
@@ -77,6 +80,7 @@ const teams = [
         monthlyCost: 600,
         fightFee: 14
     },
+
     {
         name: "Team Nogueira",
         country: "Brasil",
@@ -88,9 +92,7 @@ const teams = [
         monthlyCost: 480,
         fightFee: 12
     },
-    /* =====================================================
-       🇺🇸 ESTADOS UNIDOS
-       ===================================================== */
+
     {
         name: "American Top Team",
         country: "Estados Unidos",
@@ -102,6 +104,7 @@ const teams = [
         monthlyCost: 1000,
         fightFee: 15
     },
+
     {
         name: "American Kickboxing Academy",
         country: "Estados Unidos",
@@ -113,6 +116,7 @@ const teams = [
         monthlyCost: 950,
         fightFee: 15
     },
+
     {
         name: "Jackson-Wink MMA",
         country: "Estados Unidos",
@@ -124,6 +128,7 @@ const teams = [
         monthlyCost: 900,
         fightFee: 14
     },
+
     {
         name: "Kings MMA",
         country: "Estados Unidos",
@@ -135,6 +140,7 @@ const teams = [
         monthlyCost: 850,
         fightFee: 14
     },
+
     {
         name: "Xtreme Couture",
         country: "Estados Unidos",
@@ -146,6 +152,7 @@ const teams = [
         monthlyCost: 850,
         fightFee: 14
     },
+
     {
         name: "Kill Cliff FC",
         country: "Estados Unidos",
@@ -157,9 +164,7 @@ const teams = [
         monthlyCost: 900,
         fightFee: 15
     },
-    /* =====================================================
-       🇨🇦 CANADÁ
-       ===================================================== */
+
     {
         name: "Tristar Gym",
         country: "Canadá",
@@ -171,9 +176,7 @@ const teams = [
         monthlyCost: 800,
         fightFee: 14
     },
-    /* =====================================================
-       🇳🇿 NOVA ZELÂNDIA
-       ===================================================== */
+
     {
         name: "City Kickboxing",
         country: "Nova Zelândia",
@@ -185,9 +188,7 @@ const teams = [
         monthlyCost: 850,
         fightFee: 15
     },
-    /* =====================================================
-       🇹🇭 TAILÂNDIA
-       ===================================================== */
+
     {
         name: "Tiger Muay Thai",
         country: "Tailândia",
@@ -199,9 +200,7 @@ const teams = [
         monthlyCost: 650,
         fightFee: 13
     },
-    /* =====================================================
-       🇫🇷 FRANÇA
-       ===================================================== */
+
     {
         name: "MMA Factory",
         country: "França",
@@ -213,9 +212,7 @@ const teams = [
         monthlyCost: 700,
         fightFee: 13
     },
-    /* =====================================================
-       🇮🇪 IRLANDA
-       ===================================================== */
+
     {
         name: "SBG Ireland",
         country: "Irlanda",
@@ -227,9 +224,7 @@ const teams = [
         monthlyCost: 650,
         fightFee: 13
     },
-    /* =====================================================
-       🇯🇵 JAPÃO
-       ===================================================== */
+
     {
         name: "RIZIN Training Camp",
         country: "Japão",
@@ -241,9 +236,7 @@ const teams = [
         monthlyCost: 600,
         fightFee: 12
     },
-    /* =====================================================
-       🇷🇺 RÚSSIA
-       ===================================================== */
+
     {
         name: "Eagles MMA",
         country: "Rússia",
@@ -255,229 +248,290 @@ const teams = [
         monthlyCost: 750,
         fightFee: 14
     }
+
 ];
+
+
 /* =========================================================
    🎲 GERAR OFERTAS
 ========================================================= */
+
 function generateTeamOffers() {
+
     player.teamOffers = [];
+
+
     const reputation =
         Number(
             player.fame || 0
         );
+
+
     const currentCountry =
         player.country ||
         "Brasil";
-    /*
-     * Academias próximas ao nível do lutador.
-     */
+
+
     let available =
         teams.filter(
             team => {
-                /*
-                 * Academia muito acima da reputação:
-                 * não aparece normalmente.
-                 */
+
                 if (
                     team.reputation >
                     reputation + 25
                 ) {
+
                     return false;
+
                 }
-                /*
-                 * Academia extremamente acima:
-                 * só pode aparecer através
-                 * de empresário muito forte.
-                 */
+
+
                 if (
                     team.reputation >= 90 &&
                     reputation < 60
                 ) {
+
                     if (
                         !player.manager ||
                         player.manager.contacts < 80
                     ) {
+
                         return false;
+
                     }
+
                 }
+
+
                 return true;
+
             }
         );
-    /*
-     * Prioriza academias do país do lutador.
-     */
+
+
     const localTeams =
         available.filter(
             team =>
                 team.country ===
                 currentCountry
         );
+
+
     const foreignTeams =
         available.filter(
             team =>
                 team.country !==
                 currentCountry
         );
-    /*
-     * Maioria das oportunidades
-     * vem do próprio país.
-     */
-    available =
-        [
-            ...localTeams,
-            ...foreignTeams
-        ];
-    /*
-     * Embaralha.
-     */
+
+
+    available = [
+        ...localTeams,
+        ...foreignTeams
+    ];
+
+
     available =
         [...available].sort(
             () =>
                 Math.random() -
                 0.5
         );
-    /*
-     * Até 3 ofertas.
-     */
+
+
     player.teamOffers =
         available.slice(
             0,
             3
         );
+
 }
+
+
 /* =========================================================
    🥊 ENTRAR NA ACADEMIA
 ========================================================= */
+
 function joinTeam(index) {
+
     if (
         !player.teamOffers ||
         !player.teamOffers[index]
     ) {
+
         return;
+
     }
+
+
     const team =
         player.teamOffers[index];
+
+
     const fame =
         Number(
             player.fame || 0
         );
-    /*
-     * Requisito de reputação.
-     */
+
+
     if (
         fame + 25 <
         team.reputation
     ) {
+
         alert(
+
             "❌ A academia recusou você.\n\n" +
+
             team.name +
             "\n\n" +
+
             "Reputação necessária: " +
             team.reputation +
             "\n" +
+
             "Sua reputação: " +
             Math.round(fame)
+
         );
+
         return;
+
     }
-    /*
-     * Verifica dinheiro inicial.
-     */
+
+
     if (
         player.money <
         team.monthlyCost
     ) {
+
         alert(
-            "💰 Você não possui dinheiro " +
-            "suficiente para pagar a mensalidade."
+            "💰 Você não possui dinheiro suficiente para pagar a mensalidade."
         );
+
         return;
+
     }
+
+
     player.team =
         team;
+
+
+    player.log =
+        player.log || [];
+
+
     player.log.unshift(
+
         "🏢 Você entrou para " +
         team.name +
         " em " +
         team.city +
         ", " +
         team.country
+
     );
+
+
     save();
+
+
     alert(
+
         "🥊 NOVA ACADEMIA!\n\n" +
+
         team.name +
         "\n\n" +
+
         "📍 " +
         team.city +
         ", " +
         team.country +
         "\n\n" +
+
         "⭐ Reputação: " +
         team.reputation +
         "\n" +
+
         "💪 Qualidade: " +
         team.quality +
         "\n" +
+
         "💵 Mensalidade: $" +
         team.monthlyCost +
         "\n" +
+
         "🥊 Comissão por luta: " +
         team.fightFee +
         "%"
+
     );
+
+
     teamScreen();
+
 }
+
+
 /* =========================================================
    🥊 TESTE NA ACADEMIA
 ========================================================= */
+
 function tryoutTeam(index) {
+
     if (
         !player.teamOffers ||
         !player.teamOffers[index]
     ) {
+
         return;
+
     }
+
+
     const team =
         player.teamOffers[index];
+
+
     const fame =
         Number(
             player.fame || 0
         );
-    /*
-     * Diferença entre reputação
-     * do lutador e da academia.
-     */
+
+
     const difference =
         team.reputation -
         fame;
-    /*
-     * Chance base.
-     */
+
+
     let chance =
         70;
-    /*
-     * Academia muito acima:
-     * teste fica difícil.
-     */
+
+
     if (
         difference > 20
     ) {
+
         chance -=
             difference;
+
     }
-    /*
-     * Empresário ajuda.
-     */
+
+
     if (
         player.manager
     ) {
+
         chance +=
             Math.min(
                 20,
                 player.manager.contacts / 10
             );
+
     }
+
+
     chance =
         Math.max(
             5,
@@ -486,230 +540,314 @@ function tryoutTeam(index) {
                 chance
             )
         );
+
+
     const success =
         Math.random() * 100 <
         chance;
+
+
     if (!success) {
+
         alert(
+
             "❌ TESTE REPROVADO!\n\n" +
+
             team.name +
             "\n\n" +
-            "A academia considera que você " +
-            "ainda precisa evoluir antes de entrar."
+
+            "A academia considera que você ainda precisa evoluir antes de entrar."
+
         );
+
         return;
+
     }
-    /*
-     * Teste aprovado.
-     */
+
+
     joinTeam(index);
+
 }
+
+
 /* =========================================================
    💰 CUSTO MENSAL
 ========================================================= */
+
 function payTeamMonthlyCost() {
+
     if (
         !player.team
     ) {
+
         return;
+
     }
+
+
     const cost =
         Number(
             player.team.monthlyCost || 0
         );
+
+
     if (
         cost <= 0
     ) {
+
         return;
+
     }
+
+
     if (
         player.money >= cost
     ) {
+
         player.money -=
             cost;
+
+
         player.log.unshift(
+
             "🏢 Mensalidade paga: $" +
             cost +
             " — " +
             player.team.name
+
         );
+
     }
     else {
+
         player.log.unshift(
+
             "⚠️ Você não conseguiu pagar a mensalidade da academia."
+
         );
+
     }
+
+
     save();
+
 }
+
+
 /* =========================================================
-   💰 DESCONTO DA ACADEMIA NA LUTA
+   💰 DESCONTO DA ACADEMIA
 ========================================================= */
-function calculateTeamFightCut(amount) {
+
+function calculateTeamFightCut(
+    amount
+) {
+
     if (
         !player.team
     ) {
+
         return 0;
+
     }
+
+
     const fee =
         Number(
             player.team.fightFee || 0
         );
+
+
     return (
         Number(amount || 0) *
         fee /
         100
     );
+
 }
+
+
 /* =========================================================
-   💰 PAGAMENTO FINAL DA LUTA
+   💰 PAGAMENTO FINAL
 ========================================================= */
+
 function calculateFightPayout(
     purse,
     winBonus
 ) {
+
     const gross =
         Number(purse || 0) +
         Number(winBonus || 0);
+
+
     let managerCut =
         0;
+
+
     let teamCut =
         0;
-    /*
-     * EMPRESÁRIO
-     */
+
+
     if (
         player.manager
     ) {
+
         managerCut =
             gross *
             Number(
                 player.manager.commission || 0
             ) /
             100;
+
     }
-    /*
-     * ACADEMIA
-     */
+
+
     if (
         player.team
     ) {
+
         teamCut =
             gross *
             Number(
                 player.team.fightFee || 0
             ) /
             100;
+
     }
+
+
     const net =
         gross -
         managerCut -
         teamCut;
+
+
     return {
+
         gross:
             gross,
+
         managerCut:
             managerCut,
+
         teamCut:
             teamCut,
+
         net:
             Math.max(
                 0,
                 net
             )
+
     };
+
 }
+
+
 /* =========================================================
    🏢 TELA DE EQUIPE
 ========================================================= */
+
 function teamScreen() {
+
     const team =
         player.team || null;
+
+
     const manager =
         player.manager || null;
+
+
     const content =
         document.getElementById(
             "content"
         );
+
+
     if (!content) {
+
         return;
+
     }
+
+
     content.innerHTML = `
+
         <!-- =================================================
              ACADEMIA
         ================================================== -->
+
         <div class="card">
+
             <div class="title">
                 🏢 ACADEMIA
             </div>
+
+
             ${
                 team
                 ?
                 `
+
                 <div class="statline">
                     <span>Academia atual</span>
-                    <b>
-                        ${team.name}
-                    </b>
+                    <b>${team.name}</b>
                 </div>
+
                 <div class="statline">
                     <span>País</span>
-                    <b>
-                        ${team.country || "Não informado"}
-                    </b>
+                    <b>${team.country || "Não informado"}</b>
                 </div>
+
                 <div class="statline">
                     <span>Cidade</span>
-                    <b>
-                        ${team.city || "Não informado"}
-                    </b>
+                    <b>${team.city || "Não informado"}</b>
                 </div>
+
                 <div class="statline">
                     <span>Nível</span>
-                    <b>
-                        ${team.level || "Regional"}
-                    </b>
+                    <b>${team.level || "Regional"}</b>
                 </div>
+
                 <div class="statline">
                     <span>Reputação</span>
-                    <b>
-                        ${team.reputation || 0}
-                    </b>
+                    <b>${team.reputation || 0}</b>
                 </div>
+
                 <div class="statline">
                     <span>Qualidade</span>
-                    <b>
-                        ${team.quality || 0}
-                    </b>
+                    <b>${team.quality || 0}</b>
                 </div>
+
                 <div class="statline">
                     <span>Especialidade</span>
-                    <b>
-                        ${team.specialty || "MMA"}
-                    </b>
+                    <b>${team.specialty || "MMA"}</b>
                 </div>
+
                 <div class="statline">
                     <span>Mensalidade</span>
-                    <b>
-                        $${team.monthlyCost || 0}
-                    </b>
+                    <b>$${team.monthlyCost || 0}</b>
                 </div>
+
                 <div class="statline">
                     <span>Comissão por luta</span>
-                    <b>
-                        ${team.fightFee || 0}%
-                    </b>
+                    <b>${team.fightFee || 0}%</b>
                 </div>
+
                 `
                 :
                 `
+
                 <p>
                     🥊 Você ainda não possui uma academia.
                 </p>
+
                 `
             }
+
+
             <button
-                type="button"
-                class="main-button"
+                class="green"
                 onclick="
                     generateTeamOffers();
                     teamScreen();
@@ -717,198 +855,290 @@ function teamScreen() {
             >
                 🔎 PROCURAR ACADEMIAS
             </button>
+
         </div>
+
+
         <!-- =================================================
-             OFERTAS DE ACADEMIAS
+             OFERTAS DE ACADEMIA
         ================================================== -->
+
         ${
             (player.teamOffers || [])
                 .map(
                     (offer, index) => `
+
                     <div class="card">
+
                         <div class="title">
                             🏢 ${offer.name}
                         </div>
+
                         <div class="statline">
                             <span>País</span>
-                            <b>
-                                ${offer.country}
-                            </b>
+                            <b>${offer.country}</b>
                         </div>
+
                         <div class="statline">
                             <span>Cidade</span>
-                            <b>
-                                ${offer.city}
-                            </b>
+                            <b>${offer.city}</b>
                         </div>
+
                         <div class="statline">
                             <span>Nível</span>
-                            <b>
-                                ${offer.level}
-                            </b>
+                            <b>${offer.level}</b>
                         </div>
+
                         <div class="statline">
                             <span>Reputação</span>
-                            <b>
-                                ${offer.reputation}
-                            </b>
+                            <b>${offer.reputation}</b>
                         </div>
+
                         <div class="statline">
                             <span>Qualidade</span>
-                            <b>
-                                ${offer.quality}
-                            </b>
+                            <b>${offer.quality}</b>
                         </div>
+
                         <div class="statline">
                             <span>Especialidade</span>
-                            <b>
-                                ${offer.specialty}
-                            </b>
+                            <b>${offer.specialty}</b>
                         </div>
+
                         <div class="statline">
                             <span>Mensalidade</span>
-                            <b>
-                                $${offer.monthlyCost}
-                            </b>
+                            <b>$${offer.monthlyCost}</b>
                         </div>
+
                         <div class="statline">
                             <span>Comissão por luta</span>
-                            <b>
-                                ${offer.fightFee}%
-                            </b>
+                            <b>${offer.fightFee}%</b>
                         </div>
+
                         <button
-                            type="button"
                             class="green"
-                            onclick="
-                                joinTeam(${index})
-                            "
+                            onclick="joinTeam(${index})"
                         >
                             🤝 ENTRAR
                         </button>
+
                         <button
-                            type="button"
                             class="blue"
-                            onclick="
-                                tryoutTeam(${index})
-                            "
+                            onclick="tryoutTeam(${index})"
                         >
                             🥊 FAZER TESTE
                         </button>
+
                     </div>
-                `
+
+                    `
                 )
                 .join("")
         }
+
+
         <!-- =================================================
              EMPRESÁRIO
         ================================================== -->
+
         <div class="card">
+
             <div class="title">
                 👔 EMPRESÁRIO
             </div>
+
+
             ${
                 manager
                 ?
                 `
+
                 <div class="statline">
                     <span>Empresário</span>
-                    <b>
-                        ${manager.name}
-                    </b>
+                    <b>${manager.name}</b>
                 </div>
+
                 <div class="statline">
                     <span>Nível</span>
-                    <b>
-                        ${manager.level}
-                    </b>
+                    <b>${manager.level}</b>
                 </div>
+
                 <div class="statline">
                     <span>Comissão</span>
-                    <b>
-                        ${manager.commission || 0}%
-                    </b>
+                    <b>${manager.commission || 0}%</b>
                 </div>
+
                 <div class="statline">
                     <span>Contatos</span>
-                    <b>
-                        ${manager.contacts || 0}
-                    </b>
+                    <b>${manager.contacts || 0}</b>
                 </div>
+
                 <div class="statline">
                     <span>Negociação</span>
-                    <b>
-                        ${manager.negotiation || 0}
-                    </b>
+                    <b>${manager.negotiation || 0}</b>
                 </div>
+
                 <div class="statline">
                     <span>Acesso internacional</span>
-                    <b>
-                        ${manager.internationalAccess || 0}
-                    </b>
+                    <b>${manager.internationalAccess || 0}</b>
                 </div>
+
+
+                ${
+                    manager.contract
+                    ?
+                    `
+
+                    <div class="statline">
+                        <span>Contrato</span>
+                        <b>
+                            ${
+                                manager.contract.active
+                                ? "Ativo"
+                                : "Encerrado"
+                            }
+                        </b>
+                    </div>
+
+                    <div class="statline">
+                        <span>Anos restantes</span>
+                        <b>
+                            ${
+                                manager.contract.yearsRemaining || 0
+                            }
+                        </b>
+                    </div>
+
+                    <div class="statline">
+                        <span>Término</span>
+                        <b>
+                            Ano ${
+                                manager.contract.endYear || "-"
+                            }
+                        </b>
+                    </div>
+
+                    ${
+                        manager.contract.active
+                        ?
+                        `
+
+                        <button
+                            class="gray"
+                            onclick="
+                                terminateManagerContract()
+                            "
+                        >
+                            ⚖️ RESCINDIR CONTRATO
+                        </button>
+
+                        `
+                        :
+                        `
+
+                        <button
+                            class="green"
+                            onclick="
+                                renegotiateManagerContract()
+                            "
+                        >
+                            🤝 RENEGOCIAR CONTRATO
+                        </button>
+
+                        `
+                    }
+
+                    `
+                    :
+                    `
+
+                    <div class="statline">
+                        <span>Contrato</span>
+                        <b>
+                            Sem contrato
+                        </b>
+                    </div>
+
+                    `
+                }
+
                 `
                 :
                 `
+
                 <p>
-                    👔 Você ainda não possui um empresário.
+                    👔 Você ainda não possui empresário.
                 </p>
+
                 `
             }
-            <button
-                type="button"
-                class="gray"
-                onclick="
-                    generateManagerOffers();
-                    teamScreen();
-                "
-            >
-                👔 PROCURAR EMPRESÁRIOS
-            </button>
+
+
+            ${
+                !hasActiveManagerContract()
+                ?
+                `
+
+                <button
+                    class="gray"
+                    onclick="
+                        generateManagerOffers();
+                        teamScreen();
+                    "
+                >
+                    👔 PROCURAR EMPRESÁRIOS
+                </button>
+
+                `
+                :
+                ""
+            }
+
         </div>
+
+
         <!-- =================================================
              OFERTAS DE EMPRESÁRIOS
         ================================================== -->
+
         ${
+            !hasActiveManagerContract()
+            ?
             (player.managerOffers || [])
                 .map(
                     (managerOffer, index) => `
+
                     <div class="card">
+
                         <div class="title">
                             👔 ${managerOffer.name}
                         </div>
+
                         <div class="statline">
                             <span>Nível</span>
-                            <b>
-                                ${managerOffer.level}
-                            </b>
+                            <b>${managerOffer.level}</b>
                         </div>
+
                         <div class="statline">
                             <span>Comissão</span>
-                            <b>
-                                ${managerOffer.commission || 0}%
-                            </b>
+                            <b>${managerOffer.commission || 0}%</b>
                         </div>
+
                         <div class="statline">
                             <span>Contatos</span>
-                            <b>
-                                ${managerOffer.contacts || 0}
-                            </b>
+                            <b>${managerOffer.contacts || 0}</b>
                         </div>
+
                         <div class="statline">
                             <span>Negociação</span>
-                            <b>
-                                ${managerOffer.negotiation || 0}
-                            </b>
+                            <b>${managerOffer.negotiation || 0}</b>
                         </div>
+
                         <div class="statline">
                             <span>Acesso internacional</span>
-                            <b>
-                                ${managerOffer.internationalAccess || 0}
-                            </b>
+                            <b>${managerOffer.internationalAccess || 0}</b>
                         </div>
+
                         <button
-                            type="button"
                             class="gray"
                             onclick="
                                 hireManager(${index})
@@ -916,10 +1146,16 @@ function teamScreen() {
                         >
                             🤝 CONTRATAR
                         </button>
+
                     </div>
-                `
+
+                    `
                 )
                 .join("")
+            :
+            ""
         }
+
     `;
+
 }
