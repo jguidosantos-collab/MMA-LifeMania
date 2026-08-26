@@ -134,17 +134,11 @@ function loadGame() {
    TELA INICIAL
 ========================================================= */
 function startGame() {
-    const creation =
-        getElement("creation");
-    const creator =
-        getElement("creator");
-    const game =
-        getElement("game");
-    if (
-        !creation ||
-        !creator ||
-        !game
-    ) {
+    const creation = getElement("creation");
+    const creator = getElement("creator");
+    const game = getElement("game");
+    const tabs = getElement("tabs");
+    if (!creation || !creator || !game) {
         console.error(
             "Estrutura do index.html não encontrada."
         );
@@ -342,6 +336,10 @@ function createNewPlayer() {
     ];
     window.player =
         newPlayer;
+    /* =====================================================
+       NOVO MUNDO MMA
+       Reinicia somente o mundo ao criar nova carreira.
+    ===================================================== */
     if (
         typeof window.mmaWorld !==
         "undefined"
@@ -355,6 +353,8 @@ function createNewPlayer() {
         window.mmaWorld.eventsThisWeek =
             [];
         window.mmaWorld.news =
+            [];
+        window.mmaWorld.championships =
             [];
     }
     saveGame();
@@ -618,13 +618,31 @@ function home() {
                 :
                 `
                     <p>
-                        Nenhuma luta marcada.
+                        ${
+                            player.professional &&
+                            player.professional.active
+                            ?
+                            "Nenhuma luta marcada. Seu empresário está procurando uma oportunidade."
+                            :
+                            "Nenhuma luta marcada."
+                        }
                     </p>
-                    <button
-                        class="main-button"
-                        onclick="fightScreen()">
-                        ⚔️ CENTRAL DE LUTAS
-                    </button>
+                    ${
+                        !(
+                            player.professional &&
+                            player.professional.active
+                        )
+                        ?
+                        `
+                        <button
+                            class="main-button"
+                            onclick="fightScreen()">
+                            🔎 PROCURAR LUTA
+                        </button>
+                        `
+                        :
+                        ""
+                    }
                 `
             }
         </div>
@@ -659,6 +677,29 @@ function home() {
         </div>
         <div class="card">
             <div class="title">
+                🌎 MUNDO MMA
+            </div>
+            <div class="statline">
+                <span>
+                    Semana do mundo
+                </span>
+                <b>
+                    ${
+                        typeof window.mmaWorld !== "undefined"
+                        ?
+                        window.mmaWorld.week || 0
+                        :
+                        0
+                    }
+                </b>
+            </div>
+            <p>
+                As organizações continuam realizando
+                lutas mesmo quando você não está lutando.
+            </p>
+        </div>
+        <div class="card">
+            <div class="title">
                 ⚙️ JOGO
             </div>
             <button
@@ -680,23 +721,14 @@ function tab(name) {
     if (!content) {
         return;
     }
-    /* =========================
-       INÍCIO
-    ========================= */
     if (name === "home") {
         home();
         return;
     }
-    /* =========================
-       CARREIRA
-    ========================= */
     if (name === "career") {
         career();
         return;
     }
-    /* =========================
-       TREINO
-    ========================= */
     if (name === "train") {
         if (
             typeof window.training ===
@@ -706,42 +738,15 @@ function tab(name) {
         }
         return;
     }
-    /* =========================
-       LUTAS
-    ========================= */
     if (name === "fight") {
-        showGame();
         if (
             typeof window.fightScreen ===
             "function"
         ) {
             window.fightScreen();
         }
-        else {
-            console.error(
-                "fightScreen() não encontrada."
-            );
-            content.innerHTML = `
-                <div class="card">
-                    <div class="title">
-                        ⚔️ LUTAS
-                    </div>
-                    <p>
-                        O sistema de lutas não foi carregado.
-                    </p>
-                    <button
-                        class="main-button"
-                        onclick="tab('home')">
-                        🏠 VOLTAR AO INÍCIO
-                    </button>
-                </div>
-            `;
-        }
         return;
     }
-    /* =========================
-       EQUIPE
-    ========================= */
     if (name === "team") {
         ensurePlayer();
         showGame();
@@ -754,17 +759,45 @@ function tab(name) {
             }
             catch (error) {
                 console.error(
-                    "Erro ao abrir a tela de equipe:",
+                    "Erro ao abrir a tela de Equipe:",
                     error
                 );
+                const content =
+                    getElement("content");
+                if (content) {
+                    content.innerHTML = `
+                        <div class="card">
+                            <div class="title">
+                                🏢 EQUIPE
+                            </div>
+                            <p>
+                                Ocorreu um erro ao abrir
+                                a tela de equipe.
+                            </p>
+                            <button
+                                class="main-button"
+                                onclick="tab('home')">
+                                🏠 VOLTAR AO INÍCIO
+                            </button>
+                        </div>
+                    `;
+                }
+            }
+        }
+        else {
+            console.error(
+                "teamScreen() não encontrada."
+            );
+            const content =
+                getElement("content");
+            if (content) {
                 content.innerHTML = `
                     <div class="card">
                         <div class="title">
                             🏢 EQUIPE
                         </div>
                         <p>
-                            Ocorreu um erro ao abrir
-                            a tela de equipe.
+                            Sistema de equipe não carregado.
                         </p>
                         <button
                             class="main-button"
@@ -775,31 +808,8 @@ function tab(name) {
                 `;
             }
         }
-        else {
-            console.error(
-                "teamScreen() não encontrada."
-            );
-            content.innerHTML = `
-                <div class="card">
-                    <div class="title">
-                        🏢 EQUIPE
-                    </div>
-                    <p>
-                        Sistema de equipe não carregado.
-                    </p>
-                    <button
-                        class="main-button"
-                        onclick="tab('home')">
-                        🏠 VOLTAR AO INÍCIO
-                    </button>
-                </div>
-            `;
-        }
         return;
     }
-    /* =========================
-       VIDA
-    ========================= */
     if (name === "life") {
         showGame();
         if (
@@ -815,15 +825,28 @@ function tab(name) {
         }
         return;
     }
-    /* =========================
-       RANKING
-    ========================= */
     if (name === "ranking") {
+        showGame();
         if (
             typeof window.rankingScreen ===
             "function"
         ) {
             window.rankingScreen();
+        }
+        else {
+            console.error(
+                "rankingScreen() não encontrada."
+            );
+            content.innerHTML = `
+                <div class="card">
+                    <div class="title">
+                        🏆 RANKING
+                    </div>
+                    <p>
+                        Sistema de ranking ainda não carregado.
+                    </p>
+                </div>
+            `;
         }
         return;
     }
@@ -852,6 +875,11 @@ function nextWeek() {
         "function"
     ) {
         try {
+            /*
+             * O mundo possui seu próprio calendário.
+             * Cada avanço do jogador representa uma semana
+             * completa no universo do MMA.
+             */
             window.simulateMMWorldWeek();
         }
         catch (error) {
@@ -916,36 +944,52 @@ function nextWeek() {
     player.fatigue =
         Math.max(
             0,
-            Number(
-                player.fatigue || 0
-            ) - 10
+            Number(player.fatigue || 0) - 10
         );
     player.health =
         Math.min(
             100,
-            Number(
-                player.health || 100
-            ) + 3
+            Number(player.health || 100) + 3
         );
-    /* =====================================================
-       RECUPERAÇÃO PÓS-LUTA
-    ===================================================== */
-    if (
-        Number(player.recoveryWeeks || 0) > 0
-    ) {
-        player.recoveryWeeks =
-            Math.max(
-                0,
-                Number(player.recoveryWeeks) - 1
-            );
-    }
     /* =====================================================
        AVANÇA SEMANA
     ===================================================== */
     player.week =
-        Number(
-            player.week || 1
-        ) + 1;
+        Number(player.week || 1) + 1;
+    /* =====================================================
+       RECUPERAÇÃO PÓS-LUTA
+    ===================================================== */
+    if (
+        typeof window.processFightRecovery ===
+        "function"
+    ) {
+        try {
+            window.processFightRecovery();
+        }
+        catch (error) {
+            console.error(
+                "Erro ao processar recuperação:",
+                error
+            );
+        }
+    }
+    /* =====================================================
+       EMPRESÁRIO PROCURA NOVA LUTA
+    ===================================================== */
+    if (
+        typeof window.processManagerFightOffer ===
+        "function"
+    ) {
+        try {
+            window.processManagerFightOffer();
+        }
+        catch (error) {
+            console.error(
+                "Erro ao procurar nova luta:",
+                error
+            );
+        }
+    }
     /* =====================================================
        NOVO ANO
     ===================================================== */
@@ -954,13 +998,9 @@ function nextWeek() {
     ) {
         player.week = 1;
         player.year =
-            Number(
-                player.year || 2026
-            ) + 1;
+            Number(player.year || 2026) + 1;
         player.age =
-            Number(
-                player.age || 18
-            ) + 1;
+            Number(player.age || 18) + 1;
         player.log =
             player.log || [];
         player.log.unshift(
@@ -982,47 +1022,12 @@ function nextWeek() {
         }
     }
     /* =====================================================
-       OFERTAS DO EMPRESÁRIO
+       SALVAR
     ===================================================== */
-    /*
-     * O empresário não apresenta uma luta imediatamente
-     * após cada luta.
-     *
-     * Ele procura oportunidades durante a carreira.
-     *
-     * A oferta é criada pelo fights.js através de
-     * managerFindFight().
-     */
-    if (
-        player.professional &&
-        player.professional.active &&
-        player.manager &&
-        !player.nextFight &&
-        !player.fightOffer &&
-        Number(player.recoveryWeeks || 0) <= 0
-    ) {
-        /*
-         * Existe uma chance de o empresário encontrar
-         * uma nova oportunidade nesta semana.
-         */
-        if (Math.random() < 0.30) {
-            if (
-                typeof window.managerFindFight ===
-                "function"
-            ) {
-                try {
-                    window.managerFindFight();
-                }
-                catch (error) {
-                    console.error(
-                        "Erro ao procurar luta pelo empresário:",
-                        error
-                    );
-                }
-            }
-        }
-    }
     saveGame();
+    /* =====================================================
+       ATUALIZAR TELA
+    ===================================================== */
     home();
 }
 /* =========================================================
@@ -1035,16 +1040,12 @@ function rest() {
     player.fatigue =
         Math.max(
             0,
-            Number(
-                player.fatigue || 0
-            ) - 15
+            Number(player.fatigue || 0) - 15
         );
     player.health =
         Math.min(
             100,
-            Number(
-                player.health || 100
-            ) + 5
+            Number(player.health || 100) + 5
         );
     nextWeek();
 }
@@ -1077,6 +1078,8 @@ function resetGame() {
         window.mmaWorld.eventsThisWeek =
             [];
         window.mmaWorld.news =
+            [];
+        window.mmaWorld.championships =
             [];
     }
     const game =
@@ -1318,6 +1321,10 @@ function initializeMmaLife() {
             window.player.name
         ) {
             showGame();
+            /*
+             * O mundo será inicializado pelo
+             * sistema de eventos/ranking quando necessário.
+             */
             home();
             return;
         }
