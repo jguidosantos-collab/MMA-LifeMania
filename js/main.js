@@ -2743,3 +2743,724 @@ window.addEventListener("load", function () {
         }
     }, 100);
 });
+/* =========================================================
+   SISTEMA DE OVERALL + POTENCIAL + ATRIBUTOS AVANÇADOS
+========================================================= */
+
+function randomPotential() {
+    // Maioria dos atletas fica entre 78 e 94.
+    // Talentos excepcionais podem chegar a 98.
+    const roll = Math.random();
+
+    if (roll < 0.05) return randomDecimal(94, 98);
+    if (roll < 0.20) return randomDecimal(90, 94);
+    if (roll < 0.50) return randomDecimal(85, 90);
+    if (roll < 0.80) return randomDecimal(80, 85);
+
+    return randomDecimal(78, 80);
+}
+
+function randomDecimal(min, max) {
+    return Math.round(
+        (min + Math.random() * (max - min)) * 100
+    ) / 100;
+}
+
+/* =========================================================
+   ATRIBUTOS DAS MODALIDADES
+========================================================= */
+
+function createAdvancedAttributes() {
+
+    return {
+
+        boxing: {
+            jab: 60,
+            straight: 60,
+            hook: 60,
+            uppercut: 60,
+            defense: 60,
+            dodge: 60,
+            blocking: 60,
+            counter: 60
+        },
+
+        muayThai: {
+            attack: 60,
+            defense: 60,
+            clinch: 60,
+            elbows: 60,
+            knees: 60,
+            kicks: 60,
+            blocking: 60,
+            chin: 60
+        },
+
+        kickboxing: {
+            attack: 60,
+            defense: 60,
+            combinations: 60,
+            kicks: 60,
+            punches: 60,
+            blocking: 60,
+            movement: 60
+        },
+
+        wrestling: {
+            takedown: 60,
+            takedownDefense: 60,
+            control: 60,
+            pressure: 60,
+            scramble: 60,
+            clinch: 60
+        },
+
+        jiuJitsu: {
+            guard: 60,
+            passing: 60,
+            control: 60,
+            submission: 60,
+            submissionDefense: 60,
+            transitions: 60
+        },
+
+        physical: {
+            strength: 60,
+            speed: 60,
+            cardio: 60,
+            explosiveness: 60,
+            recovery: 60
+        },
+
+        mental: {
+            fightIQ: 60,
+            discipline: 60,
+            confidence: 60,
+            composure: 60,
+            experience: 60
+        }
+
+    };
+
+}
+
+/* =========================================================
+   POTENCIAL POR ATRIBUTO
+========================================================= */
+
+function createPotentialAttributes() {
+
+    return {
+
+        boxing: {},
+        muayThai: {},
+        kickboxing: {},
+        wrestling: {},
+        jiuJitsu: {},
+        physical: {},
+        mental: {}
+
+    };
+
+}
+
+/* =========================================================
+   GERAR POTENCIAL INDIVIDUAL
+========================================================= */
+
+function generateAttributePotentials() {
+
+    const attributes =
+        createAdvancedAttributes();
+
+    const potentials =
+        createPotentialAttributes();
+
+    Object.keys(attributes).forEach(category => {
+
+        Object.keys(attributes[category])
+            .forEach(attribute => {
+
+                potentials[category][attribute] =
+                    Math.round(
+                        randomDecimal(
+                            78,
+                            98
+                        ) * 100
+                    ) / 100;
+
+            });
+
+    });
+
+    return potentials;
+
+}
+
+/* =========================================================
+   CALCULAR MÉDIA DE UMA MODALIDADE
+========================================================= */
+
+function categoryOverall(category) {
+
+    if (
+        !player.advancedAttributes ||
+        !player.advancedAttributes[category]
+    ) {
+        return 60;
+    }
+
+    const values =
+        Object.values(
+            player.advancedAttributes[category]
+        );
+
+    if (!values.length) {
+        return 60;
+    }
+
+    const total =
+        values.reduce(
+            (sum, value) =>
+                sum + Number(value || 0),
+            0
+        );
+
+    return Math.round(
+        (total / values.length) * 100
+    ) / 100;
+
+}
+
+/* =========================================================
+   CALCULAR OVERALL GERAL
+========================================================= */
+
+function calculateOverall() {
+
+    const categories = {
+
+        boxing: 0.18,
+
+        muayThai: 0.18,
+
+        kickboxing: 0.12,
+
+        wrestling: 0.16,
+
+        jiuJitsu: 0.14,
+
+        physical: 0.12,
+
+        mental: 0.10
+
+    };
+
+    let overall = 0;
+
+    Object.keys(categories)
+        .forEach(category => {
+
+            overall +=
+                categoryOverall(category) *
+                categories[category];
+
+        });
+
+    /*
+     * O OVR nunca passa do potencial.
+     */
+
+    const potential =
+        Number(
+            player.potential || 90
+        );
+
+    overall =
+        Math.min(
+            overall,
+            potential
+        );
+
+    return Math.round(
+        overall * 100
+    ) / 100;
+
+}
+
+/* =========================================================
+   INICIALIZAR OVERALL DO LUTADOR
+========================================================= */
+
+function initializeOverallSystem() {
+
+    if (
+        !player.advancedAttributes
+    ) {
+
+        player.advancedAttributes =
+            createAdvancedAttributes();
+
+    }
+
+    if (
+        !player.attributePotential
+    ) {
+
+        player.attributePotential =
+            generateAttributePotentials();
+
+    }
+
+    if (
+        !player.potential
+    ) {
+
+        player.potential =
+            randomPotential();
+
+    }
+
+    /*
+     * Todo lutador novo começa
+     * aproximadamente em 60 OVR.
+     */
+
+    if (
+        player.overall === undefined ||
+        player.overall === null
+    ) {
+
+        player.overall = 60;
+
+    }
+
+}
+
+/* =========================================================
+   EVOLUÇÃO DECIMAL
+========================================================= */
+
+function improveAttribute(
+    category,
+    attribute,
+    amount
+) {
+
+    if (
+        !player.advancedAttributes ||
+        !player.advancedAttributes[category]
+    ) {
+        return;
+    }
+
+    if (
+        player.advancedAttributes[category][attribute]
+        === undefined
+    ) {
+        return;
+    }
+
+    const current =
+        Number(
+            player.advancedAttributes[category][attribute]
+        );
+
+    const potential =
+        Number(
+            player.attributePotential?.[category]?.[attribute]
+            || player.potential
+            || 90
+        );
+
+    let newValue =
+        current + Number(amount || 0);
+
+    /*
+     * Nunca ultrapassa o potencial individual.
+     */
+
+    newValue =
+        Math.min(
+            newValue,
+            potential
+        );
+
+    /*
+     * Nunca ultrapassa 100.
+     */
+
+    newValue =
+        Math.min(
+            newValue,
+            100
+        );
+
+    player.advancedAttributes[category][attribute] =
+        Math.round(
+            newValue * 100
+        ) / 100;
+
+    player.overall =
+        calculateOverall();
+
+}
+
+/* =========================================================
+   TREINO AUTOMÁTICO
+========================================================= */
+
+function automaticTraining(type) {
+
+    initializeOverallSystem();
+
+    const trainingMap = {
+
+        boxing: [
+            ["boxing", "jab"],
+            ["boxing", "straight"],
+            ["boxing", "hook"],
+            ["boxing", "defense"],
+            ["boxing", "blocking"]
+        ],
+
+        muayThai: [
+            ["muayThai", "attack"],
+            ["muayThai", "clinch"],
+            ["muayThai", "elbows"],
+            ["muayThai", "knees"],
+            ["muayThai", "kicks"],
+            ["muayThai", "blocking"]
+        ],
+
+        kickboxing: [
+            ["kickboxing", "attack"],
+            ["kickboxing", "combinations"],
+            ["kickboxing", "kicks"],
+            ["kickboxing", "punches"],
+            ["kickboxing", "movement"]
+        ],
+
+        wrestling: [
+            ["wrestling", "takedown"],
+            ["wrestling", "takedownDefense"],
+            ["wrestling", "control"],
+            ["wrestling", "pressure"],
+            ["wrestling", "scramble"]
+        ],
+
+        jiuJitsu: [
+            ["jiuJitsu", "guard"],
+            ["jiuJitsu", "passing"],
+            ["jiuJitsu", "control"],
+            ["jiuJitsu", "submission"],
+            ["jiuJitsu", "submissionDefense"]
+        ],
+
+        physical: [
+            ["physical", "strength"],
+            ["physical", "speed"],
+            ["physical", "cardio"],
+            ["physical", "explosiveness"],
+            ["physical", "recovery"]
+        ],
+
+        mental: [
+            ["mental", "fightIQ"],
+            ["mental", "discipline"],
+            ["mental", "confidence"],
+            ["mental", "composure"]
+        ]
+
+    };
+
+    const selected =
+        trainingMap[type];
+
+    if (!selected) {
+        return;
+    }
+
+    /*
+     * Cada treino gera uma evolução
+     * pequena e decimal.
+     */
+
+    selected.forEach(item => {
+
+        const category = item[0];
+        const attribute = item[1];
+
+        /*
+         * Quanto maior a fadiga,
+         * menor a evolução.
+         */
+
+        const fatiguePenalty =
+            Math.max(
+                0.35,
+                1 -
+                (
+                    Number(player.fatigue || 0)
+                    / 150
+                )
+            );
+
+        let evolution =
+            randomDecimal(
+                0.25,
+                0.90
+            );
+
+        evolution *=
+            fatiguePenalty;
+
+        /*
+         * Potencial alto facilita
+         * evolução.
+         */
+
+        const potential =
+            Number(
+                player.attributePotential?.[category]?.[attribute]
+                || player.potential
+                || 90
+            );
+
+        const current =
+            Number(
+                player.advancedAttributes?.[category]?.[attribute]
+                || 60
+            );
+
+        if (
+            potential - current < 5
+        ) {
+
+            evolution *= 0.55;
+
+        }
+
+        improveAttribute(
+            category,
+            attribute,
+            evolution
+        );
+
+    });
+
+    /*
+     * Treinar gera fadiga.
+     */
+
+    player.fatigue =
+        Math.min(
+            100,
+            Number(player.fatigue || 0) +
+            randomDecimal(5, 12)
+        );
+
+    /*
+     * Saúde sofre um pequeno impacto
+     * dependendo da carga.
+     */
+
+    player.health =
+        Math.max(
+            0,
+            Number(player.health || 100) -
+            randomDecimal(0.5, 2)
+        );
+
+    player.overall =
+        calculateOverall();
+
+}
+
+/* =========================================================
+   MOSTRAR OVR / POTENCIAL
+========================================================= */
+
+function overallText() {
+
+    initializeOverallSystem();
+
+    return `
+        <div class="overall-box">
+            <div>
+                <span>OVR</span>
+                <strong>
+                    ${Number(player.overall || 60).toFixed(2)}
+                </strong>
+            </div>
+
+            <div>
+                <span>POTENCIAL</span>
+                <strong>
+                    ${Number(player.potential || 90).toFixed(2)}
+                </strong>
+            </div>
+        </div>
+    `;
+
+}
+
+/* =========================================================
+   MOSTRAR ATRIBUTOS AVANÇADOS
+========================================================= */
+
+function advancedAttributesScreen() {
+
+    initializeOverallSystem();
+
+    const categories = {
+
+        boxing: "🥊 BOXE",
+
+        muayThai: "🇹🇭 MUAY THAI",
+
+        kickboxing: "🥊 KICKBOXING",
+
+        wrestling: "🤼 WRESTLING",
+
+        jiuJitsu: "🥋 JIU-JITSU",
+
+        physical: "💪 FÍSICO",
+
+        mental: "🧠 MENTAL"
+
+    };
+
+    let html = `
+
+        <div class="card">
+
+            <div class="title">
+                📊 ATRIBUTOS DO LUTADOR
+            </div>
+
+            ${overallText()}
+
+        </div>
+
+    `;
+
+    Object.keys(categories)
+        .forEach(category => {
+
+            const overall =
+                categoryOverall(category);
+
+            html += `
+
+                <div class="card">
+
+                    <div class="title">
+
+                        ${categories[category]}
+
+                        <span style="
+                            float:right;
+                            font-size:14px;
+                        ">
+                            ${overall.toFixed(2)}
+                        </span>
+
+                    </div>
+
+            `;
+
+            Object.keys(
+                player.advancedAttributes[category]
+            ).forEach(attribute => {
+
+                const value =
+                    Number(
+                        player
+                            .advancedAttributes
+                            [category]
+                            [attribute]
+                    );
+
+                const potential =
+                    Number(
+                        player
+                            .attributePotential
+                            [category]
+                            [attribute]
+                    );
+
+                const label =
+                    attribute
+                        .replace(
+                            /([A-Z])/g,
+                            " $1"
+                        )
+                        .replace(
+                            /^./,
+                            c => c.toUpperCase()
+                        );
+
+                html += `
+
+                    <div class="statline">
+
+                        <span>
+                            ${label}
+                        </span>
+
+                        <b>
+                            ${value.toFixed(2)}
+                            /
+                            ${potential.toFixed(2)}
+                        </b>
+
+                    </div>
+
+                `;
+
+            });
+
+            html += `</div>`;
+
+        });
+
+    document
+        .getElementById("content")
+        .innerHTML = html;
+
+}
+
+/* =========================================================
+   GARANTIR SISTEMA AO CARREGAR
+========================================================= */
+
+const oldLoad =
+    typeof load === "function"
+        ? load
+        : null;
+
+function initializeNewPlayerStats() {
+
+    if (!player) {
+        return;
+    }
+
+    initializeOverallSystem();
+
+    /*
+     * Compatibilidade com o sistema antigo.
+     */
+
+    player.attributes =
+        player.attributes || {};
+
+    player.attributes.overall =
+        player.overall;
+
+    player.attributes.potential =
+        player.potential;
+
+    save();
+
+}
