@@ -950,64 +950,59 @@ function tab(name) {
     }
 
     if (name === "career") {
-        alert("Carreira: " + typeof window.career);
-
         if (typeof window.career === "function") {
             window.career();
+        } else {
+            console.error("career() não encontrada");
         }
-
         return;
     }
 
     if (name === "train") {
-        alert("Treino: " + typeof window.training);
-
         if (typeof window.training === "function") {
             window.training();
+        } else {
+            console.error("training() não encontrada");
         }
-
         return;
     }
 
     if (name === "fight") {
-        alert("Lutas: " + typeof window.fightScreen);
-
         if (typeof window.fightScreen === "function") {
             window.fightScreen();
+        } else {
+            console.error("fightScreen() não encontrada");
         }
-
         return;
     }
 
     if (name === "team") {
-        alert("Equipe: " + typeof window.teamScreen);
-
         if (typeof window.teamScreen === "function") {
             window.teamScreen();
+        } else {
+            console.error("teamScreen() não encontrada");
         }
-
         return;
     }
 
     if (name === "life") {
-        alert("Vida: " + typeof window.familyScreen);
-
         if (typeof window.familyScreen === "function") {
             window.familyScreen();
+        } else {
+            console.error("familyScreen() não encontrada");
         }
-
         return;
     }
 
     if (name === "ranking") {
-        alert("Ranking ainda será conectado.");
-
+        if (typeof window.rankingScreen === "function") {
+            window.rankingScreen();
+        } else {
+            console.error("rankingScreen() não encontrada");
+        }
         return;
     }
-
-    alert("Página desconhecida: " + name);
 }
-
 
 /* =========================================================
    PRÓXIMA SEMANA
