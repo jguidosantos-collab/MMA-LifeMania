@@ -1097,13 +1097,9 @@ function tab(name) {
     }
 
     if (name === "life") {
-        if (typeof window.familyScreen === "function") {
-            window.familyScreen();
-        } else {
-            console.error("familyScreen() não encontrada");
-        }
-        return;
-    }
+    lifeScreen();
+    return;
+}
 
     if (name === "ranking") {
         if (typeof window.rankingScreen === "function") {
