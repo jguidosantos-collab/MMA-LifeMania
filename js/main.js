@@ -49,18 +49,31 @@ function showGame() {
     const tabs = getElement("tabs");
 
     if (creation) {
+
         creation.classList.add("hidden");
+
+        creation.style.display = "none";
     }
 
     if (game) {
+
         game.classList.remove("hidden");
+
         game.style.display = "block";
+
+        game.style.visibility = "visible";
+
+        game.style.opacity = "1";
     }
 
     if (tabs) {
+
         tabs.classList.remove("hidden");
+
         tabs.style.display = "flex";
+
         tabs.style.visibility = "visible";
+
         tabs.style.opacity = "1";
     }
 }
