@@ -231,4 +231,3 @@ window.createDefaultPlayer =
 
 window.createPlayer =
     createPlayer;
-alert("PLAYER.JS CARREGOU");
