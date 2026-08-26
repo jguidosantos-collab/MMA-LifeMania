@@ -239,17 +239,55 @@ function createPlayerFromScreen() {
      * Usa o sistema de criação existente
      * quando ele estiver disponível.
      */
-    if (
-        typeof createPlayer === "function"
-    ) {
-        createPlayer(
-            name,
-            country,
-            weight,
-            style
-        );
-        return;
+    if (typeof createPlayer === "function") {
+
+    createPlayer();
+
+    player.name = name;
+    player.country = country;
+    player.weight = weight;
+    player.style = style;
+
+    player.age = 15;
+    player.money = 500;
+    player.fame = 0;
+    player.health = 100;
+    player.fatigue = 0;
+
+    player.careerStage = "amateur";
+
+    player.nextFight = null;
+    player.team = null;
+    player.manager = null;
+
+    // Mostra o jogo imediatamente
+    const creation =
+        document.getElementById("creation");
+
+    const game =
+        document.getElementById("game");
+
+    const tabs =
+        document.getElementById("tabs");
+
+    if (creation) {
+        creation.classList.add("hidden");
     }
+
+    if (game) {
+        game.classList.remove("hidden");
+    }
+
+    if (tabs) {
+        tabs.classList.remove("hidden");
+    }
+
+    save();
+
+    home();
+
+    return;
+}
     /*
      * Caso o projeto ainda não possua
      * createPlayer(), cria o jogador básico.
