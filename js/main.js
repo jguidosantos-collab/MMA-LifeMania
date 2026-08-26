@@ -1569,7 +1569,7 @@ function lifeScreen() {
 ========================================================= */
 
 window.career = career;
-window.lifeScreen = lifeScreen;
+// lifeScreen pertence ao life.js
 /* =========================================================
    INICIALIZAÇÃO
 ========================================================= */
