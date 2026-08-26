@@ -111,3 +111,9 @@ championship: {
     };
 
 }
+function createDefaultPlayer() {
+
+    createPlayer();
+
+    return player;
+}
