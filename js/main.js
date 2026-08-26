@@ -369,11 +369,11 @@ function startGame() {
 
             <button
     class="start-button"
-    onclick="openCharacterCreation()"
+    onclick="openCharacterCreation()">
 
-                🆕 CRIAR NOVO LUTADOR
+    🆕 CRIAR NOVO LUTADOR
 
-            </button>
+</button>
 
         </div>
 
@@ -1427,16 +1427,7 @@ window.createPlayerFromScreen =
     createNewPlayer;
 
 
-/*
- * Compatibilidade com código antigo
- * que possa chamar openCreation().
- *
- * Não existe outra implementação.
- * O nome oficial é openCharacterCreation().
- */
 
-window.openCharacterCreation =
-    openCharacterCreation;
 
 
 /* =========================================================
