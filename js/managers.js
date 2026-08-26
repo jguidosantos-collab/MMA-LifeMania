@@ -1,771 +1,1050 @@
 /* =========================================================
-   👔 SISTEMA DE EMPRESÁRIOS
-   ========================================================= */
-/* =========================================================
-   GERAR COMISSÃO
+   MMA LIFE DYNASTY
+   MANAGERS.JS
+   SISTEMA DE EMPRESÁRIO
+   VERSÃO CORRIGIDA — FLUXO COMPLETO
+   FLUXO:
+   1. Lutador está sem luta
+   2. Empresário procura oportunidade
+   3. Empresário apresenta UMA oferta
+   4. Jogador aceita ou recusa
+   5. Ao aceitar:
+      - luta é marcada
+      - camp começa
+      - semanas de preparação são definidas
+   6. Durante o camp:
+      - não existe outra oferta
+      - não existe outra luta
+      - jogador treina normalmente
+   7. Ao chegar ao dia da luta:
+      - semana fica bloqueada
+      - botão LUTAR AGORA aparece
+   8. Depois da luta:
+      - luta é encerrada
+      - camp termina
+      - empresário volta a procurar oportunidade
 ========================================================= */
-function randomManagerCommission(min, max) {
-    return Math.floor(
-        min +
+/* =========================================================
+   CONFIGURAÇÕES
+========================================================= */
+const MANAGER_CONFIG = {
+    minCampWeeks: 4,
+    maxCampWeeks: 8,
+    searchCooldownWeeks: 2,
+    firstFightWeek: 4,
+    offerChance: 0.75,
+    maxOfferAge: 1
+};
+/* =========================================================
+   UTILIDADES
+========================================================= */
+function managerPlayer() {
+    if (
+        typeof window.player === "undefined" ||
+        !window.player
+    ) {
+        if (
+            typeof window.createDefaultPlayer ===
+            "function"
+        ) {
+            window.player =
+                window.createDefaultPlayer();
+        }
+    }
+    return window.player;
+}
+function managerSave() {
+    if (
+        typeof window.saveGame ===
+        "function"
+    ) {
+        window.saveGame();
+    }
+}
+function managerRandom(min, max) {
+    return (
         Math.random() *
-        (
-            max -
-            min +
-            1
+        (max - min)
+    ) + min;
+}
+function managerRandomInt(min, max) {
+    return Math.floor(
+        managerRandom(
+            min,
+            max + 1
+        )
+    );
+}
+function managerClamp(value, min, max) {
+    return Math.max(
+        min,
+        Math.min(
+            max,
+            value
         )
     );
 }
 /* =========================================================
-   BANCO DE EMPRESÁRIOS
+   GARANTIR ESTRUTURA DO EMPRESÁRIO
 ========================================================= */
-const managers = [
-    /* =====================================================
-       🟢 INICIANTES
-       ===================================================== */
-    {
-        name: "Carlos Mendes",
-        level: "Iniciante",
-        levelNumber: 1,
-        commission:
-            randomManagerCommission(10, 15),
-        contacts:
-            20 +
-            Math.floor(Math.random() * 16),
-        negotiation:
-            25 +
-            Math.floor(Math.random() * 21),
-        internationalAccess:
-            10 +
-            Math.floor(Math.random() * 16)
-    },
-    {
-        name: "Lucas Ferreira",
-        level: "Iniciante",
-        levelNumber: 1,
-        commission:
-            randomManagerCommission(10, 15),
-        contacts:
-            20 +
-            Math.floor(Math.random() * 16),
-        negotiation:
-            30 +
-            Math.floor(Math.random() * 21),
-        internationalAccess:
-            15 +
-            Math.floor(Math.random() * 16)
-    },
-    {
-        name: "Bruno Almeida",
-        level: "Iniciante",
-        levelNumber: 1,
-        commission:
-            randomManagerCommission(10, 15),
-        contacts:
-            25 +
-            Math.floor(Math.random() * 16),
-        negotiation:
-            25 +
-            Math.floor(Math.random() * 21),
-        internationalAccess:
-            10 +
-            Math.floor(Math.random() * 21)
-    },
-    /* =====================================================
-       🔵 INTERMEDIÁRIOS
-       ===================================================== */
-    {
-        name: "Rafael Costa",
-        level: "Intermediário",
-        levelNumber: 2,
-        commission:
-            randomManagerCommission(13, 20),
-        contacts:
-            40 +
-            Math.floor(Math.random() * 31),
-        negotiation:
-            45 +
-            Math.floor(Math.random() * 31),
-        internationalAccess:
-            35 +
-            Math.floor(Math.random() * 31)
-    },
-    {
-        name: "André Silva",
-        level: "Intermediário",
-        levelNumber: 2,
-        commission:
-            randomManagerCommission(13, 20),
-        contacts:
-            45 +
-            Math.floor(Math.random() * 31),
-        negotiation:
-            50 +
-            Math.floor(Math.random() * 31),
-        internationalAccess:
-            40 +
-            Math.floor(Math.random() * 31)
-    },
-    {
-        name: "Thiago Rodrigues",
-        level: "Intermediário",
-        levelNumber: 2,
-        commission:
-            randomManagerCommission(13, 20),
-        contacts:
-            40 +
-            Math.floor(Math.random() * 36),
-        negotiation:
-            55 +
-            Math.floor(Math.random() * 26),
-        internationalAccess:
-            45 +
-            Math.floor(Math.random() * 26)
-    },
-    {
-        name: "Felipe Martins",
-        level: "Intermediário",
-        levelNumber: 2,
-        commission:
-            randomManagerCommission(13, 20),
-        contacts:
-            50 +
-            Math.floor(Math.random() * 26),
-        negotiation:
-            45 +
-            Math.floor(Math.random() * 36),
-        internationalAccess:
-            40 +
-            Math.floor(Math.random() * 31)
-    },
-    /* =====================================================
-       🟣 ELITE
-       ===================================================== */
-    {
-        name: "Marcos Oliveira",
-        level: "Elite",
-        levelNumber: 3,
-        commission:
-            randomManagerCommission(15, 25),
-        contacts:
-            80 +
-            Math.floor(Math.random() * 21),
-        negotiation:
-            75 +
-            Math.floor(Math.random() * 26),
-        internationalAccess:
-            75 +
-            Math.floor(Math.random() * 26)
-    },
-    {
-        name: "Eduardo Martins",
-        level: "Elite",
-        levelNumber: 3,
-        commission:
-            randomManagerCommission(15, 25),
-        contacts:
-            85 +
-            Math.floor(Math.random() * 16),
-        negotiation:
-            80 +
-            Math.floor(Math.random() * 21),
-        internationalAccess:
-            80 +
-            Math.floor(Math.random() * 21)
-    },
-    {
-        name: "Ricardo Fernandes",
-        level: "Elite",
-        levelNumber: 3,
-        commission:
-            randomManagerCommission(15, 25),
-        contacts:
-            90 +
-            Math.floor(Math.random() * 11),
-        negotiation:
-            85 +
-            Math.floor(Math.random() * 16),
-        internationalAccess:
-            85 +
-            Math.floor(Math.random() * 16)
+function ensureManagerData() {
+    const player =
+        managerPlayer();
+    if (!player.manager) {
+        player.manager = {
+            active: true,
+            name: "Carlos Mendes",
+            reputation: 60,
+            experience: 50,
+            negotiation: 55,
+            network: 50
+        };
     }
-];
-/* =========================================================
-   REQUISITOS PARA APARECER EMPRESÁRIO
-========================================================= */
-function canOfferManager(manager) {
-    const fame =
-        player.fame || 0;
-    const wins =
-        player.professional
-        ? (
-            player.professional.wins || 0
-        )
-        : 0;
+    if (!Array.isArray(player.managerOffers)) {
+        player.managerOffers = [];
+    }
     if (
-        manager.levelNumber === 1
+        typeof player.managerSearchCooldown !==
+        "number"
+    ) {
+        player.managerSearchCooldown = 0;
+    }
+    if (
+        typeof player.managerLastOfferWeek !==
+        "number"
+    ) {
+        player.managerLastOfferWeek = -999;
+    }
+    if (
+        typeof player.managerOfferId !==
+        "number"
+    ) {
+        player.managerOfferId = 0;
+    }
+    if (
+        typeof player.managerSearching !==
+        "boolean"
+    ) {
+        player.managerSearching = false;
+    }
+    if (
+        typeof player.managerSearchWeek !==
+        "number"
+    ) {
+        player.managerSearchWeek = -999;
+    }
+    if (
+        typeof player.managerOfferPending !==
+        "boolean"
+    ) {
+        player.managerOfferPending = false;
+    }
+}
+/* =========================================================
+   VERIFICAR SE O JOGADOR ESTÁ EM CAMP
+========================================================= */
+function isInFightCamp() {
+    const player =
+        managerPlayer();
+    const fight =
+        player.nextFight;
+    if (!fight) {
+        return false;
+    }
+    if (
+        fight.status === "camp"
     ) {
         return true;
     }
     if (
-        manager.levelNumber === 2
+        fight.status === "scheduled"
     ) {
-        return (
-            fame >= 10 ||
-            wins >= 3
-        );
+        return true;
     }
     if (
-        manager.levelNumber === 3
+        fight.status === "fight_day"
+    ) {
+        return true;
+    }
+    if (
+        typeof fight.fightWeek ===
+        "number"
     ) {
         return (
-            fame >= 35 &&
-            wins >= 7
+            Number(player.week) <=
+            Number(fight.fightWeek)
         );
     }
     return false;
 }
 /* =========================================================
-   GERAR OFERTAS DE EMPRESÁRIOS
+   VERIFICAR DIA DA LUTA
 ========================================================= */
-function generateManagerOffers() {
-    player.managerOffers = [];
-    const possible =
-        managers.filter(
-            manager =>
-                canOfferManager(manager)
+function managerIsFightDay() {
+    const player =
+        managerPlayer();
+    const fight =
+        player.nextFight;
+    if (!fight) {
+        return false;
+    }
+    if (
+        fight.status === "fight_day"
+    ) {
+        return true;
+    }
+    if (
+        typeof fight.weeksRemaining ===
+        "number"
+    ) {
+        return (
+            fight.weeksRemaining <= 0
         );
-    const shuffled =
-        [...possible].sort(
-            () =>
-                Math.random() - 0.5
+    }
+    if (
+        typeof fight.fightWeek ===
+        "number"
+    ) {
+        return (
+            Number(player.week) >=
+            Number(fight.fightWeek)
         );
-    const selected =
-        shuffled.slice(0, 3);
-    player.managerOffers =
-        selected.map(
-            manager => ({
-                ...manager
-            })
-        );
+    }
+    return false;
 }
 /* =========================================================
-   CRIAR CONTRATO DO EMPRESÁRIO
+   VERIFICAR SE PODE PROCURAR NOVA LUTA
 ========================================================= */
-function createManagerContract(manager) {
-    /*
-     * Contrato inicial padrão:
-     * 4 anos.
-     *
-     * 1 ano = 52 semanas.
-     */
+function managerCanSearchFight() {
+    const player =
+        managerPlayer();
+    ensureManagerData();
+    /* NÃO procurar se já existe luta */
+    if (player.nextFight) {
+        return false;
+    }
+    /* NÃO procurar se existe oferta */
+    if (
+        player.managerFightOffer
+    ) {
+        return false;
+    }
+    /* NÃO procurar se há oferta na lista */
+    if (
+        player.managerOffers &&
+        player.managerOffers.length > 0
+    ) {
+        return false;
+    }
+    /* COOLDOWN */
+    if (
+        Number(
+            player.managerSearchCooldown || 0
+        ) > 0
+    ) {
+        return false;
+    }
+    return true;
+}
+/* =========================================================
+   GERAR ADVERSÁRIO
+========================================================= */
+function generateManagerOpponent() {
+    const player =
+        managerPlayer();
+    const playerOverall =
+        typeof window.getOverall ===
+        "function"
+        ?
+        Number(
+            window.getOverall()
+        )
+        :
+        Number(
+            player.overall || 45
+        );
+    const variation =
+        managerRandomInt(
+            -8,
+            8
+        );
+    const opponentPower =
+        managerClamp(
+            playerOverall +
+            variation,
+            35,
+            95
+        );
+    const names = [
+        "Lucas Andrade",
+        "Rafael Silva",
+        "Bruno Costa",
+        "Diego Oliveira",
+        "Matheus Santos",
+        "Gabriel Ferreira",
+        "Pedro Almeida",
+        "Victor Souza",
+        "André Martins",
+        "Felipe Rocha",
+        "Carlos Ribeiro",
+        "João Mendes",
+        "Thiago Lima",
+        "Renan Alves",
+        "Gustavo Pereira",
+        "Eduardo Carvalho",
+        "Leonardo Ramos",
+        "Marcelo Torres",
+        "Caio Moreira",
+        "Henrique Dias"
+    ];
+    let name =
+        names[
+            managerRandomInt(
+                0,
+                names.length - 1
+            )
+        ];
+    if (
+        player.name &&
+        name === player.name
+    ) {
+        name =
+            "Ricardo Martins";
+    }
     return {
-        active: true,
-        durationYears: 4,
-        remainingYears: 4,
-        /*
-         * Campo usado pela tela de Equipe.
-         * Mantido sincronizado com remainingYears.
-         */
-        yearsRemaining: 4,
-        remainingWeeks: 208,
-        commission:
-            Number(
-                manager.commission || 0
+        id:
+            "OPP-" +
+            Date.now() +
+            "-" +
+            managerRandomInt(
+                1000,
+                9999
             ),
-        managerName:
-            manager.name,
-        startedYear:
+        name: name,
+        displayName: name,
+        power: opponentPower,
+        overall: opponentPower,
+        age:
+            managerRandomInt(
+                18,
+                35
+            ),
+        country:
+            player.country ||
+            "Brasil",
+        style: [
+            "Striker",
+            "Wrestler",
+            "Grappler",
+            "Completo"
+        ][
+            managerRandomInt(
+                0,
+                3
+            )
+        ],
+        wins:
+            managerRandomInt(
+                0,
+                12
+            ),
+        losses:
+            managerRandomInt(
+                0,
+                6
+            ),
+        draws: 0
+    };
+}
+/* =========================================================
+   GERAR NOME DO EVENTO
+========================================================= */
+function generateManagerEvent() {
+    const events = [
+        "MMA Fight Night",
+        "Brazil Combat",
+        "Warriors Championship",
+        "Fight Arena",
+        "MMA Revolution",
+        "National Combat",
+        "Ultimate Fight League",
+        "Future Fighters",
+        "Combat Warriors",
+        "Cage Warriors Brasil"
+    ];
+    return events[
+        managerRandomInt(
+            0,
+            events.length - 1
+        )
+    ];
+}
+/* =========================================================
+   CALCULAR BOLSA
+========================================================= */
+function calculateManagerPurse() {
+    const player =
+        managerPlayer();
+    const overall =
+        typeof window.getOverall ===
+        "function"
+        ?
+        Number(
+            window.getOverall()
+        )
+        :
+        Number(
+            player.overall || 45
+        );
+    if (
+        player.professional &&
+        player.professional.active
+    ) {
+        return Math.round(
+            800 +
+            overall * 35 +
+            Number(player.fame || 0) * 15
+        );
+    }
+    return Math.round(
+        100 +
+        overall * 8 +
+        Number(player.fame || 0) * 3
+    );
+}
+/* =========================================================
+   GERAR OFERTA
+========================================================= */
+function generateManagerFightOffer() {
+    const player =
+        managerPlayer();
+    ensureManagerData();
+    const opponent =
+        generateManagerOpponent();
+    const eventName =
+        generateManagerEvent();
+    const purse =
+        calculateManagerPurse();
+    const winBonus =
+        Math.round(
+            purse * 0.5
+        );
+    const campWeeks =
+        managerRandomInt(
+            MANAGER_CONFIG.minCampWeeks,
+            MANAGER_CONFIG.maxCampWeeks
+        );
+    const offer = {
+        id:
+            ++player.managerOfferId,
+        type:
+            "fight",
+        status:
+            "pending",
+        createdWeek:
+            Number(
+                player.week || 1
+            ),
+        createdYear:
             Number(
                 player.year || 2026
             ),
-        startedWeek:
-            Number(
-                player.week || 1
-            )
+        eventName:
+            eventName,
+        opponent:
+            opponent,
+        opponentName:
+            opponent.displayName,
+        purse:
+            purse,
+        winBonus:
+            winBonus,
+        campWeeks:
+            campWeeks,
+        expiresInWeeks:
+            MANAGER_CONFIG.maxOfferAge,
+        accepted:
+            false
     };
+    return offer;
 }
 /* =========================================================
-   GARANTIR CONTRATO DO EMPRESÁRIO
+   EMPRESÁRIO PROCURA LUTA
 ========================================================= */
-function ensureManagerContract() {
-    if (
-        !player.manager
-    ) {
+function processManagerFightOffer() {
+    const player =
+        managerPlayer();
+    ensureManagerData();
+    /*
+       REGRA FUNDAMENTAL:
+       SE JÁ EXISTE LUTA,
+       EMPRESÁRIO NÃO PROCURA OUTRA.
+    */
+    if (player.nextFight) {
         return null;
     }
     /*
-     * Compatibilidade com carreiras
-     * criadas antes deste sistema.
-     */
+       SE JÁ EXISTE OFERTA,
+       NÃO CRIAR OUTRA.
+    */
     if (
-        !player.managerContract
+        player.managerFightOffer
     ) {
-        /*
-         * Algumas versões antigas podem ter
-         * o contrato dentro de manager.contract.
-         */
-        if (
-            player.manager.contract
-        ) {
-            player.managerContract =
-                {
-                    ...player.manager.contract
-                };
-        }
-        else {
-            player.managerContract =
-                createManagerContract(
-                    player.manager
-                );
-        }
-    }
-    const contract =
-        player.managerContract;
-    /*
-     * Garante os campos principais.
-     */
-    if (
-        typeof contract.active !==
-        "boolean"
-    ) {
-        contract.active = true;
-    }
-    if (
-        typeof contract.durationYears !==
-        "number"
-    ) {
-        contract.durationYears = 4;
-    }
-    if (
-        typeof contract.remainingYears !==
-        "number"
-    ) {
-        /*
-         * Se a carreira antiga tiver
-         * yearsRemaining, usa esse valor.
-         */
-        if (
-            typeof contract.yearsRemaining ===
-            "number"
-        ) {
-            contract.remainingYears =
-                contract.yearsRemaining;
-        }
-        else {
-            contract.remainingYears = 4;
-        }
+        return player.managerFightOffer;
     }
     /*
-     * =====================================================
-     * CORREÇÃO PRINCIPAL
-     *
-     * A tela de Equipe usa yearsRemaining.
-     *
-     * O processamento usa remainingYears.
-     *
-     * Agora os dois ficam sempre sincronizados.
-     * =====================================================
-     */
-    contract.yearsRemaining =
-        Number(
-            contract.remainingYears || 0
-        );
+       SE EXISTE OFERTA NA FILA,
+       NÃO CRIAR OUTRA.
+    */
     if (
-        typeof contract.remainingWeeks !==
-        "number"
+        player.managerOffers.length > 0
     ) {
-        contract.remainingWeeks =
-            contract.remainingYears *
-            52;
-    }
-    if (
-        typeof contract.commission !==
-        "number"
-    ) {
-        contract.commission =
-            Number(
-                player.manager.commission || 0
-            );
-    }
-    /*
-     * Mantém o contrato também dentro
-     * de manager.contract.
-     */
-    player.manager.contract =
-        contract;
-    return contract;
-}
-/* =========================================================
-   CONTRATAR EMPRESÁRIO
-========================================================= */
-function hireManager(index) {
-    const manager =
-        player.managerOffers[
-            index
-        ];
-    if (!manager) {
-        return;
-    }
-    player.manager = {
-        name:
-            manager.name,
-        level:
-            manager.level,
-        levelNumber:
-            manager.levelNumber,
-        commission:
-            manager.commission,
-        contacts:
-            manager.contacts,
-        negotiation:
-            manager.negotiation,
-        internationalAccess:
-            manager.internationalAccess
-    };
-    /*
-     * Cria contrato de 4 anos.
-     */
-    player.managerContract =
-        createManagerContract(
-            manager
-        );
-    /*
-     * Mantém os dois caminhos sincronizados.
-     */
-    player.manager.contract =
-        player.managerContract;
-    player.managerContractExpired =
-        false;
-    player.log =
-        player.log || [];
-    player.log.unshift(
-        "👔 " +
-        manager.name +
-        " tornou-se seu empresário " +
-        "com contrato de 4 anos."
-    );
-    save();
-    alert(
-        "👔 EMPRESÁRIO CONTRATADO!\n\n" +
-        manager.name +
-        "\n\n" +
-        "Nível: " +
-        manager.level +
-        "\n" +
-        "Comissão: " +
-        manager.commission +
-        "%\n\n" +
-        "Contrato: 4 anos\n\n" +
-        "Contatos: " +
-        manager.contacts +
-        "\n" +
-        "Negociação: " +
-        manager.negotiation +
-        "\n" +
-        "Acesso internacional: " +
-        manager.internationalAccess
-    );
-    teamScreen();
-}
-/* =========================================================
-   PROCESSAR CONTRATO NA VIRADA DO ANO
-========================================================= */
-function processManagerContractYear() {
-    if (
-        !player.manager
-    ) {
-        return;
-    }
-    ensureManagerContract();
-    const contract =
-        player.managerContract;
-    if (
-        !contract ||
-        !contract.active
-    ) {
-        return;
-    }
-    /*
-     * O contrato só diminui quando
-     * começa um novo ano.
-     *
-     * Não diminui semana a semana.
-     */
-    contract.remainingYears =
-        Math.max(
-            0,
-            Number(
-                contract.remainingYears || 0
-            ) - 1
-        );
-    /*
-     * =====================================================
-     * CORREÇÃO PRINCIPAL
-     *
-     * Atualiza o campo que a tela de Equipe mostra.
-     * =====================================================
-     */
-    contract.yearsRemaining =
-        contract.remainingYears;
-    contract.remainingWeeks =
-        Math.max(
-            0,
-            Number(
-                contract.remainingWeeks || 0
-            ) - 52
-        );
-    /*
-     * Mantém manager.contract sincronizado.
-     */
-    player.manager.contract =
-        contract;
-    /* =====================================================
-       CONTRATO TERMINOU
-    ===================================================== */
-    if (
-        contract.remainingYears <= 0
-    ) {
-        contract.remainingYears = 0;
-        contract.yearsRemaining = 0;
-        contract.remainingWeeks = 0;
-        contract.active = false;
-        player.managerContractExpired =
+        player.managerFightOffer =
+            player.managerOffers[0];
+        player.managerOfferPending =
             true;
-        player.log =
-            player.log || [];
-        player.log.unshift(
-            "📄 O contrato com " +
-            player.manager.name +
-            " chegou ao fim."
-        );
-        save();
-        return;
+        managerSave();
+        return player.managerFightOffer;
     }
     /*
-     * Contrato continua ativo.
-     */
-    save();
-}
-/* =========================================================
-   VERIFICAR CONTRATO NO INÍCIO
-========================================================= */
-function getManagerContractStatus() {
+       COOLDOWN
+    */
     if (
-        !player.manager
+        Number(
+            player.managerSearchCooldown || 0
+        ) > 0
+    ) {
+        player.managerSearchCooldown =
+            Math.max(
+                0,
+                Number(
+                    player.managerSearchCooldown
+                ) - 1
+            );
+        managerSave();
+        return null;
+    }
+    /*
+       NÃO criar luta automaticamente
+       na mesma semana da criação.
+    */
+    const currentWeek =
+        Number(
+            player.week || 1
+        );
+    const lastOfferWeek =
+        Number(
+            player.managerLastOfferWeek ||
+            -999
+        );
+    if (
+        currentWeek ===
+        lastOfferWeek
     ) {
         return null;
     }
-    ensureManagerContract();
-    return player.managerContract;
-}
-/* =========================================================
-   VERIFICAR CONTRATO ATIVO
-========================================================= */
-function hasActiveManagerContract() {
-    if (
-        !player.manager
-    ) {
-        return false;
-    }
-    const contract =
-        ensureManagerContract();
-    if (
-        !contract
-    ) {
-        return false;
-    }
-    return (
-        contract.active === true &&
-        Number(
-            contract.remainingYears || 0
-        ) > 0
-    );
-}
-/* =========================================================
-   RENOVAR CONTRATO
-========================================================= */
-function renewManagerContract() {
-    if (
-        !player.manager
-    ) {
-        return;
-    }
-    ensureManagerContract();
-    const oldContract =
-        player.managerContract;
     /*
-     * Só permite renovação depois
-     * do término do contrato.
-     */
+       PRIMEIRA OPORTUNIDADE
+    */
     if (
-        oldContract &&
-        oldContract.active
+        currentWeek <
+        MANAGER_CONFIG.firstFightWeek
+    ) {
+        return null;
+    }
+    /*
+       CHANCE DE APARECER OFERTA
+    */
+    if (
+        Math.random() >
+        MANAGER_CONFIG.offerChance
+    ) {
+        player.managerSearchCooldown =
+            MANAGER_CONFIG.searchCooldownWeeks;
+        player.managerLastOfferWeek =
+            currentWeek;
+        managerSave();
+        return null;
+    }
+    /*
+       GERAR OFERTA
+    */
+    const offer =
+        generateManagerFightOffer();
+    player.managerFightOffer =
+        offer;
+    player.managerOfferPending =
+        true;
+    player.managerSearching =
+        false;
+    player.managerSearchWeek =
+        currentWeek;
+    player.managerLastOfferWeek =
+        currentWeek;
+    player.managerOffers = [];
+    managerSave();
+    if (
+        Array.isArray(player.log)
+    ) {
+        player.log.unshift(
+            `📩 Seu empresário encontrou uma luta contra ${offer.opponentName}.`
+        );
+    }
+    return offer;
+}
+/* =========================================================
+   ACEITAR OFERTA
+========================================================= */
+function acceptManagerFightOffer() {
+    const player =
+        managerPlayer();
+    ensureManagerData();
+    const offer =
+        player.managerFightOffer;
+    if (!offer) {
+        alert(
+            "Não existe nenhuma proposta de luta."
+        );
+        return false;
+    }
+    if (
+        player.nextFight
     ) {
         alert(
-            "📄 Seu contrato atual ainda está ativo."
+            "Você já possui uma luta marcada."
         );
-        return;
+        return false;
     }
-    const manager =
-        player.manager;
     /*
-     * Renovação:
-     * novo contrato de 4 anos.
-     */
-    player.managerContract = {
-        active: true,
-        durationYears: 4,
-        remainingYears: 4,
-        /*
-         * Campo mostrado pela tela de Equipe.
-         */
-        yearsRemaining: 4,
-        remainingWeeks: 208,
-        commission:
+       DEFINIR CAMP
+    */
+    const campWeeks =
+        managerClamp(
             Number(
-                manager.commission || 0
+                offer.campWeeks ||
+                MANAGER_CONFIG.minCampWeeks
             ),
-        managerName:
-            manager.name,
-        startedYear:
+            MANAGER_CONFIG.minCampWeeks,
+            MANAGER_CONFIG.maxCampWeeks
+        );
+    const currentWeek =
+        Number(
+            player.week || 1
+        );
+    const fightWeek =
+        currentWeek +
+        campWeeks;
+    /*
+       CRIAR LUTA
+    */
+    player.nextFight = {
+        id:
+            "FIGHT-" +
+            Date.now(),
+        status:
+            "camp",
+        event: {
+            name:
+                offer.eventName
+        },
+        eventName:
+            offer.eventName,
+        opponent:
+            offer.opponent,
+        opponentName:
+            offer.opponentName,
+        purse:
+            Number(
+                offer.purse || 0
+            ),
+        winBonus:
+            Number(
+                offer.winBonus || 0
+            ),
+        campWeeks:
+            campWeeks,
+        campStartWeek:
+            currentWeek,
+        fightWeek:
+            fightWeek,
+        weeksRemaining:
+            campWeeks,
+        acceptedWeek:
+            currentWeek,
+        acceptedYear:
             Number(
                 player.year || 2026
             ),
-        startedWeek:
-            Number(
-                player.week || 1
-            )
+        result:
+            null,
+        completed:
+            false
     };
     /*
-     * Sincroniza os dois caminhos.
-     */
-    player.manager.contract =
-        player.managerContract;
-    player.managerContractExpired =
+       LIMPAR OFERTA
+    */
+    player.managerFightOffer =
+        null;
+    player.managerOfferPending =
         false;
-    player.log =
-        player.log || [];
-    player.log.unshift(
-        "🔄 Contrato renovado com " +
-        manager.name +
-        " por mais 4 anos."
-    );
-    save();
-    alert(
-        "🔄 CONTRATO RENOVADO!\n\n" +
-        manager.name +
-        "\n\n" +
-        "Duração: 4 anos\n" +
-        "Comissão: " +
-        manager.commission +
-        "%"
-    );
+    player.managerOffers = [];
+    player.managerSearching =
+        false;
+    player.managerSearchCooldown =
+        0;
+    /*
+       LOG
+    */
     if (
-        typeof home === "function"
+        Array.isArray(player.log)
     ) {
-        home();
+        player.log.unshift(
+            `🥊 Luta aceita! ${player.name} enfrentará ${offer.opponentName} em ${offer.eventName}.`
+        );
+        player.log.unshift(
+            `🏋️ Camp de ${campWeeks} semanas iniciado.`
+        );
     }
+    managerSave();
+    /*
+       ATUALIZAR TELA
+    */
+    if (
+        typeof window.home ===
+        "function"
+    ) {
+        window.home();
+    }
+    return true;
 }
 /* =========================================================
-   NÃO RENOVAR
+   RECUSAR OFERTA
 ========================================================= */
-function declineManagerRenewal() {
+function declineManagerFightOffer() {
+    const player =
+        managerPlayer();
+    ensureManagerData();
     if (
-        !player.manager
+        !player.managerFightOffer
+    ) {
+        alert(
+            "Não existe nenhuma proposta."
+        );
+        return false;
+    }
+    const opponentName =
+        player.managerFightOffer.opponentName ||
+        "adversário";
+    player.managerFightOffer =
+        null;
+    player.managerOfferPending =
+        false;
+    player.managerOffers =
+        [];
+    player.managerSearching =
+        false;
+    player.managerSearchCooldown =
+        2;
+    if (
+        Array.isArray(player.log)
+    ) {
+        player.log.unshift(
+            `❌ Você recusou a luta contra ${opponentName}.`
+        );
+    }
+    managerSave();
+    if (
+        typeof window.home ===
+        "function"
+    ) {
+        window.home();
+    }
+    return true;
+}
+/* =========================================================
+   ATUALIZAR CAMP A CADA SEMANA
+========================================================= */
+function processManagerCampWeek() {
+    const player =
+        managerPlayer();
+    ensureManagerData();
+    const fight =
+        player.nextFight;
+    if (!fight) {
+        return;
+    }
+    if (
+        fight.status ===
+        "completed"
     ) {
         return;
     }
-    const managerName =
-        player.manager.name;
-    player.log =
-        player.log || [];
-    player.log.unshift(
-        "🚪 Você decidiu não renovar " +
-        "o contrato com " +
-        managerName +
-        "."
-    );
-    player.manager = null;
-    player.managerContract = null;
-    player.managerContractExpired =
-        false;
-    save();
-    alert(
-        "🚪 CONTRATO ENCERRADO\n\n" +
-        "Você decidiu seguir sua carreira " +
-        "sem empresário."
-    );
-    home();
-}
-/* =========================================================
-   BÔNUS DE NEGOCIAÇÃO
-========================================================= */
-function getManagerNegotiationBonus() {
+    const currentWeek =
+        Number(
+            player.week || 1
+        );
+    const fightWeek =
+        Number(
+            fight.fightWeek ||
+            currentWeek
+        );
+    const remaining =
+        Math.max(
+            0,
+            fightWeek -
+            currentWeek
+        );
+    fight.weeksRemaining =
+        remaining;
+    /*
+       CAMP
+    */
     if (
-        !player.manager
+        currentWeek <
+        fightWeek
     ) {
-        return 0;
+        fight.status =
+            "camp";
+        return;
     }
-    const negotiation =
-        player.manager.negotiation ||
+    /*
+       DIA DA LUTA
+    */
+    fight.status =
+        "fight_day";
+    fight.weeksRemaining =
         0;
-    return (
-        negotiation / 5
-    );
 }
 /* =========================================================
-   ACESSO INTERNACIONAL
+   PROCESSAR SEMANA DO EMPRESÁRIO
 ========================================================= */
-function getManagerInternationalAccess() {
+function processManagerWeek() {
+    const player =
+        managerPlayer();
+    ensureManagerData();
+    /*
+       SE EXISTE LUTA:
+       atualizar camp.
+    */
     if (
-        !player.manager
+        player.nextFight
     ) {
-        return 0;
+        processManagerCampWeek();
+        managerSave();
+        return;
     }
-    return (
+    /*
+       SE EXISTE OFERTA:
+       não procurar outra.
+    */
+    if (
+        player.managerFightOffer
+    ) {
+        managerSave();
+        return;
+    }
+    /*
+       SEM LUTA:
+       procurar oportunidade.
+    */
+    processManagerFightOffer();
+}
+/* =========================================================
+   PROCESSAR ANO DO CONTRATO
+========================================================= */
+function processManagerContractYear() {
+    const player =
+        managerPlayer();
+    ensureManagerData();
+    /*
+       Pequeno aumento de experiência
+       do empresário.
+    */
+    if (
         player.manager
-            .internationalAccess ||
-        0
-    );
-}
-/* =========================================================
-   NÍVEL DO EMPRESÁRIO
-========================================================= */
-function getManagerLevel() {
-    if (
-        !player.manager
     ) {
-        return 0;
+        player.manager.experience =
+            managerClamp(
+                Number(
+                    player.manager.experience ||
+                    50
+                ) + 1,
+                1,
+                100
+            );
+        player.manager.network =
+            managerClamp(
+                Number(
+                    player.manager.network ||
+                    50
+                ) + 1,
+                1,
+                100
+            );
     }
-    return (
-        player.manager.levelNumber ||
-        1
-    );
+    managerSave();
 }
 /* =========================================================
-   FUNÇÕES GLOBAIS
+   CANCELAR LUTA
+   Usado somente por sistemas externos.
 ========================================================= */
-window.generateManagerOffers =
-    generateManagerOffers;
-window.hireManager =
-    hireManager;
-window.getManagerNegotiationBonus =
-    getManagerNegotiationBonus;
-window.getManagerInternationalAccess =
-    getManagerInternationalAccess;
-window.getManagerLevel =
-    getManagerLevel;
-window.createManagerContract =
-    createManagerContract;
-window.ensureManagerContract =
-    ensureManagerContract;
+function cancelManagerFight(reason) {
+    const player =
+        managerPlayer();
+    ensureManagerData();
+    if (
+        !player.nextFight
+    ) {
+        return false;
+    }
+    const opponent =
+        player.nextFight.opponentName ||
+        "adversário";
+    player.nextFight =
+        null;
+    player.managerFightOffer =
+        null;
+    player.managerOfferPending =
+        false;
+    player.managerSearchCooldown =
+        2;
+    if (
+        Array.isArray(player.log)
+    ) {
+        player.log.unshift(
+            `⚠️ A luta contra ${opponent} foi cancelada${reason ? `: ${reason}` : "."}`
+        );
+    }
+    managerSave();
+    return true;
+}
+/* =========================================================
+   FINALIZAR LUTA
+   Chamado pelo FIGHTS.JS depois do combate.
+========================================================= */
+function completeManagerFight(result) {
+    const player =
+        managerPlayer();
+    ensureManagerData();
+    const fight =
+        player.nextFight;
+    if (!fight) {
+        return;
+    }
+    fight.status =
+        "completed";
+    fight.completed =
+        true;
+    fight.result =
+        result || null;
+    /*
+       LIMPAR LUTA ATUAL
+    */
+    player.nextFight =
+        null;
+    /*
+       LIMPAR OFERTA
+    */
+    player.managerFightOffer =
+        null;
+    player.managerOffers =
+        [];
+    player.managerOfferPending =
+        false;
+    /*
+       COOLDOWN PARA NOVA OFERTA
+    */
+    player.managerSearchCooldown =
+        2;
+    /*
+       LOG
+    */
+    if (
+        Array.isArray(player.log)
+    ) {
+        player.log.unshift(
+            "📋 O empresário encerrou o processo desta luta."
+        );
+    }
+    managerSave();
+}
+/* =========================================================
+   OFERTA PARA TESTE
+   Útil para verificar o sistema sem esperar semanas.
+========================================================= */
+function createManagerTestOffer() {
+    const player =
+        managerPlayer();
+    ensureManagerData();
+    if (
+        player.nextFight
+    ) {
+        return false;
+    }
+    const offer =
+        generateManagerFightOffer();
+    player.managerFightOffer =
+        offer;
+    player.managerOfferPending =
+        true;
+    player.managerOffers =
+        [];
+    managerSave();
+    if (
+        typeof window.home ===
+        "function"
+    ) {
+        window.home();
+    }
+    return true;
+}
+/* =========================================================
+   GARANTIR SISTEMA APÓS CARREGAMENTO
+========================================================= */
+function initializeManagers() {
+    ensureManagerData();
+}
+/* =========================================================
+   EXPORTAR GLOBALMENTE
+========================================================= */
+window.ensureManagerData =
+    ensureManagerData;
+window.isInFightCamp =
+    isInFightCamp;
+window.managerIsFightDay =
+    managerIsFightDay;
+window.managerCanSearchFight =
+    managerCanSearchFight;
+window.processManagerFightOffer =
+    processManagerFightOffer;
+window.processManagerCampWeek =
+    processManagerCampWeek;
+window.processManagerWeek =
+    processManagerWeek;
+window.acceptManagerFightOffer =
+    acceptManagerFightOffer;
+window.declineManagerFightOffer =
+    declineManagerFightOffer;
 window.processManagerContractYear =
     processManagerContractYear;
-window.getManagerContractStatus =
-    getManagerContractStatus;
-window.hasActiveManagerContract =
-    hasActiveManagerContract;
-window.renewManagerContract =
-    renewManagerContract;
-window.declineManagerRenewal =
-    declineManagerRenewal;
+window.completeManagerFight =
+    completeManagerFight;
+window.cancelManagerFight =
+    cancelManagerFight;
+window.createManagerTestOffer =
+    createManagerTestOffer;
+/* =========================================================
+   INICIALIZAÇÃO
+========================================================= */
+if (
+    document.readyState ===
+    "loading"
+) {
+    document.addEventListener(
+        "DOMContentLoaded",
+        initializeManagers
+    );
+}
+else {
+    initializeManagers();
+}
