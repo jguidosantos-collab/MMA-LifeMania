@@ -3,42 +3,82 @@
    TEAM.JS
    SISTEMA DEFINITIVO DE EQUIPES, ACADEMIAS E TREINADORES
 ========================================================= */
+
+
 /* =========================================================
    UTILIDADES
 ========================================================= */
+
 function teamRandomInt(min, max) {
     return Math.floor(
         Math.random() * (max - min + 1)
     ) + min;
 }
+
 function teamClamp(value, min, max) {
     return Math.max(
         min,
         Math.min(max, value)
     );
 }
+
 function teamSave() {
-    if (typeof saveGame === "function") {
+
+    if (
+        typeof saveGame === "function"
+    ) {
         saveGame();
+        return;
     }
-    else if (typeof save === "function") {
+
+    if (
+        typeof save === "function"
+    ) {
         save();
+        return;
     }
-    else {
+
+    try {
         localStorage.setItem(
             "mmaLifePlayer",
             JSON.stringify(window.player)
         );
     }
+    catch (error) {
+        console.error(
+            "Erro ao salvar jogador:",
+            error
+        );
+    }
 }
+
+
 /* =========================================================
-   BANCO DE EQUIPES
-   TOP 10 DE CADA PAÍS
+   🎲 PORCENTAGEM DA EQUIPE
+   Cada equipe recebe aleatoriamente
+   entre 10% e 20%.
 ========================================================= */
+
+function generateTeamPercentage() {
+
+    return teamRandomInt(
+        10,
+        20
+    );
+}
+
+
+/* =========================================================
+   🏢 BANCO DE EQUIPES
+   TOP 10
+========================================================= */
+
 const mmaTeams = [
+
     /* =====================================================
        🇧🇷 BRASIL
     ===================================================== */
+
     {
         id: "br_01",
         name: "Nova União",
@@ -48,8 +88,10 @@ const mmaTeams = [
         structure: 96,
         coaching: 98,
         cost: 1800,
+        percentage: generateTeamPercentage(),
         specialty: "Grappling"
     },
+
     {
         id: "br_02",
         name: "Chute Boxe",
@@ -59,8 +101,10 @@ const mmaTeams = [
         structure: 94,
         coaching: 97,
         cost: 1750,
+        percentage: generateTeamPercentage(),
         specialty: "Striking"
     },
+
     {
         id: "br_03",
         name: "Team Nogueira",
@@ -70,8 +114,10 @@ const mmaTeams = [
         structure: 94,
         coaching: 95,
         cost: 1650,
+        percentage: generateTeamPercentage(),
         specialty: "Completo"
     },
+
     {
         id: "br_04",
         name: "Pitbull Brothers",
@@ -81,8 +127,10 @@ const mmaTeams = [
         structure: 91,
         coaching: 94,
         cost: 1550,
+        percentage: generateTeamPercentage(),
         specialty: "Completo"
     },
+
     {
         id: "br_05",
         name: "X-Gym",
@@ -92,8 +140,10 @@ const mmaTeams = [
         structure: 92,
         coaching: 93,
         cost: 1500,
+        percentage: generateTeamPercentage(),
         specialty: "Striking"
     },
+
     {
         id: "br_06",
         name: "Team Shogun",
@@ -103,8 +153,10 @@ const mmaTeams = [
         structure: 88,
         coaching: 91,
         cost: 1350,
+        percentage: generateTeamPercentage(),
         specialty: "Striking"
     },
+
     {
         id: "br_07",
         name: "RFT Team",
@@ -114,8 +166,10 @@ const mmaTeams = [
         structure: 85,
         coaching: 88,
         cost: 1200,
+        percentage: generateTeamPercentage(),
         specialty: "Wrestling"
     },
+
     {
         id: "br_08",
         name: "GFT Team",
@@ -125,8 +179,10 @@ const mmaTeams = [
         structure: 82,
         coaching: 86,
         cost: 1100,
+        percentage: generateTeamPercentage(),
         specialty: "Grappling"
     },
+
     {
         id: "br_09",
         name: "Alliance Brasil",
@@ -136,8 +192,10 @@ const mmaTeams = [
         structure: 80,
         coaching: 83,
         cost: 950,
+        percentage: generateTeamPercentage(),
         specialty: "Grappling"
     },
+
     {
         id: "br_10",
         name: "Arena Fight Team",
@@ -147,11 +205,15 @@ const mmaTeams = [
         structure: 76,
         coaching: 80,
         cost: 800,
+        percentage: generateTeamPercentage(),
         specialty: "Completo"
     },
+
+
     /* =====================================================
        🇺🇸 ESTADOS UNIDOS
     ===================================================== */
+
     {
         id: "us_01",
         name: "American Top Team",
@@ -161,8 +223,10 @@ const mmaTeams = [
         structure: 99,
         coaching: 98,
         cost: 2200,
+        percentage: generateTeamPercentage(),
         specialty: "Completo"
     },
+
     {
         id: "us_02",
         name: "American Kickboxing Academy",
@@ -172,8 +236,10 @@ const mmaTeams = [
         structure: 97,
         coaching: 98,
         cost: 2100,
+        percentage: generateTeamPercentage(),
         specialty: "Wrestling"
     },
+
     {
         id: "us_03",
         name: "Jackson Wink",
@@ -183,8 +249,10 @@ const mmaTeams = [
         structure: 96,
         coaching: 97,
         cost: 2000,
+        percentage: generateTeamPercentage(),
         specialty: "Striking"
     },
+
     {
         id: "us_04",
         name: "American Kickboxing Team",
@@ -194,8 +262,10 @@ const mmaTeams = [
         structure: 94,
         coaching: 94,
         cost: 1800,
+        percentage: generateTeamPercentage(),
         specialty: "Striking"
     },
+
     {
         id: "us_05",
         name: "Kings MMA",
@@ -205,8 +275,10 @@ const mmaTeams = [
         structure: 92,
         coaching: 94,
         cost: 1750,
+        percentage: generateTeamPercentage(),
         specialty: "Muay Thai"
     },
+
     {
         id: "us_06",
         name: "Elevation Fight Team",
@@ -216,8 +288,10 @@ const mmaTeams = [
         structure: 89,
         coaching: 91,
         cost: 1500,
+        percentage: generateTeamPercentage(),
         specialty: "Completo"
     },
+
     {
         id: "us_07",
         name: "Sanford MMA",
@@ -227,8 +301,10 @@ const mmaTeams = [
         structure: 91,
         coaching: 90,
         cost: 1450,
+        percentage: generateTeamPercentage(),
         specialty: "Striking"
     },
+
     {
         id: "us_08",
         name: "Factory X",
@@ -238,8 +314,10 @@ const mmaTeams = [
         structure: 85,
         coaching: 88,
         cost: 1300,
+        percentage: generateTeamPercentage(),
         specialty: "Completo"
     },
+
     {
         id: "us_09",
         name: "Fortis MMA",
@@ -249,8 +327,10 @@ const mmaTeams = [
         structure: 84,
         coaching: 86,
         cost: 1200,
+        percentage: generateTeamPercentage(),
         specialty: "Wrestling"
     },
+
     {
         id: "us_10",
         name: "Glory MMA Academy",
@@ -260,11 +340,15 @@ const mmaTeams = [
         structure: 79,
         coaching: 82,
         cost: 1000,
+        percentage: generateTeamPercentage(),
         specialty: "Striking"
     },
+
+
     /* =====================================================
        🇯🇵 JAPÃO
     ===================================================== */
+
     {
         id: "jp_01",
         name: "Japanese Combat Elite",
@@ -274,8 +358,10 @@ const mmaTeams = [
         structure: 95,
         coaching: 98,
         cost: 1900,
+        percentage: generateTeamPercentage(),
         specialty: "Grappling"
     },
+
     {
         id: "jp_02",
         name: "Pancrase Team",
@@ -285,8 +371,10 @@ const mmaTeams = [
         structure: 93,
         coaching: 96,
         cost: 1800,
+        percentage: generateTeamPercentage(),
         specialty: "Completo"
     },
+
     {
         id: "jp_03",
         name: "Shooto Elite",
@@ -296,8 +384,10 @@ const mmaTeams = [
         structure: 91,
         coaching: 94,
         cost: 1650,
+        percentage: generateTeamPercentage(),
         specialty: "Grappling"
     },
+
     {
         id: "jp_04",
         name: "Rizin Combat Team",
@@ -307,8 +397,10 @@ const mmaTeams = [
         structure: 90,
         coaching: 93,
         cost: 1600,
+        percentage: generateTeamPercentage(),
         specialty: "Completo"
     },
+
     {
         id: "jp_05",
         name: "Tokyo Fight Academy",
@@ -318,8 +410,10 @@ const mmaTeams = [
         structure: 87,
         coaching: 89,
         cost: 1400,
+        percentage: generateTeamPercentage(),
         specialty: "Striking"
     },
+
     {
         id: "jp_06",
         name: "Osaka Combat Club",
@@ -329,8 +423,10 @@ const mmaTeams = [
         structure: 84,
         coaching: 87,
         cost: 1250,
+        percentage: generateTeamPercentage(),
         specialty: "Wrestling"
     },
+
     {
         id: "jp_07",
         name: "Kyoto MMA",
@@ -340,8 +436,10 @@ const mmaTeams = [
         structure: 80,
         coaching: 84,
         cost: 1100,
+        percentage: generateTeamPercentage(),
         specialty: "Grappling"
     },
+
     {
         id: "jp_08",
         name: "Samurai Fight Team",
@@ -351,8 +449,10 @@ const mmaTeams = [
         structure: 79,
         coaching: 82,
         cost: 1000,
+        percentage: generateTeamPercentage(),
         specialty: "Striking"
     },
+
     {
         id: "jp_09",
         name: "Nippon Combat",
@@ -362,8 +462,10 @@ const mmaTeams = [
         structure: 76,
         coaching: 79,
         cost: 900,
+        percentage: generateTeamPercentage(),
         specialty: "Completo"
     },
+
     {
         id: "jp_10",
         name: "Tokyo Warriors",
@@ -373,11 +475,15 @@ const mmaTeams = [
         structure: 73,
         coaching: 77,
         cost: 800,
+        percentage: generateTeamPercentage(),
         specialty: "Completo"
     },
+
+
     /* =====================================================
        🇲🇽 MÉXICO
     ===================================================== */
+
     {
         id: "mx_01",
         name: "Mexico Combat Elite",
@@ -387,8 +493,10 @@ const mmaTeams = [
         structure: 91,
         coaching: 96,
         cost: 1500,
+        percentage: generateTeamPercentage(),
         specialty: "Striking"
     },
+
     {
         id: "mx_02",
         name: "Azteca Fight Team",
@@ -398,8 +506,10 @@ const mmaTeams = [
         structure: 89,
         coaching: 94,
         cost: 1400,
+        percentage: generateTeamPercentage(),
         specialty: "Grappling"
     },
+
     {
         id: "mx_03",
         name: "Mexico MMA Academy",
@@ -409,8 +519,10 @@ const mmaTeams = [
         structure: 87,
         coaching: 91,
         cost: 1300,
+        percentage: generateTeamPercentage(),
         specialty: "Completo"
     },
+
     {
         id: "mx_04",
         name: "Guerreros MMA",
@@ -420,8 +532,10 @@ const mmaTeams = [
         structure: 84,
         coaching: 89,
         cost: 1150,
+        percentage: generateTeamPercentage(),
         specialty: "Striking"
     },
+
     {
         id: "mx_05",
         name: "Tijuana Combat",
@@ -431,8 +545,10 @@ const mmaTeams = [
         structure: 81,
         coaching: 86,
         cost: 1050,
+        percentage: generateTeamPercentage(),
         specialty: "Wrestling"
     },
+
     {
         id: "mx_06",
         name: "Azteca Warriors",
@@ -442,8 +558,10 @@ const mmaTeams = [
         structure: 78,
         coaching: 83,
         cost: 950,
+        percentage: generateTeamPercentage(),
         specialty: "Striking"
     },
+
     {
         id: "mx_07",
         name: "Monterrey MMA",
@@ -453,8 +571,10 @@ const mmaTeams = [
         structure: 76,
         coaching: 80,
         cost: 850,
+        percentage: generateTeamPercentage(),
         specialty: "Completo"
     },
+
     {
         id: "mx_08",
         name: "Guadalajara Fight Team",
@@ -464,8 +584,10 @@ const mmaTeams = [
         structure: 73,
         coaching: 78,
         cost: 800,
+        percentage: generateTeamPercentage(),
         specialty: "Grappling"
     },
+
     {
         id: "mx_09",
         name: "Cancun Combat",
@@ -475,8 +597,10 @@ const mmaTeams = [
         structure: 70,
         coaching: 75,
         cost: 700,
+        percentage: generateTeamPercentage(),
         specialty: "Striking"
     },
+
     {
         id: "mx_10",
         name: "Maya Fight Academy",
@@ -486,11 +610,15 @@ const mmaTeams = [
         structure: 68,
         coaching: 72,
         cost: 600,
+        percentage: generateTeamPercentage(),
         specialty: "Completo"
     },
+
+
     /* =====================================================
        🇦🇷 ARGENTINA
     ===================================================== */
+
     ...createCountryTeams(
         "Argentina",
         "AR",
@@ -507,9 +635,12 @@ const mmaTeams = [
             "Argentina Fight Academy"
         ]
     ),
+
+
     /* =====================================================
        🇨🇦 CANADÁ
     ===================================================== */
+
     ...createCountryTeams(
         "Canadá",
         "CA",
@@ -526,9 +657,12 @@ const mmaTeams = [
             "North Star MMA"
         ]
     ),
+
+
     /* =====================================================
        🇷🇺 RÚSSIA
     ===================================================== */
+
     ...createCountryTeams(
         "Rússia",
         "RU",
@@ -545,9 +679,12 @@ const mmaTeams = [
             "Russian Fight Academy"
         ]
     ),
+
+
     /* =====================================================
        🇬🇧 REINO UNIDO
     ===================================================== */
+
     ...createCountryTeams(
         "Reino Unido",
         "UK",
@@ -564,59 +701,81 @@ const mmaTeams = [
             "British Fight Academy"
         ]
     )
+
 ];
+
+
 /* =========================================================
-   GERADOR AUXILIAR PARA OS PAÍSES
-   QUE POSSUEM TOP 10 PADRONIZADO
+   GERADOR DE EQUIPES
 ========================================================= */
+
 function createCountryTeams(
     country,
     prefix,
     names
 ) {
+
     return names.map(
         (name, index) => {
+
             const rank =
                 index + 1;
+
             const prestige =
                 98 -
                 (
                     index * 3
                 );
+
             return {
+
                 id:
                     prefix.toLowerCase() +
                     "_" +
-                    String(rank).padStart(2, "0"),
+                    String(rank).padStart(
+                        2,
+                        "0"
+                    ),
+
                 name:
                     name,
+
                 country:
                     country,
+
                 rank:
                     rank,
+
                 prestige:
                     teamClamp(
                         prestige,
                         70,
                         98
                     ),
+
                 structure:
                     teamClamp(
                         prestige - 2,
                         68,
                         96
                     ),
+
                 coaching:
                     teamClamp(
                         prestige + 1,
                         72,
                         99
                     ),
+
                 cost:
                     700 +
                     (
                         10 - rank
                     ) * 120,
+
+                percentage:
+                    generateTeamPercentage(),
+
                 specialty:
                     [
                         "Completo",
@@ -626,14 +785,20 @@ function createCountryTeams(
                     ][
                         index % 4
                     ]
+
             };
+
         }
     );
 }
+
+
 /* =========================================================
-   TREINADORES DAS EQUIPES
+   🥋 TREINADORES DAS EQUIPES
 ========================================================= */
+
 const teamCoaches = [
+
     {
         id: "coach_01",
         name: "Ricardo Almeida",
@@ -642,6 +807,7 @@ const teamCoaches = [
         privateCost: 850,
         weeklyCost: 120
     },
+
     {
         id: "coach_02",
         name: "Marcelo Rocha",
@@ -650,6 +816,7 @@ const teamCoaches = [
         privateCost: 800,
         weeklyCost: 115
     },
+
     {
         id: "coach_03",
         name: "Fernando Costa",
@@ -658,6 +825,7 @@ const teamCoaches = [
         privateCost: 750,
         weeklyCost: 110
     },
+
     {
         id: "coach_04",
         name: "Daniel Souza",
@@ -666,6 +834,7 @@ const teamCoaches = [
         privateCost: 720,
         weeklyCost: 105
     },
+
     {
         id: "coach_05",
         name: "Anderson Lima",
@@ -674,6 +843,7 @@ const teamCoaches = [
         privateCost: 650,
         weeklyCost: 95
     },
+
     {
         id: "coach_06",
         name: "Paulo Mendes",
@@ -682,11 +852,16 @@ const teamCoaches = [
         privateCost: 600,
         weeklyCost: 90
     }
+
 ];
+
+
 /* =========================================================
-   TREINADORES PARTICULARES
+   👤 TREINADORES PARTICULARES
 ========================================================= */
+
 const privateCoaches = [
+
     {
         id: "private_01",
         name: "Rafael Mendes",
@@ -695,6 +870,7 @@ const privateCoaches = [
         cost: 900,
         weeklyCost: 150
     },
+
     {
         id: "private_02",
         name: "Bruno Silva",
@@ -703,6 +879,7 @@ const privateCoaches = [
         cost: 850,
         weeklyCost: 140
     },
+
     {
         id: "private_03",
         name: "Carlos Oliveira",
@@ -711,6 +888,7 @@ const privateCoaches = [
         cost: 1000,
         weeklyCost: 160
     },
+
     {
         id: "private_04",
         name: "Eduardo Santos",
@@ -719,341 +897,683 @@ const privateCoaches = [
         cost: 1200,
         weeklyCost: 180
     }
+
 ];
+
+
 /* =========================================================
-   GARANTIR ESTRUTURA DO PLAYER
+   🧬 GARANTIR ESTRUTURA DO PLAYER
 ========================================================= */
+
 function ensureTeamPlayer() {
+
     if (
         typeof window.player ===
         "undefined" ||
         !window.player
     ) {
+
         if (
             typeof createDefaultPlayer ===
             "function"
         ) {
+
             window.player =
                 createDefaultPlayer();
+
         }
+
     }
-    if (!player.team) {
+
+    if (!window.player) {
+        return;
+    }
+
+    if (
+        !player.team
+    ) {
         player.team = null;
     }
-    if (!player.coach) {
+
+    if (
+        !player.coach
+    ) {
         player.coach = null;
     }
-    if (!player.privateCoach) {
+
+    if (
+        !player.privateCoach
+    ) {
         player.privateCoach = null;
     }
-    if (!player.teamHistory) {
+
+    if (
+        !player.teamHistory
+    ) {
         player.teamHistory = [];
     }
+
 }
+
+
 /* =========================================================
-   CHANCE DE ENTRAR NA EQUIPE
+   🎯 CHANCE DE ENTRAR NA EQUIPE
 ========================================================= */
-function getTeamAcceptanceChance(team) {
+
+function getTeamAcceptanceChance(
+    team
+) {
+
     ensureTeamPlayer();
+
     const ovr =
-        typeof getOverall === "function"
-        ? getOverall()
-        : 40;
+        typeof getOverall ===
+        "function"
+        ?
+        Number(
+            getOverall()
+        )
+        :
+        40;
+
     const fame =
         Number(
             player.fame || 0
         );
+
     let chance =
         15;
+
     chance +=
         ovr -
         50;
+
     chance +=
         fame / 5;
+
     chance +=
         (
             100 -
             team.prestige
         ) / 2;
+
     return teamClamp(
         chance,
         5,
         95
     );
 }
+
+
 /* =========================================================
-   CONTRATAR EQUIPE
+   🏢 ENTRAR NA EQUIPE
 ========================================================= */
-function joinTeam(teamId) {
+
+function joinTeam(
+    teamId
+) {
+
     ensureTeamPlayer();
+
     const team =
         mmaTeams.find(
             item =>
-                item.id === teamId
+                item.id ===
+                teamId
         );
+
     if (!team) {
         return;
     }
+
     const chance =
         getTeamAcceptanceChance(
             team
         );
+
     if (
         Math.random() * 100 >
         chance
     ) {
+
         alert(
             "🏢 A equipe recusou sua entrada.\n\n" +
             "Equipe: " +
             team.name +
             "\n\n" +
-            "Tente melhorar seu OVR, fama e carreira."
+            "Chance de aprovação: " +
+            chance.toFixed(0) +
+            "%\n\n" +
+            "Melhore seu OVR e sua fama."
         );
+
         return;
     }
+
+
+    /* =====================================================
+       SE JÁ ESTIVER EM OUTRA EQUIPE
+    ===================================================== */
+
+    if (
+        player.team
+    ) {
+
+        const leave =
+            confirm(
+                "🏢 Você já pertence à equipe " +
+                player.team.name +
+                ".\n\n" +
+                "Deseja sair dela e entrar na nova equipe?"
+            );
+
+        if (!leave) {
+            return;
+        }
+
+    }
+
+
+    /* =====================================================
+       DADOS DA EQUIPE
+    ===================================================== */
+
     player.team = {
+
         id:
             team.id,
+
         name:
             team.name,
+
         country:
             team.country,
+
         rank:
             team.rank,
+
         prestige:
             team.prestige,
+
+        structure:
+            team.structure,
+
+        coaching:
+            team.coaching,
+
+        percentage:
+            team.percentage,
+
+        cost:
+            team.cost,
+
         specialty:
             team.specialty
+
     };
+
+
+    /* =====================================================
+       HISTÓRICO
+    ===================================================== */
+
     player.teamHistory.push({
+
         team:
             team.name,
+
         country:
             team.country,
+
+        rank:
+            team.rank,
+
         joinedYear:
             player.year,
+
         joinedWeek:
             player.week
+
     });
+
+
+    /* =====================================================
+       TREINADOR DA EQUIPE
+    ===================================================== */
+
     const coach =
         teamCoaches[
-            team.rank % teamCoaches.length
+            (
+                team.rank - 1
+            ) %
+            teamCoaches.length
         ];
+
+
     player.coach = {
+
         id:
             coach.id,
+
         name:
             coach.name,
+
         specialty:
             coach.specialty,
+
         level:
             Math.min(
                 99,
                 coach.level +
                 Math.floor(
                     (
-                        100 -
+                        10 -
                         team.rank
-                    ) / 10
+                    ) / 2
                 )
             )
+
     };
+
+
+    /* =====================================================
+       LOG
+    ===================================================== */
+
     player.log =
         player.log || [];
+
     player.log.unshift(
         "🏢 Você entrou para " +
         team.name +
-        "."
+        " (#" +
+        team.rank +
+        ")."
     );
+
+
     teamSave();
+
+
     alert(
         "🏢 EQUIPE CONTRATADA!\n\n" +
+
         team.name +
         "\n" +
+
         team.country +
+
         "\n\n" +
+
+        "Ranking: #" +
+        team.rank +
+
+        "\n" +
+
+        "Percentual: " +
+        team.percentage +
+        "%" +
+
+        "\n\n" +
+
         "Treinador: " +
-        player.coach.name
+        player.coach.name +
+
+        "\n" +
+
+        "Nível: " +
+        player.coach.level
     );
+
+
     teamScreen();
+
 }
+
+
 /* =========================================================
-   SAIR DA EQUIPE
+   🚪 SAIR DA EQUIPE
 ========================================================= */
+
 function leaveTeam() {
+
     ensureTeamPlayer();
-    if (!player.team) {
+
+    if (
+        !player.team
+    ) {
         return;
     }
+
     const oldTeam =
         player.team.name;
-    player.team = null;
-    player.coach = null;
+
+    const confirmLeave =
+        confirm(
+            "🚪 Deseja realmente sair da equipe " +
+            oldTeam +
+            "?"
+        );
+
+    if (!confirmLeave) {
+        return;
+    }
+
+    player.team =
+        null;
+
+    player.coach =
+        null;
+
     player.log =
         player.log || [];
+
     player.log.unshift(
         "🚪 Você deixou a equipe " +
         oldTeam +
         "."
     );
+
     teamSave();
+
     teamScreen();
+
 }
+
+
 /* =========================================================
-   CONTRATAR TREINADOR PARTICULAR
+   👤 CONTRATAR TREINADOR PARTICULAR
 ========================================================= */
-function hirePrivateCoach(coachId) {
+
+function hirePrivateCoach(
+    coachId
+) {
+
     ensureTeamPlayer();
+
     const coach =
         privateCoaches.find(
             item =>
-                item.id === coachId
+                item.id ===
+                coachId
         );
+
     if (!coach) {
         return;
     }
+
     const money =
         Number(
             player.money || 0
         );
+
+
     if (
         money <
         coach.cost
     ) {
+
         alert(
-            "💰 Dinheiro insuficiente.\n\n" +
-            "Custo: $" +
-            coach.cost
+            "💰 DINHEIRO INSUFICIENTE!\n\n" +
+
+            "Treinador: " +
+            coach.name +
+
+            "\n\n" +
+
+            "Custo inicial: $" +
+            coach.cost +
+
+            "\n" +
+
+            "Seu dinheiro: $" +
+            money
         );
+
         return;
     }
+
+
+    /* =====================================================
+       SE JÁ POSSUI TREINADOR
+    ===================================================== */
+
+    if (
+        player.privateCoach
+    ) {
+
+        const replace =
+            confirm(
+                "🥋 Você já possui um treinador particular:\n\n" +
+                player.privateCoach.name +
+                "\n\n" +
+                "Deseja substituir por " +
+                coach.name +
+                "?"
+            );
+
+        if (!replace) {
+            return;
+        }
+
+    }
+
+
     player.money =
         money -
         coach.cost;
+
+
     player.privateCoach = {
+
         id:
             coach.id,
+
         name:
             coach.name,
+
         specialty:
             coach.specialty,
+
         level:
             coach.level,
+
         weeklyCost:
             coach.weeklyCost
+
     };
+
+
     player.log =
         player.log || [];
+
     player.log.unshift(
         "🥋 Você contratou o treinador particular " +
         coach.name +
         "."
     );
+
+
     teamSave();
+
+
     alert(
         "🥋 TREINADOR PARTICULAR CONTRATADO!\n\n" +
+
         coach.name +
-        "\n" +
+
+        "\n\n" +
+
         "Especialidade: " +
         coach.specialty +
+
         "\n" +
+
         "Nível: " +
         coach.level +
+
         "\n\n" +
-        "Custo: $" +
+
+        "Contrato inicial: $" +
         coach.cost +
+
         "\n" +
+
         "Custo semanal: $" +
         coach.weeklyCost
     );
+
+
     teamScreen();
+
 }
+
+
 /* =========================================================
-   DEMITIR TREINADOR PARTICULAR
+   🚪 DEMITIR TREINADOR PARTICULAR
 ========================================================= */
+
 function firePrivateCoach() {
+
     ensureTeamPlayer();
-    if (!player.privateCoach) {
+
+    if (
+        !player.privateCoach
+    ) {
         return;
     }
+
     const name =
         player.privateCoach.name;
-    player.privateCoach = null;
+
+    const confirmFire =
+        confirm(
+            "🥋 Deseja encerrar o contrato com " +
+            name +
+            "?"
+        );
+
+    if (!confirmFire) {
+        return;
+    }
+
+    player.privateCoach =
+        null;
+
     player.log =
         player.log || [];
+
     player.log.unshift(
         "🥋 Você encerrou o trabalho com " +
         name +
         "."
     );
+
     teamSave();
+
     teamScreen();
+
 }
+
+
 /* =========================================================
-   TREINAMENTO DA EQUIPE
+   🥊 TREINAMENTO DA EQUIPE
 ========================================================= */
+
 function applyTeamTraining() {
+
     ensureTeamPlayer();
-    if (!player.team) {
+
+    if (
+        !player.team
+    ) {
         return;
     }
+
     const team =
         mmaTeams.find(
             item =>
                 item.id ===
                 player.team.id
         );
+
     if (!team) {
         return;
     }
-    if (!player.attributes) {
+
+    if (
+        !player.attributes
+    ) {
         player.attributes = {};
     }
+
+
     const specialty =
         team.specialty;
+
     let attribute;
+
+
     if (
         specialty ===
         "Striking"
     ) {
+
         attribute =
             "striking";
+
     }
+
     else if (
         specialty ===
         "Wrestling"
     ) {
+
         attribute =
             "wrestling";
+
     }
+
     else if (
         specialty ===
         "Grappling"
     ) {
+
         attribute =
             "grappling";
+
     }
+
     else {
+
         attribute =
             "technique";
+
     }
+
+
     const current =
         Number(
             player.attributes[
                 attribute
             ] || 40
         );
+
     const potential =
         Number(
             player.potential ||
             90
         );
+
+
     const gain =
         0.20 +
         (
             team.coaching /
             500
         );
+
+
     player.attributes[
         attribute
     ] =
@@ -1063,63 +1583,97 @@ function applyTeamTraining() {
                 current + gain
             ).toFixed(2)
         );
+
 }
+
+
 /* =========================================================
-   TREINAMENTO PARTICULAR
+   👤 TREINAMENTO PARTICULAR
 ========================================================= */
+
 function applyPrivateCoachTraining() {
+
     ensureTeamPlayer();
-    if (!player.privateCoach) {
+
+    if (
+        !player.privateCoach
+    ) {
         return;
     }
-    if (!player.attributes) {
+
+    if (
+        !player.attributes
+    ) {
         player.attributes = {};
     }
+
+
     const coach =
         player.privateCoach;
+
     let attribute;
+
+
     if (
         coach.specialty ===
         "Striking"
     ) {
+
         attribute =
             "striking";
+
     }
+
     else if (
         coach.specialty ===
         "Wrestling"
     ) {
+
         attribute =
             "wrestling";
+
     }
+
     else if (
         coach.specialty ===
         "Grappling"
     ) {
+
         attribute =
             "grappling";
+
     }
+
     else {
+
         attribute =
             "technique";
+
     }
+
+
     const current =
         Number(
             player.attributes[
                 attribute
             ] || 40
         );
+
     const potential =
         Number(
             player.potential ||
             90
         );
+
+
     const gain =
         0.35 +
         (
             coach.level /
             500
         );
+
+
     player.attributes[
         attribute
     ] =
@@ -1129,309 +1683,813 @@ function applyPrivateCoachTraining() {
                 current + gain
             ).toFixed(2)
         );
+
 }
+
+
 /* =========================================================
-   PROCESSAR EQUIPE NA VIRADA DA SEMANA
+   📅 PROCESSAR EQUIPE NA VIRADA DA SEMANA
 ========================================================= */
+
 function processTeamWeek() {
+
     ensureTeamPlayer();
+
     applyTeamTraining();
+
     applyPrivateCoachTraining();
+
+
+    /* =====================================================
+       PAGAMENTO DO TREINADOR PARTICULAR
+    ===================================================== */
+
     if (
         player.privateCoach
     ) {
+
         const cost =
             Number(
                 player.privateCoach
                     .weeklyCost || 0
             );
+
         player.money =
             Math.max(
                 0,
                 Number(
                     player.money || 0
-                ) - cost
+                ) -
+                cost
             );
+
     }
+
+
     teamSave();
+
 }
+
+
 /* =========================================================
-   FILTRAR EQUIPES DO PAÍS
+   🌎 FILTRAR EQUIPES DO PAÍS
 ========================================================= */
+
 function getTeamsByCountry(
     country
 ) {
+
     return mmaTeams.filter(
         team =>
             team.country ===
             country
     );
+
 }
+
+
 /* =========================================================
-   TELA DE EQUIPE
+   🌎 OBTER PAÍSES COM EQUIPES
 ========================================================= */
+
+function getTeamCountries() {
+
+    return [
+        ...new Set(
+            mmaTeams.map(
+                team =>
+                    team.country
+            )
+        )
+    ];
+
+}
+
+
+/* =========================================================
+   🏢 TELA DE EQUIPE
+========================================================= */
+
 function teamScreen() {
+
     ensureTeamPlayer();
-    showGame();
-    const content =
-        getElement("content");
-    if (!content) {
-        return;
+
+
+    if (
+        typeof showGame ===
+        "function"
+    ) {
+        showGame();
     }
+
+
+    const content =
+        document.getElementById(
+            "content"
+        );
+
+
+    if (!content) {
+
+        console.error(
+            "Elemento #content não encontrado."
+        );
+
+        return;
+
+    }
+
+
     const country =
         player.country ||
         "Brasil";
-    const teams =
+
+
+    let teams =
         getTeamsByCountry(
             country
         );
-    let teamHTML = "";
-    if (player.team) {
+
+
+    /* =====================================================
+       SE O PAÍS DO JOGADOR AINDA NÃO POSSUI
+       BANCO DE EQUIPES, MOSTRA BRASIL COMO
+       FALLBACK PARA NÃO DEIXAR A TELA VAZIA.
+    ===================================================== */
+
+    let displayedCountry =
+        country;
+
+
+    if (
+        teams.length === 0
+    ) {
+
+        teams =
+            getTeamsByCountry(
+                "Brasil"
+            );
+
+        displayedCountry =
+            "Brasil";
+
+    }
+
+
+    let teamHTML =
+        "";
+
+
+    /* =====================================================
+       JOGADOR JÁ POSSUI EQUIPE
+    ===================================================== */
+
+    if (
+        player.team
+    ) {
+
+        const currentTeam =
+            mmaTeams.find(
+                team =>
+                    team.id ===
+                    player.team.id
+            );
+
+
+        const teamData =
+            currentTeam ||
+            player.team;
+
+
         teamHTML = `
+
             <div class="card">
+
                 <div class="title">
                     🏢 SUA EQUIPE
                 </div>
+
+
                 <div class="statline">
-                    <span>Equipe</span>
+                    <span>
+                        Equipe
+                    </span>
+
                     <b>
-                        ${player.team.name}
+                        ${teamData.name}
                     </b>
                 </div>
+
+
                 <div class="statline">
-                    <span>País</span>
+                    <span>
+                        País
+                    </span>
+
                     <b>
-                        ${player.team.country}
+                        ${teamData.country}
                     </b>
                 </div>
+
+
                 <div class="statline">
-                    <span>Ranking</span>
+                    <span>
+                        Ranking
+                    </span>
+
                     <b>
-                        #${player.team.rank}
+                        #${teamData.rank}
                     </b>
                 </div>
+
+
                 <div class="statline">
-                    <span>Especialidade</span>
+                    <span>
+                        Prestígio
+                    </span>
+
                     <b>
-                        ${player.team.specialty}
+                        ${teamData.prestige}
                     </b>
                 </div>
+
+
+                <div class="statline">
+                    <span>
+                        Estrutura
+                    </span>
+
+                    <b>
+                        ${teamData.structure}
+                    </b>
+                </div>
+
+
+                <div class="statline">
+                    <span>
+                        Treinamento
+                    </span>
+
+                    <b>
+                        ${teamData.coaching}
+                    </b>
+                </div>
+
+
+                <div class="statline">
+                    <span>
+                        Especialidade
+                    </span>
+
+                    <b>
+                        ${teamData.specialty}
+                    </b>
+                </div>
+
+
+                <div class="statline">
+                    <span>
+                        Percentual
+                    </span>
+
+                    <b>
+                        ${teamData.percentage || 10}%
+                    </b>
+                </div>
+
+
                 ${
                     player.coach
                     ?
                     `
+
                     <div class="statline">
-                        <span>Treinador</span>
+
+                        <span>
+                            Treinador
+                        </span>
+
                         <b>
                             ${player.coach.name}
                         </b>
+
                     </div>
+
+
+                    <div class="statline">
+
+                        <span>
+                            Nível do treinador
+                        </span>
+
+                        <b>
+                            ${player.coach.level}
+                        </b>
+
+                    </div>
+
                     `
                     :
                     ""
                 }
+
+
                 <button
                     class="gray"
                     onclick="leaveTeam()">
+
                     🚪 SAIR DA EQUIPE
+
                 </button>
+
             </div>
+
         `;
+
     }
+
+
+    /* =====================================================
+       JOGADOR SEM EQUIPE
+    ===================================================== */
+
     else {
+
         teamHTML = `
+
             <div class="card">
+
                 <div class="title">
                     🏢 PROCURAR EQUIPE
                 </div>
+
                 <p>
-                    Escolha uma academia para
-                    desenvolver sua carreira.
+                    Escolha uma das 10 maiores equipes
+                    disponíveis em ${displayedCountry}.
                 </p>
+
+                <p>
+                    Cada equipe possui uma porcentagem
+                    aleatória entre 10% e 20%.
+                </p>
+
             </div>
+
+
             ${
                 teams.map(
-                    team => `
-                    <div class="card">
-                        <div class="title">
-                            #${team.rank}
-                            ${team.name}
-                        </div>
-                        <div class="statline">
-                            <span>Prestígio</span>
-                            <b>
-                                ${team.prestige}
-                            </b>
-                        </div>
-                        <div class="statline">
-                            <span>Estrutura</span>
-                            <b>
-                                ${team.structure}
-                            </b>
-                        </div>
-                        <div class="statline">
-                            <span>Treinamento</span>
-                            <b>
-                                ${team.coaching}
-                            </b>
-                        </div>
-                        <div class="statline">
-                            <span>Especialidade</span>
-                            <b>
-                                ${team.specialty}
-                            </b>
-                        </div>
-                        <div class="statline">
-                            <span>Custo</span>
-                            <b>
-                                $${team.cost}
-                            </b>
-                        </div>
-                        <button
-                            class="green"
-                            onclick="joinTeam('${team.id}')">
-                            🥊 TENTAR ENTRAR
-                        </button>
-                    </div>
-                    `
+                    team => {
+
+                        const chance =
+                            getTeamAcceptanceChance(
+                                team
+                            );
+
+
+                        return `
+
+                            <div class="card">
+
+                                <div class="title">
+
+                                    #${team.rank}
+                                    ${team.name}
+
+                                </div>
+
+
+                                <div class="statline">
+
+                                    <span>
+                                        Prestígio
+                                    </span>
+
+                                    <b>
+                                        ${team.prestige}
+                                    </b>
+
+                                </div>
+
+
+                                <div class="statline">
+
+                                    <span>
+                                        Estrutura
+                                    </span>
+
+                                    <b>
+                                        ${team.structure}
+                                    </b>
+
+                                </div>
+
+
+                                <div class="statline">
+
+                                    <span>
+                                        Treinamento
+                                    </span>
+
+                                    <b>
+                                        ${team.coaching}
+                                    </b>
+
+                                </div>
+
+
+                                <div class="statline">
+
+                                    <span>
+                                        Especialidade
+                                    </span>
+
+                                    <b>
+                                        ${team.specialty}
+                                    </b>
+
+                                </div>
+
+
+                                <div class="statline">
+
+                                    <span>
+                                        Percentual
+                                    </span>
+
+                                    <b>
+                                        ${team.percentage}%
+                                    </b>
+
+                                </div>
+
+
+                                <div class="statline">
+
+                                    <span>
+                                        Custo
+                                    </span>
+
+                                    <b>
+                                        $${team.cost}
+                                    </b>
+
+                                </div>
+
+
+                                <div class="statline">
+
+                                    <span>
+                                        Chance de aprovação
+                                    </span>
+
+                                    <b>
+                                        ${chance.toFixed(0)}%
+                                    </b>
+
+                                </div>
+
+
+                                <button
+                                    class="green"
+                                    onclick="joinTeam('${team.id}')">
+
+                                    🥊 TENTAR ENTRAR
+
+                                </button>
+
+                            </div>
+
+                        `;
+
+                    }
                 ).join("")
             }
+
         `;
+
     }
-    content.innerHTML = `
+
+
+    /* =====================================================
+       👤 TREINADOR PARTICULAR
+    ===================================================== */
+
+    const privateCoachHTML = `
+
         <div class="card">
-            <div class="title">
-                🏢 EQUIPE
-            </div>
-            <p>
-                ${country}
-            </p>
-        </div>
-        ${teamHTML}
-        <div class="card">
+
             <div class="title">
                 🥋 TREINADOR PARTICULAR
             </div>
+
+
             ${
                 player.privateCoach
                 ?
+
                 `
+
                     <div class="statline">
+
                         <span>
                             Treinador
                         </span>
+
                         <b>
                             ${player.privateCoach.name}
                         </b>
+
                     </div>
+
+
                     <div class="statline">
+
                         <span>
                             Especialidade
                         </span>
+
                         <b>
                             ${player.privateCoach.specialty}
                         </b>
+
                     </div>
+
+
                     <div class="statline">
+
                         <span>
                             Nível
                         </span>
+
                         <b>
                             ${player.privateCoach.level}
                         </b>
+
                     </div>
+
+
                     <div class="statline">
+
                         <span>
                             Custo semanal
                         </span>
+
                         <b>
                             $${player.privateCoach.weeklyCost}
                         </b>
+
                     </div>
+
+
                     <button
                         class="gray"
                         onclick="firePrivateCoach()">
+
                         🚪 ENCERRAR TREINADOR
+
                     </button>
+
                 `
+
                 :
+
                 `
+
                     <p>
-                        Tenha dinheiro suficiente
-                        para contratar um treinador
-                        particular.
+                        Você pode contratar um treinador
+                        particular independentemente
+                        da equipe.
                     </p>
+
+
                     ${
                         privateCoaches.map(
                             coach => `
+
                                 <div
                                     class="statline"
                                     style="margin-top:10px"
                                 >
+
                                     <span>
+
                                         ${coach.name}
                                         —
                                         ${coach.specialty}
+
                                     </span>
+
                                     <b>
-                                        Nível ${coach.level}
+
+                                        Nível
+                                        ${coach.level}
+
                                     </b>
+
                                 </div>
+
+
+                                <div
+                                    class="statline"
+                                >
+
+                                    <span>
+                                        Custo inicial
+                                    </span>
+
+                                    <b>
+                                        $${coach.cost}
+                                    </b>
+
+                                </div>
+
+
+                                <div
+                                    class="statline"
+                                >
+
+                                    <span>
+                                        Custo semanal
+                                    </span>
+
+                                    <b>
+                                        $${coach.weeklyCost}
+                                    </b>
+
+                                </div>
+
+
                                 <button
                                     class="green"
                                     onclick="hirePrivateCoach('${coach.id}')">
+
                                     🥋 CONTRATAR
+
                                     $${coach.cost}
+
                                 </button>
+
                             `
                         ).join("")
                     }
+
                 `
             }
+
         </div>
+
+    `;
+
+
+    /* =====================================================
+       HTML FINAL
+    ===================================================== */
+
+    content.innerHTML = `
+
+        <div class="card">
+
+            <div class="title">
+                🏢 EQUIPE
+            </div>
+
+            <p>
+                País: ${displayedCountry}
+            </p>
+
+        </div>
+
+
+        ${teamHTML}
+
+
+        ${privateCoachHTML}
+
+
         <button
             class="main-button"
             onclick="tab('home')">
+
             🏠 VOLTAR AO INÍCIO
+
         </button>
+
     `;
+
 }
+
+
 /* =========================================================
-   COMPATIBILIDADE
+   🏢 ABRIR EQUIPE
+   Compatibilidade com o sistema principal
 ========================================================= */
+
+function openTeam() {
+
+    ensureTeamPlayer();
+
+    if (
+        typeof teamScreen ===
+        "function"
+    ) {
+
+        teamScreen();
+
+        return;
+
+    }
+
+
+    alert(
+        "❌ O sistema de equipes não foi carregado."
+    );
+
+}
+
+
+/* =========================================================
+   🔗 ALIASES DE COMPATIBILIDADE
+========================================================= */
+
 window.mmaTeams =
     mmaTeams;
+
 window.teamCoaches =
     teamCoaches;
+
 window.privateCoaches =
     privateCoaches;
+
 window.ensureTeamPlayer =
     ensureTeamPlayer;
+
 window.teamScreen =
     teamScreen;
+
+window.openTeam =
+    openTeam;
+
+window.showTeamScreen =
+    teamScreen;
+
+window.openTeamScreen =
+    teamScreen;
+
+window.team =
+    openTeam;
+
+window.equipe =
+    openTeam;
+
+window.teams =
+    openTeam;
+
 window.joinTeam =
     joinTeam;
+
 window.leaveTeam =
     leaveTeam;
+
 window.hirePrivateCoach =
     hirePrivateCoach;
+
 window.firePrivateCoach =
     firePrivateCoach;
+
 window.processTeamWeek =
     processTeamWeek;
+
 window.applyTeamTraining =
     applyTeamTraining;
+
 window.applyPrivateCoachTraining =
     applyPrivateCoachTraining;
+
 window.getTeamsByCountry =
     getTeamsByCountry;
+
+window.getTeamCountries =
+    getTeamCountries;
+
+window.getTeamAcceptanceChance =
+    getTeamAcceptanceChance;
+
+
 /* =========================================================
-   INICIALIZAÇÃO
+   🧬 INICIALIZAÇÃO
 ========================================================= */
+
 if (
     typeof window.player !==
     "undefined" &&
     window.player
 ) {
+
     ensureTeamPlayer();
+
 }
+
+
+/* =========================================================
+   🏁 FIM DO TEAM.JS
+========================================================= */
