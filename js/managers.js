@@ -1,94 +1,451 @@
 /* =========================================================
    MMA LIFE DYNASTY
    MANAGERS.JS
-   SISTEMA COMPLETO DE EMPRESÁRIO
-   VERSÃO — CONTRATOS + OFERTAS + NEGOCIAÇÃO
+   EMPRESÁRIO — SISTEMA COMPLETO
+   VERSÃO DEFINITIVA
+
+   FLUXO:
+
+   JOGADOR SEM LUTA
+          ↓
+   EMPRESÁRIO PROCURA
+          ↓
+   PROPOSTA DE LUTA
+          ↓
+   BOLSA + BÔNUS
+          ↓
+   ACEITAR / RECUSAR
+          ↓
+   CAMP
+          ↓
+   SEMANAS DE PREPARAÇÃO
+          ↓
+   DIA DA LUTA
+          ↓
+   BOTÃO LUTAR AGORA
+          ↓
+   FIGHT.JS
+          ↓
+   RESULTADO
+          ↓
+   CONTRATO / HISTÓRICO
+          ↓
+   EMPRESÁRIO PROCURA NOVA OPORTUNIDADE
+
+
+   CATEGORIAS:
+
+   🟢 REGIONAL
+   🔵 NACIONAL
+   🟣 MUNDIAL
+   🔴 ELITE
 ========================================================= */
+
+
 /* =========================================================
    CONFIGURAÇÕES GERAIS
 ========================================================= */
+
 const MANAGER_CONFIG = {
+
     minCampWeeks: 4,
+
     maxCampWeeks: 8,
-    searchCooldownWeeks: 2,
-    firstFightWeek: 4,
-    offerChance: 0.75,
+
+    searchCooldownWeeks: 1,
+
+    firstFightWeek: 1,
+
+    offerChance: 0.85,
+
     maxOfferAge: 1,
-    /* Contratos */
-    regionalMinFights: 3,
-    regionalMaxFights: 5,
-    nationalMinFights: 3,
-    nationalMaxFights: 5,
-    worldFirstMinFights: 2,
-    worldFirstMaxFights: 3,
-    worldSecondMinFights: 2,
-    worldSecondMaxFights: 4,
-    eliteFirstFights: 3,
-    eliteSecondMinFights: 3,
-    eliteSecondMaxFights: 5,
-    /* Bolsas */
-    regionalPurse: 200,
-    regionalWinBonus: 200,
-    nationalPurse: 1000,
-    nationalWinBonus: 1000,
-    worldFirstPurse: 8000,
-    worldFirstWinBonus: 8000,
-    worldSecondPurse: 10000,
-    worldSecondMaxPurse: 20000,
-    worldThirdMinPurse: 80000,
-    worldMaxPurse: 350000,
-    eliteFirstPurse: 12000,
-    eliteFirstWinBonus: 12000,
-    eliteSecondPurse: 25000,
-    eliteThirdMinPurse: 200000,
-    eliteMaxPurse: 1000000,
-    maxPPV: 10
+
+    minContractFights: 3,
+
+    maxContractFights: 5
+
 };
+
+
+/* =========================================================
+   TABELA DE EVENTOS
+========================================================= */
+
+const MANAGER_EVENTS = [
+
+    /* =====================================================
+       🟢 REGIONAL
+    ===================================================== */
+
+    {
+        name: "MMA Fight Night",
+        category: "regional",
+        type: "regional",
+        prestige: 20,
+        basePurse: 200,
+        winBonus: 200,
+        minContract: 3,
+        maxContract: 5,
+        negotiable: false,
+        ppv: false,
+        elite: false
+    },
+
+    {
+        name: "Brazil Combat",
+        category: "regional",
+        type: "regional",
+        prestige: 25,
+        basePurse: 200,
+        winBonus: 200,
+        minContract: 3,
+        maxContract: 5,
+        negotiable: false,
+        ppv: false,
+        elite: false
+    },
+
+    {
+        name: "Fight Arena",
+        category: "regional",
+        type: "regional",
+        prestige: 30,
+        basePurse: 200,
+        winBonus: 200,
+        minContract: 3,
+        maxContract: 5,
+        negotiable: false,
+        ppv: false,
+        elite: false
+    },
+
+    {
+        name: "Future Fighters",
+        category: "regional",
+        type: "regional",
+        prestige: 35,
+        basePurse: 200,
+        winBonus: 200,
+        minContract: 3,
+        maxContract: 5,
+        negotiable: false,
+        ppv: false,
+        elite: false
+    },
+
+    {
+        name: "National Combat",
+        category: "regional",
+        type: "regional",
+        prestige: 40,
+        basePurse: 200,
+        winBonus: 200,
+        minContract: 3,
+        maxContract: 5,
+        negotiable: false,
+        ppv: false,
+        elite: false
+    },
+
+
+    /* =====================================================
+       🔵 NACIONAL
+    ===================================================== */
+
+    {
+        name: "Warriors Championship",
+        category: "national",
+        type: "national",
+        prestige: 50,
+        basePurse: 1000,
+        winBonus: 1000,
+        minContract: 3,
+        maxContract: 5,
+        negotiable: false,
+        ppv: false,
+        elite: false
+    },
+
+    {
+        name: "Combat Warriors",
+        category: "national",
+        type: "national",
+        prestige: 55,
+        basePurse: 1000,
+        winBonus: 1000,
+        minContract: 3,
+        maxContract: 5,
+        negotiable: false,
+        ppv: false,
+        elite: false
+    },
+
+    {
+        name: "Cage Warriors Brasil",
+        category: "national",
+        type: "national",
+        prestige: 60,
+        basePurse: 1000,
+        winBonus: 1000,
+        minContract: 3,
+        maxContract: 5,
+        negotiable: false,
+        ppv: false,
+        elite: false
+    },
+
+    {
+        name: "Ultimate Fight League",
+        category: "national",
+        type: "national",
+        prestige: 65,
+        basePurse: 1000,
+        winBonus: 1000,
+        minContract: 3,
+        maxContract: 5,
+        negotiable: false,
+        ppv: false,
+        elite: false
+    },
+
+
+    /* =====================================================
+       🟣 MUNDIAL
+    ===================================================== */
+
+    {
+        name: "PFL",
+        category: "world",
+        type: "world",
+        prestige: 75,
+        basePurse: 8000,
+        winBonus: 8000,
+        minContract: 2,
+        maxContract: 3,
+        negotiable: true,
+        ppv: true,
+        elite: false
+    },
+
+    {
+        name: "Bellator",
+        category: "world",
+        type: "world",
+        prestige: 80,
+        basePurse: 8000,
+        winBonus: 8000,
+        minContract: 2,
+        maxContract: 3,
+        negotiable: true,
+        ppv: true,
+        elite: false
+    },
+
+    {
+        name: "ONE Championship",
+        category: "world",
+        type: "world",
+        prestige: 82,
+        basePurse: 8000,
+        winBonus: 8000,
+        minContract: 2,
+        maxContract: 3,
+        negotiable: true,
+        ppv: true,
+        elite: false
+    },
+
+    {
+        name: "Rizin",
+        category: "world",
+        type: "world",
+        prestige: 78,
+        basePurse: 8000,
+        winBonus: 8000,
+        minContract: 2,
+        maxContract: 3,
+        negotiable: true,
+        ppv: true,
+        elite: false
+    },
+
+
+    /* =====================================================
+       🔴 ELITE
+    ===================================================== */
+
+    {
+        name: "UFC",
+        category: "elite",
+        type: "elite",
+        prestige: 95,
+        basePurse: 12000,
+        winBonus: 12000,
+        minContract: 3,
+        maxContract: 3,
+        negotiable: true,
+        ppv: true,
+        elite: true
+    },
+
+    {
+        name: "UFC — Evento Grande",
+        category: "elite",
+        type: "elite_big",
+        prestige: 100,
+        basePurse: 25000,
+        winBonus: 25000,
+        minContract: 3,
+        maxContract: 5,
+        negotiable: true,
+        ppv: true,
+        elite: true
+    },
+
+    {
+        name: "UFC — Disputa de Título",
+        category: "elite",
+        type: "title",
+        prestige: 105,
+        basePurse: 200000,
+        winBonus: 200000,
+        minContract: 1,
+        maxContract: 1,
+        negotiable: true,
+        ppv: true,
+        elite: true
+    },
+
+    {
+        name: "UFC — Defesa de Cinturão",
+        category: "elite",
+        type: "title_defense",
+        prestige: 110,
+        basePurse: 200000,
+        winBonus: 200000,
+        minContract: 1,
+        maxContract: 1,
+        negotiable: true,
+        ppv: true,
+        elite: true
+    }
+
+];
+
+
+/* =========================================================
+   ESTADO GLOBAL
+========================================================= */
+
+window.mmaManager = null;
+
+
 /* =========================================================
    UTILIDADES
 ========================================================= */
+
 function managerPlayer() {
+
     if (
         typeof window.player === "undefined" ||
         !window.player
     ) {
+
         if (
             typeof window.createDefaultPlayer ===
             "function"
         ) {
+
             window.player =
                 window.createDefaultPlayer();
+
         }
+
     }
+
     return window.player;
+
 }
+
+
+/* =========================================================
+   SALVAR
+========================================================= */
+
 function managerSave() {
-    if (
-        typeof window.saveGame ===
-        "function"
-    ) {
-        window.saveGame();
+
+    try {
+
+        if (
+            typeof window.saveGame ===
+            "function"
+        ) {
+
+            window.saveGame();
+
+        }
+
     }
+    catch (error) {
+
+        console.warn(
+            "Erro ao salvar jogo:",
+            error
+        );
+
+    }
+
 }
-function managerRandom(min, max) {
+
+
+/* =========================================================
+   RANDOM
+========================================================= */
+
+function managerRandom(
+    min,
+    max
+) {
+
     return (
         Math.random() *
-        (max - min)
+        (
+            max - min
+        )
     ) + min;
+
 }
-function managerRandomInt(min, max) {
+
+
+/* =========================================================
+   RANDOM INTEGER
+========================================================= */
+
+function managerRandomInt(
+    min,
+    max
+) {
+
     return Math.floor(
         managerRandom(
             min,
             max + 1
         )
     );
+
 }
+
+
+/* =========================================================
+   CLAMP
+========================================================= */
+
 function managerClamp(
     value,
     min,
     max
 ) {
+
     return Math.max(
         min,
         Math.min(
@@ -96,195 +453,309 @@ function managerClamp(
             value
         )
     );
+
 }
+
+
 /* =========================================================
-   ESTRUTURA DO EMPRESÁRIO
+   GARANTIR ESTRUTURA
 ========================================================= */
+
 function ensureManagerData() {
+
     const player =
         managerPlayer();
-    if (!player.manager) {
+
+
+    if (
+        !player.manager
+    ) {
+
         player.manager = {
+
             active: true,
-            name:
-                "Carlos Mendes",
+
+            name: "Carlos Mendes",
+
             reputation: 60,
+
             experience: 50,
+
             negotiation: 55,
+
             network: 50
+
         };
+
     }
+
+
     if (
         !Array.isArray(
             player.managerOffers
         )
     ) {
+
         player.managerOffers = [];
+
     }
+
+
     if (
         typeof player.managerSearchCooldown !==
         "number"
     ) {
+
         player.managerSearchCooldown = 0;
+
     }
+
+
     if (
         typeof player.managerLastOfferWeek !==
         "number"
     ) {
+
         player.managerLastOfferWeek = -999;
+
     }
+
+
     if (
         typeof player.managerOfferId !==
         "number"
     ) {
+
         player.managerOfferId = 0;
+
     }
+
+
     if (
         typeof player.managerSearching !==
         "boolean"
     ) {
+
         player.managerSearching = false;
+
     }
+
+
+    if (
+        typeof player.managerSearchWeek !==
+        "number"
+    ) {
+
+        player.managerSearchWeek = -999;
+
+    }
+
+
     if (
         typeof player.managerOfferPending !==
         "boolean"
     ) {
+
         player.managerOfferPending = false;
+
     }
+
+
     if (
-        !Array.isArray(
-            player.managerContractHistory
-        )
-    ) {
-        player.managerContractHistory = [];
-    }
-}
-/* =========================================================
-   ESTÁGIO DO JOGADOR
-========================================================= */
-function managerCareerStage() {
-    const player =
-        managerPlayer();
-    if (
-        player.professional &&
-        player.professional.active
-    ) {
-        return (
-            player.careerStage ||
-            "regional"
-        );
-    }
-    return "amateur";
-}
-/* =========================================================
-   VERIFICAR CAMP
-========================================================= */
-function isInFightCamp() {
-    const player =
-        managerPlayer();
-    const fight =
-        player.nextFight;
-    if (!fight) {
-        return false;
-    }
-    return true;
-}
-/* =========================================================
-   DIA DA LUTA
-========================================================= */
-function managerIsFightDay() {
-    const player =
-        managerPlayer();
-    const fight =
-        player.nextFight;
-    if (!fight) {
-        return false;
-    }
-    if (
-        fight.status ===
-        "fight_day"
-    ) {
-        return true;
-    }
-    if (
-        typeof fight.weeksRemaining ===
+        typeof player.managerContractFightNumber !==
         "number"
     ) {
-        return (
-            fight.weeksRemaining <= 0
-        );
+
+        player.managerContractFightNumber = 0;
+
     }
+
+
     if (
-        typeof fight.fightWeek ===
+        typeof player.managerContractTotalFights !==
         "number"
     ) {
-        return (
-            Number(player.week) >=
-            Number(fight.fightWeek)
-        );
+
+        player.managerContractTotalFights = 0;
+
     }
-    return false;
+
+
+    if (
+        typeof player.managerContractEvent !==
+        "string"
+    ) {
+
+        player.managerContractEvent = "";
+
+    }
+
+
+    if (
+        typeof player.managerContractCategory !==
+        "string"
+    ) {
+
+        player.managerContractCategory = "";
+
+    }
+
 }
+
+
 /* =========================================================
-   CALCULAR OVR
+   OVERALL DO JOGADOR
 ========================================================= */
-function managerOverall() {
+
+function managerGetPlayerOverall() {
+
     const player =
         managerPlayer();
-    if (
-        typeof window.getOverall ===
-        "function"
-    ) {
-        return Number(
-            window.getOverall()
-        );
+
+
+    try {
+
+        if (
+            typeof window.getOverall ===
+            "function"
+        ) {
+
+            const value =
+                Number(
+                    window.getOverall()
+                );
+
+
+            if (
+                Number.isFinite(value) &&
+                value > 0
+            ) {
+
+                return value;
+
+            }
+
+        }
+
     }
-    return Number(
-        player.overall || 45
-    );
+    catch (error) {
+
+        console.warn(
+            "getOverall indisponível."
+        );
+
+    }
+
+
+    const overall =
+        Number(
+            player.overall || 45
+        );
+
+
+    return (
+        Number.isFinite(overall) &&
+        overall > 0
+    )
+    ?
+    overall
+    :
+    45;
+
 }
+
+
 /* =========================================================
    GERAR ADVERSÁRIO
 ========================================================= */
+
 function generateManagerOpponent() {
+
     const player =
         managerPlayer();
-    const overall =
-        managerOverall();
+
+
+    const playerOverall =
+        managerGetPlayerOverall();
+
+
+    /*
+       ADVERSÁRIO SEMPRE TEM OVERALL VÁLIDO.
+    */
+
     const variation =
         managerRandomInt(
             -8,
             8
         );
-    const power =
+
+
+    const opponentOverall =
         managerClamp(
-            overall +
-            variation,
-            35,
+            Math.round(
+                playerOverall +
+                variation
+            ),
+            30,
             95
         );
+
+
     const names = [
+
         "Lucas Andrade",
+
         "Rafael Silva",
+
         "Bruno Costa",
+
         "Diego Oliveira",
+
         "Matheus Santos",
+
         "Gabriel Ferreira",
+
         "Pedro Almeida",
+
         "Victor Souza",
+
         "André Martins",
+
         "Felipe Rocha",
+
         "Carlos Ribeiro",
+
         "João Mendes",
+
         "Thiago Lima",
+
         "Renan Alves",
+
         "Gustavo Pereira",
+
         "Eduardo Carvalho",
+
         "Leonardo Ramos",
+
         "Marcelo Torres",
+
         "Caio Moreira",
-        "Henrique Dias"
+
+        "Henrique Dias",
+
+        "Rodrigo Alves",
+
+        "Marcos Vinicius",
+
+        "Daniel Costa",
+
+        "Arthur Souza",
+
+        "Vinicius Rocha"
+
     ];
+
+
     let name =
         names[
             managerRandomInt(
@@ -292,14 +763,39 @@ function generateManagerOpponent() {
                 names.length - 1
             )
         ];
+
+
+    /*
+       NUNCA deixar o adversário
+       com o mesmo nome do jogador.
+    */
+
     if (
         player.name &&
         name === player.name
     ) {
+
         name =
             "Ricardo Martins";
+
     }
+
+
+    const styles = [
+
+        "Striker",
+
+        "Wrestler",
+
+        "Grappler",
+
+        "Completo"
+
+    ];
+
+
     return {
+
         id:
             "OPP-" +
             Date.now() +
@@ -308,1656 +804,3649 @@ function generateManagerOpponent() {
                 1000,
                 9999
             ),
+
         name:
             name,
+
         displayName:
             name,
-        power:
-            power,
+
         overall:
-            power,
+            opponentOverall,
+
+        power:
+            opponentOverall,
+
         age:
             managerRandomInt(
                 18,
                 35
             ),
+
         country:
             player.country ||
             "Brasil",
-        style: [
-            "Striker",
-            "Wrestler",
-            "Grappler",
-            "Completo"
-        ][
-            managerRandomInt(
-                0,
-                3
-            )
-        ],
+
+        style:
+            styles[
+                managerRandomInt(
+                    0,
+                    styles.length - 1
+                )
+            ],
+
         wins:
             managerRandomInt(
                 0,
-                20
+                15
             ),
+
         losses:
             managerRandomInt(
                 0,
                 8
             ),
+
         draws:
             0
+
     };
+
 }
+
+
 /* =========================================================
-   EVENTOS
+   ESCOLHER EVENTO
 ========================================================= */
-const MANAGER_EVENTS = [
-    {
-        name:
-            "MMA Fight Night",
-        stage:
-            "regional",
-        type:
-            "regional",
-        prestige:
-            20,
-        isBigEvent:
-            false
-    },
-    {
-        name:
-            "Brazil Combat",
-        stage:
-            "regional",
-        type:
-            "regional",
-        prestige:
-            25,
-        isBigEvent:
-            false
-    },
-    {
-        name:
-            "Fight Arena",
-        stage:
-            "regional",
-        type:
-            "regional",
-        prestige:
-            30,
-        isBigEvent:
-            false
-    },
-    {
-        name:
-            "Future Fighters",
-        stage:
-            "regional",
-        type:
-            "regional",
-        prestige:
-            35,
-        isBigEvent:
-            false
-    },
-    {
-        name:
-            "National Combat",
-        stage:
-            "regional",
-        type:
-            "regional",
-        prestige:
-            40,
-        isBigEvent:
-            false
-    },
-    {
-        name:
-            "Warriors Championship",
-        stage:
-            "national",
-        type:
-            "national",
-        prestige:
-            50,
-        isBigEvent:
-            false
-    },
-    {
-        name:
-            "Combat Warriors",
-        stage:
-            "national",
-        type:
-            "national",
-        prestige:
-            55,
-        isBigEvent:
-            false
-    },
-    {
-        name:
-            "Cage Warriors Brasil",
-        stage:
-            "national",
-        type:
-            "national",
-        prestige:
-            60,
-        isBigEvent:
-            false
-    },
-    {
-        name:
-            "Ultimate Fight League",
-        stage:
-            "national",
-        type:
-            "national",
-        prestige:
-            65,
-        isBigEvent:
-            false
-    },
-    {
-        name:
-            "PFL",
-        stage:
-            "world",
-        type:
-            "world",
-        prestige:
-            80,
-        isBigEvent:
-            true
-    },
-    {
-        name:
-            "Bellator",
-        stage:
-            "world",
-        type:
-            "world",
-        prestige:
-            82,
-        isBigEvent:
-            true
-    },
-    {
-        name:
-            "ONE Championship",
-        stage:
-            "world",
-        type:
-            "world",
-        prestige:
-            84,
-        isBigEvent:
-            true
-    },
-    {
-        name:
-            "Rizin",
-        stage:
-            "world",
-        type:
-            "world",
-        prestige:
-            78,
-        isBigEvent:
-            true
-    },
-    {
-        name:
-            "UFC",
-        stage:
-            "elite",
-        type:
-            "elite",
-        prestige:
-            100,
-        isBigEvent:
-            true
-    }
-];
-/* =========================================================
-   GERAR EVENTO
-========================================================= */
+
 function generateManagerEvent() {
+
     const player =
         managerPlayer();
-    const stage =
-        managerCareerStage();
-    let available = [];
+
+
+    /*
+       SE O JOGADOR TEM CONTRATO
+       MUNDIAL, NÃO PODE RECEBER ELITE
+       ENQUANTO ESTIVER PRESO AO CONTRATO.
+    */
+
+    const contract =
+        player.currentContract;
+
+
+    let availableEvents =
+        MANAGER_EVENTS.slice();
+
+
     if (
-        stage ===
-        "amateur"
+        contract &&
+        contract.category === "world"
     ) {
-        available =
-            MANAGER_EVENTS.filter(
-                event =>
-                    event.stage ===
-                    "regional"
+
+        availableEvents =
+            availableEvents.filter(
+                function(event) {
+
+                    return (
+                        event.category !==
+                        "elite"
+                    );
+
+                }
             );
+
+    }
+
+
+    /*
+       SE ESTÁ EM CONTRATO NACIONAL,
+       PODE receber regional ou nacional.
+       Eventos mundiais/elite podem
+       aparecer como oportunidade maior,
+       permitindo quebra conforme regras.
+    */
+
+
+    /*
+       PESOS POR PROGRESSÃO.
+    */
+
+    const overall =
+        managerGetPlayerOverall();
+
+
+    if (
+        overall < 50
+    ) {
+
+        availableEvents =
+            availableEvents.filter(
+                function(event) {
+
+                    return (
+                        event.category ===
+                        "regional"
+                    );
+
+                }
+            );
+
     }
     else if (
-        stage ===
-        "regional"
+        overall < 65
     ) {
-        available =
-            MANAGER_EVENTS.filter(
-                event =>
-                    event.stage ===
-                    "regional"
+
+        availableEvents =
+            availableEvents.filter(
+                function(event) {
+
+                    return (
+                        event.category ===
+                        "regional" ||
+                        event.category ===
+                        "national"
+                    );
+
+                }
             );
+
     }
     else if (
-        stage ===
-        "national"
+        overall < 75
     ) {
-        available =
-            MANAGER_EVENTS.filter(
-                event =>
-                    event.stage ===
-                    "national"
+
+        availableEvents =
+            availableEvents.filter(
+                function(event) {
+
+                    return (
+                        event.category ===
+                        "regional" ||
+                        event.category ===
+                        "national" ||
+                        event.category ===
+                        "world"
+                    );
+
+                }
             );
+
     }
-    else if (
-        stage ===
-        "international" ||
-        stage ===
-        "world"
+
+
+    /*
+       Nunca deixar sem evento.
+    */
+
+    if (
+        availableEvents.length === 0
     ) {
-        available =
+
+        availableEvents =
             MANAGER_EVENTS.filter(
-                event =>
-                    event.stage ===
-                    "world"
+                function(event) {
+
+                    return (
+                        event.category ===
+                        "regional"
+                    );
+
+                }
             );
+
     }
-    else {
-        available =
-            MANAGER_EVENTS.filter(
-                event =>
-                    event.stage ===
-                    "elite"
-            );
-    }
-    if (
-        available.length ===
-        0
-    ) {
-        available =
-            MANAGER_EVENTS.slice();
-    }
-    return available[
-        managerRandomInt(
-            0,
-            available.length - 1
-        )
-    ];
-}
-/* =========================================================
-   BOLSA NORMAL
-========================================================= */
-function calculateManagerPurse() {
-    const player =
-        managerPlayer();
-    const stage =
-        managerCareerStage();
-    if (
-        stage ===
-        "amateur"
-    ) {
-        return 0;
-    }
-    if (
-        stage ===
-        "regional"
-    ) {
-        return MANAGER_CONFIG.regionalPurse;
-    }
-    if (
-        stage ===
-        "national"
-    ) {
-        return MANAGER_CONFIG.nationalPurse;
-    }
-    if (
-        stage ===
-        "world"
-    ) {
-        return MANAGER_CONFIG.worldFirstPurse;
-    }
-    if (
-        stage ===
-        "elite"
-    ) {
-        return MANAGER_CONFIG.eliteFirstPurse;
-    }
-    return 0;
-}
-/* =========================================================
-   BOLSA EVENTO GRANDE
-========================================================= */
-function calculateBigEventPurse() {
-    const player =
-        managerPlayer();
-    const contractNumber =
-        Number(
-            player.worldContractNumber ||
-            player.eliteContractNumber ||
-            1
-        );
+
+
+    /*
+       Sorteio.
+    */
+
     const event =
-        player.managerCurrentEvent;
+        availableEvents[
+            managerRandomInt(
+                0,
+                availableEvents.length - 1
+            )
+        ];
+
+
+    return {
+
+        name:
+            event.name,
+
+        category:
+            event.category,
+
+        type:
+            event.type,
+
+        prestige:
+            event.prestige,
+
+        basePurse:
+            event.basePurse,
+
+        winBonus:
+            event.winBonus,
+
+        minContract:
+            event.minContract,
+
+        maxContract:
+            event.maxContract,
+
+        negotiable:
+            event.negotiable,
+
+        ppv:
+            event.ppv,
+
+        elite:
+            event.elite,
+
+        isBigEvent:
+            (
+                event.type ===
+                "elite_big" ||
+                event.type ===
+                "title" ||
+                event.type ===
+                "title_defense"
+            )
+
+    };
+
+}
+
+
+/* =========================================================
+   CALCULAR BOLSA REGIONAL
+========================================================= */
+
+function calculateRegionalPurse() {
+
+    return 200;
+
+}
+
+
+/* =========================================================
+   CALCULAR BOLSA NACIONAL
+========================================================= */
+
+function calculateNationalPurse() {
+
+    return 1000;
+
+}
+
+
+/* =========================================================
+   CALCULAR BOLSA MUNDIAL
+========================================================= */
+
+function calculateWorldPurse() {
+
+    const player =
+        managerPlayer();
+
+
+    /*
+       PRIMEIRO CONTRATO:
+       $8.000
+    */
+
+    const fightNumber =
+        Number(
+            player.managerContractFightNumber ||
+            0
+        );
+
+
+    const contractCategory =
+        player.managerContractCategory;
+
+
     if (
-        event &&
-        event.stage ===
+        contractCategory !==
+        "world"
+    ) {
+
+        return 8000;
+
+    }
+
+
+    /*
+       Segundo contrato:
+       começa em $10.000.
+    */
+
+    if (
+        fightNumber <= 3
+    ) {
+
+        return 8000;
+
+    }
+
+
+    if (
+        fightNumber <= 6
+    ) {
+
+        return 10000;
+
+    }
+
+
+    /*
+       Terceiro contrato:
+       pode passar de $80.000.
+    */
+
+    return managerClamp(
+
+        Math.round(
+            80000 +
+            managerRandom(
+                0,
+                270000
+            )
+        ),
+
+        80000,
+
+        350000
+
+    );
+
+}
+
+
+/* =========================================================
+   CALCULAR BOLSA ELITE
+========================================================= */
+
+function calculateElitePurse(
+    event
+) {
+
+    const player =
+        managerPlayer();
+
+
+    const fightNumber =
+        Number(
+            player.managerContractFightNumber ||
+            0
+        );
+
+
+    /*
+       UFC NORMAL
+       PRIMEIRO CONTRATO
+    */
+
+    if (
+        event.type ===
         "elite"
     ) {
+
         if (
-            contractNumber <=
-            1
+            fightNumber <= 0
         ) {
-            return MANAGER_CONFIG.eliteFirstPurse;
+
+            return 12000;
+
         }
+
+
+        /*
+           Segundo contrato:
+           $12k até $25k.
+        */
+
         if (
-            contractNumber ===
-            2
+            fightNumber <= 3
         ) {
-            return MANAGER_CONFIG.eliteSecondPurse;
+
+            return managerRandomInt(
+                12000,
+                25000
+            );
+
         }
-        return managerRandomInt(
-            MANAGER_CONFIG.eliteThirdMinPurse,
-            MANAGER_CONFIG.eliteMaxPurse
+
+
+        /*
+           Terceiro contrato:
+           $200k+
+        */
+
+        return managerClamp(
+
+            Math.round(
+                managerRandom(
+                    200000,
+                    1000000
+                )
+            ),
+
+            200000,
+
+            1000000
+
         );
+
     }
+
+
+    /*
+       UFC EVENTO GRANDE
+    */
+
     if (
-        contractNumber <=
-        1
+        event.type ===
+        "elite_big"
     ) {
-        return MANAGER_CONFIG.worldFirstPurse;
-    }
-    if (
-        contractNumber ===
-        2
-    ) {
-        return managerRandomInt(
-            MANAGER_CONFIG.worldSecondPurse,
-            MANAGER_CONFIG.worldSecondMaxPurse
+
+        return managerClamp(
+
+            Math.round(
+                managerRandom(
+                    25000,
+                    1000000
+                )
+            ),
+
+            25000,
+
+            1000000
+
         );
+
     }
-    return managerRandomInt(
-        MANAGER_CONFIG.worldThirdMinPurse,
-        MANAGER_CONFIG.worldMaxPurse
-    );
+
+
+    /*
+       DISPUTA DE TÍTULO
+    */
+
+    if (
+        event.type ===
+        "title"
+    ) {
+
+        return managerClamp(
+
+            Math.round(
+                managerRandom(
+                    200000,
+                    1000000
+                )
+            ),
+
+            200000,
+
+            1000000
+
+        );
+
+    }
+
+
+    /*
+       DEFESA
+    */
+
+    if (
+        event.type ===
+        "title_defense"
+    ) {
+
+        return managerClamp(
+
+            Math.round(
+                managerRandom(
+                    200000,
+                    1000000
+                )
+            ),
+
+            200000,
+
+            1000000
+
+        );
+
+    }
+
+
+    return 12000;
+
 }
+
+
+/* =========================================================
+   CALCULAR BOLSA PRINCIPAL
+========================================================= */
+
+function calculateManagerPurse(
+    event
+) {
+
+    const player =
+        managerPlayer();
+
+
+    if (
+        !event
+    ) {
+
+        return 200;
+
+    }
+
+
+    /*
+       🟢 REGIONAL
+    */
+
+    if (
+        event.category ===
+        "regional"
+    ) {
+
+        return calculateRegionalPurse();
+
+    }
+
+
+    /*
+       🔵 NACIONAL
+    */
+
+    if (
+        event.category ===
+        "national"
+    ) {
+
+        return calculateNationalPurse();
+
+    }
+
+
+    /*
+       🟣 MUNDIAL
+    */
+
+    if (
+        event.category ===
+        "world"
+    ) {
+
+        return calculateWorldPurse();
+
+    }
+
+
+    /*
+       🔴 ELITE
+    */
+
+    if (
+        event.category ===
+        "elite"
+    ) {
+
+        return calculateElitePurse(
+            event
+        );
+
+    }
+
+
+    return 200;
+
+}
+
+
 /* =========================================================
    BÔNUS DE VITÓRIA
 ========================================================= */
+
 function calculateManagerWinBonus(
     purse
 ) {
+
     const player =
         managerPlayer();
+
+
+    /*
+       AMADOR:
+       NUNCA TEM BOLSA.
+       NUNCA TEM BÔNUS.
+    */
+
     if (
-        !player.professional ||
+        player.careerStage ===
+        "amateur"
+    ) {
+
+        return 0;
+
+    }
+
+
+    if (
+        player.professional &&
         player.professional.active !== true
     ) {
+
+        /*
+           Ainda não profissional.
+           Segurança.
+        */
+
         return 0;
+
     }
-    const stage =
-        managerCareerStage();
-    if (
-        stage ===
-        "regional"
-    ) {
-        return MANAGER_CONFIG.regionalWinBonus;
-    }
-    if (
-        stage ===
-        "national"
-    ) {
-        return MANAGER_CONFIG.nationalWinBonus;
-    }
+
+
+    /*
+       REGRA:
+       BÔNUS = 100% DA BOLSA.
+    */
+
     return Math.round(
         Number(purse || 0)
     );
+
 }
+
+
+/* =========================================================
+   VERIFICAR SE É AMADOR
+========================================================= */
+
+function managerIsAmateur() {
+
+    const player =
+        managerPlayer();
+
+
+    if (
+        player.careerStage ===
+        "amateur"
+    ) {
+
+        return true;
+
+    }
+
+
+    if (
+        player.professional &&
+        player.professional.active === true
+    ) {
+
+        return false;
+
+    }
+
+
+    /*
+       Segurança:
+       idade/carreira inicial.
+    */
+
+    if (
+        Number(player.age || 15) < 18
+    ) {
+
+        return true;
+
+    }
+
+
+    return false;
+
+}
+
+
 /* =========================================================
    NEGOCIAÇÃO
 ========================================================= */
+
 function createNegotiationData(
     purse,
     event
 ) {
+
     const player =
         managerPlayer();
-    const isProfessional =
-        Boolean(
-            player.professional &&
-            player.professional.active === true
-        );
-    const available =
-        Boolean(
-            isProfessional &&
-            event &&
-            event.isBigEvent
-        );
-    return {
-        available:
-            available,
-        rounds:
-            0,
-        maxRounds:
-            3,
-        originalPurse:
-            Number(purse || 0),
-        currentPurse:
-            Number(purse || 0),
-        requestedPurse:
-            Number(purse || 0),
-        maxPurse:
-            Number(purse || 0),
-        ppv:
-            0,
-        requestedPPV:
-            0,
-        accepted:
-            false,
-        rejected:
-            false,
-        completed:
-            false
-    };
-}
-/* =========================================================
-   CALCULAR CHANCE DE ACEITAÇÃO
-========================================================= */
-function managerNegotiationChance(
-    requested,
-    base,
-    event
-) {
-    const player =
-        managerPlayer();
+
+
+    /*
+       Regional e Nacional:
+       NÃO negociáveis.
+    */
+
     if (
-        requested <=
-        base
+        event.category ===
+        "regional" ||
+        event.category ===
+        "national"
     ) {
-        return 1;
+
+        return {
+
+            available: false,
+
+            currentPurse:
+                purse,
+
+            minimum:
+                purse,
+
+            maximum:
+                purse,
+
+            successChance:
+                100,
+
+            ppvAvailable:
+                false,
+
+            ppv:
+                0
+
+        };
+
     }
-    const increase =
-        (
-            requested -
-            base
-        ) /
-        Math.max(
-            base,
-            1
-        );
-    const managerSkill =
-        Number(
-            player.manager &&
-            player.manager.negotiation ||
-            50
-        );
-    const performance =
-        managerPerformanceScore();
-    let chance =
-        0.85 -
-        increase * 0.7 +
-        managerSkill * 0.001 +
-        performance * 0.001;
+
+
+    /*
+       MUNDIAL
+    */
+
     if (
-        event &&
-        event.stage ===
+        event.category ===
+        "world"
+    ) {
+
+        const minimum =
+            Number(purse);
+
+
+        const maximum =
+            Math.min(
+                350000,
+                minimum * 2
+            );
+
+
+        const requested =
+            Math.round(
+                managerRandom(
+                    minimum,
+                    maximum
+                )
+            );
+
+
+        /*
+           Quanto maior a bolsa,
+           menor a chance.
+        */
+
+        const ratio =
+            requested /
+            Math.max(
+                1,
+                maximum
+            );
+
+
+        const successChance =
+            managerClamp(
+                Math.round(
+                    90 -
+                    ratio * 75 +
+                    Number(
+                        player.manager.negotiation ||
+                        0
+                    ) * 0.15
+                ),
+                10,
+                90
+            );
+
+
+        const ppv =
+            managerClamp(
+
+                Number(
+                    (
+                        managerRandom(
+                            1,
+                            10
+                        )
+                    ).toFixed(1)
+                ),
+
+                1,
+
+                10
+
+            );
+
+
+        return {
+
+            available: true,
+
+            currentPurse:
+                purse,
+
+            minimum:
+                minimum,
+
+            maximum:
+                maximum,
+
+            requested:
+                requested,
+
+            successChance:
+                successChance,
+
+            ppvAvailable:
+                true,
+
+            ppv:
+                ppv,
+
+            negotiationType:
+                "world"
+
+        };
+
+    }
+
+
+    /*
+       ELITE
+    */
+
+    if (
+        event.category ===
         "elite"
     ) {
-        chance -=
-            increase * 0.15;
-    }
-    return managerClamp(
-        chance,
-        0.05,
-        0.95
-    );
-}
-/* =========================================================
-   PERFORMANCE
-========================================================= */
-function managerPerformanceScore() {
-    const player =
-        managerPlayer();
-    const pro =
-        player.professional || {};
-    const wins =
-        Number(
-            pro.wins || 0
-        );
-    const losses =
-        Number(
-            pro.losses || 0
-        );
-    const fame =
-        Number(
-            player.fame || 0
-        );
-    let score =
-        wins * 4 -
-        losses * 3 +
-        fame * 0.1;
-    if (
-        player.championship &&
-        player.championship.title
-    ) {
-        score +=
-            20;
-    }
-    return managerClamp(
-        score,
-        0,
-        100
-    );
-}
-/* =========================================================
-   NEGOCIAR BOLSA
-========================================================= */
-function negotiateManagerPurse(
-    requestedPurse
-) {
-    const player =
-        managerPlayer();
-    const fight =
-        player.managerFightOffer;
-    if (!fight) {
-        return {
-            success: false,
-            message:
-                "Não existe proposta."
-        };
-    }
-    if (
-        !fight.negotiation ||
-        !fight.negotiation.available
-    ) {
-        return {
-            success: false,
-            message:
-                "Esta luta não permite negociação."
-        };
-    }
-    const negotiation =
-        fight.negotiation;
-    if (
-        negotiation.rounds >=
-        negotiation.maxRounds
-    ) {
-        return {
-            success: false,
-            message:
-                "Limite de negociação atingido."
-        };
-    }
-    const base =
-        Number(
-            negotiation.originalPurse ||
-            fight.purse ||
-            0
-        );
-    const requested =
-        Number(
-            requestedPurse
-        );
-    if (
-        !Number.isFinite(requested) ||
-        requested <= 0
-    ) {
-        return {
-            success: false,
-            message:
-                "Valor inválido."
-        };
-    }
-    const event =
-        fight.event ||
-        null;
-    const chance =
-        managerNegotiationChance(
-            requested,
-            base,
-            event
-        );
-    negotiation.rounds++;
-    if (
-        Math.random() <=
-        chance
-    ) {
-        negotiation.currentPurse =
+
+        const minimum =
+            Number(purse);
+
+
+        let maximum;
+
+
+        if (
+            event.type ===
+            "elite" &&
+            minimum < 200000
+        ) {
+
+            maximum =
+                Math.max(
+                    25000,
+                    minimum * 2
+                );
+
+        }
+        else {
+
+            maximum =
+                1000000;
+
+        }
+
+
+        const requested =
             Math.round(
-                requested
-            );
-        negotiation.accepted =
-            true;
-        negotiation.completed =
-            true;
-        fight.purse =
-            Math.round(
-                requested
-            );
-        fight.fightPurse =
-            Math.round(
-                requested
-            );
-        fight.winBonus =
-            Math.round(
-                requested
-            );
-        fight.totalWinPayout =
-            Math.round(
-                requested * 2
-            );
-        return {
-            success: true,
-            message:
-                "A organização aceitou a negociação.",
-            purse:
-                Math.round(
-                    requested
+                managerRandom(
+                    minimum,
+                    maximum
                 )
+            );
+
+
+        /*
+           Bolsa maior = menor chance.
+        */
+
+        const ratio =
+            requested /
+            Math.max(
+                1,
+                maximum
+            );
+
+
+        let successChance =
+            90 -
+            ratio * 80;
+
+
+        /*
+           Performance melhora negociação.
+        */
+
+        const performanceBonus =
+            (
+                Number(
+                    player.professional?.wins ||
+                    0
+                ) >
+                Number(
+                    player.professional?.losses ||
+                    0
+                )
+            )
+            ?
+            10
+            :
+            0;
+
+
+        successChance +=
+            performanceBonus;
+
+
+        /*
+           Empresário experiente ajuda.
+        */
+
+        successChance +=
+            Number(
+                player.manager.negotiation ||
+                50
+            ) * 0.10;
+
+
+        successChance =
+            managerClamp(
+                Math.round(
+                    successChance
+                ),
+                5,
+                90
+            );
+
+
+        const ppv =
+            managerClamp(
+
+                Number(
+                    managerRandom(
+                        1,
+                        10
+                    ).toFixed(1)
+                ),
+
+                1,
+
+                10
+
+            );
+
+
+        return {
+
+            available: true,
+
+            currentPurse:
+                purse,
+
+            minimum:
+                minimum,
+
+            maximum:
+                maximum,
+
+            requested:
+                requested,
+
+            successChance:
+                successChance,
+
+            ppvAvailable:
+                true,
+
+            ppv:
+                ppv,
+
+            negotiationType:
+                "elite"
+
         };
+
     }
-    negotiation.rejected =
-        true;
-    negotiation.completed =
-        true;
+
+
     return {
-        success: false,
-        message:
-            "A organização recusou o novo valor."
+
+        available: false,
+
+        currentPurse:
+            purse,
+
+        minimum:
+            purse,
+
+        maximum:
+            purse,
+
+        successChance:
+            100,
+
+        ppvAvailable:
+            false,
+
+        ppv:
+            0
+
     };
+
 }
+
+
 /* =========================================================
-   NEGOCIAR PPV
+   NEGOCIAR OFERTA
 ========================================================= */
-function negotiateManagerPPV(
+
+function negotiateManagerFightOffer(
+    requestedPurse,
     requestedPPV
 ) {
+
     const player =
         managerPlayer();
-    const fight =
+
+
+    ensureManagerData();
+
+
+    const offer =
         player.managerFightOffer;
-    if (!fight) {
-        return false;
-    }
+
+
     if (
-        !fight.negotiation ||
-        !fight.negotiation.available
+        !offer
     ) {
-        return false;
-    }
-    const requested =
-        managerClamp(
-            Number(
-                requestedPPV
-            ),
-            0,
-            MANAGER_CONFIG.maxPPV
+
+        alert(
+            "Não existe uma proposta para negociar."
         );
-    const performance =
-        managerPerformanceScore();
-    const base =
+
+        return false;
+
+    }
+
+
+    if (
+        !offer.negotiable
+    ) {
+
+        alert(
+            "Esta proposta não pode ser negociada."
+        );
+
+        return false;
+
+    }
+
+
+    const negotiation =
+        offer.negotiation ||
+        {};
+
+
+    const purse =
         Number(
-            fight.negotiation.requestedPPV ||
+            requestedPurse ||
+            negotiation.requested ||
+            offer.purse
+        );
+
+
+    const ppv =
+        Number(
+            requestedPPV ||
+            negotiation.ppv ||
             0
         );
-    let chance =
-        0.85 -
-        requested * 0.055 +
-        performance * 0.002;
-    if (
-        requested >
-        base
-    ) {
-        chance -=
-            (
-                requested -
-                base
-            ) *
-            0.04;
-    }
-    chance =
-        managerClamp(
-            chance,
-            0.05,
-            0.95
+
+
+    const minimum =
+        Number(
+            negotiation.minimum ||
+            offer.purse
         );
+
+
+    const maximum =
+        Number(
+            negotiation.maximum ||
+            minimum
+        );
+
+
+    /*
+       Não permitir valor menor
+       ou maior que o limite.
+    */
+
+    const finalPurse =
+        managerClamp(
+            purse,
+            minimum,
+            maximum
+        );
+
+
+    let successChance =
+        Number(
+            negotiation.successChance ||
+            50
+        );
+
+
+    /*
+       Pedir mais reduz chance.
+    */
+
+    const ratio =
+        finalPurse /
+        Math.max(
+            1,
+            maximum
+        );
+
+
+    successChance -=
+        Math.round(
+            ratio * 25
+        );
+
+
+    /*
+       PPV alto reduz chance.
+    */
+
     if (
-        Math.random() <=
-        chance
+        ppv > 0
     ) {
-        fight.negotiation.ppv =
-            requested;
-        fight.ppv =
-            requested;
-        return true;
+
+        successChance -=
+            Math.round(
+                ppv * 2
+            );
+
     }
-    return false;
+
+
+    successChance =
+        managerClamp(
+            successChance,
+            3,
+            90
+        );
+
+
+    const roll =
+        managerRandom(
+            0,
+            100
+        );
+
+
+    if (
+        roll <=
+        successChance
+    ) {
+
+        offer.purse =
+            Math.round(
+                finalPurse
+            );
+
+        offer.fightPurse =
+            Math.round(
+                finalPurse
+            );
+
+        offer.winBonus =
+            Math.round(
+                finalPurse
+            );
+
+        offer.totalWinPayout =
+            Math.round(
+                finalPurse * 2
+            );
+
+
+        offer.negotiation.accepted =
+            true;
+
+        offer.negotiation.finalPurse =
+            Math.round(
+                finalPurse
+            );
+
+        offer.negotiation.finalPPV =
+            ppv;
+
+        offer.negotiation.result =
+            "accepted";
+
+
+        offer.ppvPercentage =
+            ppv;
+
+
+        if (
+            Array.isArray(
+                player.log
+            )
+        ) {
+
+            player.log.unshift(
+
+                `💰 Negociação aceita! Bolsa: $${Math.round(finalPurse).toLocaleString("en-US")} + bônus de vitória.`
+
+            );
+
+        }
+
+
+        managerSave();
+
+
+        return {
+
+            success: true,
+
+            purse:
+                finalPurse,
+
+            ppv:
+                ppv
+
+        };
+
+    }
+
+
+    /*
+       NEGOCIAÇÃO RECUSADA.
+    */
+
+    offer.negotiation.result =
+        "rejected";
+
+
+    if (
+        Array.isArray(
+            player.log
+        )
+    ) {
+
+        player.log.unshift(
+
+            "❌ O evento recusou a negociação."
+
+        );
+
+    }
+
+
+    managerSave();
+
+
+    return {
+
+        success: false,
+
+        purse:
+            offer.purse,
+
+        ppv:
+            0
+
+    };
+
 }
+
+
 /* =========================================================
    GERAR OFERTA
 ========================================================= */
+
 function generateManagerFightOffer() {
+
     const player =
         managerPlayer();
+
+
     ensureManagerData();
+
+
+    /*
+       NÃO GERAR BOLSA PARA AMADOR.
+       Mas o empresário ainda pode encontrar
+       oportunidade de luta amadora.
+    */
+
+    const amateur =
+        managerIsAmateur();
+
+
     const opponent =
         generateManagerOpponent();
+
+
     const event =
         generateManagerEvent();
-    player.managerCurrentEvent =
-        event;
-    const isProfessional =
-        Boolean(
-            player.professional &&
-            player.professional.active === true
-        );
+
+
+    /*
+       Se amador, bolsa = ZERO.
+    */
+
     let purse =
         0;
+
+
+    if (
+        amateur
+    ) {
+
+        purse = 0;
+
+    }
+    else {
+
+        purse =
+            calculateManagerPurse(
+                event
+            );
+
+    }
+
+
+    /*
+       Bônus.
+    */
+
     let winBonus =
         0;
-    /* =====================================================
-       AMADOR
-       SEM BOLSA
-    ===================================================== */
+
+
     if (
-        !isProfessional
+        !amateur
     ) {
-        purse =
-            0;
+
         winBonus =
-            0;
+            calculateManagerWinBonus(
+                purse
+            );
+
     }
-    /* =====================================================
-       PROFISSIONAL
-    ===================================================== */
-    else {
-        if (
-            event.stage ===
-            "regional"
-        ) {
-            purse =
-                MANAGER_CONFIG.regionalPurse;
-            winBonus =
-                MANAGER_CONFIG.regionalWinBonus;
-        }
-        else if (
-            event.stage ===
-            "national"
-        ) {
-            purse =
-                MANAGER_CONFIG.nationalPurse;
-            winBonus =
-                MANAGER_CONFIG.nationalWinBonus;
-        }
-        else if (
-            event.stage ===
-            "world"
-        ) {
-            purse =
-                calculateBigEventPurse();
-            winBonus =
-                purse;
-        }
-        else if (
-            event.stage ===
-            "elite"
-        ) {
-            purse =
-                calculateBigEventPurse();
-            winBonus =
-                purse;
-        }
-    }
+
+
+    /*
+       CAMP.
+    */
+
     const campWeeks =
         managerRandomInt(
+
             MANAGER_CONFIG.minCampWeeks,
+
             MANAGER_CONFIG.maxCampWeeks
+
         );
-    const negotiation =
-        createNegotiationData(
-            purse,
-            event
+
+
+    /*
+       CONTRATO.
+    */
+
+    const contractFights =
+        managerRandomInt(
+
+            event.minContract,
+
+            event.maxContract
+
         );
+
+
+    /*
+       NEGOCIAÇÃO.
+    */
+
+    let negotiation;
+
+
+    if (
+        amateur
+    ) {
+
+        negotiation = {
+
+            available: false,
+
+            currentPurse: 0,
+
+            minimum: 0,
+
+            maximum: 0,
+
+            successChance: 100,
+
+            ppvAvailable: false,
+
+            ppv: 0
+
+        };
+
+    }
+    else {
+
+        negotiation =
+            createNegotiationData(
+                purse,
+                event
+            );
+
+    }
+
+
     const offer = {
+
         id:
             ++player.managerOfferId,
+
         type:
             "fight",
+
         status:
             "pending",
+
+
+        /* =================================================
+           DATA
+        ================================================= */
+
         createdWeek:
             Number(
-                player.week || 1
+                player.week || 0
             ),
+
         createdYear:
             Number(
                 player.year || 2026
             ),
+
+
+        /* =================================================
+           EVENTO
+        ================================================= */
+
         eventName:
             event.name,
+
         eventType:
             event.type,
-        eventStage:
-            event.stage,
+
+        eventCategory:
+            event.category,
+
         eventPrestige:
             event.prestige,
+
         isBigEvent:
             Boolean(
                 event.isBigEvent
             ),
+
+
         event: {
+
             name:
                 event.name,
+
             type:
                 event.type,
-            stage:
-                event.stage,
+
+            category:
+                event.category,
+
             prestige:
                 event.prestige,
+
             isBigEvent:
                 Boolean(
                     event.isBigEvent
                 )
+
         },
+
+
+        /* =================================================
+           ADVERSÁRIO
+        ================================================= */
+
         opponent:
             opponent,
+
         opponentName:
             opponent.name,
+
         opponentDisplayName:
             opponent.displayName,
+
         opponentOverall:
             Number(
                 opponent.overall
             ),
+
         opponentPower:
             Number(
                 opponent.power
             ),
+
+
+        /* =================================================
+           FINANCEIRO
+        ================================================= */
+
         purse:
-            Number(purse),
+            Number(
+                purse
+            ),
+
         fightPurse:
-            Number(purse),
+            Number(
+                purse
+            ),
+
         winBonus:
-            Number(winBonus),
+            Number(
+                winBonus
+            ),
+
         totalWinPayout:
             Number(
                 purse +
                 winBonus
             ),
+
+
+        /* =================================================
+           AMADOR
+        ================================================= */
+
+        amateur:
+            amateur,
+
+        amateurPurse:
+            amateur
+            ?
+            0
+            :
+            null,
+
+        amateurWinBonus:
+            amateur
+            ?
+            0
+            :
+            null,
+
+
+        /* =================================================
+           CONTRATO
+        ================================================= */
+
+        contractFights:
+            contractFights,
+
+        contractRemaining:
+            contractFights,
+
+
+        /* =================================================
+           CAMP
+        ================================================= */
+
         campWeeks:
             campWeeks,
+
         minCampWeeks:
             MANAGER_CONFIG.minCampWeeks,
+
         maxCampWeeks:
             MANAGER_CONFIG.maxCampWeeks,
+
+
+        /* =================================================
+           NEGOCIAÇÃO
+        ================================================= */
+
         negotiation:
             negotiation,
+
         negotiable:
             Boolean(
                 negotiation.available
             ),
-        ppv:
-            0,
+
+
+        /* =================================================
+           PPV
+        ================================================= */
+
+        ppvAvailable:
+            Boolean(
+                event.ppv &&
+                !amateur
+            ),
+
+        ppvPercentage:
+            Number(
+                negotiation.ppv ||
+                0
+            ),
+
+
+        /* =================================================
+           STATUS
+        ================================================= */
+
         accepted:
             false,
+
         declined:
             false,
+
         expired:
             false,
+
+
+        /* =================================================
+           COMPATIBILIDADE
+        ================================================= */
+
         fightWeek:
             null,
+
         weeksRemaining:
             campWeeks
+
     };
+
+
     return offer;
+
 }
+
+
 /* =========================================================
-   PODE PROCURAR LUTA?
+   EMPRESÁRIO PODE PROCURAR?
 ========================================================= */
+
 function managerCanSearchFight() {
+
     const player =
         managerPlayer();
+
+
     ensureManagerData();
+
+
+    /*
+       SE JÁ TEM LUTA:
+       NÃO.
+    */
+
     if (
         player.nextFight
     ) {
+
         return false;
+
     }
+
+
+    /*
+       SE TEM PROPOSTA:
+       NÃO.
+    */
+
     if (
         player.managerFightOffer
     ) {
+
         return false;
+
     }
+
+
+    /*
+       SE EXISTE FILA:
+       NÃO.
+    */
+
     if (
-        player.managerOffers &&
+        Array.isArray(
+            player.managerOffers
+        ) &&
         player.managerOffers.length > 0
     ) {
+
         return false;
+
     }
+
+
+    /*
+       COOLDOWN.
+    */
+
     if (
         Number(
             player.managerSearchCooldown ||
             0
         ) > 0
     ) {
+
         return false;
+
     }
+
+
     return true;
+
 }
+
+
 /* =========================================================
    EMPRESÁRIO PROCURA LUTA
 ========================================================= */
+
 function processManagerFightOffer() {
+
     const player =
         managerPlayer();
+
+
     ensureManagerData();
+
+
+    /*
+       NÃO PROCURAR DURANTE CAMP.
+    */
+
     if (
         player.nextFight
     ) {
+
         return null;
+
     }
+
+
+    /*
+       NÃO CRIAR SEGUNDA PROPOSTA.
+    */
+
     if (
         player.managerFightOffer
     ) {
+
         return player.managerFightOffer;
+
     }
+
+
+    /*
+       FILA.
+    */
+
     if (
-        player.managerOffers.length >
-        0
+        player.managerOffers.length > 0
     ) {
+
         player.managerFightOffer =
             player.managerOffers[0];
+
         player.managerOfferPending =
             true;
+
         managerSave();
+
         return player.managerFightOffer;
+
     }
+
+
+    /*
+       COOLDOWN.
+    */
+
     if (
         Number(
             player.managerSearchCooldown ||
             0
         ) > 0
     ) {
-        player.managerSearchCooldown =
-            Math.max(
-                0,
-                Number(
-                    player.managerSearchCooldown
-                ) - 1
-            );
-        managerSave();
+
         return null;
+
     }
+
+
+    /*
+       SEMANA ATUAL.
+    */
+
     const currentWeek =
         Number(
-            player.week || 1
+            player.week || 0
         );
-    const lastOfferWeek =
-        Number(
-            player.managerLastOfferWeek ||
-            -999
-        );
+
+
+    /*
+       NÃO GERAR DUAS PROPOSTAS
+       NA MESMA SEMANA.
+    */
+
     if (
         currentWeek ===
-        lastOfferWeek
+        Number(
+            player.managerLastOfferWeek
+        )
     ) {
+
         return null;
+
     }
+
+
+    /*
+       PRIMEIRA SEMANA.
+    */
+
     if (
         currentWeek <
         MANAGER_CONFIG.firstFightWeek
     ) {
+
         return null;
+
     }
+
+
+    /*
+       CHANCE.
+    */
+
     if (
         Math.random() >
         MANAGER_CONFIG.offerChance
     ) {
-        player.managerSearchCooldown =
-            MANAGER_CONFIG.searchCooldownWeeks;
+
         player.managerLastOfferWeek =
             currentWeek;
+
+        player.managerSearchCooldown =
+            MANAGER_CONFIG.searchCooldownWeeks;
+
         managerSave();
+
         return null;
+
     }
+
+
+    /*
+       GERAR.
+    */
+
     const offer =
         generateManagerFightOffer();
+
+
+    /*
+       SEGURANÇA:
+       adversário obrigatório.
+    */
+
+    if (
+        !offer ||
+        !offer.opponent
+    ) {
+
+        console.error(
+            "Falha ao gerar adversário."
+        );
+
+        return null;
+
+    }
+
+
     player.managerFightOffer =
         offer;
+
+
     player.managerOfferPending =
         true;
+
+
     player.managerSearching =
         false;
+
+
+    player.managerSearchWeek =
+        currentWeek;
+
+
     player.managerLastOfferWeek =
         currentWeek;
+
+
     player.managerOffers =
         [];
+
+
+    /*
+       LOG.
+    */
+
     if (
-        Array.isArray(player.log)
+        Array.isArray(
+            player.log
+        )
     ) {
-        player.log.unshift(
-            `📩 Seu empresário encontrou ${offer.opponentName} para ${offer.eventName}.`
-        );
+
+        if (
+            offer.amateur
+        ) {
+
+            player.log.unshift(
+
+                `📩 Seu empresário encontrou uma luta amadora contra ${offer.opponentName}.`
+
+            );
+
+        }
+        else {
+
+            player.log.unshift(
+
+                `📩 Seu empresário encontrou uma luta contra ${offer.opponentName} no ${offer.eventName}. Bolsa: $${Number(offer.purse || 0).toLocaleString("en-US")} + bônus de vitória de $${Number(offer.winBonus || 0).toLocaleString("en-US")}.`
+
+            );
+
+        }
+
     }
+
+
     managerSave();
-    if (
-        typeof window.home ===
-        "function"
-    ) {
-        window.home();
+
+
+    /*
+       ATUALIZAR HOME SE EXISTIR.
+    */
+
+    try {
+
+        if (
+            typeof window.home ===
+            "function"
+        ) {
+
+            window.home();
+
+        }
+
     }
+    catch (error) {
+
+        console.warn(
+            "Home não pôde ser atualizada."
+        );
+
+    }
+
+
     return offer;
+
 }
+
+
 /* =========================================================
-   ACEITAR LUTA
+   VERIFICAR CAMP
 ========================================================= */
-function acceptManagerFightOffer() {
+
+function isInFightCamp() {
+
     const player =
         managerPlayer();
+
+
+    const fight =
+        player.nextFight;
+
+
+    if (
+        !fight
+    ) {
+
+        return false;
+
+    }
+
+
+    if (
+        fight.completed ===
+        true
+    ) {
+
+        return false;
+
+    }
+
+
+    if (
+        fight.status ===
+        "camp"
+    ) {
+
+        return true;
+
+    }
+
+
+    if (
+        fight.status ===
+        "scheduled"
+    ) {
+
+        return true;
+
+    }
+
+
+    if (
+        fight.status ===
+        "fight_day"
+    ) {
+
+        return true;
+
+    }
+
+
+    if (
+        typeof fight.fightWeek ===
+        "number"
+    ) {
+
+        return (
+            Number(
+                player.week
+            ) <=
+            Number(
+                fight.fightWeek
+            )
+        );
+
+    }
+
+
+    return false;
+
+}
+
+
+/* =========================================================
+   DIA DA LUTA
+========================================================= */
+
+function managerIsFightDay() {
+
+    const player =
+        managerPlayer();
+
+
+    const fight =
+        player.nextFight;
+
+
+    if (
+        !fight
+    ) {
+
+        return false;
+
+    }
+
+
+    if (
+        fight.status ===
+        "fight_day"
+    ) {
+
+        return true;
+
+    }
+
+
+    if (
+        typeof fight.weeksRemaining ===
+        "number" &&
+        fight.weeksRemaining <= 0
+    ) {
+
+        return true;
+
+    }
+
+
+    if (
+        typeof fight.fightWeek ===
+        "number"
+    ) {
+
+        return (
+            Number(
+                player.week || 0
+            ) >=
+            Number(
+                fight.fightWeek
+            )
+        );
+
+    }
+
+
+    return false;
+
+}
+
+
+/* =========================================================
+   ACEITAR OFERTA
+========================================================= */
+
+function acceptManagerFightOffer() {
+
+    const player =
+        managerPlayer();
+
+
     ensureManagerData();
+
+
     const offer =
         player.managerFightOffer;
-    if (!offer) {
+
+
+    if (
+        !offer
+    ) {
+
         alert(
             "Não existe nenhuma proposta de luta."
         );
+
         return false;
+
     }
+
+
+    /*
+       SEGURANÇA:
+       adversário obrigatório.
+    */
+
+    if (
+        !offer.opponent
+    ) {
+
+        alert(
+            "Erro: adversário não encontrado na proposta."
+        );
+
+        console.error(
+            "Oferta sem adversário:",
+            offer
+        );
+
+        return false;
+
+    }
+
+
+    /*
+       NÃO aceitar se já tem luta.
+    */
+
     if (
         player.nextFight
     ) {
+
         alert(
             "Você já possui uma luta marcada."
         );
+
         return false;
+
     }
+
+
+    /*
+       CAMP.
+    */
+
     const campWeeks =
         managerClamp(
+
             Number(
                 offer.campWeeks ||
                 MANAGER_CONFIG.minCampWeeks
             ),
+
             MANAGER_CONFIG.minCampWeeks,
+
             MANAGER_CONFIG.maxCampWeeks
+
         );
+
+
     const currentWeek =
         Number(
-            player.week || 1
+            player.week || 0
         );
+
+
+    /*
+       IMPORTANTE:
+
+       A luta acontece DEPOIS do camp.
+
+       Exemplo:
+
+       Semana 10 = aceita
+       Camp = 4 semanas
+       Semana 11
+       Semana 12
+       Semana 13
+       Semana 14
+       Semana 14 = luta
+
+    */
+
     const fightWeek =
         currentWeek +
         campWeeks;
-    /* =====================================================
-       CONTRATO
-    ===================================================== */
-    let contractFights =
-        managerRandomInt(
-            MANAGER_CONFIG.regionalMinFights,
-            MANAGER_CONFIG.regionalMaxFights
-        );
-    if (
-        offer.eventStage ===
-        "national"
-    ) {
-        contractFights =
-            managerRandomInt(
-                MANAGER_CONFIG.nationalMinFights,
-                MANAGER_CONFIG.nationalMaxFights
-            );
-    }
-    if (
-        offer.eventStage ===
-        "world"
-    ) {
-        const contractNumber =
-            Number(
-                player.worldContractNumber ||
-                0
-            ) + 1;
-        player.worldContractNumber =
-            contractNumber;
-        if (
-            contractNumber ===
-            1
-        ) {
-            contractFights =
-                managerRandomInt(
-                    MANAGER_CONFIG.worldFirstMinFights,
-                    MANAGER_CONFIG.worldFirstMaxFights
-                );
-        }
-        else {
-            contractFights =
-                managerRandomInt(
-                    MANAGER_CONFIG.worldSecondMinFights,
-                    MANAGER_CONFIG.worldSecondMaxFights
-                );
-        }
-    }
-    if (
-        offer.eventStage ===
-        "elite"
-    ) {
-        const contractNumber =
-            Number(
-                player.eliteContractNumber ||
-                0
-            ) + 1;
-        player.eliteContractNumber =
-            contractNumber;
-        if (
-            contractNumber ===
-            1
-        ) {
-            contractFights =
-                MANAGER_CONFIG.eliteFirstFights;
-        }
-        else {
-            contractFights =
-                managerRandomInt(
-                    MANAGER_CONFIG.eliteSecondMinFights,
-                    MANAGER_CONFIG.eliteSecondMaxFights
-                );
-        }
-    }
-    /* =====================================================
-       CRIAR LUTA
-    ===================================================== */
+
+
+    /*
+       CRIAR LUTA.
+    */
+
     player.nextFight = {
+
         id:
             "FIGHT-" +
-            Date.now(),
+            Date.now() +
+            "-" +
+            managerRandomInt(
+                1000,
+                9999
+            ),
+
         status:
             "camp",
+
+
+        /* EVENTO */
+
         event:
             offer.event,
+
         eventName:
             offer.eventName,
+
+        eventType:
+            offer.eventType,
+
+        eventCategory:
+            offer.eventCategory,
+
+        eventPrestige:
+            offer.eventPrestige,
+
+        isBigEvent:
+            offer.isBigEvent,
+
+
+        /* ADVERSÁRIO */
+
         opponent:
             offer.opponent,
+
         opponentName:
             offer.opponentName,
+
         opponentDisplayName:
             offer.opponentDisplayName,
+
         opponentOverall:
-            offer.opponentOverall,
+            Number(
+                offer.opponentOverall ||
+                offer.opponent?.overall ||
+                45
+            ),
+
         opponentPower:
-            offer.opponentPower,
+            Number(
+                offer.opponentPower ||
+                offer.opponent?.power ||
+                45
+            ),
+
+
+        /* FINANCEIRO */
+
         purse:
-            offer.purse,
+            Number(
+                offer.purse || 0
+            ),
+
         fightPurse:
-            offer.purse,
+            Number(
+                offer.fightPurse ||
+                offer.purse ||
+                0
+            ),
+
         winBonus:
-            offer.winBonus,
-        ppv:
-            offer.ppv || 0,
+            Number(
+                offer.winBonus || 0
+            ),
+
+        totalWinPayout:
+            Number(
+                offer.totalWinPayout ||
+                (
+                    Number(
+                        offer.purse || 0
+                    ) +
+                    Number(
+                        offer.winBonus || 0
+                    )
+                )
+            ),
+
+
+        /* CONTRATO */
+
+        contractFights:
+            Number(
+                offer.contractFights ||
+                1
+            ),
+
+        contractRemaining:
+            Number(
+                offer.contractFights ||
+                1
+            ),
+
+
+        /* CAMP */
+
         campWeeks:
             campWeeks,
+
         campStartWeek:
             currentWeek,
+
         fightWeek:
             fightWeek,
+
         weeksRemaining:
             campWeeks,
-        contractFights:
-            contractFights,
-        contractFightNumber:
-            1,
-        result:
-            null,
-        completed:
-            false
-    };
-    /* =====================================================
-       CONTRATO ATUAL
-    ===================================================== */
-    player.currentContract = {
-        active:
-            true,
-        promotionName:
-            offer.eventName,
-        stage:
-            offer.eventStage,
-        fights:
-            contractFights,
-        fightsCompleted:
-            0,
-        purse:
-            offer.purse,
-        winBonus:
-            offer.winBonus,
-        ppv:
-            offer.ppv || 0,
-        startedWeek:
+
+
+        /* DATA */
+
+        acceptedWeek:
             currentWeek,
-        startedYear:
+
+        acceptedYear:
             Number(
                 player.year || 2026
-            )
+            ),
+
+
+        /* PPV */
+
+        ppvAvailable:
+            Boolean(
+                offer.ppvAvailable
+            ),
+
+        ppvPercentage:
+            Number(
+                offer.ppvPercentage ||
+                0
+            ),
+
+
+        /* RESULTADO */
+
+        result:
+            null,
+
+        completed:
+            false
+
     };
-    /* =====================================================
-       PROFISSIONALIZAÇÃO
-    ===================================================== */
+
+
+    /*
+       REGISTRAR CONTRATO.
+    */
+
+    player.managerContractFightNumber =
+        Number(
+            player.managerContractFightNumber ||
+            0
+        );
+
+
+    player.managerContractTotalFights =
+        Number(
+            offer.contractFights ||
+            1
+        );
+
+
+    player.managerContractEvent =
+        offer.eventName;
+
+
+    player.managerContractCategory =
+        offer.eventCategory;
+
+
+    /*
+       CONTRATO ATUAL.
+    */
+
     if (
-        offer.eventStage !==
-        "amateur"
+        !player.currentContract
     ) {
-        player.professional =
-            player.professional || {};
-        player.professional.active =
-            true;
-        if (
-            !player.careerStage ||
-            player.careerStage ===
-            "amateur"
-        ) {
-            player.careerStage =
-                offer.eventStage ===
-                "regional"
-                ?
-                "regional"
-                :
-                offer.eventStage;
-        }
+
+        player.currentContract = {
+
+            event:
+                offer.eventName,
+
+            eventName:
+                offer.eventName,
+
+            category:
+                offer.eventCategory,
+
+            type:
+                offer.eventType,
+
+            totalFights:
+                Number(
+                    offer.contractFights ||
+                    1
+                ),
+
+            fightsCompleted:
+                0,
+
+            fightsRemaining:
+                Number(
+                    offer.contractFights ||
+                    1
+                ),
+
+            purse:
+                Number(
+                    offer.purse ||
+                    0
+                ),
+
+            winBonus:
+                Number(
+                    offer.winBonus ||
+                    0
+                ),
+
+            ppv:
+                Number(
+                    offer.ppvPercentage ||
+                    0
+                )
+
+        };
+
     }
-    /* =====================================================
-       LIMPAR OFERTA
-    ===================================================== */
+
+
+    /*
+       LIMPAR PROPOSTA.
+    */
+
     player.managerFightOffer =
         null;
+
     player.managerOfferPending =
         false;
+
     player.managerOffers =
         [];
+
     player.managerSearching =
         false;
+
     player.managerSearchCooldown =
         0;
-    /* =====================================================
-       LOG
-    ===================================================== */
+
+
+    /*
+       LOG.
+    */
+
     if (
-        Array.isArray(player.log)
+        Array.isArray(
+            player.log
+        )
     ) {
+
         player.log.unshift(
-            `🥊 Luta aceita contra ${offer.opponentName}.`
+
+            `🥊 Luta aceita! ${player.name || "Você"} enfrentará ${offer.opponentName}.`
+
         );
+
+
         player.log.unshift(
-            `🏋️ Camp de ${campWeeks} semanas iniciado.`
+
+            `🏟️ Evento: ${offer.eventName}.`
+
         );
+
+
+        if (
+            offer.amateur
+        ) {
+
+            player.log.unshift(
+
+                `🥊 Luta amadora confirmada. Bolsa: $0.`
+
+            );
+
+        }
+        else {
+
+            player.log.unshift(
+
+                `💰 Bolsa: $${Number(offer.purse || 0).toLocaleString("en-US")} + $${Number(offer.winBonus || 0).toLocaleString("en-US")} de bônus de vitória.`
+
+            );
+
+        }
+
+
         player.log.unshift(
-            `📄 Contrato de ${contractFights} luta(s) com ${offer.eventName}.`
+
+            `🏋️ Camp de ${campWeeks} semanas iniciado. A luta será na semana ${fightWeek}.`
+
         );
+
     }
+
+
     managerSave();
-    if (
-        typeof window.home ===
-        "function"
-    ) {
-        window.home();
+
+
+    /*
+       ATUALIZAR HOME.
+    */
+
+    try {
+
+        if (
+            typeof window.home ===
+            "function"
+        ) {
+
+            window.home();
+
+        }
+
     }
+    catch (error) {
+
+        console.warn(
+            "Não foi possível atualizar Home."
+        );
+
+    }
+
+
     return true;
+
 }
+
+
 /* =========================================================
-   RECUSAR
+   RECUSAR OFERTA
 ========================================================= */
+
 function declineManagerFightOffer() {
+
     const player =
         managerPlayer();
+
+
     ensureManagerData();
+
+
     if (
         !player.managerFightOffer
     ) {
+
         alert(
             "Não existe nenhuma proposta."
         );
+
         return false;
+
     }
-    const opponent =
-        player.managerFightOffer
-            .opponentName ||
+
+
+    const opponentName =
+        player.managerFightOffer.opponentName ||
         "adversário";
+
+
     player.managerFightOffer =
         null;
+
+
     player.managerOfferPending =
         false;
+
+
     player.managerOffers =
         [];
+
+
     player.managerSearching =
         false;
+
+
     player.managerSearchCooldown =
-        2;
+        1;
+
+
     if (
-        Array.isArray(player.log)
+        Array.isArray(
+            player.log
+        )
     ) {
+
         player.log.unshift(
-            `❌ Você recusou a luta contra ${opponent}.`
+
+            `❌ Você recusou a luta contra ${opponentName}.`
+
         );
+
     }
+
+
     managerSave();
-    if (
-        typeof window.home ===
-        "function"
-    ) {
-        window.home();
+
+
+    try {
+
+        if (
+            typeof window.home ===
+            "function"
+        ) {
+
+            window.home();
+
+        }
+
     }
+    catch (error) {}
+
+
     return true;
+
 }
+
+
 /* =========================================================
-   CAMP
+   PROCESSAR CAMP
 ========================================================= */
+
 function processManagerCampWeek() {
+
     const player =
         managerPlayer();
+
+
     ensureManagerData();
+
+
     const fight =
         player.nextFight;
-    if (!fight) {
+
+
+    if (
+        !fight
+    ) {
+
         return;
+
     }
+
+
+    if (
+        fight.completed ===
+        true
+    ) {
+
+        return;
+
+    }
+
+
     const currentWeek =
         Number(
-            player.week || 1
+            player.week || 0
         );
+
+
     const fightWeek =
         Number(
-            fight.fightWeek ||
-            currentWeek
+            fight.fightWeek
         );
+
+
+    if (
+        !Number.isFinite(
+            fightWeek
+        )
+    ) {
+
+        console.error(
+            "Fight sem fightWeek:",
+            fight
+        );
+
+        return;
+
+    }
+
+
+    /*
+       SEMANAS RESTANTES.
+    */
+
     const remaining =
         Math.max(
+
             0,
+
             fightWeek -
             currentWeek
+
         );
+
+
     fight.weeksRemaining =
         remaining;
+
+
+    /*
+       CAMP.
+    */
+
     if (
         currentWeek <
         fightWeek
     ) {
+
         fight.status =
             "camp";
+
+
+        /*
+           Camp ativo.
+        */
+
         return;
+
     }
+
+
+    /*
+       DIA DA LUTA.
+    */
+
     fight.status =
         "fight_day";
+
+
     fight.weeksRemaining =
         0;
+
+
+    /*
+       LOG APENAS UMA VEZ.
+    */
+
+    if (
+        fight.fightDayNotified !==
+        true
+    ) {
+
+        fight.fightDayNotified =
+            true;
+
+
+        if (
+            Array.isArray(
+                player.log
+            )
+        ) {
+
+            player.log.unshift(
+
+                `🥊 DIA DA LUTA! ${fight.opponentName} aguarda você no ${fight.eventName}.`
+
+            );
+
+        }
+
+    }
+
 }
+
+
 /* =========================================================
-   PROCESSAR SEMANA
+   PROCESSAR SEMANA DO EMPRESÁRIO
 ========================================================= */
+
 function processManagerWeek() {
+
     const player =
         managerPlayer();
+
+
     ensureManagerData();
+
+
+    /*
+       PRIMEIRO:
+       se existe luta,
+       atualizar camp.
+    */
+
     if (
         player.nextFight
     ) {
+
         processManagerCampWeek();
+
         managerSave();
+
         return;
+
     }
+
+
+    /*
+       SE EXISTE OFERTA,
+       NÃO PROCURAR OUTRA.
+    */
+
     if (
         player.managerFightOffer
     ) {
+
         managerSave();
+
         return;
+
     }
+
+
+    /*
+       SEM LUTA:
+       EMPRESÁRIO PROCURA.
+    */
+
     processManagerFightOffer();
+
 }
+
+
 /* =========================================================
-   FINALIZAR LUTA
+   VERIFICAR SE AVANÇO DE SEMANA
+   DEVE SER BLOQUEADO
 ========================================================= */
-function completeManagerFight(
-    result
-) {
+
+function managerShouldBlockWeekAdvance() {
+
     const player =
         managerPlayer();
-    ensureManagerData();
+
+
     const fight =
         player.nextFight;
-    if (!fight) {
-        return;
-    }
-    const contract =
-        player.currentContract;
-    if (contract) {
-        contract.fightsCompleted =
-            Number(
-                contract.fightsCompleted ||
-                0
-            ) + 1;
-        if (
-            contract.fightsCompleted >=
-            Number(
-                contract.fights ||
-                0
-            )
-        ) {
-            contract.active =
-                false;
-            player.currentContract =
-                null;
-            player.managerSearchCooldown =
-                1;
-        }
-    }
-    fight.status =
-        "completed";
-    fight.completed =
-        true;
-    fight.result =
-        result || null;
-    player.nextFight =
-        null;
-    player.managerFightOffer =
-        null;
-    player.managerOffers =
-        [];
-    player.managerOfferPending =
-        false;
+
+
     if (
-        Array.isArray(
-            player.managerContractHistory
-        )
+        !fight
     ) {
-        if (
-            contract
-        ) {
-            player.managerContractHistory.push(
-                {
-                    ...contract,
-                    completedAtWeek:
-                        Number(
-                            player.week || 1
-                        )
-                }
-            );
-        }
+
+        return false;
+
     }
-    player.managerSearchCooldown =
-        2;
+
+
+    /*
+       DIA DA LUTA:
+       BLOQUEAR.
+    */
+
     if (
-        Array.isArray(player.log)
+        managerIsFightDay()
     ) {
-        player.log.unshift(
-            "📋 O empresário encerrou o processo desta luta."
-        );
+
+        return true;
+
     }
-    managerSave();
+
+
+    return false;
+
 }
+
+
 /* =========================================================
-   CANCELAR LUTA
+   VERIFICAR SE PODE LUTAR
 ========================================================= */
-function cancelManagerFight(
-    reason
-) {
+
+function managerCanFightNow() {
+
     const player =
         managerPlayer();
-    ensureManagerData();
+
+
     if (
         !player.nextFight
     ) {
+
         return false;
+
     }
-    const opponent =
-        player.nextFight.opponentName ||
-        "adversário";
-    player.nextFight =
-        null;
-    player.managerFightOffer =
-        null;
-    player.managerOffers =
-        [];
-    player.managerOfferPending =
-        false;
-    player.managerSearchCooldown =
-        2;
-    if (
-        Array.isArray(player.log)
-    ) {
-        player.log.unshift(
-            `⚠️ A luta contra ${opponent} foi cancelada${reason ? `: ${reason}` : "."}`
-        );
-    }
-    managerSave();
-    return true;
+
+
+    return managerIsFightDay();
+
 }
+
+
 /* =========================================================
-   OFERTA DE TESTE
+   PROCESSAR ANO
 ========================================================= */
-function createManagerTestOffer() {
-    const player =
-        managerPlayer();
-    ensureManagerData();
-    if (
-        player.nextFight
-    ) {
-        return false;
-    }
-    const offer =
-        generateManagerFightOffer();
-    player.managerFightOffer =
-        offer;
-    player.managerOfferPending =
-        true;
-    player.managerOffers =
-        [];
-    managerSave();
-    if (
-        typeof window.home ===
-        "function"
-    ) {
-        window.home();
-    }
-    return true;
-}
-/* =========================================================
-   ANO
-========================================================= */
+
 function processManagerContractYear() {
+
     const player =
         managerPlayer();
+
+
     ensureManagerData();
+
+
     if (
         player.manager
     ) {
+
         player.manager.experience =
             managerClamp(
+
                 Number(
                     player.manager.experience ||
                     50
                 ) + 1,
+
                 1,
+
                 100
+
             );
+
+
         player.manager.network =
             managerClamp(
+
                 Number(
                     player.manager.network ||
                     50
                 ) + 1,
+
                 1,
+
                 100
+
             );
+
     }
+
+
     managerSave();
+
 }
+
+
+/* =========================================================
+   CANCELAR LUTA
+========================================================= */
+
+function cancelManagerFight(
+    reason
+) {
+
+    const player =
+        managerPlayer();
+
+
+    ensureManagerData();
+
+
+    if (
+        !player.nextFight
+    ) {
+
+        return false;
+
+    }
+
+
+    const opponent =
+        player.nextFight.opponentName ||
+        "adversário";
+
+
+    player.nextFight =
+        null;
+
+
+    player.managerFightOffer =
+        null;
+
+
+    player.managerOfferPending =
+        false;
+
+
+    player.managerOffers =
+        [];
+
+
+    player.managerSearchCooldown =
+        1;
+
+
+    if (
+        Array.isArray(
+            player.log
+        )
+    ) {
+
+        player.log.unshift(
+
+            `⚠️ A luta contra ${opponent} foi cancelada${reason ? `: ${reason}` : "."}`
+
+        );
+
+    }
+
+
+    managerSave();
+
+
+    return true;
+
+}
+
+
+/* =========================================================
+   FINALIZAR LUTA
+   CHAMADO PELO FIGHTS.JS
+========================================================= */
+
+function completeManagerFight(
+    result
+) {
+
+    const player =
+        managerPlayer();
+
+
+    ensureManagerData();
+
+
+    const fight =
+        player.nextFight;
+
+
+    if (
+        !fight
+    ) {
+
+        return;
+
+    }
+
+
+    /*
+       SALVAR RESULTADO.
+    */
+
+    fight.status =
+        "completed";
+
+
+    fight.completed =
+        true;
+
+
+    fight.result =
+        result ||
+        null;
+
+
+    /*
+       CONTRATO.
+    */
+
+    if (
+        player.currentContract
+    ) {
+
+        player.currentContract.fightsCompleted =
+            Number(
+                player.currentContract.fightsCompleted ||
+                0
+            ) + 1;
+
+
+        player.currentContract.fightsRemaining =
+            Math.max(
+
+                0,
+
+                Number(
+                    player.currentContract.fightsRemaining ||
+                    0
+                ) - 1
+
+            );
+
+
+        player.managerContractFightNumber =
+            Number(
+                player.managerContractFightNumber ||
+                0
+            ) + 1;
+
+
+        /*
+           CONTRATO TERMINOU.
+        */
+
+        if (
+            player.currentContract.fightsRemaining <=
+            0
+        ) {
+
+            if (
+                Array.isArray(
+                    player.log
+                )
+            ) {
+
+                player.log.unshift(
+
+                    `📋 Contrato com ${player.currentContract.eventName || player.currentContract.event} encerrado.`
+
+                );
+
+            }
+
+
+            player.currentContract =
+                null;
+
+
+            player.managerContractFightNumber =
+                0;
+
+
+            player.managerContractTotalFights =
+                0;
+
+
+            player.managerContractEvent =
+                "";
+
+
+            player.managerContractCategory =
+                "";
+
+        }
+
+    }
+
+
+    /*
+       LIMPAR LUTA.
+    */
+
+    player.nextFight =
+        null;
+
+
+    player.managerFightOffer =
+        null;
+
+
+    player.managerOffers =
+        [];
+
+
+    player.managerOfferPending =
+        false;
+
+
+    player.managerSearching =
+        false;
+
+
+    /*
+       PEQUENO COOLDOWN.
+    */
+
+    player.managerSearchCooldown =
+        1;
+
+
+    /*
+       LOG.
+    */
+
+    if (
+        Array.isArray(
+            player.log
+        )
+    ) {
+
+        player.log.unshift(
+
+            "📋 O empresário encerrou o processo desta luta."
+
+        );
+
+    }
+
+
+    managerSave();
+
+}
+
+
+/* =========================================================
+   OFERTA DE TESTE
+========================================================= */
+
+function createManagerTestOffer() {
+
+    const player =
+        managerPlayer();
+
+
+    ensureManagerData();
+
+
+    if (
+        player.nextFight
+    ) {
+
+        return false;
+
+    }
+
+
+    const offer =
+        generateManagerFightOffer();
+
+
+    player.managerFightOffer =
+        offer;
+
+
+    player.managerOfferPending =
+        true;
+
+
+    player.managerOffers =
+        [];
+
+
+    managerSave();
+
+
+    try {
+
+        if (
+            typeof window.home ===
+            "function"
+        ) {
+
+            window.home();
+
+        }
+
+    }
+    catch (error) {}
+
+
+    return true;
+
+}
+
+
+/* =========================================================
+   FORÇAR OFERTA
+   ÚTIL PARA TESTE
+========================================================= */
+
+function forceManagerFightOffer() {
+
+    const player =
+        managerPlayer();
+
+
+    ensureManagerData();
+
+
+    if (
+        player.nextFight
+    ) {
+
+        return false;
+
+    }
+
+
+    const offer =
+        generateManagerFightOffer();
+
+
+    if (
+        !offer
+    ) {
+
+        return false;
+
+    }
+
+
+    player.managerFightOffer =
+        offer;
+
+
+    player.managerOfferPending =
+        true;
+
+
+    player.managerOffers =
+        [];
+
+
+    managerSave();
+
+
+    return offer;
+
+}
+
+
+/* =========================================================
+   PEGAR OFERTA ATUAL
+========================================================= */
+
+function getManagerFightOffer() {
+
+    const player =
+        managerPlayer();
+
+
+    ensureManagerData();
+
+
+    return (
+        player.managerFightOffer ||
+        null
+    );
+
+}
+
+
+/* =========================================================
+   PEGAR LUTA ATUAL
+========================================================= */
+
+function getManagerCurrentFight() {
+
+    const player =
+        managerPlayer();
+
+
+    return (
+        player.nextFight ||
+        null
+    );
+
+}
+
+
+/* =========================================================
+   INICIALIZAR
+========================================================= */
+
+function initializeManagers() {
+
+    ensureManagerData();
+
+}
+
+
 /* =========================================================
    EXPORTAR
 ========================================================= */
+
 window.ensureManagerData =
     ensureManagerData;
+
+
 window.isInFightCamp =
     isInFightCamp;
+
+
 window.managerIsFightDay =
     managerIsFightDay;
+
+
 window.managerCanSearchFight =
     managerCanSearchFight;
-window.generateManagerOpponent =
-    generateManagerOpponent;
-window.generateManagerEvent =
-    generateManagerEvent;
-window.calculateManagerPurse =
-    calculateManagerPurse;
-window.calculateBigEventPurse =
-    calculateBigEventPurse;
-window.calculateManagerWinBonus =
-    calculateManagerWinBonus;
-window.createNegotiationData =
-    createNegotiationData;
-window.negotiateManagerPurse =
-    negotiateManagerPurse;
-window.negotiateManagerPPV =
-    negotiateManagerPPV;
-window.generateManagerFightOffer =
-    generateManagerFightOffer;
+
+
+window.managerCanFightNow =
+    managerCanFightNow;
+
+
+window.managerShouldBlockWeekAdvance =
+    managerShouldBlockWeekAdvance;
+
+
 window.processManagerFightOffer =
     processManagerFightOffer;
+
+
 window.processManagerCampWeek =
     processManagerCampWeek;
+
+
 window.processManagerWeek =
     processManagerWeek;
+
+
 window.acceptManagerFightOffer =
     acceptManagerFightOffer;
+
+
 window.declineManagerFightOffer =
     declineManagerFightOffer;
+
+
+window.negotiateManagerFightOffer =
+    negotiateManagerFightOffer;
+
+
 window.processManagerContractYear =
     processManagerContractYear;
+
+
 window.completeManagerFight =
     completeManagerFight;
+
+
 window.cancelManagerFight =
     cancelManagerFight;
+
+
 window.createManagerTestOffer =
     createManagerTestOffer;
+
+
+window.forceManagerFightOffer =
+    forceManagerFightOffer;
+
+
+window.getManagerFightOffer =
+    getManagerFightOffer;
+
+
+window.getManagerCurrentFight =
+    getManagerCurrentFight;
+
+
+window.generateManagerOpponent =
+    generateManagerOpponent;
+
+
+window.generateManagerEvent =
+    generateManagerEvent;
+
+
+window.generateManagerFightOffer =
+    generateManagerFightOffer;
+
+
+window.calculateManagerPurse =
+    calculateManagerPurse;
+
+
+window.calculateManagerWinBonus =
+    calculateManagerWinBonus;
+
+
+window.calculateWorldPurse =
+    calculateWorldPurse;
+
+
+window.calculateElitePurse =
+    calculateElitePurse;
+
+
+window.createNegotiationData =
+    createNegotiationData;
+
+
 /* =========================================================
    INICIALIZAÇÃO
 ========================================================= */
+
 if (
     document.readyState ===
     "loading"
 ) {
+
     document.addEventListener(
         "DOMContentLoaded",
-        ensureManagerData
+        initializeManagers
     );
+
 }
 else {
-    ensureManagerData();
+
+    initializeManagers();
+
 }
+
+
+/* =========================================================
+   FIM DO MANAGERS.JS
+========================================================= */
