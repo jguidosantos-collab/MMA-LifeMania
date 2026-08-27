@@ -1,109 +1,100 @@
+/* =========================================================
+   MMA LIFE DYNASTY
+   SAVE.JS
+   SISTEMA DE SALVAMENTO
+   =========================================================
+   CORREÇÃO:
+   - Usa o mesmo save utilizado pelo main.js
+   - Remove conflito com mmaLifeDynastyV1
+   - Não duplica resetGame()
+   - Mantém compatibilidade com o sistema atual
+========================================================= */
+/* =========================================================
+   SALVAR
+========================================================= */
 function save() {
-
+    if (
+        typeof window.player === "undefined" ||
+        !window.player
+    ) {
+        return;
+    }
     localStorage.setItem(
-
-        "mmaLifeDynastyV1",
-
-        JSON.stringify(player)
-
+        "mmaLifePlayer",
+        JSON.stringify(
+            window.player
+        )
     );
-
 }
-
-
+/* =========================================================
+   CARREGAR
+========================================================= */
 function load() {
-
     const data =
         localStorage.getItem(
-            "mmaLifeDynastyV1"
+            "mmaLifePlayer"
         );
-
-
     if (!data) {
-
-        return;
-
+        return false;
     }
-
-
     try {
-
-        player =
+        window.player =
             JSON.parse(data);
-
-
-        document
-            .getElementById("creation")
-            .classList.add("hidden");
-
-
-        document
-            .getElementById("game")
-            .classList.remove("hidden");
-
-
-        document
-            .getElementById("tabs")
-            .classList.remove("hidden");
-
-
-        home();
-
+        const creation =
+            document.getElementById(
+                "creation"
+            );
+        const game =
+            document.getElementById(
+                "game"
+            );
+        const tabs =
+            document.getElementById(
+                "tabs"
+            );
+        if (creation) {
+            creation.classList.add(
+                "hidden"
+            );
+        }
+        if (game) {
+            game.classList.remove(
+                "hidden"
+            );
+        }
+        if (tabs) {
+            tabs.classList.remove(
+                "hidden"
+            );
+        }
+        if (
+            typeof window.home ===
+            "function"
+        ) {
+            window.home();
+        }
+        return true;
     }
-
     catch (error) {
-
-        console.log(
-            "Erro ao carregar save."
+        console.error(
+            "Erro ao carregar save:",
+            error
         );
-
+        return false;
     }
-
 }
-
-
-function resetGame() {
-
-    const confirmReset =
-        confirm(
-
-            "⚠️ ATENÇÃO!\n\n" +
-            "Isso vai apagar sua carreira atual.\n\n" +
-            "Deseja realmente reiniciar?"
-
-        );
-
-
-    if (!confirmReset) {
-
-        return;
-
-    }
-
-
-    localStorage.removeItem(
-        "mmaLifeDynastyV1"
-    );
-
-
-    player = null;
-
-
-    document
-        .getElementById("game")
-        .classList.add("hidden");
-
-
-    document
-        .getElementById("tabs")
-        .classList.add("hidden");
-
-
-    document
-        .getElementById("creation")
-        .classList.remove("hidden");
-
-
-    initCreation();
-
-}
+/* =========================================================
+   DISPONIBILIZAR GLOBALMENTE
+========================================================= */
+window.save =
+    save;
+window.load =
+    load;
+/* =========================================================
+   OBSERVAÇÃO
+=========================================================
+   O resetGame() NÃO fica neste arquivo.
+   Ele já é controlado pelo main.js,
+   evitando duas funções com o mesmo nome
+   disputando o controle do jogo.
+========================================================= */
