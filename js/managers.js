@@ -1011,15 +1011,11 @@ function generateManagerEvent() {
             ),
 
         isBigEvent:
-            false
 
-    };
-
-}
-
-
-/* =========================================================
-   CALCULAR BOLSA BASE
+           /* =========================================================
+   CALCULAR BOLSA DA LUTA
+   AMADOR = SEM BOLSA
+   PROFISSIONAL = BOLSA NORMAL
 ========================================================= */
 
 function calculateManagerPurse() {
@@ -1027,9 +1023,41 @@ function calculateManagerPurse() {
     const player =
         managerPlayer();
 
+    /*
+       =====================================================
+       AMADOR
+       =====================================================
+
+       Lutador amador NÃO recebe bolsa.
+    */
+
+    if (
+        !player.professional ||
+        player.professional.active !== true
+    ) {
+
+        return 0;
+
+    }
+
+
+    /*
+       =====================================================
+       PROFISSIONAL
+       =====================================================
+    */
 
     const overall =
-        managerGetPlayerOverall();
+        typeof window.getOverall ===
+        "function"
+        ?
+        Number(
+            window.getOverall()
+        )
+        :
+        Number(
+            player.overall || 45
+        );
 
 
     const fame =
@@ -1038,40 +1066,14 @@ function calculateManagerPurse() {
         );
 
 
-    /*
-       PROFISSIONAL
-    */
+    const purse =
+        800 +
+        overall * 35 +
+        fame * 15;
 
-    if (
-        player.professional &&
-        player.professional.active
-    ) {
-
-        return Math.round(
-
-            800 +
-
-            overall * 35 +
-
-            fame * 15
-
-        );
-
-    }
-
-
-    /*
-       AMADOR
-    */
 
     return Math.round(
-
-        100 +
-
-        overall * 8 +
-
-        fame * 3
-
+        purse
     );
 
 }
