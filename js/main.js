@@ -2,21 +2,18 @@
    MMA LIFE DYNASTY
    MAIN.JS
    CONTROLE PRINCIPAL DO JOGO
-   RESPONSABILIDADES:
-   - Inicialização
-   - Criação do jogador
-   - Carregamento e salvamento
-   - Navegação
-   - Home
-   - Carreira
-   - Avanço de semanas
-   - Bloqueio no dia da luta
-   - Chamadas para Fights.js
-   - Treinamento
-   - Recuperação
-   - Empresário
-   - Ranking
-   - Mundo MMA
+   VERSÃO ATUALIZADA
+   =========================================================
+   CORREÇÕES:
+   - Travamento no dia da luta AMADORA
+   - Travamento no dia da luta PROFISSIONAL
+   - Camp de preparação respeitado
+   - Não permite avançar além da semana da luta
+   - Reconhece fightWeek
+   - Reconhece weeksRemaining
+   - Reconhece status fight_day
+   - Compatível com managers.js
+   - Compatível com fights.js gigante
 ========================================================= */
 /* =========================================================
    UTILIDADES
@@ -37,8 +34,6 @@ function showCreation() {
     if (creation) {
         creation.classList.remove("hidden");
         creation.style.display = "block";
-        creation.style.visibility = "visible";
-        creation.style.opacity = "1";
     }
     if (game) {
         game.classList.add("hidden");
@@ -84,26 +79,17 @@ function ensurePlayer() {
         ) {
             window.player =
                 window.createDefaultPlayer();
-        } else {
-            console.error(
-                "createDefaultPlayer() não encontrada."
-            );
-            return null;
         }
     }
-    return window.player;
 }
 /* =========================================================
    SALVAR
 ========================================================= */
 function saveGame() {
-    const player = ensurePlayer();
-    if (!player) {
-        return;
-    }
+    ensurePlayer();
     localStorage.setItem(
         "mmaLifePlayer",
-        JSON.stringify(player)
+        JSON.stringify(window.player)
     );
 }
 /* =========================================================
@@ -120,32 +106,66 @@ function loadGame() {
     try {
         const data =
             JSON.parse(saved);
-        if (!data) {
-            return false;
-        }
         const base =
-            typeof window.createDefaultPlayer ===
-            "function"
-                ? window.createDefaultPlayer()
-                : {};
+            createDefaultPlayer();
         window.player = {
             ...base,
             ...data,
             attributes: {
-                ...(base.attributes || {}),
+                ...base.attributes,
                 ...(data.attributes || {})
             },
             professional: {
-                ...(base.professional || {}),
+                ...base.professional,
                 ...(data.professional || {})
             },
             amateur: {
-                ...(base.amateur || {}),
+                ...base.amateur,
                 ...(data.amateur || {})
             },
             trainingPlan: {
-                ...(base.trainingPlan || {}),
+                ...base.trainingPlan,
                 ...(data.trainingPlan || {})
+            },
+            championship: {
+                ...base.championship,
+                ...(data.championship || {})
+            },
+            sponsors: {
+                ...base.sponsors,
+                ...(data.sponsors || {})
+            },
+            socialMedia: {
+                ...base.socialMedia,
+                ...(data.socialMedia || {})
+            },
+            media: {
+                ...base.media,
+                ...(data.media || {})
+            },
+            finances: {
+                ...base.finances,
+                ...(data.finances || {})
+            },
+            assets: {
+                ...base.assets,
+                ...(data.assets || {})
+            },
+            investments: {
+                ...base.investments,
+                ...(data.investments || {})
+            },
+            taxes: {
+                ...base.taxes,
+                ...(data.taxes || {})
+            },
+            legal: {
+                ...base.legal,
+                ...(data.legal || {})
+            },
+            legacy: {
+                ...base.legacy,
+                ...(data.legacy || {})
             },
             currentContract: {
                 ...(base.currentContract || {}),
@@ -154,10 +174,7 @@ function loadGame() {
             promotionHistory: {
                 ...(base.promotionHistory || {}),
                 ...(data.promotionHistory || {})
-            },
-            nextFight: data.nextFight || null,
-            managerFightOffer:
-                data.managerFightOffer || null
+            }
         };
         return true;
     }
@@ -173,10 +190,17 @@ function loadGame() {
    TELA INICIAL
 ========================================================= */
 function startGame() {
-    const creation = getElement("creation");
-    const creator = getElement("creator");
-    const game = getElement("game");
-    if (!creation || !creator || !game) {
+    const creation =
+        getElement("creation");
+    const creator =
+        getElement("creator");
+    const game =
+        getElement("game");
+    if (
+        !creation ||
+        !creator ||
+        !game
+    ) {
         console.error(
             "Estrutura do index.html não encontrada."
         );
@@ -331,17 +355,8 @@ function createNewPlayer() {
         );
         return;
     }
-    if (
-        typeof window.createDefaultPlayer !==
-        "function"
-    ) {
-        alert(
-            "Erro: player.js não foi carregado."
-        );
-        return;
-    }
     const newPlayer =
-        window.createDefaultPlayer();
+        createDefaultPlayer();
     newPlayer.name =
         name;
     const country =
@@ -369,16 +384,11 @@ function createNewPlayer() {
     newPlayer.fame = 0;
     newPlayer.health = 100;
     newPlayer.fatigue = 0;
-    newPlayer.nextFight = null;
-    newPlayer.managerFightOffer = null;
     newPlayer.log = [
         `🥊 ${name} iniciou sua carreira no MMA.`
     ];
     window.player =
         newPlayer;
-    /* =====================================================
-       REINICIAR MUNDO MMA
-    ===================================================== */
     if (
         typeof window.mmaWorld !==
         "undefined"
@@ -404,14 +414,11 @@ function createNewPlayer() {
    OVERALL
 ========================================================= */
 function getOverall() {
+    ensurePlayer();
     const player =
-        ensurePlayer();
-    if (!player) {
-        return 0;
-    }
+        window.player;
     if (
-        typeof player.overall ===
-        "number" &&
+        typeof player.overall === "number" &&
         !player._overallStarted
     ) {
         return player.overall;
@@ -455,10 +462,7 @@ function getOverall() {
     ];
     const average =
         values.reduce(
-            function(
-                total,
-                value
-            ) {
+            function(total, value) {
                 return total + value;
             },
             0
@@ -467,91 +471,79 @@ function getOverall() {
         Number(
             player.potential || 90
         ),
-        Math.round(
-            average
-        )
+        Math.round(average)
     );
 }
 /* =========================================================
-   DIA DA LUTA
+   VERIFICAR DIA DA LUTA
+   AMADOR + PROFISSIONAL
 ========================================================= */
 function isFightDay() {
-    const player =
-        ensurePlayer();
-    if (!player) {
-        return false;
-    }
+    ensurePlayer();
     const fight =
-        player.nextFight;
+        window.player.nextFight;
     if (!fight) {
         return false;
     }
+    /* STATUS EXPLÍCITO */
+    if (
+        fight.status ===
+        "fight_day"
+    ) {
+        return true;
+    }
+    /* WEEKS REMAINING */
     if (
         typeof fight.weeksRemaining ===
         "number"
     ) {
         return (
-            fight.weeksRemaining <= 0
+            Number(
+                fight.weeksRemaining
+            ) <= 0
         );
     }
+    /* FIGHT WEEK */
     if (
         typeof fight.fightWeek ===
         "number"
     ) {
         return (
-            Number(player.week) >=
-            Number(fight.fightWeek)
+            Number(
+                window.player.week
+            ) >=
+            Number(
+                fight.fightWeek
+            )
         );
     }
     return false;
 }
 /* =========================================================
-   ABRIR TELA DE LUTA
+   VERIFICAR SE EXISTE LUTA FUTURA
 ========================================================= */
-function openFight() {
+function hasScheduledFight() {
     ensurePlayer();
-    showGame();
+    const fight =
+        window.player.nextFight;
+    if (!fight) {
+        return false;
+    }
     if (
-        typeof window.fightScreen ===
-        "function"
+        fight.status ===
+        "completed"
     ) {
-        window.fightScreen();
-        return;
+        return false;
     }
-    const content =
-        getContent();
-    if (content) {
-        content.innerHTML = `
-            <div class="card">
-                <div class="title">
-                    🥊 SISTEMA DE LUTA
-                </div>
-                <p>
-                    O sistema de combate
-                    não foi carregado.
-                </p>
-                <p>
-                    Verifique se
-                    <strong>fights.js</strong>
-                    está incluído no index.html.
-                </p>
-                <button
-                    class="main-button"
-                    onclick="home()">
-                    🏠 VOLTAR
-                </button>
-            </div>
-        `;
-    }
+    return true;
 }
 /* =========================================================
    OFERTA DO EMPRESÁRIO
 ========================================================= */
 function renderManagerOffer() {
     const player =
-        ensurePlayer();
+        window.player;
     if (
-        !player ||
         !player.managerFightOffer
     ) {
         return "";
@@ -600,7 +592,8 @@ function renderManagerOffer() {
                 ""
             }
             ${
-                offer.purse
+                typeof offer.purse ===
+                "number"
                 ?
                 `
                     <div class="statline">
@@ -618,7 +611,8 @@ function renderManagerOffer() {
                 ""
             }
             ${
-                offer.winBonus
+                typeof offer.winBonus ===
+                "number"
                 ?
                 `
                     <div class="statline">
@@ -629,6 +623,23 @@ function renderManagerOffer() {
                             $${Math.round(
                                 offer.winBonus
                             )}
+                        </b>
+                    </div>
+                `
+                :
+                ""
+            }
+            ${
+                offer.campWeeks
+                ?
+                `
+                    <div class="statline">
+                        <span>
+                            Camp
+                        </span>
+                        <b>
+                            ${offer.campWeeks}
+                            semanas
                         </b>
                     </div>
                 `
@@ -652,13 +663,14 @@ function renderManagerOffer() {
    HOME
 ========================================================= */
 function home() {
-    const player =
-        ensurePlayer();
+    ensurePlayer();
     const content =
         getContent();
-    if (!player || !content) {
+    if (!content) {
         return;
     }
+    const player =
+        window.player;
     const pro =
         player.professional || {};
     const amateur =
@@ -673,7 +685,6 @@ function home() {
         isFightDay();
     content.innerHTML = `
         ${renderManagerOffer()}
-        <!-- PERFIL -->
         <div class="card fighter-card">
             <div class="fighter-avatar">
                 🥊
@@ -690,7 +701,6 @@ function home() {
                 </p>
             </div>
         </div>
-        <!-- RESUMO -->
         <div class="stats-grid">
             <div class="stat-card">
                 <span>
@@ -729,7 +739,6 @@ function home() {
                 </strong>
             </div>
         </div>
-        <!-- CALENDÁRIO -->
         <div class="card">
             <div class="title">
                 📅 CALENDÁRIO
@@ -760,16 +769,54 @@ function home() {
                         </div>
                         <p>
                             Sua luta é hoje.
-                            Você precisa realizar
-                            o combate antes de
-                            avançar a semana.
+                            A semana está bloqueada.
                         </p>
                         <button
                             class="main-button"
-                            onclick="openFight()">
+                            onclick="fightScreen()">
                             👊 LUTAR AGORA
                         </button>
                     </div>
+                `
+                :
+                fight
+                ?
+                `
+                    <div class="card">
+                        <div class="title">
+                            🏋️ CAMP DE PREPARAÇÃO
+                        </div>
+                        <p>
+                            Sua próxima luta está marcada.
+                            Continue sua preparação.
+                        </p>
+                        ${
+                            typeof fight.weeksRemaining ===
+                            "number"
+                            ?
+                            `
+                                <div class="statline">
+                                    <span>
+                                        Faltam
+                                    </span>
+                                    <b>
+                                        ${Math.max(
+                                            0,
+                                            fight.weeksRemaining
+                                        )}
+                                        semanas
+                                    </b>
+                                </div>
+                            `
+                            :
+                            ""
+                        }
+                    </div>
+                    <button
+                        class="main-button"
+                        onclick="nextWeek()">
+                        ⏭️ AVANÇAR SEMANA
+                    </button>
                 `
                 :
                 `
@@ -781,7 +828,6 @@ function home() {
                 `
             }
         </div>
-        <!-- PRÓXIMA LUTA -->
         <div class="card">
             <div class="title">
                 ⚔️ PRÓXIMO COMBATE
@@ -800,6 +846,7 @@ function home() {
                                 ?
                                 fight.event.name
                                 :
+                                fight.eventName ||
                                 "Evento MMA"
                             }
                         </b>
@@ -815,10 +862,14 @@ function home() {
                                 (
                                     fight.opponent.displayName ||
                                     fight.opponent.name ||
+                                    fight.opponentName ||
                                     "Adversário"
                                 )
                                 :
-                                "A definir"
+                                (
+                                    fight.opponentName ||
+                                    "Adversário"
+                                )
                             }
                         </b>
                     </div>
@@ -830,13 +881,16 @@ function home() {
                             ${
                                 fight.opponent
                                 ?
-                                (
+                                Number(
                                     fight.opponent.power ||
                                     fight.opponent.overall ||
                                     0
                                 )
                                 :
-                                0
+                                Number(
+                                    fight.opponentOverall ||
+                                    0
+                                )
                             }
                         </b>
                     </div>
@@ -869,7 +923,7 @@ function home() {
                         `
                             <button
                                 class="main-button"
-                                onclick="openFight()">
+                                onclick="fightScreen()">
                                 👊 LUTAR AGORA
                             </button>
                         `
@@ -892,7 +946,6 @@ function home() {
                 `
             }
         </div>
-        <!-- CARREIRA -->
         <div class="card">
             <div class="title">
                 🥊 CARREIRA
@@ -929,7 +982,6 @@ function home() {
                 </b>
             </div>
         </div>
-        <!-- CONDIÇÃO -->
         <div class="card">
             <div class="title">
                 ❤️ CONDIÇÃO
@@ -955,7 +1007,6 @@ function home() {
                 </b>
             </div>
         </div>
-        <!-- RANKING -->
         <div class="card ranking-home-card">
             <div class="title">
                 🏆 RANKING MUNDIAL
@@ -971,19 +1022,16 @@ function home() {
                 🌎 VER RANKING MUNDIAL
             </button>
         </div>
-        <!-- MUNDO -->
         <div class="card">
             <div class="title">
                 🌎 MUNDO MMA
             </div>
             <p>
-                Eventos, lutadores,
-                rankings e campeonatos
-                continuam evoluindo enquanto
-                sua carreira avança.
+                Eventos e lutadores continuam
+                evoluindo enquanto sua carreira
+                avança.
             </p>
         </div>
-        <!-- JOGO -->
         <div class="card">
             <div class="title">
                 ⚙️ JOGO
@@ -998,7 +1046,7 @@ function home() {
     `;
 }
 /* =========================================================
-   RANKING MUNDIAL
+   ABRIR RANKING
 ========================================================= */
 function openWorldRanking() {
     showGame();
@@ -1018,13 +1066,8 @@ function openWorldRanking() {
                     🏆 RANKING MUNDIAL
                 </div>
                 <p>
-                    O sistema de ranking
-                    não foi carregado.
-                </p>
-                <p>
-                    Verifique se o arquivo
-                    <strong>ranking.js</strong>
-                    está incluído no index.html.
+                    O sistema de ranking não foi
+                    carregado.
                 </p>
                 <button
                     class="main-button"
@@ -1063,7 +1106,12 @@ function tab(name) {
         return;
     }
     if (name === "fight") {
-        openFight();
+        if (
+            typeof window.fightScreen ===
+            "function"
+        ) {
+            window.fightScreen();
+        }
         return;
     }
     if (name === "team") {
@@ -1091,21 +1139,54 @@ function tab(name) {
 }
 /* =========================================================
    PRÓXIMA SEMANA
+   BLOQUEIO ABSOLUTO
 ========================================================= */
 function nextWeek() {
+    ensurePlayer();
     const player =
-        ensurePlayer();
-    if (!player) {
+        window.player;
+    /* =====================================================
+       TRAVA ABSOLUTA
+       FUNCIONA NO AMADOR E PROFISSIONAL
+    ===================================================== */
+    if (
+        isFightDay()
+    ) {
+        alert(
+            "🚨 DIA DA LUTA! Você precisa realizar o combate antes de avançar a semana."
+        );
+        if (
+            typeof window.fightScreen ===
+            "function"
+        ) {
+            window.fightScreen();
+        }
         return;
     }
     /* =====================================================
-       BLOQUEIO NO DIA DA LUTA
+       PROTEÇÃO EXTRA CONTRA PASSAR DA FIGHT WEEK
     ===================================================== */
-    if (isFightDay()) {
+    if (
+        player.nextFight &&
+        typeof player.nextFight.fightWeek ===
+        "number" &&
+        Number(player.week) >=
+        Number(player.nextFight.fightWeek)
+    ) {
+        player.nextFight.status =
+            "fight_day";
+        player.nextFight.weeksRemaining =
+            0;
+        saveGame();
         alert(
-            "🚨 Você chegou ao dia da luta. Faça o combate antes de avançar a semana."
+            "🚨 Você chegou ao dia da luta! O avanço da semana está bloqueado."
         );
-        openFight();
+        if (
+            typeof window.fightScreen ===
+            "function"
+        ) {
+            window.fightScreen();
+        }
         return;
     }
     /* =====================================================
@@ -1142,30 +1223,6 @@ function nextWeek() {
             );
         }
     }
-   /* =====================================================
-   CAMP DA LUTA
-===================================================== */
-
-if (
-    typeof window.processFightCampWeek ===
-    "function"
-) {
-
-    try {
-
-        window.processFightCampWeek();
-
-    }
-    catch (error) {
-
-        console.error(
-            "Erro ao processar camp da luta:",
-            error
-        );
-
-    }
-
-}
     /* =====================================================
        TREINAMENTO
     ===================================================== */
@@ -1176,12 +1233,11 @@ if (
         player.trainingPlan.weeks[player.week]
         :
         [];
-    if (Array.isArray(plan)) {
+    if (
+        Array.isArray(plan)
+    ) {
         plan.forEach(
             function(training) {
-                if (!training) {
-                    return;
-                }
                 const attribute =
                     training.attribute;
                 if (!attribute) {
@@ -1189,9 +1245,8 @@ if (
                 }
                 const current =
                     Number(
-                        player.attributes &&
-                        player.attributes[attribute]
-                            || 60
+                        player.attributes[attribute] ||
+                        60
                     );
                 const potential =
                     Number(
@@ -1212,11 +1267,6 @@ if (
                         potential -
                         current
                     );
-                if (
-                    !player.attributes
-                ) {
-                    player.attributes = {};
-                }
                 player.attributes[attribute] =
                     Number(
                         (
@@ -1247,38 +1297,30 @@ if (
             ) + 3
         );
     /* =====================================================
-       AVANÇA SEMANA
+       AVANÇAR SEMANA
     ===================================================== */
     player.week =
         Number(
             player.week ||
             1
         ) + 1;
-
-   /* =====================================================
-   ATUALIZAR CONTAGEM DA PRÓXIMA LUTA
-===================================================== */
-
-if (
-    typeof window.updateFightCountdown ===
-    "function"
-) {
-
-    try {
-
-        window.updateFightCountdown();
-
+    /* =====================================================
+       ATUALIZAR CAMP
+    ===================================================== */
+    if (
+        typeof window.processManagerCampWeek ===
+        "function"
+    ) {
+        try {
+            window.processManagerCampWeek();
+        }
+        catch (error) {
+            console.error(
+                "Erro ao processar camp:",
+                error
+            );
+        }
     }
-    catch (error) {
-
-        console.error(
-            "Erro ao atualizar contador da luta:",
-            error
-        );
-
-    }
-
-}
     /* =====================================================
        RECUPERAÇÃO PÓS-LUTA
     ===================================================== */
@@ -1300,6 +1342,20 @@ if (
        EMPRESÁRIO
     ===================================================== */
     if (
+        typeof window.processManagerWeek ===
+        "function"
+    ) {
+        try {
+            window.processManagerWeek();
+        }
+        catch (error) {
+            console.error(
+                "Erro ao processar empresário:",
+                error
+            );
+        }
+    }
+    else if (
         typeof window.processManagerFightOffer ===
         "function"
     ) {
@@ -1348,8 +1404,7 @@ if (
                 15
             ) + 1;
         player.log =
-            player.log ||
-            [];
+            player.log || [];
         player.log.unshift(
             `🎆 Começou o Ano ${player.year}.`
         );
@@ -1375,11 +1430,9 @@ if (
    DESCANSAR
 ========================================================= */
 function rest() {
+    ensurePlayer();
     const player =
-        ensurePlayer();
-    if (!player) {
-        return;
-    }
+        window.player;
     player.fatigue =
         Math.max(
             0,
@@ -1412,17 +1465,8 @@ function resetGame() {
     localStorage.removeItem(
         "mmaLifePlayer"
     );
-    if (
-        typeof window.createDefaultPlayer ===
-        "function"
-    ) {
-        window.player =
-            window.createDefaultPlayer();
-    }
-    else {
-        window.player =
-            null;
-    }
+    window.player =
+        createDefaultPlayer();
     if (
         typeof window.mmaWorld !==
         "undefined"
@@ -1469,21 +1513,20 @@ function resetGame() {
    CARREIRA
 ========================================================= */
 function career() {
-    const player =
-        ensurePlayer();
+    ensurePlayer();
     const content =
         getElement("content");
-    if (!player || !content) {
+    if (!content) {
         return;
     }
+    const p =
+        window.player;
     const amateur =
-        player.amateur ||
-        {};
+        p.amateur || {};
     const professional =
-        player.professional ||
-        {};
+        p.professional || {};
     const careerStage =
-        player.careerStage ||
+        p.careerStage ||
         "amateur";
     const stageLabels = {
         amateur:
@@ -1501,7 +1544,7 @@ function career() {
         stageLabels[careerStage] ||
         "🥋 Amador";
     const contract =
-        player.currentContract;
+        p.currentContract;
     content.innerHTML = `
         <div class="card">
             <div class="title">
@@ -1529,15 +1572,7 @@ function career() {
                     Idade
                 </span>
                 <b>
-                    ${player.age || 15} anos
-                </b>
-            </div>
-            <div class="statline">
-                <span>
-                    OVR
-                </span>
-                <b>
-                    ${getOverall()}
+                    ${p.age || 15} anos
                 </b>
             </div>
             <div class="statline">
@@ -1546,7 +1581,7 @@ function career() {
                 </span>
                 <b>
                     ${Math.round(
-                        player.fame || 0
+                        p.fame || 0
                     )}
                 </b>
             </div>
@@ -1556,7 +1591,7 @@ function career() {
                 </span>
                 <b>
                     $${Math.round(
-                        player.money || 0
+                        p.money || 0
                     )}
                 </b>
             </div>
@@ -1702,8 +1737,8 @@ window.openWorldRanking =
     openWorldRanking;
 window.isFightDay =
     isFightDay;
-window.openFight =
-    openFight;
+window.hasScheduledFight =
+    hasScheduledFight;
 /* =========================================================
    INICIALIZAÇÃO
 ========================================================= */
