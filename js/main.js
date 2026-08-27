@@ -1254,6 +1254,31 @@ if (
             player.week ||
             1
         ) + 1;
+
+   /* =====================================================
+   ATUALIZAR CONTAGEM DA PRÓXIMA LUTA
+===================================================== */
+
+if (
+    typeof window.updateFightCountdown ===
+    "function"
+) {
+
+    try {
+
+        window.updateFightCountdown();
+
+    }
+    catch (error) {
+
+        console.error(
+            "Erro ao atualizar contador da luta:",
+            error
+        );
+
+    }
+
+}
     /* =====================================================
        RECUPERAÇÃO PÓS-LUTA
     ===================================================== */
