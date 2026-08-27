@@ -2,6 +2,22 @@
    MMA LIFE — TEMA ESCURO
 ========================================================= */
 
+html {
+    touch-action: manipulation;
+    -webkit-text-size-adjust: 100%;
+}
+
+body {
+    touch-action: manipulation;
+    overscroll-behavior: none;
+}
+
+button,
+input,
+select,
+textarea {
+    touch-action: manipulation;
+}
 * {
     box-sizing: border-box;
 }
