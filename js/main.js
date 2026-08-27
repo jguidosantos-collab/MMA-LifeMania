@@ -13,7 +13,8 @@
    - Reconhece weeksRemaining
    - Reconhece status fight_day
    - Compatível com managers.js
-   - Compatível com fights.js gigante
+   - Compatível com fights.js
+   - POTENCIAL DO ATLETA VISÍVEL
 ========================================================= */
 /* =========================================================
    UTILIDADES
@@ -384,6 +385,15 @@ function createNewPlayer() {
     newPlayer.fame = 0;
     newPlayer.health = 100;
     newPlayer.fatigue = 0;
+    /*
+       GARANTIR POTENCIAL
+    */
+    if (
+        typeof newPlayer.potential !==
+        "number"
+    ) {
+        newPlayer.potential = 90;
+    }
     newPlayer.log = [
         `🥊 ${name} iniciou sua carreira no MMA.`
     ];
@@ -418,7 +428,8 @@ function getOverall() {
     const player =
         window.player;
     if (
-        typeof player.overall === "number" &&
+        typeof player.overall ===
+        "number" &&
         !player._overallStarted
     ) {
         return player.overall;
@@ -485,14 +496,12 @@ function isFightDay() {
     if (!fight) {
         return false;
     }
-    /* STATUS EXPLÍCITO */
     if (
         fight.status ===
         "fight_day"
     ) {
         return true;
     }
-    /* WEEKS REMAINING */
     if (
         typeof fight.weeksRemaining ===
         "number"
@@ -503,7 +512,6 @@ function isFightDay() {
             ) <= 0
         );
     }
-    /* FIGHT WEEK */
     if (
         typeof fight.fightWeek ===
         "number"
@@ -683,6 +691,15 @@ function home() {
         player.nextFight;
     const fightDay =
         isFightDay();
+    /*
+       POTENCIAL
+    */
+    const potential =
+        Math.round(
+            Number(
+                player.potential || 90
+            )
+        );
     content.innerHTML = `
         ${renderManagerOffer()}
         <div class="card fighter-card">
@@ -708,6 +725,14 @@ function home() {
                 </span>
                 <strong>
                     ${player.age || 15}
+                </strong>
+            </div>
+            <div class="stat-card">
+                <span>
+                    POTENCIAL
+                </span>
+                <strong>
+                    ${potential}
                 </strong>
             </div>
             <div class="stat-card">
@@ -1545,6 +1570,12 @@ function career() {
         "🥋 Amador";
     const contract =
         p.currentContract;
+    const potential =
+        Math.round(
+            Number(
+                p.potential || 90
+            )
+        );
     content.innerHTML = `
         <div class="card">
             <div class="title">
@@ -1573,6 +1604,22 @@ function career() {
                 </span>
                 <b>
                     ${p.age || 15} anos
+                </b>
+            </div>
+            <div class="statline">
+                <span>
+                    Potencial
+                </span>
+                <b>
+                    ${potential}
+                </b>
+            </div>
+            <div class="statline">
+                <span>
+                    OVR
+                </span>
+                <b>
+                    ${getOverall()}
                 </b>
             </div>
             <div class="statline">
