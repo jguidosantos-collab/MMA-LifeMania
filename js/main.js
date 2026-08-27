@@ -1142,6 +1142,30 @@ function nextWeek() {
             );
         }
     }
+   /* =====================================================
+   CAMP DA LUTA
+===================================================== */
+
+if (
+    typeof window.processFightCampWeek ===
+    "function"
+) {
+
+    try {
+
+        window.processFightCampWeek();
+
+    }
+    catch (error) {
+
+        console.error(
+            "Erro ao processar camp da luta:",
+            error
+        );
+
+    }
+
+}
     /* =====================================================
        TREINAMENTO
     ===================================================== */
