@@ -1,11 +1,8 @@
 /* =========================================================
    MMA LIFE DYNASTY
    PLAYER.JS
-   PROJETO 1 — BASE DEFINITIVA DO JOGADOR
+   BASE DEFINITIVA DO JOGADOR
    VERSÃO CORRIGIDA
-========================================================= */
-/* =========================================================
-   JOGADOR GLOBAL
 ========================================================= */
 var player = null;
 /* =========================================================
@@ -29,28 +26,11 @@ function createDefaultPlayer() {
         /* =====================================================
            POTENCIAL
         ===================================================== */
-        potential:
-            Math.floor(
-                Math.random() * 13
-            ) + 78,
+        potential: Math.floor(Math.random() * 13) + 78,
         /* =====================================================
-           OVERALL
+           OVERALL INICIAL
         ===================================================== */
-        overall: (() => {
-            const roll =
-                Math.random();
-            if (roll < 0.05) return 40;
-            if (roll < 0.10) return 41;
-            if (roll < 0.20) return 42;
-            if (roll < 0.35) return 43;
-            if (roll < 0.55) return 44;
-            if (roll < 0.75) return 45;
-            if (roll < 0.88) return 46;
-            if (roll < 0.95) return 47;
-            if (roll < 0.98) return 48;
-            if (roll < 0.995) return 49;
-            return 50;
-        })(),
+        overall: getInitialOverall(),
         /* =====================================================
            AMADOR
         ===================================================== */
@@ -105,35 +85,34 @@ function createDefaultPlayer() {
         manager: null,
         managerOffers: [],
         managerFightOffer: null,
-        managerSearching: false,
-        managerSearchWeek: -999,
         managerSearchCooldown: 0,
         managerLastOfferWeek: -999,
         managerOfferId: 0,
+        managerSearching: false,
+        managerSearchWeek: -999,
         managerOfferPending: false,
-        managerNextSearchWeek: 0,
-        managerSearchAfterRest: false,
         managerContractFightNumber: 0,
         managerContractTotalFights: 0,
         managerContractEvent: "",
         managerContractCategory: "",
+        managerNextSearchWeek: 0,
+        postFightRestWeeks: 0,
+        postFightRestActive: false,
+        managerSearchAfterRest: false,
         /* =====================================================
-           DECISÃO PROFISSIONAL
+           PROFISSIONALIZAÇÃO
         ===================================================== */
         professionalDecisionPending: false,
         professionalDecisionMade: false,
         professionalDecisionWeek: -999,
-        /* =====================================================
-           DESCANSO PÓS-LUTA
-        ===================================================== */
-        postFightRestWeeks: 0,
-        postFightRestActive: false,
         /* =====================================================
            CARREIRA
         ===================================================== */
         nextFight: null,
         currentPromotion: null,
         currentContract: null,
+        contractNegotiation: false,
+        contractOffers: [],
         contracts: [],
         opportunities: [],
         promotionHistory: {},
@@ -283,14 +262,44 @@ function createDefaultPlayer() {
             "🥊 Sua carreira começou aos 15 anos."
         ]
     };
-    /*
-       IMPORTANTE:
-       Torna o jogador imediatamente disponível
-       para todos os outros arquivos.
-    */
-    window.player =
-        player;
     return player;
+}
+/* =========================================================
+   GERAR OVERALL INICIAL
+========================================================= */
+function getInitialOverall() {
+    var roll = Math.random();
+    if (roll < 0.05) {
+        return 40;
+    }
+    if (roll < 0.10) {
+        return 41;
+    }
+    if (roll < 0.20) {
+        return 42;
+    }
+    if (roll < 0.35) {
+        return 43;
+    }
+    if (roll < 0.55) {
+        return 44;
+    }
+    if (roll < 0.75) {
+        return 45;
+    }
+    if (roll < 0.88) {
+        return 46;
+    }
+    if (roll < 0.95) {
+        return 47;
+    }
+    if (roll < 0.98) {
+        return 48;
+    }
+    if (roll < 0.995) {
+        return 49;
+    }
+    return 50;
 }
 /* =========================================================
    COMPATIBILIDADE
@@ -299,14 +308,29 @@ function createPlayer() {
     return createDefaultPlayer();
 }
 /* =========================================================
+   GARANTIR JOGADOR EXISTENTE
+========================================================= */
+function ensurePlayer() {
+    if (
+        !player ||
+        typeof player !== "object"
+    ) {
+        createDefaultPlayer();
+    }
+    return player;
+}
+/* =========================================================
    DISPONIBILIZAR GLOBALMENTE
 ========================================================= */
-window.player =
-    player;
+window.player = player;
 window.createDefaultPlayer =
     createDefaultPlayer;
 window.createPlayer =
     createPlayer;
+window.ensurePlayer =
+    ensurePlayer;
+window.getInitialOverall =
+    getInitialOverall;
 /* =========================================================
    FIM DO PLAYER.JS
 ========================================================= */
