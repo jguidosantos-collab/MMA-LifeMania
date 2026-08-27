@@ -2629,3 +2629,356 @@ window.processFightRecovery =
 ========================================================= */
 window.mmaFight =
     window.mmaFight || null;
+
+/* =========================================================
+   MMA LIFE DYNASTY
+   FIGHTS.JS
+   SINCRONIZAÇÃO DAS SEMANAS DA LUTA
+========================================================= */
+
+
+/* =========================================================
+   GARANTIR ESTRUTURA DA LUTA
+========================================================= */
+
+function ensureFightWeekSystem() {
+
+    if (
+        !window.player ||
+        !window.player.nextFight
+    ) {
+        return null;
+    }
+
+    const fight =
+        window.player.nextFight;
+
+    /*
+       Se a luta já possui uma semana-alvo,
+       usamos ela como referência principal.
+    */
+
+    if (
+        typeof fight.fightWeek !== "number"
+    ) {
+
+        /*
+           Se só temos weeksRemaining,
+           transformamos isso em uma semana-alvo.
+        */
+
+        if (
+            typeof fight.weeksRemaining ===
+            "number"
+        ) {
+
+            fight.fightWeek =
+                Number(window.player.week || 1) +
+                Number(fight.weeksRemaining);
+
+        }
+
+    }
+
+    /*
+       Se ainda assim não existe,
+       criamos uma luta para 4 semanas.
+    */
+
+    if (
+        typeof fight.fightWeek !== "number"
+    ) {
+
+        fight.fightWeek =
+            Number(window.player.week || 1) + 4;
+
+    }
+
+    return fight;
+
+}
+
+
+/* =========================================================
+   ATUALIZAR CONTADOR DA LUTA
+========================================================= */
+
+function updateFightCountdown() {
+
+    if (
+        !window.player ||
+        !window.player.nextFight
+    ) {
+        return;
+    }
+
+    const fight =
+        ensureFightWeekSystem();
+
+    if (!fight) {
+        return;
+    }
+
+    const currentWeek =
+        Number(
+            window.player.week || 1
+        );
+
+    const fightWeek =
+        Number(
+            fight.fightWeek
+        );
+
+    const remaining =
+        fightWeek -
+        currentWeek;
+
+    fight.weeksRemaining =
+        Math.max(
+            0,
+            remaining
+        );
+
+    /*
+       Marca explicitamente o dia da luta.
+    */
+
+    fight.isFightDay =
+        fight.weeksRemaining <= 0;
+
+    /*
+       Compatibilidade com outros sistemas.
+    */
+
+    fight.week =
+        fightWeek;
+
+    fight.targetWeek =
+        fightWeek;
+
+}
+
+
+/* =========================================================
+   VERIFICAR DIA DA LUTA
+========================================================= */
+
+function isFightDayFixed() {
+
+    if (
+        !window.player ||
+        !window.player.nextFight
+    ) {
+        return false;
+    }
+
+    updateFightCountdown();
+
+    return (
+        window.player.nextFight
+        .weeksRemaining <= 0
+    );
+
+}
+
+
+/* =========================================================
+   CRIAR CAMP
+========================================================= */
+
+function setupFightCamp(
+    weeks
+) {
+
+    if (
+        !window.player ||
+        !window.player.nextFight
+    ) {
+        return;
+    }
+
+    const player =
+        window.player;
+
+    const fight =
+        player.nextFight;
+
+    const campWeeks =
+        Number(weeks || 4);
+
+    const currentWeek =
+        Number(
+            player.week || 1
+        );
+
+    /*
+       A luta acontece depois do período
+       completo de preparação.
+    */
+
+    fight.campWeeks =
+        campWeeks;
+
+    fight.campStartedWeek =
+        currentWeek;
+
+    fight.fightWeek =
+        currentWeek +
+        campWeeks;
+
+    fight.weeksRemaining =
+        campWeeks;
+
+    fight.isFightDay =
+        false;
+
+    fight.campActive =
+        true;
+
+    fight.campComplete =
+        false;
+
+    fight.fightCompleted =
+        false;
+
+    /*
+       Histórico
+    */
+
+    player.log =
+        player.log || [];
+
+    player.log.unshift(
+        `🥊 CAMP DE LUTA iniciado. ${campWeeks} semanas até o combate.`
+    );
+
+    fightSave();
+
+}
+
+
+/* =========================================================
+   PROCESSAR CAMP SEMANAL
+========================================================= */
+
+function processFightCampWeek() {
+
+    if (
+        !window.player ||
+        !window.player.nextFight
+    ) {
+        return;
+    }
+
+    const player =
+        window.player;
+
+    const fight =
+        player.nextFight;
+
+    /*
+       Se não existe camp,
+       não fazemos nada.
+    */
+
+    if (
+        !fight.campActive
+    ) {
+        return;
+    }
+
+    updateFightCountdown();
+
+    /*
+       Quando chega no dia da luta,
+       o camp termina.
+    */
+
+    if (
+        fight.weeksRemaining <= 0
+    ) {
+
+        fight.campComplete =
+            true;
+
+        fight.campActive =
+            false;
+
+        fight.isFightDay =
+            true;
+
+        player.log =
+            player.log || [];
+
+        player.log.unshift(
+            "🚨 DIA DA LUTA! O camp terminou. Você precisa lutar antes de avançar."
+        );
+
+        return;
+
+    }
+
+}
+
+
+/* =========================================================
+   FINALIZAR LUTA
+========================================================= */
+
+function finishFightSchedule() {
+
+    if (
+        !window.player ||
+        !window.player.nextFight
+    ) {
+        return;
+    }
+
+    const fight =
+        window.player.nextFight;
+
+    fight.fightCompleted =
+        true;
+
+    fight.isFightDay =
+        false;
+
+    fight.campActive =
+        false;
+
+    fight.campComplete =
+        false;
+
+    fight.weeksRemaining =
+        null;
+
+    fight.fightWeek =
+        null;
+
+    fight.targetWeek =
+        null;
+
+}
+
+
+/* =========================================================
+   EXPORTAR
+========================================================= */
+
+window.ensureFightWeekSystem =
+    ensureFightWeekSystem;
+
+window.updateFightCountdown =
+    updateFightCountdown;
+
+window.isFightDayFixed =
+    isFightDayFixed;
+
+window.setupFightCamp =
+    setupFightCamp;
+
+window.processFightCampWeek =
+    processFightCampWeek;
+
+window.finishFightSchedule =
+    finishFightSchedule;
