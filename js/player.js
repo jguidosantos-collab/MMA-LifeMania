@@ -52,28 +52,17 @@ function createDefaultPlayer() {
 
         overall: (() => {
 
-            const roll =
-                Math.random();
-
+            const roll = Math.random();
 
             if (roll < 0.05) return 40;
-
             if (roll < 0.10) return 41;
-
             if (roll < 0.20) return 42;
-
             if (roll < 0.35) return 43;
-
             if (roll < 0.55) return 44;
-
             if (roll < 0.75) return 45;
-
             if (roll < 0.88) return 46;
-
             if (roll < 0.95) return 47;
-
             if (roll < 0.98) return 48;
-
             if (roll < 0.995) return 49;
 
             return 50;
@@ -93,7 +82,13 @@ function createDefaultPlayer() {
 
             draws: 0,
 
-            ranking: 50
+            ranking: 50,
+
+            fightsThisYear: 0,
+
+            lastFightWeek: -999,
+
+            fightsHistory: []
 
         },
 
@@ -112,7 +107,13 @@ function createDefaultPlayer() {
 
             draws: 0,
 
-            ranking: null
+            ranking: null,
+
+            fightsThisYear: 0,
+
+            lastFightWeek: -999,
+
+            fightsHistory: []
 
         },
 
@@ -180,6 +181,32 @@ function createDefaultPlayer() {
 
         managerOffers: [],
 
+        managerFightOffer: null,
+
+        managerOfferId: 0,
+
+        managerOfferPending: false,
+
+        managerSearching: false,
+
+        managerSearchWeek: -999,
+
+        managerSearchCooldown: 0,
+
+        managerLastOfferWeek: -999,
+
+        managerNextSearchWeek: 0,
+
+        managerSearchAfterRest: false,
+
+        managerContractFightNumber: 0,
+
+        managerContractTotalFights: 0,
+
+        managerContractEvent: "",
+
+        managerContractCategory: "",
+
 
         /* =====================================================
            CARREIRA
@@ -198,7 +225,7 @@ function createDefaultPlayer() {
 
 
         /* =====================================================
-           NOVO SISTEMA DE NEGOCIAÇÃO
+           NEGOCIAÇÃO
         ===================================================== */
 
         contractNegotiation: false,
@@ -259,7 +286,6 @@ function createDefaultPlayer() {
 
         /* =====================================================
            PATROCÍNIOS
-           Máximo de 4 patrocinadores ativos.
         ===================================================== */
 
         sponsors: {
@@ -518,7 +544,6 @@ function createPlayer() {
 
 window.createDefaultPlayer =
     createDefaultPlayer;
-
 
 window.createPlayer =
     createPlayer;
