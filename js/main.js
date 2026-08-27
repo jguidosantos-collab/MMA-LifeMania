@@ -1,177 +1,129 @@
 /* =========================================================
    MMA LIFE DYNASTY
    MAIN.JS
-   CONTROLADOR PRINCIPAL
-   VERSÃO CORRIGIDA
+   CONTROLADOR PRINCIPAL DA INTERFACE
+   VERSÃO ESTÁVEL
 ========================================================= */
 /* =========================================================
    UTILIDADES
 ========================================================= */
+function getElement(id) {
+    return document.getElementById(id);
+}
 function $(id) {
     return document.getElementById(id);
 }
 /* =========================================================
-   GARANTIR ESTRUTURA DO PLAYER
+   GARANTIR PLAYER
 ========================================================= */
-function normalizePlayer() {
+function ensureMainPlayer() {
     if (
-        typeof player === "undefined" ||
-        !player ||
-        typeof player !== "object"
+        typeof window.player === "undefined" ||
+        !window.player
     ) {
-        if (typeof createDefaultPlayer === "function") {
-            createDefaultPlayer();
+        if (
+            typeof window.createDefaultPlayer ===
+            "function"
+        ) {
+            window.createDefaultPlayer();
         }
     }
-    if (!player) {
-        return;
+    return window.player;
+}
+/* =========================================================
+   NORMALIZAR PLAYER
+========================================================= */
+function normalizeMainPlayer() {
+    const p = ensureMainPlayer();
+    if (!p) {
+        return null;
     }
-    player.name =
-        player.name || "";
-    player.country =
-        player.country || "Brasil";
-    player.weight =
-        player.weight || "Peso Leve";
-    player.style =
-        player.style || "Completo";
-    player.age =
-        Number(player.age || 15);
-    player.week =
-        Number(player.week || 0);
-    player.year =
-        Number(player.year || 2026);
-    player.money =
-        Number(player.money || 0);
-    player.fame =
-        Number(player.fame || 0);
-    player.health =
-        Number(player.health ?? 100);
-    player.fatigue =
-        Number(player.fatigue || 0);
-    player.potential =
-        Number(player.potential || 78);
-    player.careerStage =
-        player.careerStage || "amateur";
-    player.amateur =
-        player.amateur || {
+    p.name = p.name || "";
+    p.country = p.country || "Brasil";
+    p.weight = p.weight || "Peso Leve";
+    p.style = p.style || "Completo";
+    p.age = Number(p.age || 15);
+    p.week = Number(
+        p.week ?? 0
+    );
+    p.year = Number(
+        p.year || 2026
+    );
+    p.money = Number(
+        p.money || 0
+    );
+    p.fame = Number(
+        p.fame || 0
+    );
+    p.health = Number(
+        p.health ?? 100
+    );
+    p.fatigue = Number(
+        p.fatigue || 0
+    );
+    p.potential = Number(
+        p.potential || 78
+    );
+    p.attributes =
+        p.attributes || {};
+    p.amateur =
+        p.amateur || {
             wins: 0,
             losses: 0,
             draws: 0,
             ranking: 50
         };
-    player.professional =
-        player.professional || {
+    p.professional =
+        p.professional || {
             active: false,
             wins: 0,
             losses: 0,
             draws: 0,
             ranking: null
         };
-    player.attributes =
-        player.attributes || {};
-    player.team =
-        player.team || null;
-    player.teamOffers =
-        Array.isArray(player.teamOffers)
-        ? player.teamOffers
-        : [];
-    player.manager =
-        player.manager || null;
-    player.managerOffers =
-        Array.isArray(player.managerOffers)
-        ? player.managerOffers
-        : [];
-    player.nextFight =
-        player.nextFight || null;
-    player.trainingPlan =
-        player.trainingPlan || {
+    p.trainingPlan =
+        p.trainingPlan || {
             weeks: {}
         };
-    player.trainingPlan.weeks =
-        player.trainingPlan.weeks || {};
-    player.children =
-        Array.isArray(player.children)
-        ? player.children
+    p.trainingPlan.weeks =
+        p.trainingPlan.weeks || {};
+    p.children =
+        Array.isArray(p.children)
+        ? p.children
         : [];
-    player.relationship =
-        player.relationship || "Solteiro";
-    player.married =
-        Boolean(player.married);
-    player.log =
-        Array.isArray(player.log)
-        ? player.log
+    p.log =
+        Array.isArray(p.log)
+        ? p.log
         : [];
-    return player;
+    return p;
 }
 /* =========================================================
-   SALVAMENTO
+   SALVAR
 ========================================================= */
 function mainSave() {
     try {
         if (
-            typeof save === "function"
+            typeof window.save ===
+            "function"
         ) {
-            save();
+            window.save();
+            return;
+        }
+        const p =
+            normalizeMainPlayer();
+        if (!p) {
             return;
         }
         localStorage.setItem(
             "mmaLifePlayer",
-            JSON.stringify(player)
-        );
-    } catch (error) {
-        console.error(
-            "Erro ao salvar jogador:",
-            error
+            JSON.stringify(p)
         );
     }
-}
-/* =========================================================
-   CARREGAMENTO
-========================================================= */
-function mainLoad() {
-    try {
-        if (
-            typeof load === "function"
-        ) {
-            const result =
-                load();
-            normalizePlayer();
-            return result;
-        }
-        const saved =
-            localStorage.getItem(
-                "mmaLifePlayer"
-            );
-        if (!saved) {
-            return false;
-        }
-        const data =
-            JSON.parse(saved);
-        if (
-            typeof player === "undefined" ||
-            !player
-        ) {
-            if (
-                typeof createDefaultPlayer ===
-                "function"
-            ) {
-                createDefaultPlayer();
-            }
-        }
-        Object.assign(
-            player,
-            data
-        );
-        normalizePlayer();
-        return Boolean(
-            player.name
-        );
-    } catch (error) {
+    catch (error) {
         console.error(
-            "Erro ao carregar jogador:",
+            "Erro ao salvar:",
             error
         );
-        return false;
     }
 }
 /* =========================================================
@@ -179,11 +131,11 @@ function mainLoad() {
 ========================================================= */
 function showGame() {
     const creation =
-        $("creation");
+        getElement("creation");
     const game =
-        $("game");
+        getElement("game");
     const tabs =
-        $("tabs");
+        getElement("tabs");
     if (creation) {
         creation.classList.add(
             "hidden"
@@ -205,11 +157,11 @@ function showGame() {
 ========================================================= */
 function showCreation() {
     const creation =
-        $("creation");
+        getElement("creation");
     const game =
-        $("game");
+        getElement("game");
     const tabs =
-        $("tabs");
+        getElement("tabs");
     if (creation) {
         creation.classList.remove(
             "hidden"
@@ -227,12 +179,77 @@ function showCreation() {
     }
 }
 /* =========================================================
+   OVR
+========================================================= */
+function getOverall() {
+    const p =
+        normalizeMainPlayer();
+    if (!p) {
+        return 0;
+    }
+    if (
+        typeof p.overall ===
+        "number"
+    ) {
+        const attrs =
+            p.attributes || {};
+        const keys = [
+            "strength",
+            "striking",
+            "wrestling",
+            "grappling",
+            "cardio",
+            "technique",
+            "defense",
+            "fightIQ"
+        ];
+        const values =
+            keys
+            .map(
+                key =>
+                    Number(
+                        attrs[key]
+                    )
+            )
+            .filter(
+                value =>
+                    Number.isFinite(
+                        value
+                    )
+            );
+        if (values.length) {
+            const average =
+                values.reduce(
+                    (
+                        total,
+                        value
+                    ) =>
+                        total + value,
+                    0
+                ) /
+                values.length;
+            return Math.min(
+                Number(
+                    p.potential || 99
+                ),
+                Math.round(
+                    average
+                )
+            );
+        }
+        return Number(
+            p.overall
+        );
+    }
+    return 0;
+}
+/* =========================================================
    TELA INICIAL
 ========================================================= */
 function startGame() {
     showCreation();
     const creator =
-        $("creator");
+        getElement("creator");
     if (!creator) {
         return;
     }
@@ -275,26 +292,22 @@ function startGame() {
                 🆕 CRIAR NOVO LUTADOR
             </button>
             <div class="start-footer">
-                AMADOR
-                →
-                REGIONAL
-                →
-                NACIONAL
-                →
-                INTERNACIONAL
-                →
+                AMADOR →
+                REGIONAL →
+                NACIONAL →
+                INTERNACIONAL →
                 ELITE
             </div>
         </div>
     `;
 }
 /* =========================================================
-   CRIAÇÃO DO LUTADOR
+   CRIAÇÃO
 ========================================================= */
 function openCharacterCreation() {
     showCreation();
     const creator =
-        $("creator");
+        getElement("creator");
     if (!creator) {
         return;
     }
@@ -384,148 +397,197 @@ function openCharacterCreation() {
     `;
 }
 /* =========================================================
-   CRIAR JOGADOR
+   CRIAR LUTADOR
 ========================================================= */
 function createPlayerFromScreen() {
-    const nameElement =
-        $("playerName");
-    if (!nameElement) {
+    const input =
+        getElement("playerName");
+    if (!input) {
         return;
     }
     const name =
-        nameElement.value.trim();
+        input.value.trim();
     if (!name) {
         alert(
             "Digite o nome do lutador."
         );
         return;
     }
-    /*
-       IMPORTANTE:
-       Não criamos outro objeto manualmente.
-       O player.js já possui
-       createDefaultPlayer().
-    */
     if (
-        typeof createDefaultPlayer ===
+        typeof window.createDefaultPlayer ===
         "function"
     ) {
-        createDefaultPlayer();
+        window.createDefaultPlayer();
     }
-    normalizePlayer();
-    player.name =
+    const p =
+        normalizeMainPlayer();
+    if (!p) {
+        return;
+    }
+    p.name =
         name;
     const country =
-        $("country");
+        getElement("country");
     const weight =
-        $("weight");
+        getElement("weight");
     const style =
-        $("style");
-    player.country =
+        getElement("style");
+    p.country =
         country
         ? country.value
         : "Brasil";
-    player.weight =
+    p.weight =
         weight
         ? weight.value
         : "Peso Leve";
-    player.style =
+    p.style =
         style
         ? style.value
         : "Completo";
-    /*
-       O potencial já é gerado
-       pelo player.js.
-       Não sobrescrevemos aqui.
-    */
-    player.log =
-        Array.isArray(player.log)
-        ? player.log
+    p.log =
+        Array.isArray(p.log)
+        ? p.log
         : [];
-    player.log.unshift(
-        `🥊 ${player.name} iniciou sua carreira no MMA.`
+    p.log.unshift(
+        `🥊 ${p.name} iniciou sua carreira no MMA.`
     );
     mainSave();
-    normalizePlayer();
     showGame();
     home();
 }
 /* =========================================================
-   OVERALL
+   NAVEGAÇÃO
 ========================================================= */
-function getOverall() {
-    normalizePlayer();
-    if (
-        !player ||
-        !player.attributes
-    ) {
-        return 0;
+function tab(name) {
+    const p =
+        normalizeMainPlayer();
+    if (!p || !p.name) {
+        startGame();
+        return;
     }
-    /*
-       Se o player.js possui
-       um overall inicial, usamos
-       os atributos para calcular
-       o OVR atual.
-       Isso evita o OVR ficar
-       travado.
-    */
-    const a =
-        player.attributes;
-    const values = [
-        Number(a.strength),
-        Number(a.striking),
-        Number(a.wrestling),
-        Number(a.grappling),
-        Number(a.cardio),
-        Number(a.technique),
-        Number(a.defense),
-        Number(a.fightIQ)
-    ].filter(
-        value =>
-            Number.isFinite(value)
-    );
-    if (!values.length) {
-        return Number(
-            player.overall || 0
-        );
+    showGame();
+    switch (name) {
+        case "home":
+            home();
+            break;
+        case "career":
+            career();
+            break;
+        case "train":
+            if (
+                typeof window.training ===
+                "function"
+            ) {
+                window.training();
+            }
+            else {
+                trainingFallback();
+            }
+            break;
+        case "fight":
+            if (
+                typeof window.fightScreen ===
+                "function"
+            ) {
+                window.fightScreen();
+            }
+            else {
+                fightFallback();
+            }
+            break;
+        case "team":
+            if (
+                typeof window.teamScreen ===
+                "function"
+            ) {
+                window.teamScreen();
+            }
+            else {
+                teamFallback();
+            }
+            break;
+        case "life":
+            if (
+                typeof window.familyScreen ===
+                "function"
+            ) {
+                window.familyScreen();
+            }
+            else {
+                lifeFallback();
+            }
+            break;
+        case "ranking":
+            if (
+                typeof window.rankingScreen ===
+                "function"
+            ) {
+                window.rankingScreen();
+            }
+            else {
+                rankingFallback();
+            }
+            break;
+        default:
+            home();
     }
-    const total =
-        values.reduce(
-            (sum, value) =>
-                sum + value,
-            0
-        );
-    const overall =
-        Math.round(
-            total /
-            values.length
-        );
-    return Math.min(
-        Number(
-            player.potential || 99
-        ),
-        overall
-    );
 }
 /* =========================================================
    HOME
 ========================================================= */
 function home() {
-    normalizePlayer();
+    const p =
+        normalizeMainPlayer();
+    if (!p) {
+        startGame();
+        return;
+    }
+    if (!p.name) {
+        startGame();
+        return;
+    }
     showGame();
     const content =
-        $("content");
+        getElement("content");
     if (!content) {
         return;
     }
-    const pro =
-        player.professional || {};
     const amateur =
-        player.amateur || {};
+        p.amateur || {};
+    const professional =
+        p.professional || {};
     const team =
-        player.team;
+        p.team;
     const manager =
-        player.manager;
+        p.manager;
+    let statusText =
+        "Disponível";
+    let statusIcon =
+        "🟢";
+    if (
+        p.postFightRestActive
+    ) {
+        statusText =
+            `Descanso pós-luta: ${p.postFightRestWeeks || 0} semanas`;
+        statusIcon =
+            "😴";
+    }
+    else if (
+        p.managerSearching
+    ) {
+        statusText =
+            "Empresário procurando luta";
+        statusIcon =
+            "📞";
+    }
+    else if (
+        p.nextFight
+    ) {
+        statusText =
+            "Luta agendada";
+        statusIcon =
+            "🥊";
+    }
     content.innerHTML = `
         <div class="home-container">
             <div class="fighter-header">
@@ -534,13 +596,13 @@ function home() {
                 </div>
                 <div class="fighter-info">
                     <div class="fighter-name">
-                        ${player.name || "Novo Lutador"}
+                        ${p.name}
                     </div>
                     <div>
-                        ${player.country}
+                        ${p.country}
                     </div>
                     <div>
-                        ${player.weight}
+                        ${p.weight}
                     </div>
                 </div>
             </div>
@@ -550,7 +612,7 @@ function home() {
                         IDADE
                     </span>
                     <strong>
-                        ${player.age}
+                        ${p.age}
                     </strong>
                 </div>
                 <div class="stat-card">
@@ -566,7 +628,7 @@ function home() {
                         POTENCIAL
                     </span>
                     <strong>
-                        ${player.potential}
+                        ${p.potential}
                     </strong>
                 </div>
                 <div class="stat-card">
@@ -574,7 +636,7 @@ function home() {
                         SEMANA
                     </span>
                     <strong>
-                        ${player.week}/52
+                        ${p.week}/52
                     </strong>
                 </div>
             </div>
@@ -587,7 +649,7 @@ function home() {
                         Estágio
                     </span>
                     <b>
-                        ${player.careerStage}
+                        ${p.careerStage || "amateur"}
                     </b>
                 </div>
                 <div class="statline">
@@ -607,11 +669,11 @@ function home() {
                         Profissional
                     </span>
                     <b>
-                        ${pro.wins || 0}
+                        ${professional.wins || 0}
                         -
-                        ${pro.losses || 0}
+                        ${professional.losses || 0}
                         -
-                        ${pro.draws || 0}
+                        ${professional.draws || 0}
                     </b>
                 </div>
                 <button
@@ -623,41 +685,23 @@ function home() {
             </div>
             <div class="card">
                 <div class="title">
-                    🏋️ TREINAMENTO
+                    📅 STATUS DA CARREIRA
                 </div>
                 <div class="statline">
                     <span>
-                        Saúde
+                        Situação
                     </span>
                     <b>
-                        ${Math.round(player.health)}%
+                        ${statusIcon}
+                        ${statusText}
                     </b>
-                </div>
-                <div class="statline">
-                    <span>
-                        Fadiga
-                    </span>
-                    <b>
-                        ${Math.round(player.fatigue)}%
-                    </b>
-                </div>
-                <button
-                    class="main-button"
-                    onclick="training()"
-                >
-                    🏋️ CAMP
-                </button>
-            </div>
-            <div class="card">
-                <div class="title">
-                    📅 CALENDÁRIO
                 </div>
                 <div class="statline">
                     <span>
                         Ano
                     </span>
                     <b>
-                        ${player.year}
+                        ${p.year}
                     </b>
                 </div>
                 <div class="statline">
@@ -665,54 +709,81 @@ function home() {
                         Semana
                     </span>
                     <b>
-                        ${player.week}/52
+                        ${p.week}/52
                     </b>
                 </div>
-                <button
-                    class="main-button"
-                    onclick="calendarScreen()"
-                >
-                    📅 VER CALENDÁRIO
-                </button>
             </div>
             <div class="card">
                 <div class="title">
-                    ⚔️ LUTAS
+                    🏋️ TREINAMENTO
                 </div>
                 <div class="statline">
                     <span>
-                        Próxima luta
+                        Saúde
                     </span>
                     <b>
-                        ${
-                            player.nextFight
-                            ? "Marcada"
-                            : "Nenhuma"
-                        }
+                        ${Math.round(p.health)}%
+                    </b>
+                </div>
+                <div class="statline">
+                    <span>
+                        Fadiga
+                    </span>
+                    <b>
+                        ${Math.round(p.fatigue)}%
                     </b>
                 </div>
                 <button
                     class="main-button"
-                    onclick="fightScreen()"
+                    onclick="openTraining()"
                 >
-                    ⚔️ LUTAS
+                    🏋️ TREINO
+                </button>
+                <button
+                    class="main-button"
+                    onclick="openCamp()"
+                >
+                    🥊 CAMP
+                </button>
+                <button
+                    class="main-button"
+                    onclick="nextWeek()"
+                >
+                    ⏭️ AVANÇAR SEMANA
                 </button>
             </div>
             <div class="card">
                 <div class="title">
+                    🥊 CARREIRA DE COMBATE
+                </div>
+                <button
+                    class="main-button"
+                    onclick="openFight()"
+                >
+                    ⚔️ LUTAS
+                </button>
+                <button
+                    class="main-button"
+                    onclick="openTeam()"
+                >
                     🏢 EQUIPE
-                </div>
-                <div class="statline">
-                    <span>
-                        Academia
-                    </span>
-                    <b>
-                        ${
-                            team
-                            ? team.name
-                            : "Nenhuma"
-                        }
-                    </b>
+                </button>
+                <button
+                    class="main-button"
+                    onclick="openLife()"
+                >
+                    ❤️ VIDA
+                </button>
+                <button
+                    class="main-button"
+                    onclick="openRanking()"
+                >
+                    🏆 RANKING
+                </button>
+            </div>
+            <div class="card">
+                <div class="title">
+                    👔 ESTRUTURA
                 </div>
                 <div class="statline">
                     <span>
@@ -726,50 +797,18 @@ function home() {
                         }
                     </b>
                 </div>
-                <button
-                    class="main-button"
-                    onclick="teamScreen()"
-                >
-                    🏢 EQUIPE
-                </button>
-            </div>
-            <div class="card">
-                <div class="title">
-                    ❤️ VIDA
-                </div>
                 <div class="statline">
                     <span>
-                        Relacionamento
+                        Equipe
                     </span>
                     <b>
-                        ${player.relationship}
+                        ${
+                            team
+                            ? team.name
+                            : "Nenhuma"
+                        }
                     </b>
                 </div>
-                <div class="statline">
-                    <span>
-                        Filhos
-                    </span>
-                    <b>
-                        ${player.children.length}
-                    </b>
-                </div>
-                <button
-                    class="main-button"
-                    onclick="familyScreen()"
-                >
-                    ❤️ VIDA
-                </button>
-            </div>
-            <div class="card">
-                <div class="title">
-                    🏆 RANKING
-                </div>
-                <button
-                    class="main-button"
-                    onclick="rankingScreen()"
-                >
-                    🏆 VER RANKINGS
-                </button>
             </div>
             <div class="card">
                 <div class="title">
@@ -780,7 +819,15 @@ function home() {
                         Dinheiro
                     </span>
                     <b>
-                        $${Math.round(player.money)}
+                        $${Math.round(p.money)}
+                    </b>
+                </div>
+                <div class="statline">
+                    <span>
+                        Fama
+                    </span>
+                    <b>
+                        ${Math.round(p.fame)}
                     </b>
                 </div>
             </div>
@@ -789,7 +836,7 @@ function home() {
                     ⚙️ SISTEMA
                 </div>
                 <button
-                    class="main-button gray"
+                    class="gray"
                     onclick="resetGame()"
                 >
                     🔄 REINICIAR JOGO
@@ -799,58 +846,131 @@ function home() {
     `;
 }
 /* =========================================================
+   BOTÃO TREINO
+========================================================= */
+function openTraining() {
+    showGame();
+    if (
+        typeof window.training ===
+        "function"
+    ) {
+        window.training();
+        return;
+    }
+    trainingFallback();
+}
+/* =========================================================
+   BOTÃO CAMP
+========================================================= */
+function openCamp() {
+    showGame();
+    if (
+        typeof window.campScreen ===
+        "function"
+    ) {
+        window.campScreen();
+        return;
+    }
+    trainingFallback();
+}
+/* =========================================================
+   BOTÃO LUTAS
+========================================================= */
+function openFight() {
+    showGame();
+    if (
+        typeof window.fightScreen ===
+        "function"
+    ) {
+        window.fightScreen();
+        return;
+    }
+    fightFallback();
+}
+/* =========================================================
+   BOTÃO EQUIPE
+========================================================= */
+function openTeam() {
+    showGame();
+    if (
+        typeof window.teamScreen ===
+        "function"
+    ) {
+        window.teamScreen();
+        return;
+    }
+    teamFallback();
+}
+/* =========================================================
+   BOTÃO VIDA
+========================================================= */
+function openLife() {
+    showGame();
+    if (
+        typeof window.familyScreen ===
+        "function"
+    ) {
+        window.familyScreen();
+        return;
+    }
+    lifeFallback();
+}
+/* =========================================================
+   BOTÃO RANKING
+========================================================= */
+function openRanking() {
+    showGame();
+    if (
+        typeof window.rankingScreen ===
+        "function"
+    ) {
+        window.rankingScreen();
+        return;
+    }
+    rankingFallback();
+}
+/* =========================================================
    CARREIRA
 ========================================================= */
 function career() {
-    normalizePlayer();
+    const p =
+        normalizeMainPlayer();
+    if (!p) {
+        return;
+    }
     showGame();
     const content =
-        $("content");
+        getElement("content");
     if (!content) {
         return;
     }
     const attributes =
-        player.attributes || {};
-    const names = {
-        strength: "💪 Força",
-        striking: "🥊 Striking",
-        wrestling: "🤼 Wrestling",
-        grappling: "🥋 Grappling",
-        cardio: "🏃 Cardio",
-        technique: "🎯 Técnica",
-        defense: "🛡️ Defesa",
-        fightIQ: "🧠 Fight IQ",
-        chin: "🦷 Queixo",
-        offense: "⚔️ Ofensivo",
-        blocking: "🛡️ Bloqueio",
-        mental: "🧠 Mental",
-        discipline: "🎯 Disciplina",
-        confidence: "🔥 Confiança"
-    };
-    let rows = "";
-    Object.keys(names)
-        .forEach(
-            key => {
-                const value =
-                    Number(
-                        attributes[key] || 0
-                    );
-                rows += `
-                    <div class="statline">
-                        <span>
-                            ${names[key]}
-                        </span>
-                        <b>
-                            ${value.toFixed(2)}
-                        </b>
-                    </div>
-                `;
-            }
-        );
+        p.attributes || {};
+    const rows = [
+        ["💪 Força", "strength"],
+        ["🥊 Striking", "striking"],
+        ["🤼 Wrestling", "wrestling"],
+        ["🥋 Grappling", "grappling"],
+        ["🫀 Cardio", "cardio"],
+        ["🎯 Técnica", "technique"],
+        ["🛡️ Defesa", "defense"],
+        ["🧠 Fight IQ", "fightIQ"],
+        ["🦷 Queixo", "chin"],
+        ["⚔️ Ofensivo", "offense"],
+        ["🛡️ Bloqueio", "blocking"]
+    ];
     content.innerHTML = `
         <div class="card">
             <div class="title">
                 🏆 MINHA CARREIRA
+            </div>
+            <div class="statline">
+                <span>
+                    Lutador
+                </span>
+                <b>
+                    ${p.name}
+                </b>
             </div>
             <div class="statline">
                 <span>
@@ -865,7 +985,7 @@ function career() {
                     Potencial
                 </span>
                 <b>
-                    ${player.potential}
+                    ${p.potential}
                 </b>
             </div>
             <div class="statline">
@@ -873,15 +993,7 @@ function career() {
                     Idade
                 </span>
                 <b>
-                    ${player.age}
-                </b>
-            </div>
-            <div class="statline">
-                <span>
-                    Estágio
-                </span>
-                <b>
-                    ${player.careerStage}
+                    ${p.age}
                 </b>
             </div>
         </div>
@@ -889,7 +1001,24 @@ function career() {
             <div class="title">
                 📊 ATRIBUTOS
             </div>
-            ${rows}
+            ${
+                rows
+                .map(
+                    row => `
+                        <div class="statline">
+                            <span>
+                                ${row[0]}
+                            </span>
+                            <b>
+                                ${Number(
+                                    attributes[row[1]] || 0
+                                ).toFixed(1)}
+                            </b>
+                        </div>
+                    `
+                )
+                .join("")
+            }
         </div>
         <div class="card">
             <button
@@ -902,75 +1031,399 @@ function career() {
     `;
 }
 /* =========================================================
-   NAVEGAÇÃO
+   AVANÇAR SEMANA
+   FLUXO PRINCIPAL
 ========================================================= */
-function tab(name) {
-    normalizePlayer();
-    if (
-        !player.name
-    ) {
-        startGame();
+function nextWeek() {
+    const p =
+        normalizeMainPlayer();
+    if (!p) {
         return;
     }
-    showGame();
-    switch (name) {
-        case "home":
-            home();
-            break;
-        case "career":
-            career();
-            break;
-        case "train":
-            if (
-                typeof training ===
-                "function"
-            ) {
-                training();
-            }
-            break;
-        case "fight":
-            if (
-                typeof fightScreen ===
-                "function"
-            ) {
-                fightScreen();
-            }
-            break;
-        case "team":
-            if (
-                typeof teamScreen ===
-                "function"
-            ) {
-                teamScreen();
-            }
-            break;
-        case "life":
-            if (
-                typeof familyScreen ===
-                "function"
-            ) {
-                familyScreen();
-            }
-            break;
-        case "ranking":
-            if (
-                typeof rankingScreen ===
-                "function"
-            ) {
-                rankingScreen();
-            }
-            break;
-        case "calendar":
-            if (
-                typeof calendarScreen ===
-                "function"
-            ) {
-                calendarScreen();
-            }
-            break;
-        default:
-            home();
+    /* =====================================================
+       1 — PROCESSAR CAMP DA SEMANA
+    ===================================================== */
+    if (
+        p.trainingCamp &&
+        Array.isArray(
+            p.trainingCamp.weeks
+        )
+    ) {
+        const camp =
+            p.trainingCamp.weeks;
+        const campIndex =
+            Number(
+                p.trainingCamp.currentWeek || 0
+            );
+        if (
+            campIndex >= 0 &&
+            campIndex < camp.length &&
+            typeof window.processCampWeek ===
+            "function"
+        ) {
+            window.processCampWeek(
+                camp[campIndex]
+            );
+            p.trainingCamp.currentWeek =
+                campIndex + 1;
+        }
     }
+    /* =====================================================
+       2 — PLANO DE TREINO NORMAL
+    ===================================================== */
+    const plan =
+        p.trainingPlan &&
+        p.trainingPlan.weeks
+        ? p.trainingPlan.weeks[p.week] || []
+        : [];
+    if (
+        plan.length &&
+        !p.nextFight
+    ) {
+        plan.forEach(
+            treino => {
+                const attribute =
+                    treino.attribute;
+                if (
+                    !attribute ||
+                    !p.attributes
+                ) {
+                    return;
+                }
+                const current =
+                    Number(
+                        p.attributes[
+                            attribute
+                        ] || 45
+                    );
+                const potential =
+                    Number(
+                        p.potential || 90
+                    );
+                if (
+                    current >=
+                    potential
+                ) {
+                    return;
+                }
+                const gain =
+                    Math.min(
+                        Number(
+                            treino.gain || 0.5
+                        ),
+                        potential -
+                        current
+                    );
+                p.attributes[
+                    attribute
+                ] =
+                    Number(
+                        (
+                            current +
+                            gain
+                        ).toFixed(2)
+                    );
+                p.fatigue =
+                    Math.min(
+                        100,
+                        Number(
+                            p.fatigue || 0
+                        ) + 4
+                    );
+            }
+        );
+    }
+    /* =====================================================
+       3 — RECUPERAÇÃO
+    ===================================================== */
+    p.fatigue =
+        Math.max(
+            0,
+            Number(
+                p.fatigue || 0
+            ) - 10
+        );
+    p.health =
+        Math.min(
+            100,
+            Number(
+                p.health || 100
+            ) + 3
+        );
+    /* =====================================================
+       4 — DESCANSO PÓS-LUTA
+    ===================================================== */
+    if (
+        p.postFightRestActive
+    ) {
+        p.postFightRestWeeks =
+            Math.max(
+                0,
+                Number(
+                    p.postFightRestWeeks || 0
+                ) - 1
+            );
+        p.fatigue =
+            Math.max(
+                0,
+                p.fatigue - 15
+            );
+        p.health =
+            Math.min(
+                100,
+                p.health + 6
+            );
+        if (
+            p.postFightRestWeeks <= 0
+        ) {
+            p.postFightRestActive =
+                false;
+            p.managerSearchAfterRest =
+                true;
+            p.managerNextSearchWeek =
+                p.week + 1;
+        }
+    }
+    /* =====================================================
+       5 — EMPRESÁRIO
+    ===================================================== */
+    if (
+        p.manager &&
+        !p.nextFight &&
+        !p.postFightRestActive
+    ) {
+        const searchWeek =
+            Number(
+                p.managerNextSearchWeek || 0
+            );
+        if (
+            p.week >=
+            searchWeek
+        ) {
+            p.managerSearchAfterRest =
+                true;
+        }
+    }
+    /* =====================================================
+       6 — AVANÇAR SEMANA
+    ===================================================== */
+    p.week =
+        Number(
+            p.week || 0
+        ) + 1;
+    /* =====================================================
+       7 — NOVO ANO
+    ===================================================== */
+    if (
+        p.week > 52
+    ) {
+        p.week = 1;
+        p.year =
+            Number(
+                p.year || 2026
+            ) + 1;
+        p.age =
+            Number(
+                p.age || 15
+            ) + 1;
+        p.log =
+            p.log || [];
+        p.log.unshift(
+            `🎆 Começou o ano ${p.year}.`
+        );
+    }
+    /* =====================================================
+       8 — EMPRESÁRIO PROCURA OPORTUNIDADE
+    ===================================================== */
+    if (
+        p.manager &&
+        !p.nextFight &&
+        !p.postFightRestActive &&
+        p.managerSearchAfterRest &&
+        typeof window.managerSearchForFight ===
+        "function"
+    ) {
+        try {
+            window.managerSearchForFight();
+        }
+        catch (error) {
+            console.warn(
+                "Busca do empresário:",
+                error
+            );
+        }
+    }
+    mainSave();
+    home();
+}
+/* =========================================================
+   DESCANSAR
+========================================================= */
+function rest() {
+    nextWeek();
+}
+/* =========================================================
+   FALLBACK TREINO
+========================================================= */
+function trainingFallback() {
+    const content =
+        getElement("content");
+    if (!content) {
+        return;
+    }
+    content.innerHTML = `
+        <div class="card">
+            <div class="title">
+                🏋️ TREINAMENTO
+            </div>
+            <p>
+                Sistema de treinamento carregado.
+            </p>
+            <button
+                class="main-button"
+                onclick="nextWeek()"
+            >
+                ⏭️ AVANÇAR SEMANA
+            </button>
+            <button
+                class="gray"
+                onclick="home()"
+            >
+                ← VOLTAR
+            </button>
+        </div>
+    `;
+}
+/* =========================================================
+   FALLBACK LUTAS
+========================================================= */
+function fightFallback() {
+    const content =
+        getElement("content");
+    if (!content) {
+        return;
+    }
+    const p =
+        normalizeMainPlayer();
+    content.innerHTML = `
+        <div class="card">
+            <div class="title">
+                ⚔️ LUTAS
+            </div>
+            <p>
+                O sistema de lutas está sendo carregado.
+            </p>
+            ${
+                p && p.nextFight
+                ?
+                `
+                    <div class="statline">
+                        <span>
+                            Luta marcada
+                        </span>
+                        <b>
+                            Sim
+                        </b>
+                    </div>
+                `
+                :
+                `
+                    <div class="statline">
+                        <span>
+                            Luta
+                        </span>
+                        <b>
+                            Nenhuma marcada
+                        </b>
+                    </div>
+                `
+            }
+            <button
+                class="gray"
+                onclick="home()"
+            >
+                ← VOLTAR
+            </button>
+        </div>
+    `;
+}
+/* =========================================================
+   FALLBACK EQUIPE
+========================================================= */
+function teamFallback() {
+    const content =
+        getElement("content");
+    if (!content) {
+        return;
+    }
+    content.innerHTML = `
+        <div class="card">
+            <div class="title">
+                🏢 EQUIPE
+            </div>
+            <p>
+                Sistema de equipes carregado.
+            </p>
+            <button
+                class="gray"
+                onclick="home()"
+            >
+                ← VOLTAR
+            </button>
+        </div>
+    `;
+}
+/* =========================================================
+   FALLBACK VIDA
+========================================================= */
+function lifeFallback() {
+    const content =
+        getElement("content");
+    if (!content) {
+        return;
+    }
+    content.innerHTML = `
+        <div class="card">
+            <div class="title">
+                ❤️ VIDA
+            </div>
+            <p>
+                Sistema de vida carregado.
+            </p>
+            <button
+                class="gray"
+                onclick="home()"
+            >
+                ← VOLTAR
+            </button>
+        </div>
+    `;
+}
+/* =========================================================
+   FALLBACK RANKING
+========================================================= */
+function rankingFallback() {
+    const content =
+        getElement("content");
+    if (!content) {
+        return;
+    }
+    content.innerHTML = `
+        <div class="card">
+            <div class="title">
+                🏆 RANKING
+            </div>
+            <p>
+                Sistema de rankings carregado.
+            </p>
+            <button
+                class="gray"
+                onclick="home()"
+            >
+                ← VOLTAR
+            </button>
+        </div>
+    `;
 }
 /* =========================================================
    RESET
@@ -978,7 +1431,7 @@ function tab(name) {
 function resetGame() {
     const confirmed =
         confirm(
-            "Tem certeza que deseja apagar toda a carreira e criar um novo lutador?"
+            "Tem certeza que deseja apagar toda a carreira?"
         );
     if (!confirmed) {
         return;
@@ -986,225 +1439,57 @@ function resetGame() {
     localStorage.removeItem(
         "mmaLifePlayer"
     );
-    /*
-       Também remove o save antigo
-       caso exista de versões anteriores.
-    */
-    localStorage.removeItem(
-        "mmaLifeDynastyV1"
-    );
     if (
-        typeof createDefaultPlayer ===
+        typeof window.createDefaultPlayer ===
         "function"
     ) {
-        createDefaultPlayer();
+        window.createDefaultPlayer();
     }
-    normalizePlayer();
-    showCreation();
     startGame();
 }
 /* =========================================================
-   COMPATIBILIDADE — DESCANSO
+   EXPOR FUNÇÕES
 ========================================================= */
-function rest() {
-    if (
-        typeof nextWeek ===
-        "function"
-    ) {
-        nextWeek();
-        return;
-    }
-    if (
-        typeof advanceWeek ===
-        "function"
-    ) {
-        advanceWeek();
-        return;
-    }
-    player.week =
-        Number(player.week || 0) + 1;
-    if (
-        player.week > 52
-    ) {
-        player.week = 1;
-        player.year =
-            Number(player.year || 2026) + 1;
-        player.age =
-            Number(player.age || 15) + 1;
-    }
-    player.fatigue =
-        Math.max(
-            0,
-            Number(player.fatigue || 0) - 15
-        );
-    player.health =
-        Math.min(
-            100,
-            Number(player.health || 100) + 5
-        );
-    mainSave();
-    home();
-}
-/* =========================================================
-   TREINO MANUAL — COMPATIBILIDADE
-========================================================= */
-function train(attribute) {
-    normalizePlayer();
-    if (
-        !attribute
-    ) {
-        return;
-    }
-    if (
-        !player.attributes[attribute]
-    ) {
-        player.attributes[attribute] =
-            45;
-    }
-    const current =
-        Number(
-            player.attributes[attribute]
-        );
-    const potential =
-        Number(
-            player.potential || 99
-        );
-    if (
-        current < potential
-    ) {
-        player.attributes[attribute] =
-            Number(
-                Math.min(
-                    potential,
-                    current + 0.5
-                ).toFixed(2)
-            );
-    }
-    player.fatigue =
-        Math.min(
-            100,
-            Number(
-                player.fatigue || 0
-            ) + 8
-        );
-    mainSave();
-    if (
-        typeof training ===
-        "function"
-    ) {
-        training();
-    } else {
-        home();
-    }
-}
-/* =========================================================
-   AVANÇAR SEMANA — COMPATIBILIDADE
-========================================================= */
-function nextWeek() {
-    normalizePlayer();
-    const plan =
-        player.trainingPlan &&
-        player.trainingPlan.weeks
-        ? player.trainingPlan.weeks[
-            player.week
-        ] || []
-        : [];
-    /*
-       Aplica os treinos programados.
-    */
-    plan.forEach(
-        treino => {
-            if (
-                !treino ||
-                !treino.attribute
-            ) {
-                return;
-            }
-            const attribute =
-                treino.attribute;
-            const current =
-                Number(
-                    player.attributes[
-                        attribute
-                    ] || 0
-                );
-            const potential =
-                Number(
-                    player.potential || 99
-                );
-            if (
-                current >= potential
-            ) {
-                return;
-            }
-            const gain =
-                Number(
-                    treino.gain || 0.5
-                );
-            player.attributes[
-                attribute
-            ] =
-                Number(
-                    Math.min(
-                        potential,
-                        current + gain
-                    ).toFixed(2)
-                );
-            player.fatigue =
-                Math.min(
-                    100,
-                    Number(
-                        player.fatigue || 0
-                    ) + 4
-                );
-        }
-    );
-    /*
-       Recuperação.
-    */
-    player.fatigue =
-        Math.max(
-            0,
-            Number(
-                player.fatigue || 0
-            ) - 10
-        );
-    player.health =
-        Math.min(
-            100,
-            Number(
-                player.health || 100
-            ) + 3
-        );
-    /*
-       Avança a semana.
-    */
-    player.week =
-        Number(
-            player.week || 0
-        ) + 1;
-    /*
-       Virada de ano.
-    */
-    if (
-        player.week > 52
-    ) {
-        player.week = 1;
-        player.year =
-            Number(
-                player.year || 2026
-            ) + 1;
-        player.age =
-            Number(
-                player.age || 15
-            ) + 1;
-        player.log.unshift(
-            `🎆 Começou o Ano ${player.year}.`
-        );
-    }
-    mainSave();
-    home();
-}
+window.getElement =
+    getElement;
+window.$ =
+    $;
+window.showGame =
+    showGame;
+window.showCreation =
+    showCreation;
+window.startGame =
+    startGame;
+window.openCharacterCreation =
+    openCharacterCreation;
+window.createPlayerFromScreen =
+    createPlayerFromScreen;
+window.getOverall =
+    getOverall;
+window.tab =
+    tab;
+window.home =
+    home;
+window.career =
+    career;
+window.nextWeek =
+    nextWeek;
+window.rest =
+    rest;
+window.openTraining =
+    openTraining;
+window.openCamp =
+    openCamp;
+window.openFight =
+    openFight;
+window.openTeam =
+    openTeam;
+window.openLife =
+    openLife;
+window.openRanking =
+    openRanking;
+window.resetGame =
+    resetGame;
 /* =========================================================
    INICIALIZAÇÃO
 ========================================================= */
@@ -1212,70 +1497,56 @@ document.addEventListener(
     "DOMContentLoaded",
     function () {
         try {
-            const loaded =
-                mainLoad();
-            normalizePlayer();
+            let loaded =
+                false;
+            if (
+                typeof window.load ===
+                "function"
+            ) {
+                loaded =
+                    window.load();
+            }
+            const p =
+                normalizeMainPlayer();
             if (
                 loaded &&
-                player &&
-                player.name
+                p &&
+                p.name
             ) {
                 showGame();
                 home();
-            } else {
-                /*
-                   Não existe jogador salvo.
-                */
-                showCreation();
+            }
+            else {
                 startGame();
             }
-        } catch (error) {
+        }
+        catch (error) {
             console.error(
-                "Erro fatal na inicialização:",
+                "Erro na inicialização:",
                 error
             );
-            /*
-               Mesmo que algum módulo
-               tenha problema, tentamos
-               mostrar a tela inicial.
-            */
-            showCreation();
-            startGame();
+            try {
+                showGame();
+                const p =
+                    normalizeMainPlayer();
+                if (
+                    p &&
+                    p.name
+                ) {
+                    home();
+                }
+                else {
+                    startGame();
+                }
+            }
+            catch (
+                fatalError
+            ) {
+                console.error(
+                    "Erro fatal:",
+                    fatalError
+                );
+            }
         }
     }
 );
-/* =========================================================
-   DISPONIBILIZAR FUNÇÕES
-========================================================= */
-window.$ =
-    $;
-window.startGame =
-    startGame;
-window.openCharacterCreation =
-    openCharacterCreation;
-window.createPlayerFromScreen =
-    createPlayerFromScreen;
-window.showGame =
-    showGame;
-window.showCreation =
-    showCreation;
-window.home =
-    home;
-window.career =
-    career;
-window.tab =
-    tab;
-window.getOverall =
-    getOverall;
-window.resetGame =
-    resetGame;
-window.rest =
-    rest;
-window.train =
-    train;
-window.nextWeek =
-    nextWeek;
-window.mainSave =
-    mainSave;
-window.mainLoad =
-    mainLoad;
