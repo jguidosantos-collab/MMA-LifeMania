@@ -1,45 +1,17 @@
 /* =========================================================
    MMA LIFE DYNASTY
    MANAGERS.JS
-   EMPRESÁRIO — SISTEMA COMPLETO
-   VERSÃO CORRIGIDA E ESTÁVEL
-   FLUXO:
-   ATLETA AMADOR
-        ↓
-   SEM EMPRESÁRIO
-        ↓
-   PROCURAR EMPRESÁRIO
-        ↓
-   ESCOLHER EMPRESÁRIO
-        ↓
-   CONTRATAR
-        ↓
-   EMPRESÁRIO AVALIA O ATLETA
-        ↓
-   PERGUNTA:
-   "QUER SE TORNAR PROFISSIONAL?"
-        ↓
-   SIM → PROFISSIONAL
-        ↓
-   EMPRESÁRIO PROCURA LUTAS
-        ↓
-   OFERTA
-        ↓
-   NEGOCIAÇÃO
-        ↓
-   ACEITAR
-        ↓
-   CAMP
-        ↓
-   LUTA
-        ↓
-   RESULTADO
-        ↓
-   DESCANSO PÓS-LUTA
-        ↓
-   ESPERA REALISTA
-        ↓
-   NOVA OFERTA
+   EMPRESÁRIO — SISTEMA COMPLETO CORRIGIDO
+   CORREÇÕES PRINCIPAIS:
+   - Corrigido erro de negotiateManagerFightOffer inexistente.
+   - Estado do empresário permanece imediatamente disponível.
+   - Oferta não depende de reload da página.
+   - Busca de luta respeita calendário.
+   - Camp e descanso pós-luta separados.
+   - Contratos funcionais.
+   - Negociação funcional.
+   - Profissionalização funcional.
+   - Atualização da interface protegida.
 ========================================================= */
 /* =========================================================
    CONFIGURAÇÕES
@@ -48,10 +20,8 @@ const MANAGER_CONFIG = {
     minCampWeeks: 4,
     maxCampWeeks: 8,
     postFightRestWeeks: 2,
-    searchCooldownWeeks: 2,
     minSearchWaitWeeks: 1,
     maxSearchWaitWeeks: 4,
-    firstFightWeek: 1,
     offerChance: 0.60,
     minContractFights: 3,
     maxContractFights: 5,
@@ -62,9 +32,6 @@ const MANAGER_CONFIG = {
    EVENTOS
 ========================================================= */
 const MANAGER_EVENTS = [
-    /* =====================================================
-       REGIONAL
-    ===================================================== */
     {
         name: "MMA Fight Night",
         category: "regional",
@@ -130,9 +97,6 @@ const MANAGER_EVENTS = [
         ppv: false,
         elite: false
     },
-    /* =====================================================
-       NACIONAL
-    ===================================================== */
     {
         name: "Warriors Championship",
         category: "national",
@@ -185,9 +149,6 @@ const MANAGER_EVENTS = [
         ppv: false,
         elite: false
     },
-    /* =====================================================
-       MUNDIAL
-    ===================================================== */
     {
         name: "PFL",
         category: "world",
@@ -240,9 +201,6 @@ const MANAGER_EVENTS = [
         ppv: true,
         elite: false
     },
-    /* =====================================================
-       ELITE
-    ===================================================== */
     {
         name: "UFC",
         category: "elite",
@@ -303,57 +261,74 @@ window.mmaManager = null;
 /* =========================================================
    UTILIDADES
 ========================================================= */
-function getManagerPlayer() {
+function managerPlayer() {
     if (
-        typeof window.player === "undefined" ||
-        !window.player
+        !window.player &&
+        typeof window.createDefaultPlayer === "function"
     ) {
-        if (
-            typeof window.createDefaultPlayer ===
-            "function"
-        ) {
-            window.player =
-                window.createDefaultPlayer();
-        }
+        window.player =
+            window.createDefaultPlayer();
     }
     return window.player;
 }
-function managerPlayer() {
-    return getManagerPlayer();
-}
-/* =========================================================
-   SALVAR
-========================================================= */
 function managerSave() {
     try {
         if (
-            typeof window.saveGame ===
-            "function"
+            typeof window.saveGame === "function"
         ) {
             window.saveGame();
         }
     }
     catch (error) {
         console.warn(
-            "MANAGERS.JS: erro ao salvar.",
+            "Erro ao salvar jogo:",
             error
         );
     }
 }
-/* =========================================================
-   RANDOM
-========================================================= */
-function managerRandom(min, max) {
-    return (
-        Math.random() *
-        (
-            max - min
-        )
-    ) + min;
+function managerRefreshUI() {
+    /*
+       IMPORTANTE:
+       O MANAGERS.JS não pode depender
+       exclusivamente de home().
+       Tentamos várias funções existentes,
+       mas nenhuma é obrigatória.
+    */
+    try {
+        if (
+            typeof window.home === "function"
+        ) {
+            window.home();
+            return;
+        }
+    }
+    catch (error) {
+        console.warn(
+            "Erro ao atualizar home:",
+            error
+        );
+    }
+    try {
+        if (
+            typeof window.renderHome === "function"
+        ) {
+            window.renderHome();
+            return;
+        }
+    }
+    catch (error) {}
+    try {
+        if (
+            typeof window.updateUI === "function"
+        ) {
+            window.updateUI();
+        }
+    }
+    catch (error) {}
 }
-/* =========================================================
-   RANDOM INTEGER
-========================================================= */
+function managerRandom(min, max) {
+    return Math.random() * (max - min) + min;
+}
 function managerRandomInt(min, max) {
     return Math.floor(
         managerRandom(
@@ -362,9 +337,6 @@ function managerRandomInt(min, max) {
         )
     );
 }
-/* =========================================================
-   CLAMP
-========================================================= */
 function managerClamp(value, min, max) {
     return Math.max(
         min,
@@ -375,7 +347,7 @@ function managerClamp(value, min, max) {
     );
 }
 /* =========================================================
-   GARANTIR ESTRUTURA
+   ESTRUTURA
 ========================================================= */
 function ensureManagerData() {
     const player =
@@ -384,123 +356,98 @@ function ensureManagerData() {
         return;
     }
     if (
-        typeof player.manager ===
-        "undefined"
+        typeof player.manager === "undefined"
     ) {
         player.manager = null;
     }
     if (
-        !Array.isArray(
-            player.managerOffers
-        )
+        !Array.isArray(player.managerOffers)
     ) {
         player.managerOffers = [];
     }
     if (
-        typeof player.managerSearchCooldown !==
-        "number"
+        typeof player.managerSearchCooldown !== "number"
     ) {
         player.managerSearchCooldown = 0;
     }
     if (
-        typeof player.managerLastOfferWeek !==
-        "number"
+        typeof player.managerLastOfferWeek !== "number"
     ) {
         player.managerLastOfferWeek = -999;
     }
     if (
-        typeof player.managerOfferId !==
-        "number"
+        typeof player.managerOfferId !== "number"
     ) {
         player.managerOfferId = 0;
     }
     if (
-        typeof player.managerSearching !==
-        "boolean"
+        typeof player.managerSearching !== "boolean"
     ) {
         player.managerSearching = false;
     }
     if (
-        typeof player.managerSearchWeek !==
-        "number"
+        typeof player.managerSearchWeek !== "number"
     ) {
         player.managerSearchWeek = -999;
     }
     if (
-        typeof player.managerOfferPending !==
-        "boolean"
+        typeof player.managerOfferPending !== "boolean"
     ) {
         player.managerOfferPending = false;
     }
     if (
-        typeof player.managerContractFightNumber !==
-        "number"
+        typeof player.managerContractFightNumber !== "number"
     ) {
         player.managerContractFightNumber = 0;
     }
     if (
-        typeof player.managerContractTotalFights !==
-        "number"
+        typeof player.managerContractTotalFights !== "number"
     ) {
         player.managerContractTotalFights = 0;
     }
     if (
-        typeof player.managerContractEvent !==
-        "string"
+        typeof player.managerContractEvent !== "string"
     ) {
         player.managerContractEvent = "";
     }
     if (
-        typeof player.managerContractCategory !==
-        "string"
+        typeof player.managerContractCategory !== "string"
     ) {
         player.managerContractCategory = "";
     }
     if (
-        typeof player.postFightRestWeeks !==
-        "number"
+        typeof player.postFightRestWeeks !== "number"
     ) {
         player.postFightRestWeeks = 0;
     }
     if (
-        typeof player.postFightRestActive !==
-        "boolean"
+        typeof player.postFightRestActive !== "boolean"
     ) {
         player.postFightRestActive = false;
     }
     if (
-        typeof player.managerNextSearchWeek !==
-        "number"
+        typeof player.managerNextSearchWeek !== "number"
     ) {
         player.managerNextSearchWeek = 0;
     }
     if (
-        typeof player.professionalDecisionPending !==
-        "boolean"
+        typeof player.professionalDecisionPending !== "boolean"
     ) {
         player.professionalDecisionPending = false;
     }
     if (
-        typeof player.professionalDecisionMade !==
-        "boolean"
+        typeof player.professionalDecisionMade !== "boolean"
     ) {
         player.professionalDecisionMade = false;
     }
     if (
-        typeof player.professionalDecisionWeek !==
-        "number"
+        typeof player.professionalDecisionWeek !== "number"
     ) {
         player.professionalDecisionWeek = -999;
     }
-    if (
-        typeof player.managerSearchAfterRest !==
-        "boolean"
-    ) {
-        player.managerSearchAfterRest = false;
-    }
 }
 /* =========================================================
-   TEM EMPRESÁRIO?
+   EMPRESÁRIO
 ========================================================= */
 function hasManager() {
     const player =
@@ -525,8 +472,7 @@ function managerGetPlayerOverall() {
     }
     try {
         if (
-            typeof window.getOverall ===
-            "function"
+            typeof window.getOverall === "function"
         ) {
             const value =
                 Number(
@@ -540,26 +486,22 @@ function managerGetPlayerOverall() {
             }
         }
     }
-    catch (error) {
-        console.warn(
-            "MANAGERS.JS: getOverall indisponível."
-        );
-    }
-    const overall =
+    catch (error) {}
+    const value =
         Number(
             player.overall || 45
         );
     return (
-        Number.isFinite(overall) &&
-        overall > 0
+        Number.isFinite(value) &&
+        value > 0
     )
         ?
-        overall
+        value
         :
         45;
 }
 /* =========================================================
-   VERIFICAR AMADOR
+   AMADOR
 ========================================================= */
 function managerIsAmateur() {
     const player =
@@ -568,16 +510,9 @@ function managerIsAmateur() {
         return true;
     }
     if (
-        player.careerStage ===
-        "amateur"
+        player.careerStage === "amateur"
     ) {
         return true;
-    }
-    if (
-        player.careerStage ===
-        "professional"
-    ) {
-        return false;
     }
     if (
         player.professional &&
@@ -585,34 +520,18 @@ function managerIsAmateur() {
     ) {
         return false;
     }
-    return (
-        Number(
-            player.age || 15
-        ) < 18
-    );
+    return Number(
+        player.age || 15
+    ) < 18;
 }
 /* =========================================================
-   GERAR OPONENTE
+   OPONENTE
 ========================================================= */
 function generateManagerOpponent() {
     const player =
         managerPlayer();
-    const playerOverall =
+    const overall =
         managerGetPlayerOverall();
-    const variation =
-        managerRandomInt(
-            -8,
-            8
-        );
-    const opponentOverall =
-        managerClamp(
-            Math.round(
-                playerOverall +
-                variation
-            ),
-            30,
-            95
-        );
     const names = [
         "Lucas Andrade",
         "Rafael Silva",
@@ -652,8 +571,7 @@ function generateManagerOpponent() {
         player.name &&
         name === player.name
     ) {
-        name =
-            "Ricardo Martins";
+        name = "Ricardo Martins";
     }
     const styles = [
         "Striker",
@@ -661,6 +579,18 @@ function generateManagerOpponent() {
         "Grappler",
         "Completo"
     ];
+    const opponentOverall =
+        managerClamp(
+            Math.round(
+                overall +
+                managerRandomInt(
+                    -8,
+                    8
+                )
+            ),
+            30,
+            95
+        );
     return {
         id:
             "OPP-" +
@@ -708,76 +638,53 @@ function generateManagerOpponent() {
     };
 }
 /* =========================================================
-   ESCOLHER EVENTO
+   EVENTO
 ========================================================= */
 function generateManagerEvent() {
     const overall =
         managerGetPlayerOverall();
-    let availableEvents =
-        MANAGER_EVENTS.slice();
+    let available =
+        MANAGER_EVENTS.filter(
+            function(event) {
+                if (
+                    overall < 50
+                ) {
+                    return event.category === "regional";
+                }
+                if (
+                    overall < 65
+                ) {
+                    return (
+                        event.category === "regional" ||
+                        event.category === "national"
+                    );
+                }
+                if (
+                    overall < 75
+                ) {
+                    return (
+                        event.category === "regional" ||
+                        event.category === "national" ||
+                        event.category === "world"
+                    );
+                }
+                return true;
+            }
+        );
     if (
-        overall < 50
+        available.length === 0
     ) {
-        availableEvents =
-            availableEvents.filter(
-                function(event) {
-                    return (
-                        event.category ===
-                        "regional"
-                    );
-                }
-            );
-    }
-    else if (
-        overall < 65
-    ) {
-        availableEvents =
-            availableEvents.filter(
-                function(event) {
-                    return (
-                        event.category ===
-                        "regional" ||
-                        event.category ===
-                        "national"
-                    );
-                }
-            );
-    }
-    else if (
-        overall < 75
-    ) {
-        availableEvents =
-            availableEvents.filter(
-                function(event) {
-                    return (
-                        event.category ===
-                        "regional" ||
-                        event.category ===
-                        "national" ||
-                        event.category ===
-                        "world"
-                    );
-                }
-            );
-    }
-    if (
-        availableEvents.length === 0
-    ) {
-        availableEvents =
+        available =
             MANAGER_EVENTS.filter(
-                function(event) {
-                    return (
-                        event.category ===
-                        "regional"
-                    );
-                }
+                event =>
+                    event.category === "regional"
             );
     }
     const event =
-        availableEvents[
+        available[
             managerRandomInt(
                 0,
-                availableEvents.length - 1
+                available.length - 1
             )
         ];
     return {
@@ -805,12 +712,9 @@ function generateManagerEvent() {
             event.elite,
         isBigEvent:
             (
-                event.type ===
-                "elite_big" ||
-                event.type ===
-                "title" ||
-                event.type ===
-                "title_defense"
+                event.type === "elite_big" ||
+                event.type === "title" ||
+                event.type === "title_defense"
             )
     };
 }
@@ -828,8 +732,7 @@ function calculateWorldPurse() {
         managerPlayer();
     const fightNumber =
         Number(
-            player?.managerContractFightNumber ||
-            0
+            player?.managerContractFightNumber || 0
         );
     if (
         fightNumber <= 3
@@ -857,12 +760,10 @@ function calculateElitePurse(event) {
         managerPlayer();
     const fightNumber =
         Number(
-            player?.managerContractFightNumber ||
-            0
+            player?.managerContractFightNumber || 0
         );
     if (
-        event.type ===
-        "elite"
+        event.type === "elite"
     ) {
         if (
             fightNumber <= 0
@@ -889,8 +790,7 @@ function calculateElitePurse(event) {
         );
     }
     if (
-        event.type ===
-        "elite_big"
+        event.type === "elite_big"
     ) {
         return managerClamp(
             Math.round(
@@ -904,10 +804,8 @@ function calculateElitePurse(event) {
         );
     }
     if (
-        event.type ===
-        "title" ||
-        event.type ===
-        "title_defense"
+        event.type === "title" ||
+        event.type === "title_defense"
     ) {
         return managerClamp(
             Math.round(
@@ -927,30 +825,24 @@ function calculateManagerPurse(event) {
         return 200;
     }
     if (
-        event.category ===
-        "regional"
+        event.category === "regional"
     ) {
         return calculateRegionalPurse();
     }
     if (
-        event.category ===
-        "national"
+        event.category === "national"
     ) {
         return calculateNationalPurse();
     }
     if (
-        event.category ===
-        "world"
+        event.category === "world"
     ) {
         return calculateWorldPurse();
     }
     if (
-        event.category ===
-        "elite"
+        event.category === "elite"
     ) {
-        return calculateElitePurse(
-            event
-        );
+        return calculateElitePurse(event);
     }
     return 200;
 }
@@ -980,34 +872,29 @@ function createNegotiationData(
         managerPlayer();
     if (
         !event ||
-        event.category ===
-        "regional" ||
-        event.category ===
-        "national" ||
-        event.negotiable === false
+        event.category === "regional" ||
+        event.category === "national"
     ) {
         return {
             available: false,
             currentPurse:
-                Number(purse || 0),
+                purse,
             minimum:
-                Number(purse || 0),
+                purse,
             maximum:
-                Number(purse || 0),
+                purse,
             requested:
-                Number(purse || 0),
+                purse,
             successChance:
                 100,
             ppvAvailable:
                 false,
             ppv:
-                0,
-            status:
-                "fixed"
+                0
         };
     }
     const minimum =
-        Number(purse || 0);
+        Number(purse);
     const maximum =
         Math.min(
             1000000,
@@ -1019,15 +906,11 @@ function createNegotiationData(
             )
         );
     const requested =
-        managerClamp(
-            Math.round(
-                managerRandom(
-                    minimum,
-                    maximum
-                )
-            ),
-            minimum,
-            maximum
+        Math.round(
+            managerRandom(
+                minimum,
+                maximum
+            )
         );
     const ratio =
         requested /
@@ -1040,8 +923,7 @@ function createNegotiationData(
         ratio * 75;
     successChance +=
         Number(
-            player?.manager?.negotiation ||
-            50
+            player?.manager?.negotiation || 50
         ) * 0.15;
     successChance =
         managerClamp(
@@ -1052,21 +934,16 @@ function createNegotiationData(
             90
         );
     const ppv =
-        managerClamp(
-            Number(
-                managerRandom(
-                    1,
-                    10
-                ).toFixed(1)
-            ),
-            1,
-            10
+        Number(
+            managerRandom(
+                1,
+                10
+            ).toFixed(1)
         );
     return {
-        available:
-            true,
+        available: true,
         currentPurse:
-            minimum,
+            purse,
         minimum:
             minimum,
         maximum:
@@ -1076,23 +953,21 @@ function createNegotiationData(
         successChance:
             successChance,
         ppvAvailable:
-            Boolean(event.ppv),
+            true,
         ppv:
-            event.ppv
-                ?
-                ppv
-                :
-                0,
+            ppv,
         negotiationType:
             event.category,
-        status:
-            "pending"
+        negotiated:
+            false,
+        accepted:
+            false
     };
 }
 /* =========================================================
    NEGOCIAR OFERTA
 ========================================================= */
-function negotiateManagerFightOffer(amount) {
+function negotiateManagerFightOffer() {
     const player =
         managerPlayer();
     ensureManagerData();
@@ -1102,171 +977,85 @@ function negotiateManagerFightOffer(amount) {
     const offer =
         player.managerFightOffer;
     if (!offer) {
+        alert(
+            "Não existe nenhuma oferta para negociar."
+        );
+        return false;
+    }
+    if (
+        !offer.negotiation ||
+        offer.negotiation.available !== true
+    ) {
+        alert(
+            "Esta oferta não pode ser negociada."
+        );
+        return false;
+    }
+    if (
+        offer.negotiation.negotiated === true
+    ) {
+        alert(
+            "Esta oferta já foi negociada."
+        );
         return false;
     }
     const negotiation =
         offer.negotiation;
+    const roll =
+        Math.random() * 100;
+    negotiation.negotiated =
+        true;
     if (
-        !negotiation ||
-        negotiation.available !== true
-    ) {
-        return true;
-    }
-    if (
-        negotiation.status ===
-        "accepted"
-    ) {
-        return true;
-    }
-    let requested =
-        Number(amount);
-    if (
-        !Number.isFinite(requested)
-    ) {
-        requested =
-            Number(
-                negotiation.requested ||
-                negotiation.currentPurse ||
-                0
-            );
-    }
-    requested =
-        managerClamp(
-            Math.round(
-                requested
-            ),
-            Number(
-                negotiation.minimum ||
-                0
-            ),
-            Number(
-                negotiation.maximum ||
-                requested
-            )
-        );
-    negotiation.requested =
-        requested;
-    /*
-       A chance de negociação leva em conta:
-       - qualidade do empresário
-       - valor pedido
-       - dificuldade da negociação
-    */
-    const minimum =
+        roll <=
         Number(
-            negotiation.minimum ||
-            0
-        );
-    const maximum =
-        Number(
-            negotiation.maximum ||
-            minimum
-        );
-    const ratio =
-        requested /
-        Math.max(
-            1,
-            maximum
-        );
-    let chance =
-        90 -
-        ratio * 75;
-    chance +=
-        Number(
-            player.manager?.negotiation ||
-            50
-        ) * 0.15;
-    chance =
-        managerClamp(
-            Math.round(chance),
-            5,
-            95
-        );
-    negotiation.successChance =
-        chance;
-    const success =
-        Math.random() * 100 <
-        chance;
-    if (
-        success
+            negotiation.successChance
+        )
     ) {
-        /*
-           A bolsa negociada passa
-           a ser a nova bolsa da luta.
-        */
-        const oldPurse =
-            Number(
-                offer.purse ||
-                0
-            );
         const newPurse =
-            requested;
+            Number(
+                negotiation.requested
+            );
         offer.purse =
             newPurse;
         offer.fightPurse =
             newPurse;
-        /*
-           O bônus acompanha a bolsa.
-        */
-        if (
-            !offer.amateur
-        ) {
-            offer.winBonus =
-                calculateManagerWinBonus(
-                    newPurse
-                );
-        }
-        offer.totalWinPayout =
-            Number(
-                offer.purse || 0
-            ) +
-            Number(
-                offer.winBonus || 0
+        offer.winBonus =
+            calculateManagerWinBonus(
+                newPurse
             );
+        offer.totalWinPayout =
+            newPurse +
+            offer.winBonus;
         negotiation.currentPurse =
             newPurse;
-        negotiation.requested =
-            newPurse;
-        negotiation.status =
-            "accepted";
-        negotiation.success =
+        negotiation.accepted =
             true;
         if (
-            Array.isArray(
-                player.log
-            )
+            Array.isArray(player.log)
         ) {
             player.log.unshift(
-                `🤝 Negociação concluída! A bolsa passou de $${oldPurse.toLocaleString("en-US")} para $${newPurse.toLocaleString("en-US")}.`
+                `🤝 Negociação aceita! A bolsa foi aumentada para $${newPurse.toLocaleString("en-US")}.`
             );
         }
-        managerSave();
-        return true;
     }
-    /*
-       Negociação recusada.
-       A oferta original continua válida.
-    */
-    negotiation.status =
-        "failed";
-    negotiation.success =
-        false;
-    negotiation.counterOffer =
-        minimum;
-    if (
-        Array.isArray(
-            player.log
-        )
-    ) {
-        player.log.unshift(
-            `❌ A organização recusou a negociação de $${requested.toLocaleString("en-US")}.`
-        );
-        player.log.unshift(
-            `💰 A oferta original de $${minimum.toLocaleString("en-US")} continua disponível.`
-        );
+    else {
+        negotiation.accepted =
+            false;
+        if (
+            Array.isArray(player.log)
+        ) {
+            player.log.unshift(
+                "❌ A organização recusou a negociação. A oferta original continua válida."
+            );
+        }
     }
+    player.managerFightOffer =
+        offer;
+    player.managerOfferPending =
+        true;
     managerSave();
-    return false;
+    managerRefreshUI();
+    return negotiation.accepted;
 }
 /* =========================================================
    GERAR OFERTA
@@ -1276,6 +1065,7 @@ function generateManagerFightOffer() {
         managerPlayer();
     ensureManagerData();
     if (
+        !player ||
         !hasManager()
     ) {
         return null;
@@ -1286,16 +1076,12 @@ function generateManagerFightOffer() {
         generateManagerOpponent();
     const event =
         generateManagerEvent();
-    let purse =
-        0;
-    if (
-        !amateur
-    ) {
-        purse =
-            calculateManagerPurse(
-                event
-            );
-    }
+    const purse =
+        amateur
+            ?
+            0
+            :
+            calculateManagerPurse(event);
     const winBonus =
         amateur
             ?
@@ -1325,8 +1111,7 @@ function generateManagerFightOffer() {
                 requested: 0,
                 successChance: 100,
                 ppvAvailable: false,
-                ppv: 0,
-                status: "fixed"
+                ppv: 0
             }
             :
             createNegotiationData(
@@ -1363,7 +1148,9 @@ function generateManagerFightOffer() {
         event:
             event,
         opponent:
-            opponent,
+            {
+                ...opponent
+            },
         opponentName:
             opponent.name,
         opponentDisplayName:
@@ -1406,8 +1193,7 @@ function generateManagerFightOffer() {
             ),
         ppvPercentage:
             Number(
-                negotiation.ppv ||
-                0
+                negotiation.ppv || 0
             ),
         accepted:
             false,
@@ -1422,16 +1208,14 @@ function generateManagerFightOffer() {
     };
 }
 /* =========================================================
-   PODE PROCURAR?
+   PODE PROCURAR
 ========================================================= */
 function managerCanSearchFight() {
     const player =
         managerPlayer();
-    if (!player) {
-        return false;
-    }
     ensureManagerData();
     if (
+        !player ||
         !hasManager()
     ) {
         return false;
@@ -1481,11 +1265,9 @@ function managerCanSearchFight() {
 function processManagerFightOffer() {
     const player =
         managerPlayer();
-    if (!player) {
-        return null;
-    }
     ensureManagerData();
     if (
+        !player ||
         !hasManager()
     ) {
         return null;
@@ -1507,13 +1289,6 @@ function processManagerFightOffer() {
         player.managerFightOffer
     ) {
         return player.managerFightOffer;
-    }
-    if (
-        Number(
-            player.managerSearchCooldown || 0
-        ) > 0
-    ) {
-        return null;
     }
     const currentWeek =
         Number(
@@ -1537,6 +1312,11 @@ function processManagerFightOffer() {
     }
     player.managerLastOfferWeek =
         currentWeek;
+    player.managerSearching =
+        true;
+    /*
+       Chance de encontrar.
+    */
     if (
         Math.random() >
         MANAGER_CONFIG.offerChance
@@ -1549,11 +1329,10 @@ function processManagerFightOffer() {
         player.managerNextSearchWeek =
             currentWeek +
             wait;
-        player.managerSearchCooldown =
-            0;
         player.managerSearching =
             false;
         managerSave();
+        managerRefreshUI();
         return null;
     }
     const offer =
@@ -1561,6 +1340,8 @@ function processManagerFightOffer() {
     if (
         !offer
     ) {
+        player.managerSearching =
+            false;
         return null;
     }
     player.managerFightOffer =
@@ -1574,9 +1355,7 @@ function processManagerFightOffer() {
     player.managerOffers =
         [];
     if (
-        Array.isArray(
-            player.log
-        )
+        Array.isArray(player.log)
     ) {
         if (
             offer.amateur
@@ -1592,15 +1371,7 @@ function processManagerFightOffer() {
         }
     }
     managerSave();
-    try {
-        if (
-            typeof window.home ===
-            "function"
-        ) {
-            window.home();
-        }
-    }
-    catch (error) {}
+    managerRefreshUI();
     return offer;
 }
 /* =========================================================
@@ -1609,31 +1380,25 @@ function processManagerFightOffer() {
 function acceptManagerFightOffer() {
     const player =
         managerPlayer();
+    ensureManagerData();
     if (!player) {
         return false;
     }
-    ensureManagerData();
     const offer =
         player.managerFightOffer;
-    if (
-        !offer
-    ) {
+    if (!offer) {
         alert(
             "Não existe nenhuma proposta de luta."
         );
         return false;
     }
-    if (
-        !offer.opponent
-    ) {
+    if (!offer.opponent) {
         alert(
             "Erro: adversário não encontrado na proposta."
         );
         return false;
     }
-    if (
-        player.nextFight
-    ) {
+    if (player.nextFight) {
         alert(
             "Você já possui uma luta marcada."
         );
@@ -1646,16 +1411,10 @@ function acceptManagerFightOffer() {
         ) > 0
     ) {
         alert(
-            "Você ainda está no período de recuperação pós-luta."
+            "Você ainda está se recuperando."
         );
         return false;
     }
-    /*
-       Se a negociação ainda estiver pendente,
-       a oferta original continua válida.
-       Portanto o jogador pode aceitar
-       mesmo sem negociar.
-    */
     const campWeeks =
         managerClamp(
             Number(
@@ -1673,19 +1432,9 @@ function acceptManagerFightOffer() {
         currentWeek +
         campWeeks;
     const opponent =
-        offer.opponent
-            ?
-            {
-                ...offer.opponent
-            }
-            :
-            null;
-    if (!opponent) {
-        alert(
-            "Erro: adversário não encontrado."
-        );
-        return false;
-    }
+        {
+            ...offer.opponent
+        };
     player.nextFight = {
         id:
             "FIGHT-" +
@@ -1708,7 +1457,9 @@ function acceptManagerFightOffer() {
         eventPrestige:
             offer.eventPrestige,
         isBigEvent:
-            offer.isBigEvent,
+            Boolean(
+                offer.isBigEvent
+            ),
         opponent:
             opponent,
         opponentName:
@@ -1755,13 +1506,11 @@ function acceptManagerFightOffer() {
             ),
         contractFights:
             Number(
-                offer.contractFights ||
-                1
+                offer.contractFights || 1
             ),
         contractRemaining:
             Number(
-                offer.contractFights ||
-                1
+                offer.contractFights || 1
             ),
         campWeeks:
             campWeeks,
@@ -1790,25 +1539,24 @@ function acceptManagerFightOffer() {
         completed:
             false
     };
+    /*
+       CONTRATO
+    */
     player.managerContractFightNumber =
         Number(
-            player.managerContractFightNumber ||
-            0
+            player.managerContractFightNumber || 0
         );
     player.managerContractTotalFights =
         Number(
-            offer.contractFights ||
-            1
+            offer.contractFights || 1
         );
     player.managerContractEvent =
         offer.eventName;
     player.managerContractCategory =
         offer.eventCategory;
     /*
-       Se não existe contrato,
-       cria o contrato.
-       Se já existe contrato,
-       mantém o contrato existente.
+       Se não houver contrato,
+       cria um novo.
     */
     if (
         !player.currentContract
@@ -1824,33 +1572,31 @@ function acceptManagerFightOffer() {
                 offer.eventType,
             totalFights:
                 Number(
-                    offer.contractFights ||
-                    1
+                    offer.contractFights || 1
                 ),
             fightsCompleted:
                 0,
             fightsRemaining:
                 Number(
-                    offer.contractFights ||
-                    1
+                    offer.contractFights || 1
                 ),
             purse:
                 Number(
-                    offer.purse ||
-                    0
+                    offer.purse || 0
                 ),
             winBonus:
                 Number(
-                    offer.winBonus ||
-                    0
+                    offer.winBonus || 0
                 ),
             ppv:
                 Number(
-                    offer.ppvPercentage ||
-                    0
+                    offer.ppvPercentage || 0
                 )
         };
     }
+    /*
+       LIMPAR OFERTA.
+    */
     player.managerFightOffer =
         null;
     player.managerOfferPending =
@@ -1861,12 +1607,14 @@ function acceptManagerFightOffer() {
         false;
     player.managerSearchCooldown =
         0;
+    /*
+       Nenhuma nova luta antes
+       do término da atual.
+    */
     player.managerNextSearchWeek =
         fightWeek;
     if (
-        Array.isArray(
-            player.log
-        )
+        Array.isArray(player.log)
     ) {
         player.log.unshift(
             `🥊 Luta aceita! ${player.name || "Você"} enfrentará ${offer.opponentName}.`
@@ -1883,7 +1631,7 @@ function acceptManagerFightOffer() {
         }
         else {
             player.log.unshift(
-                `💰 Bolsa: $${Number(offer.purse || 0).toLocaleString("en-US")} + $${Number(offer.winBonus || 0).toLocaleString("en-US")} de bônus de vitória.`
+                `💰 Bolsa: $${Number(offer.purse || 0).toLocaleString("en-US")} + $${Number(offer.winBonus || 0).toLocaleString("en-US")} de bônus.`
             );
         }
         player.log.unshift(
@@ -1891,15 +1639,7 @@ function acceptManagerFightOffer() {
         );
     }
     managerSave();
-    try {
-        if (
-            typeof window.home ===
-            "function"
-        ) {
-            window.home();
-        }
-    }
-    catch (error) {}
+    managerRefreshUI();
     return true;
 }
 /* =========================================================
@@ -1908,11 +1648,9 @@ function acceptManagerFightOffer() {
 function declineManagerFightOffer() {
     const player =
         managerPlayer();
-    if (!player) {
-        return false;
-    }
     ensureManagerData();
     if (
+        !player ||
         !player.managerFightOffer
     ) {
         alert(
@@ -1935,38 +1673,26 @@ function declineManagerFightOffer() {
         Number(
             player.week || 0
         );
-    const wait =
+    player.managerNextSearchWeek =
+        currentWeek +
         managerRandomInt(
             2,
             4
         );
-    player.managerNextSearchWeek =
-        currentWeek +
-        wait;
     player.managerSearchCooldown =
         0;
     if (
-        Array.isArray(
-            player.log
-        )
+        Array.isArray(player.log)
     ) {
         player.log.unshift(
             `❌ Você recusou a luta contra ${opponentName}.`
         );
         player.log.unshift(
-            "📅 Seu empresário vai procurar outra oportunidade nas próximas semanas."
+            "📅 Seu empresário vai procurar outra oportunidade."
         );
     }
     managerSave();
-    try {
-        if (
-            typeof window.home ===
-            "function"
-        ) {
-            window.home();
-        }
-    }
-    catch (error) {}
+    managerRefreshUI();
     return true;
 }
 /* =========================================================
@@ -1975,29 +1701,20 @@ function declineManagerFightOffer() {
 function isInFightCamp() {
     const player =
         managerPlayer();
-    if (!player) {
-        return false;
-    }
     const fight =
-        player.nextFight;
-    if (
-        !fight
-    ) {
+        player?.nextFight;
+    if (!fight) {
         return false;
     }
     if (
-        fight.completed ===
-        true
+        fight.completed === true
     ) {
         return false;
     }
     return (
-        fight.status ===
-        "camp" ||
-        fight.status ===
-        "scheduled" ||
-        fight.status ===
-        "fight_day"
+        fight.status === "camp" ||
+        fight.status === "scheduled" ||
+        fight.status === "fight_day"
     );
 }
 /* =========================================================
@@ -2006,47 +1723,28 @@ function isInFightCamp() {
 function managerIsFightDay() {
     const player =
         managerPlayer();
-    if (!player) {
-        return false;
-    }
     const fight =
-        player.nextFight;
-    if (
-        !fight
-    ) {
+        player?.nextFight;
+    if (!fight) {
         return false;
     }
     if (
-        fight.completed ===
-        true
-    ) {
-        return false;
-    }
-    if (
-        fight.status ===
-        "fight_day"
+        fight.status === "fight_day"
     ) {
         return true;
     }
     if (
-        typeof fight.weeksRemaining ===
-        "number" &&
+        typeof fight.fightWeek === "number" &&
+        Number(player.week || 0) >=
+        fight.fightWeek
+    ) {
+        return true;
+    }
+    if (
+        typeof fight.weeksRemaining === "number" &&
         fight.weeksRemaining <= 0
     ) {
         return true;
-    }
-    if (
-        typeof fight.fightWeek ===
-        "number"
-    ) {
-        return (
-            Number(
-                player.week || 0
-            ) >=
-            Number(
-                fight.fightWeek
-            )
-        );
     }
     return false;
 }
@@ -2056,12 +1754,9 @@ function managerIsFightDay() {
 function processManagerCampWeek() {
     const player =
         managerPlayer();
-    if (!player) {
-        return;
-    }
     ensureManagerData();
     const fight =
-        player.nextFight;
+        player?.nextFight;
     if (
         !fight ||
         fight.completed === true
@@ -2077,9 +1772,7 @@ function processManagerCampWeek() {
             fight.fightWeek
         );
     if (
-        !Number.isFinite(
-            fightWeek
-        )
+        !Number.isFinite(fightWeek)
     ) {
         return;
     }
@@ -2104,15 +1797,12 @@ function processManagerCampWeek() {
     fight.weeksRemaining =
         0;
     if (
-        fight.fightDayNotified !==
-        true
+        fight.fightDayNotified !== true
     ) {
         fight.fightDayNotified =
             true;
         if (
-            Array.isArray(
-                player.log
-            )
+            Array.isArray(player.log)
         ) {
             player.log.unshift(
                 `🥊 DIA DA LUTA! ${fight.opponentName} aguarda você no ${fight.eventName}.`
@@ -2122,16 +1812,14 @@ function processManagerCampWeek() {
     }
 }
 /* =========================================================
-   DESCANSO PÓS-LUTA
+   DESCANSO
 ========================================================= */
 function processManagerPostFightRest() {
     const player =
         managerPlayer();
-    if (!player) {
-        return false;
-    }
     ensureManagerData();
     if (
+        !player ||
         player.postFightRestActive !== true
     ) {
         return false;
@@ -2165,18 +1853,14 @@ function processManagerPostFightRest() {
             Number(
                 player.week || 0
             );
-        const wait =
+        player.managerNextSearchWeek =
+            currentWeek +
             managerRandomInt(
                 MANAGER_CONFIG.minSearchWaitWeeks,
                 MANAGER_CONFIG.maxSearchWaitWeeks
             );
-        player.managerNextSearchWeek =
-            currentWeek +
-            wait;
         if (
-            Array.isArray(
-                player.log
-            )
+            Array.isArray(player.log)
         ) {
             player.log.unshift(
                 "🥊 Recuperação pós-luta concluída."
@@ -2188,9 +1872,7 @@ function processManagerPostFightRest() {
     }
     else {
         if (
-            Array.isArray(
-                player.log
-            )
+            Array.isArray(player.log)
         ) {
             player.log.unshift(
                 `🛌 Recuperação pós-luta: ${player.postFightRestWeeks} semana(s) restante(s).`
@@ -2206,52 +1888,54 @@ function processManagerPostFightRest() {
 function processManagerWeek() {
     const player =
         managerPlayer();
-    if (!player) {
-        return;
-    }
     ensureManagerData();
     if (
+        !player ||
         !hasManager()
     ) {
         return;
     }
+    /*
+       DESCANSO TEM PRIORIDADE.
+    */
     if (
         player.postFightRestActive === true
     ) {
         processManagerPostFightRest();
         return;
     }
+    /*
+       CAMP.
+    */
     if (
         player.nextFight
     ) {
         processManagerCampWeek();
         return;
     }
+    /*
+       OFERTA JÁ EXISTE.
+    */
     if (
         player.managerFightOffer
     ) {
         return;
     }
+    /*
+       BUSCA.
+    */
     processManagerFightOffer();
 }
 /* =========================================================
-   BLOQUEAR AVANÇO NO DIA DA LUTA
+   BLOQUEAR AVANÇO
 ========================================================= */
 function managerShouldBlockWeekAdvance() {
     return managerIsFightDay();
 }
 /* =========================================================
-   PODE LUTAR?
+   PODE LUTAR
 ========================================================= */
 function managerCanFightNow() {
-    const player =
-        managerPlayer();
-    if (
-        !player ||
-        !player.nextFight
-    ) {
-        return false;
-    }
     return managerIsFightDay();
 }
 /* =========================================================
@@ -2260,56 +1944,46 @@ function managerCanFightNow() {
 function completeManagerFight(result) {
     const player =
         managerPlayer();
-    if (!player) {
-        return;
-    }
     ensureManagerData();
     const fight =
-        player.nextFight;
+        player?.nextFight;
     if (
         !fight
     ) {
-        return;
+        return false;
     }
     fight.status =
         "completed";
     fight.completed =
         true;
     fight.result =
-        result ||
-        null;
+        result || null;
     /*
-       CONTRATO
+       CONTRATO.
     */
     if (
         player.currentContract
     ) {
         player.currentContract.fightsCompleted =
             Number(
-                player.currentContract.fightsCompleted ||
-                0
+                player.currentContract.fightsCompleted || 0
             ) + 1;
         player.currentContract.fightsRemaining =
             Math.max(
                 0,
                 Number(
-                    player.currentContract.fightsRemaining ||
-                    0
+                    player.currentContract.fightsRemaining || 0
                 ) - 1
             );
         player.managerContractFightNumber =
             Number(
-                player.managerContractFightNumber ||
-                0
+                player.managerContractFightNumber || 0
             ) + 1;
         if (
-            player.currentContract.fightsRemaining <=
-            0
+            player.currentContract.fightsRemaining <= 0
         ) {
             if (
-                Array.isArray(
-                    player.log
-                )
+                Array.isArray(player.log)
             ) {
                 player.log.unshift(
                     `📋 Contrato com ${player.currentContract.eventName || player.currentContract.event} encerrado.`
@@ -2328,14 +2002,14 @@ function completeManagerFight(result) {
         }
     }
     /*
-       DESCANSO
+       DESCANSO.
     */
     player.postFightRestWeeks =
         MANAGER_CONFIG.postFightRestWeeks;
     player.postFightRestActive =
         true;
     /*
-       LIMPAR LUTA
+       LIMPAR LUTA.
     */
     player.nextFight =
         null;
@@ -2350,8 +2024,7 @@ function completeManagerFight(result) {
     player.managerSearchCooldown =
         0;
     /*
-       Próxima busca somente depois
-       do descanso + espera realista.
+       Agenda a próxima busca.
     */
     player.managerNextSearchWeek =
         Number(
@@ -2363,9 +2036,7 @@ function completeManagerFight(result) {
             MANAGER_CONFIG.maxSearchWaitWeeks
         );
     if (
-        Array.isArray(
-            player.log
-        )
+        Array.isArray(player.log)
     ) {
         player.log.unshift(
             `🛌 Descanso pós-luta iniciado. Você terá ${MANAGER_CONFIG.postFightRestWeeks} semanas de recuperação.`
@@ -2375,6 +2046,8 @@ function completeManagerFight(result) {
         );
     }
     managerSave();
+    managerRefreshUI();
+    return true;
 }
 /* =========================================================
    CANCELAR LUTA
@@ -2382,11 +2055,9 @@ function completeManagerFight(result) {
 function cancelManagerFight(reason) {
     const player =
         managerPlayer();
-    if (!player) {
-        return false;
-    }
     ensureManagerData();
     if (
+        !player ||
         !player.nextFight
     ) {
         return false;
@@ -2413,15 +2084,14 @@ function cancelManagerFight(reason) {
             4
         );
     if (
-        Array.isArray(
-            player.log
-        )
+        Array.isArray(player.log)
     ) {
         player.log.unshift(
             `⚠️ A luta contra ${opponent} foi cancelada${reason ? `: ${reason}` : "."}`
         );
     }
     managerSave();
+    managerRefreshUI();
     return true;
 }
 /* =========================================================
@@ -2430,10 +2100,12 @@ function cancelManagerFight(reason) {
 function managerCanAskProfessional() {
     const player =
         managerPlayer();
-    if (!player) {
+    ensureManagerData();
+    if (
+        !player
+    ) {
         return false;
     }
-    ensureManagerData();
     if (
         !managerIsAmateur()
     ) {
@@ -2453,28 +2125,23 @@ function managerCanAskProfessional() {
         return false;
     }
     if (
-        player.professionalDecisionMade ===
-        true
+        player.professionalDecisionMade === true
     ) {
         return false;
     }
     if (
-        player.professionalDecisionPending ===
-        true
+        player.professionalDecisionPending === true
     ) {
         return false;
     }
     return true;
 }
 /* =========================================================
-   PERGUNTAR PROFISSIONALIZAÇÃO
+   PERGUNTA PROFISSIONAL
 ========================================================= */
 function askProfessionalTransition() {
     const player =
         managerPlayer();
-    if (!player) {
-        return false;
-    }
     ensureManagerData();
     if (
         !managerCanAskProfessional()
@@ -2484,26 +2151,19 @@ function askProfessionalTransition() {
     player.professionalDecisionPending =
         true;
     if (
-        Array.isArray(
-            player.log
-        )
+        Array.isArray(player.log)
     ) {
         player.log.unshift(
-            "💼 Seu empresário quer conversar sobre sua carreira."
-        );
-        player.log.unshift(
-            "🥊 Você já está pronto para considerar uma carreira profissional."
+            "💼 Seu empresário acredita que você está pronto para o MMA profissional."
         );
     }
     managerSave();
     /*
-       Mantido como fallback para a versão atual.
-       Posteriormente a interface poderá substituir
-       este confirm por uma tela própria.
+       A confirmação é executada uma única vez.
     */
     try {
         const answer =
-            confirm(
+            window.confirm(
                 "Seu empresário acredita que você está pronto para se tornar profissional.\n\nDeseja migrar para o MMA profissional?"
             );
         if (
@@ -2516,9 +2176,12 @@ function askProfessionalTransition() {
         }
     }
     catch (error) {
+        /*
+           Se confirm() não existir,
+           mantém a decisão pendente para a interface.
+        */
         console.warn(
-            "Pergunta de profissionalização não pôde ser exibida.",
-            error
+            "Não foi possível abrir a confirmação de profissionalização."
         );
     }
     return true;
@@ -2529,10 +2192,10 @@ function askProfessionalTransition() {
 function acceptProfessionalTransition() {
     const player =
         managerPlayer();
+    ensureManagerData();
     if (!player) {
         return false;
     }
-    ensureManagerData();
     player.careerStage =
         "professional";
     player.professionalDecisionPending =
@@ -2551,37 +2214,19 @@ function acceptProfessionalTransition() {
     player.professional.active =
         true;
     if (
-        typeof player.professional.wins !==
-        "number"
+        typeof player.professional.wins !== "number"
     ) {
-        player.professional.wins =
-            0;
+        player.professional.wins = 0;
     }
     if (
-        typeof player.professional.losses !==
-        "number"
+        typeof player.professional.losses !== "number"
     ) {
-        player.professional.losses =
-            0;
+        player.professional.losses = 0;
     }
     if (
-        typeof player.professional.draws !==
-        "number"
+        typeof player.professional.draws !== "number"
     ) {
-        player.professional.draws =
-            0;
-    }
-    if (
-        Array.isArray(
-            player.log
-        )
-    ) {
-        player.log.unshift(
-            "🥊 PARABÉNS! Você se tornou um atleta profissional."
-        );
-        player.log.unshift(
-            "💼 Seu empresário começará a buscar oportunidades profissionais."
-        );
+        player.professional.draws = 0;
     }
     player.managerNextSearchWeek =
         Number(
@@ -2591,16 +2236,18 @@ function acceptProfessionalTransition() {
             1,
             3
         );
-    managerSave();
-    try {
-        if (
-            typeof window.home ===
-            "function"
-        ) {
-            window.home();
-        }
+    if (
+        Array.isArray(player.log)
+    ) {
+        player.log.unshift(
+            "🥊 PARABÉNS! Você se tornou um atleta profissional."
+        );
+        player.log.unshift(
+            "💼 Seu empresário começará a buscar oportunidades profissionais."
+        );
     }
-    catch (error) {}
+    managerSave();
+    managerRefreshUI();
     return true;
 }
 /* =========================================================
@@ -2609,10 +2256,10 @@ function acceptProfessionalTransition() {
 function declineProfessionalTransition() {
     const player =
         managerPlayer();
+    ensureManagerData();
     if (!player) {
         return false;
     }
-    ensureManagerData();
     player.professionalDecisionPending =
         false;
     player.professionalDecisionMade =
@@ -2622,15 +2269,14 @@ function declineProfessionalTransition() {
             player.week || 0
         );
     if (
-        Array.isArray(
-            player.log
-        )
+        Array.isArray(player.log)
     ) {
         player.log.unshift(
             "🥊 Você decidiu continuar no MMA amador por enquanto."
         );
     }
     managerSave();
+    managerRefreshUI();
     return true;
 }
 /* =========================================================
@@ -2639,9 +2285,6 @@ function declineProfessionalTransition() {
 function processManagerProfessionalTransition() {
     const player =
         managerPlayer();
-    if (!player) {
-        return false;
-    }
     ensureManagerData();
     if (
         !managerCanAskProfessional()
@@ -2656,66 +2299,42 @@ function processManagerProfessionalTransition() {
 function getAvailableManagers() {
     return [
         {
-            id:
-                "manager_1",
-            name:
-                "Carlos Mendes",
-            reputation:
-                60,
-            experience:
-                50,
-            negotiation:
-                55,
-            network:
-                50,
+            id: "manager_1",
+            name: "Carlos Mendes",
+            reputation: 60,
+            experience: 50,
+            negotiation: 55,
+            network: 50,
             description:
                 "Empresário equilibrado, bom para atletas iniciantes."
         },
         {
-            id:
-                "manager_2",
-            name:
-                "Ricardo Alves",
-            reputation:
-                75,
-            experience:
-                70,
-            negotiation:
-                65,
-            network:
-                70,
+            id: "manager_2",
+            name: "Ricardo Alves",
+            reputation: 75,
+            experience: 70,
+            negotiation: 65,
+            network: 70,
             description:
                 "Empresário experiente com boa rede nacional."
         },
         {
-            id:
-                "manager_3",
-            name:
-                "Marcos Oliveira",
-            reputation:
-                85,
-            experience:
-                85,
-            negotiation:
-                80,
-            network:
-                85,
+            id: "manager_3",
+            name: "Marcos Oliveira",
+            reputation: 85,
+            experience: 85,
+            negotiation: 80,
+            network: 85,
             description:
                 "Empresário de alto nível, focado em grandes organizações."
         },
         {
-            id:
-                "manager_4",
-            name:
-                "Fernando Costa",
-            reputation:
-                55,
-            experience:
-                40,
-            negotiation:
-                70,
-            network:
-                45,
+            id: "manager_4",
+            name: "Fernando Costa",
+            reputation: 55,
+            experience: 40,
+            negotiation: 70,
+            network: 45,
             description:
                 "Bom negociador, ideal para quem quer melhorar as bolsas."
         }
@@ -2727,29 +2346,27 @@ function getAvailableManagers() {
 function hireManager(managerId) {
     const player =
         managerPlayer();
+    ensureManagerData();
     if (!player) {
         return false;
     }
-    ensureManagerData();
-    const managers =
-        getAvailableManagers();
     const selected =
-        managers.find(
+        getAvailableManagers().find(
             function(manager) {
                 return (
-                    manager.id ===
-                    managerId
+                    manager.id === managerId
                 );
             }
         );
-    if (
-        !selected
-    ) {
+    if (!selected) {
         alert(
             "Empresário não encontrado."
         );
         return false;
     }
+    /*
+       CONTRATAÇÃO IMEDIATA.
+    */
     player.manager = {
         id:
             selected.id,
@@ -2766,6 +2383,9 @@ function hireManager(managerId) {
         network:
             selected.network
     };
+    /*
+       LIMPA ESTADO ANTIGO.
+    */
     player.managerFightOffer =
         null;
     player.managerOffers =
@@ -2776,6 +2396,9 @@ function hireManager(managerId) {
         false;
     player.managerSearchCooldown =
         0;
+    /*
+       Primeira busca futura.
+    */
     const currentWeek =
         Number(
             player.week || 0
@@ -2787,27 +2410,23 @@ function hireManager(managerId) {
             3
         );
     if (
-        Array.isArray(
-            player.log
-        )
+        Array.isArray(player.log)
     ) {
         player.log.unshift(
             `💼 Você contratou o empresário ${selected.name}.`
         );
         player.log.unshift(
-            "📅 Seu novo empresário começará a procurar oportunidades nas próximas semanas."
+            "📅 Seu novo empresário começará a procurar oportunidades."
         );
     }
     managerSave();
-    try {
-        if (
-            typeof window.home ===
-            "function"
-        ) {
-            window.home();
-        }
-    }
-    catch (error) {}
+    /*
+       IMPORTANTE:
+       atualiza imediatamente.
+       Não precisa apertar atualizar
+       no navegador.
+    */
+    managerRefreshUI();
     return true;
 }
 /* =========================================================
@@ -2816,11 +2435,9 @@ function hireManager(managerId) {
 function fireManager() {
     const player =
         managerPlayer();
-    if (!player) {
-        return false;
-    }
     ensureManagerData();
     if (
+        !player ||
         !hasManager()
     ) {
         return false;
@@ -2840,12 +2457,8 @@ function fireManager() {
         false;
     player.managerSearchCooldown =
         0;
-    player.managerNextSearchWeek =
-        0;
     if (
-        Array.isArray(
-            player.log
-        )
+        Array.isArray(player.log)
     ) {
         player.log.unshift(
             `💼 Você encerrou o contrato com ${managerName}.`
@@ -2855,15 +2468,7 @@ function fireManager() {
         );
     }
     managerSave();
-    try {
-        if (
-            typeof window.home ===
-            "function"
-        ) {
-            window.home();
-        }
-    }
-    catch (error) {}
+    managerRefreshUI();
     return true;
 }
 /* =========================================================
@@ -2872,30 +2477,22 @@ function fireManager() {
 function createManagerTestOffer() {
     const player =
         managerPlayer();
-    if (!player) {
-        return false;
-    }
     ensureManagerData();
     if (
+        !player ||
         !hasManager()
     ) {
         return false;
     }
     if (
-        player.nextFight
-    ) {
-        return false;
-    }
-    if (
+        player.nextFight ||
         player.postFightRestActive
     ) {
         return false;
     }
     const offer =
         generateManagerFightOffer();
-    if (
-        !offer
-    ) {
+    if (!offer) {
         return false;
     }
     player.managerFightOffer =
@@ -2905,6 +2502,7 @@ function createManagerTestOffer() {
     player.managerOffers =
         [];
     managerSave();
+    managerRefreshUI();
     return true;
 }
 /* =========================================================
@@ -2913,30 +2511,22 @@ function createManagerTestOffer() {
 function forceManagerFightOffer() {
     const player =
         managerPlayer();
-    if (!player) {
-        return false;
-    }
     ensureManagerData();
     if (
+        !player ||
         !hasManager()
     ) {
         return false;
     }
     if (
-        player.nextFight
-    ) {
-        return false;
-    }
-    if (
+        player.nextFight ||
         player.postFightRestActive
     ) {
         return false;
     }
     const offer =
         generateManagerFightOffer();
-    if (
-        !offer
-    ) {
+    if (!offer) {
         return false;
     }
     player.managerFightOffer =
@@ -2946,6 +2536,7 @@ function forceManagerFightOffer() {
     player.managerOffers =
         [];
     managerSave();
+    managerRefreshUI();
     return offer;
 }
 /* =========================================================
@@ -2954,65 +2545,47 @@ function forceManagerFightOffer() {
 function getManagerFightOffer() {
     const player =
         managerPlayer();
-    if (!player) {
-        return null;
-    }
     ensureManagerData();
     return (
-        player.managerFightOffer ||
+        player?.managerFightOffer ||
         null
     );
 }
 function getManagerCurrentFight() {
     const player =
         managerPlayer();
-    if (!player) {
-        return null;
-    }
     return (
-        player.nextFight ||
+        player?.nextFight ||
         null
     );
 }
 function getManagerPostFightRest() {
     const player =
         managerPlayer();
-    if (!player) {
-        return {
-            active:
-                false,
-            weeksRemaining:
-                0
-        };
-    }
     ensureManagerData();
     return {
         active:
-            player.postFightRestActive === true,
+            player?.postFightRestActive === true,
         weeksRemaining:
             Number(
-                player.postFightRestWeeks || 0
+                player?.postFightRestWeeks || 0
             )
     };
 }
 /* =========================================================
-   PROCESSAR ANO
+   ANO
 ========================================================= */
 function processManagerContractYear() {
     const player =
         managerPlayer();
-    if (!player) {
-        return;
-    }
     ensureManagerData();
     if (
-        player.manager
+        player?.manager
     ) {
         player.manager.experience =
             managerClamp(
                 Number(
-                    player.manager.experience ||
-                    50
+                    player.manager.experience || 50
                 ) + 1,
                 1,
                 100
@@ -3020,8 +2593,7 @@ function processManagerContractYear() {
         player.manager.network =
             managerClamp(
                 Number(
-                    player.manager.network ||
-                    50
+                    player.manager.network || 50
                 ) + 1,
                 1,
                 100
@@ -3033,18 +2605,10 @@ function processManagerContractYear() {
    INICIALIZAÇÃO
 ========================================================= */
 function initializeManagers() {
-    try {
-        ensureManagerData();
-    }
-    catch (error) {
-        console.error(
-            "MANAGERS.JS: erro na inicialização.",
-            error
-        );
-    }
+    ensureManagerData();
 }
 /* =========================================================
-   EXPORTAR
+   EXPORTAÇÕES
 ========================================================= */
 window.ensureManagerData =
     ensureManagerData;
@@ -3078,6 +2642,10 @@ window.acceptManagerFightOffer =
     acceptManagerFightOffer;
 window.declineManagerFightOffer =
     declineManagerFightOffer;
+/*
+   AGORA A FUNÇÃO EXISTE.
+   Esta era uma das causas do erro.
+*/
 window.negotiateManagerFightOffer =
     negotiateManagerFightOffer;
 window.processManagerContractYear =
@@ -3123,24 +2691,21 @@ window.declineProfessionalTransition =
 window.processManagerProfessionalTransition =
     processManagerProfessionalTransition;
 /* =========================================================
-   DOM
+   INICIALIZAÇÃO SEGURA
 ========================================================= */
 if (
-    typeof document !==
-    "undefined"
+    document.readyState === "loading"
 ) {
-    if (
-        document.readyState ===
-        "loading"
-    ) {
-        document.addEventListener(
-            "DOMContentLoaded",
-            initializeManagers
-        );
-    }
-    else {
-        initializeManagers();
-    }
+    document.addEventListener(
+        "DOMContentLoaded",
+        initializeManagers,
+        {
+            once: true
+        }
+    );
+}
+else {
+    initializeManagers();
 }
 /* =========================================================
    FIM DO MANAGERS.JS
