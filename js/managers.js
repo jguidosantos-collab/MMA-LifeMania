@@ -1276,232 +1276,247 @@ function createNegotiationData(
 /* =========================================================
    GERAR OFERTA
 ========================================================= */
-
 function generateManagerFightOffer() {
-
     const player =
         managerPlayer();
-
-
     ensureManagerData();
-
-
+    /* =====================================================
+       ADVERSÁRIO
+    ===================================================== */
     const opponent =
         generateManagerOpponent();
-
-
+    /* =====================================================
+       EVENTO
+    ===================================================== */
     const event =
         generateManagerEvent();
-
-
-    let purse;
-
-
-    if (
-        event.isBigEvent
-    ) {
-
-        purse =
-            calculateBigEventPurse();
-
-    }
-    else {
-
-        purse =
-            calculateManagerPurse();
-
-    }
-
-
-    const winBonus =
-        calculateManagerWinBonus(
-            purse
+    /* =====================================================
+       VERIFICAR SE É PROFISSIONAL
+    ===================================================== */
+    const isProfessional =
+        Boolean(
+            player.professional &&
+            player.professional.active === true
         );
-
-
+    /* =====================================================
+       BOLSA E BÔNUS
+       AMADOR:
+       - Bolsa = $0
+       - Bônus = $0
+       PROFISSIONAL:
+       - Evento normal = bolsa normal
+       - Evento grande = bolsa especial
+       - Bônus calculado normalmente
+    ===================================================== */
+    let purse = 0;
+    let winBonus = 0;
+    if (
+        isProfessional
+    ) {
+        if (
+            event.isBigEvent === true
+        ) {
+            purse =
+                calculateBigEventPurse();
+        }
+        else {
+            purse =
+                calculateManagerPurse();
+        }
+        winBonus =
+            calculateManagerWinBonus(
+                purse
+            );
+    }
+    /* =====================================================
+       GARANTIR NÚMEROS VÁLIDOS
+    ===================================================== */
+    purse =
+        Number(purse || 0);
+    winBonus =
+        Number(winBonus || 0);
+    /* =====================================================
+       CAMP
+    ===================================================== */
     const campWeeks =
         managerRandomInt(
-
             MANAGER_CONFIG.minCampWeeks,
-
             MANAGER_CONFIG.maxCampWeeks
-
         );
-
-
-    const negotiation =
-        createNegotiationData(
+    /* =====================================================
+       NEGOCIAÇÃO
+       A negociação só fica disponível
+       quando for uma luta profissional
+       em evento grande.
+    ===================================================== */
+    let negotiation = {
+        available: false,
+        basePurse:
             purse,
-            event
-        );
-
-
+        currentPurse:
+            purse,
+        originalPurse:
+            purse,
+        maxPurse:
+            purse,
+        rounds: 0,
+        completed: false
+    };
+    if (
+        isProfessional &&
+        event.isBigEvent === true &&
+        typeof createNegotiationData ===
+        "function"
+    ) {
+        negotiation =
+            createNegotiationData(
+                purse,
+                event
+            );
+    }
+    /* =====================================================
+       CRIAR OFERTA
+    ===================================================== */
     const offer = {
-
         id:
             ++player.managerOfferId,
-
         type:
             "fight",
-
         status:
             "pending",
-
-
-        /*
+        /* =================================================
            DATA
-        */
-
+        ================================================= */
         createdWeek:
             Number(
                 player.week || 1
             ),
-
         createdYear:
             Number(
                 player.year || 2026
             ),
-
-
-        /*
+        /* =================================================
            EVENTO
-        */
-
+        ================================================= */
         eventName:
             event.name,
-
         eventType:
             event.type,
-
         eventPrestige:
             event.prestige,
-
         isBigEvent:
             Boolean(
                 event.isBigEvent
             ),
-
-
         event: {
-
             name:
                 event.name,
-
             type:
                 event.type,
-
             prestige:
                 event.prestige,
-
             isBigEvent:
                 Boolean(
                     event.isBigEvent
                 )
-
         },
-
-
-        /*
+        /* =================================================
            ADVERSÁRIO
-           IMPORTANTE:
-           O Fight.js terá acesso
-           por qualquer desses campos.
-        */
-
+           Mantemos TODOS os campos para evitar
+           o problema do adversário aparecer
+           como "não encontrado" no Fight.js.
+        ================================================= */
         opponent:
             opponent,
-
         opponentName:
-            opponent.name,
-
+            opponent.name ||
+            opponent.displayName ||
+            "Adversário",
         opponentDisplayName:
-            opponent.displayName,
-
+            opponent.displayName ||
+            opponent.name ||
+            "Adversário",
         opponentOverall:
-            opponent.overall,
-
-        opponentPower:
-            opponent.power,
-
-
-        /*
-           FINANCEIRO
-        */
-
-        purse:
-            Number(purse),
-
-        fightPurse:
-            Number(purse),
-
-        winBonus:
-            Number(winBonus),
-
-        totalWinPayout:
             Number(
-                purse +
-                winBonus
+                opponent.overall ||
+                opponent.power ||
+                0
             ),
-
-
-        /*
+        opponentPower:
+            Number(
+                opponent.power ||
+                opponent.overall ||
+                0
+            ),
+        /* =================================================
+           FINANCEIRO
+        ================================================= */
+        purse:
+            purse,
+        fightPurse:
+            purse,
+        winBonus:
+            winBonus,
+        totalWinPayout:
+            purse +
+            winBonus,
+        /* =================================================
            CAMP
-        */
-
+        ================================================= */
         campWeeks:
             campWeeks,
-
         minCampWeeks:
             MANAGER_CONFIG.minCampWeeks,
-
         maxCampWeeks:
             MANAGER_CONFIG.maxCampWeeks,
-
-
-        /*
+        /* =================================================
            NEGOCIAÇÃO
-        */
-
+        ================================================= */
         negotiation:
             negotiation,
-
         negotiable:
             Boolean(
-                negotiation.available
+                negotiation &&
+                negotiation.available === true
             ),
-
-
-        /*
+        /* =================================================
            STATUS
-        */
-
+        ================================================= */
         accepted:
             false,
-
         declined:
             false,
-
         expired:
             false,
-
-
-        /*
-           COMPATIBILIDADE
-        */
-
+        /* =================================================
+           COMPATIBILIDADE COM FIGHT.JS
+        ================================================= */
         fightWeek:
             null,
-
         weeksRemaining:
             campWeeks
-
     };
-
-
+    /* =====================================================
+       LOG DA OFERTA
+    ===================================================== */
+    if (
+        Array.isArray(player.log)
+    ) {
+        if (
+            isProfessional
+        ) {
+            player.log.unshift(
+                `📩 Empresário encontrou uma luta contra ${offer.opponentName}. Bolsa: $${Math.round(purse)}.`
+            );
+        }
+        else {
+            player.log.unshift(
+                `📩 Empresário encontrou uma luta amadora contra ${offer.opponentName}.`
+            );
+        }
+    }
     return offer;
-
 }
-
 
 /* =========================================================
    PROCESSAR PROPOSTA
