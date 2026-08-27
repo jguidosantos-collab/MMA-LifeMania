@@ -2,7 +2,6 @@
    MMA LIFE DYNASTY
    MANAGERS.JS
    EMPRESÁRIO — SISTEMA COMPLETO
-   VERSÃO DEFINITIVA
    FLUXO:
    JOGADOR SEM LUTA
           ↓
@@ -20,13 +19,15 @@
           ↓
    DIA DA LUTA
           ↓
-   BOTÃO LUTAR AGORA
+   LUTAR AGORA
           ↓
    FIGHT.JS
           ↓
    RESULTADO
           ↓
    DESCANSO PÓS-LUTA
+          ↓
+   PERÍODO DE RECUPERAÇÃO
           ↓
    EMPRESÁRIO PROCURA NOVA OPORTUNIDADE
    CATEGORIAS:
@@ -41,20 +42,45 @@
 const MANAGER_CONFIG = {
     minCampWeeks: 4,
     maxCampWeeks: 8,
-    searchCooldownWeeks: 1,
     /*
-       DESCANSO PÓS-LUTA
-       Depois de cada luta concluída,
-       o jogador precisa descansar 2 semanas
-       antes do empresário poder procurar
-       uma nova oportunidade.
+       Cooldown utilizado quando uma busca não
+       encontra uma oportunidade.
+    */
+    searchCooldownWeeks: 2,
+    /*
+       Descanso obrigatório depois de cada luta.
     */
     postFightRestWeeks: 2,
+    /*
+       Depois do descanso ainda existe um período
+       adicional antes de o empresário começar
+       uma nova negociação.
+    */
+    postFightSearchDelayWeeks: 2,
+    /*
+       Primeira luta da carreira.
+    */
     firstFightWeek: 1,
+    /*
+       Chance de encontrar oportunidade quando
+       o empresário faz uma busca.
+    */
     offerChance: 0.85,
     maxOfferAge: 1,
     minContractFights: 3,
-    maxContractFights: 5
+    maxContractFights: 5,
+    /*
+       LIMITE ABSOLUTO DE LUTAS POR ANO.
+       Normalmente o jogador terá 2 ou 3.
+       4 é o máximo.
+    */
+    maxFightsPerYear: 4,
+    /*
+       Tempo mínimo entre o início das lutas.
+       Evita que o jogador fique lutando
+       praticamente toda hora.
+    */
+    minWeeksBetweenFights: 6
 };
 /* =========================================================
    TABELA DE EVENTOS
@@ -468,10 +494,6 @@ function ensureManagerData() {
        =====================================================
        DESCANSO PÓS-LUTA
        =====================================================
-       Compatibilidade com saves antigos.
-       Se o jogador já possui um save criado
-       antes deste sistema existir, essas variáveis
-       serão criadas automaticamente.
     */
     if (
         typeof player.postFightRestWeeks !==
@@ -484,6 +506,44 @@ function ensureManagerData() {
         "boolean"
     ) {
         player.postFightRestActive = false;
+    }
+    /*
+       =====================================================
+       CONTROLE ANUAL DE LUTAS
+       =====================================================
+    */
+    if (
+        typeof player.managerLastFightWeek !==
+        "number"
+    ) {
+        player.managerLastFightWeek = -999;
+    }
+    if (
+        typeof player.managerLastFightYear !==
+        "number"
+    ) {
+        player.managerLastFightYear = -999;
+    }
+    if (
+        typeof player.managerFightsThisYear !==
+        "number"
+    ) {
+        player.managerFightsThisYear = 0;
+    }
+    if (
+        typeof player.managerNextSearchWeek !==
+        "number"
+    ) {
+        player.managerNextSearchWeek = 0;
+    }
+    if (
+        typeof player.managerNextSearchYear !==
+        "number"
+    ) {
+        player.managerNextSearchYear =
+            Number(
+                player.year || 2026
+            );
     }
 }
 /* =========================================================
@@ -522,10 +582,10 @@ function managerGetPlayerOverall() {
         Number.isFinite(overall) &&
         overall > 0
     )
-    ?
-    overall
-    :
-    45;
+        ?
+        overall
+        :
+        45;
 }
 /* =========================================================
    GERAR ADVERSÁRIO
@@ -1067,11 +1127,9 @@ function createNegotiationData(
         const ppv =
             managerClamp(
                 Number(
-                    (
-                        managerRandom(
-                            1,
-                            10
-                        )
+                    managerRandom(
+                        1,
+                        10
                     ).toFixed(1)
                 ),
                 1,
@@ -1146,10 +1204,10 @@ function createNegotiationData(
                     0
                 )
             )
-            ?
-            10
-            :
-            0;
+                ?
+                10
+                :
+                0;
         successChance +=
             performanceBonus;
         successChance +=
@@ -1518,16 +1576,16 @@ function generateManagerFightOffer() {
             amateur,
         amateurPurse:
             amateur
-            ?
-            0
-            :
-            null,
+                ?
+                0
+                :
+                null,
         amateurWinBonus:
             amateur
-            ?
-            0
-            :
-            null,
+                ?
+                0
+                :
+                null,
         contractFights:
             contractFights,
         contractRemaining:
@@ -1575,9 +1633,7 @@ function managerCanSearchFight() {
         managerPlayer();
     ensureManagerData();
     /*
-       DESCANSO PÓS-LUTA:
-       durante o descanso o empresário
-       não pode procurar.
+       DESCANSO
     */
     if (
         player.postFightRestActive === true &&
@@ -1587,11 +1643,17 @@ function managerCanSearchFight() {
     ) {
         return false;
     }
+    /*
+       JÁ POSSUI LUTA
+    */
     if (
         player.nextFight
     ) {
         return false;
     }
+    /*
+       JÁ POSSUI OFERTA
+    */
     if (
         player.managerFightOffer
     ) {
@@ -1605,11 +1667,26 @@ function managerCanSearchFight() {
     ) {
         return false;
     }
+    /*
+       COOLDOWN
+    */
     if (
         Number(
             player.managerSearchCooldown ||
             0
         ) > 0
+    ) {
+        return false;
+    }
+    /*
+       LIMITE ANUAL
+    */
+    if (
+        Number(
+            player.managerFightsThisYear ||
+            0
+        ) >=
+        MANAGER_CONFIG.maxFightsPerYear
     ) {
         return false;
     }
@@ -1623,7 +1700,7 @@ function processManagerFightOffer() {
         managerPlayer();
     ensureManagerData();
     /*
-       NÃO PROCURAR DURANTE DESCANSO PÓS-LUTA.
+       DESCANSO
     */
     if (
         player.postFightRestActive === true &&
@@ -1633,16 +1710,25 @@ function processManagerFightOffer() {
     ) {
         return null;
     }
+    /*
+       JÁ POSSUI LUTA
+    */
     if (
         player.nextFight
     ) {
         return null;
     }
+    /*
+       JÁ EXISTE OFERTA
+    */
     if (
         player.managerFightOffer
     ) {
         return player.managerFightOffer;
     }
+    /*
+       OFERTA ANTIGA
+    */
     if (
         player.managerOffers.length > 0
     ) {
@@ -1653,6 +1739,9 @@ function processManagerFightOffer() {
         managerSave();
         return player.managerFightOffer;
     }
+    /*
+       COOLDOWN
+    */
     if (
         Number(
             player.managerSearchCooldown ||
@@ -1665,6 +1754,75 @@ function processManagerFightOffer() {
         Number(
             player.week || 0
         );
+    const currentYear =
+        Number(
+            player.year || 2026
+        );
+    /*
+       PRIMEIRA LUTA
+    */
+    if (
+        currentWeek <
+        MANAGER_CONFIG.firstFightWeek
+    ) {
+        return null;
+    }
+    /*
+       LIMITE ANUAL
+    */
+    if (
+        Number(
+            player.managerFightsThisYear ||
+            0
+        ) >=
+        MANAGER_CONFIG.maxFightsPerYear
+    ) {
+        return null;
+    }
+    /*
+       ESPERA ENTRE LUTAS
+    */
+    if (
+        Number(
+            player.managerLastFightYear
+        ) ===
+        currentYear
+    ) {
+        const weeksSinceLastFight =
+            currentWeek -
+            Number(
+                player.managerLastFightWeek ||
+                -999
+            );
+        if (
+            weeksSinceLastFight <
+            MANAGER_CONFIG.minWeeksBetweenFights
+        ) {
+            return null;
+        }
+    }
+    /*
+       ESPERA PÓS-DESCANSO
+    */
+    if (
+        currentYear ===
+        Number(
+            player.managerNextSearchYear
+        )
+    ) {
+        if (
+            currentWeek <
+            Number(
+                player.managerNextSearchWeek ||
+                0
+            )
+        ) {
+            return null;
+        }
+    }
+    /*
+       EVITAR DUAS BUSCAS NA MESMA SEMANA
+    */
     if (
         currentWeek ===
         Number(
@@ -1673,12 +1831,9 @@ function processManagerFightOffer() {
     ) {
         return null;
     }
-    if (
-        currentWeek <
-        MANAGER_CONFIG.firstFightWeek
-    ) {
-        return null;
-    }
+    /*
+       CHANCE DE ENCONTRAR LUTA
+    */
     if (
         Math.random() >
         MANAGER_CONFIG.offerChance
@@ -1690,6 +1845,9 @@ function processManagerFightOffer() {
         managerSave();
         return null;
     }
+    /*
+       GERAR OFERTA
+    */
     const offer =
         generateManagerFightOffer();
     if (
@@ -1878,7 +2036,7 @@ function acceptManagerFightOffer() {
         return false;
     }
     /*
-       Não aceitar durante recuperação.
+       RECUPERAÇÃO
     */
     if (
         player.postFightRestActive === true &&
@@ -2092,7 +2250,7 @@ function acceptManagerFightOffer() {
             offer.amateur
         ) {
             player.log.unshift(
-                `🥊 Luta amadora confirmada. Bolsa: $0.`
+                "🥊 Luta amadora confirmada. Bolsa: $0."
             );
         }
         else {
@@ -2147,7 +2305,7 @@ function declineManagerFightOffer() {
     player.managerSearching =
         false;
     player.managerSearchCooldown =
-        1;
+        MANAGER_CONFIG.searchCooldownWeeks;
     if (
         Array.isArray(
             player.log
@@ -2252,9 +2410,6 @@ function processManagerPostFightRest() {
     const player =
         managerPlayer();
     ensureManagerData();
-    /*
-       Não há descanso ativo.
-    */
     if (
         player.postFightRestActive !== true
     ) {
@@ -2264,9 +2419,6 @@ function processManagerPostFightRest() {
         Number(
             player.postFightRestWeeks || 0
         );
-    /*
-       Descanso já terminou.
-    */
     if (
         remaining <= 0
     ) {
@@ -2277,16 +2429,13 @@ function processManagerPostFightRest() {
         return false;
     }
     /*
-       Passa uma semana de recuperação.
+       Uma semana de recuperação passou.
     */
     player.postFightRestWeeks =
         Math.max(
             0,
             remaining - 1
         );
-    /*
-       Última semana concluída.
-    */
     if (
         player.postFightRestWeeks <= 0
     ) {
@@ -2300,7 +2449,7 @@ function processManagerPostFightRest() {
             )
         ) {
             player.log.unshift(
-                "🥊 Recuperação pós-luta concluída. Seu empresário já pode procurar uma nova luta."
+                "🥊 Recuperação pós-luta concluída. Agora existe um período de espera antes de seu empresário procurar uma nova luta."
             );
         }
     }
@@ -2325,11 +2474,56 @@ function processManagerWeek() {
     const player =
         managerPlayer();
     ensureManagerData();
+    const currentWeek =
+        Number(
+            player.week || 0
+        );
+    const currentYear =
+        Number(
+            player.year || 2026
+        );
     /*
-       PRIMEIRO:
-       PROCESSAR DESCANSO PÓS-LUTA.
-       Enquanto houver descanso,
-       o empresário não procura nova luta.
+       =====================================================
+       NOVO ANO
+       =====================================================
+    */
+    if (
+        Number(
+            player.managerLastFightYear
+        ) !==
+        currentYear
+    ) {
+        player.managerFightsThisYear =
+            0;
+        player.managerLastFightYear =
+            currentYear;
+    }
+    /*
+       =====================================================
+       CORRIGIR COOLDOWN
+       =====================================================
+       ESTE ERA UM DOS PROBLEMAS PRINCIPAIS.
+       O código antigo colocava cooldown = 1,
+       mas nunca diminuía.
+       Agora ele diminui a cada semana.
+    */
+    if (
+        Number(
+            player.managerSearchCooldown || 0
+        ) > 0
+    ) {
+        player.managerSearchCooldown =
+            Math.max(
+                0,
+                Number(
+                    player.managerSearchCooldown
+                ) - 1
+            );
+    }
+    /*
+       =====================================================
+       DESCANSO
+       =====================================================
     */
     if (
         player.postFightRestActive === true
@@ -2339,9 +2533,9 @@ function processManagerWeek() {
         return;
     }
     /*
-       SEGUNDO:
-       se existe luta,
-       atualizar camp.
+       =====================================================
+       CAMP / LUTAS
+       =====================================================
     */
     if (
         player.nextFight
@@ -2351,8 +2545,9 @@ function processManagerWeek() {
         return;
     }
     /*
-       SE EXISTE OFERTA,
-       NÃO PROCURAR OUTRA.
+       =====================================================
+       JÁ EXISTE OFERTA
+       =====================================================
     */
     if (
         player.managerFightOffer
@@ -2361,10 +2556,86 @@ function processManagerWeek() {
         return;
     }
     /*
-       SEM LUTA:
-       EMPRESÁRIO PROCURA.
+       =====================================================
+       LIMITE ANUAL
+       =====================================================
+    */
+    if (
+        Number(
+            player.managerFightsThisYear || 0
+        ) >=
+        MANAGER_CONFIG.maxFightsPerYear
+    ) {
+        managerSave();
+        return;
+    }
+    /*
+       =====================================================
+       TEMPO MÍNIMO ENTRE LUTAS
+       =====================================================
+    */
+    if (
+        currentYear ===
+        Number(
+            player.managerLastFightYear
+        )
+    ) {
+        const weeksSinceLastFight =
+            currentWeek -
+            Number(
+                player.managerLastFightWeek ||
+                -999
+            );
+        if (
+            weeksSinceLastFight <
+            MANAGER_CONFIG.minWeeksBetweenFights
+        ) {
+            managerSave();
+            return;
+        }
+    }
+    /*
+       =====================================================
+       ESPERA DEPOIS DO DESCANSO
+       =====================================================
+    */
+    if (
+        currentYear ===
+        Number(
+            player.managerNextSearchYear
+        )
+    ) {
+        if (
+            currentWeek <
+            Number(
+                player.managerNextSearchWeek ||
+                0
+            )
+        ) {
+            managerSave();
+            return;
+        }
+    }
+    /*
+       =====================================================
+       COOLDOWN
+       =====================================================
+    */
+    if (
+        Number(
+            player.managerSearchCooldown || 0
+        ) > 0
+    ) {
+        managerSave();
+        return;
+    }
+    /*
+       =====================================================
+       EMPRESÁRIO PROCURA
+       =====================================================
     */
     processManagerFightOffer();
+    managerSave();
 }
 /* =========================================================
    VERIFICAR SE AVANÇO DE SEMANA
@@ -2376,10 +2647,7 @@ function managerShouldBlockWeekAdvance() {
     const fight =
         player.nextFight;
     /*
-       DESCANSO PÓS-LUTA:
-       NÃO BLOQUEAR O AVANÇO.
-       O jogador precisa poder avançar
-       as semanas de recuperação.
+       Descanso não bloqueia avanço.
     */
     if (
         player.postFightRestActive === true &&
@@ -2471,7 +2739,7 @@ function cancelManagerFight(
     player.managerOffers =
         [];
     player.managerSearchCooldown =
-        1;
+        MANAGER_CONFIG.searchCooldownWeeks;
     if (
         Array.isArray(
             player.log
@@ -2502,7 +2770,9 @@ function completeManagerFight(
         return;
     }
     /*
-       SALVAR RESULTADO.
+       =====================================================
+       SALVAR RESULTADO
+       =====================================================
     */
     fight.status =
         "completed";
@@ -2512,7 +2782,9 @@ function completeManagerFight(
         result ||
         null;
     /*
-       CONTRATO.
+       =====================================================
+       CONTRATO
+       =====================================================
     */
     if (
         player.currentContract
@@ -2562,19 +2834,62 @@ function completeManagerFight(
     }
     /*
        =====================================================
+       REGISTRAR LUTAS DO ANO
+       =====================================================
+    */
+    const currentYear =
+        Number(
+            player.year || 2026
+        );
+    const currentWeek =
+        Number(
+            player.week || 0
+        );
+    if (
+        Number(
+            player.managerLastFightYear
+        ) !==
+        currentYear
+    ) {
+        player.managerFightsThisYear =
+            0;
+    }
+    player.managerFightsThisYear =
+        Number(
+            player.managerFightsThisYear ||
+            0
+        ) + 1;
+    player.managerLastFightYear =
+        currentYear;
+    player.managerLastFightWeek =
+        currentWeek;
+    /*
+       =====================================================
        DESCANSO PÓS-LUTA
        =====================================================
-       A luta terminou.
-       O jogador precisa cumprir 2 semanas
-       de recuperação antes de o empresário
-       procurar outra luta.
     */
     player.postFightRestWeeks =
         MANAGER_CONFIG.postFightRestWeeks;
     player.postFightRestActive =
         true;
     /*
-       LIMPAR LUTA.
+       =====================================================
+       PRÓXIMA BUSCA
+       =====================================================
+       Depois das 2 semanas de descanso,
+       ainda haverá 2 semanas adicionais antes
+       de o empresário começar uma nova procura.
+    */
+    player.managerNextSearchWeek =
+        currentWeek +
+        MANAGER_CONFIG.postFightRestWeeks +
+        MANAGER_CONFIG.postFightSearchDelayWeeks;
+    player.managerNextSearchYear =
+        currentYear;
+    /*
+       =====================================================
+       LIMPAR LUTA ATUAL
+       =====================================================
     */
     player.nextFight =
         null;
@@ -2587,14 +2902,14 @@ function completeManagerFight(
     player.managerSearching =
         false;
     /*
-       PEQUENO COOLDOWN.
-       Mantido para não alterar o sistema
-       que já existia.
+       Pequeno cooldown mantido.
     */
     player.managerSearchCooldown =
         1;
     /*
-       LOG DO DESCANSO.
+       =====================================================
+       LOG
+       =====================================================
     */
     if (
         Array.isArray(
@@ -2602,7 +2917,7 @@ function completeManagerFight(
         )
     ) {
         player.log.unshift(
-            `🛌 Descanso pós-luta iniciado. Você terá ${MANAGER_CONFIG.postFightRestWeeks} semanas de recuperação antes de procurar uma nova luta.`
+            `🛌 Descanso pós-luta iniciado. Você terá ${MANAGER_CONFIG.postFightRestWeeks} semanas de recuperação antes de poder buscar uma nova luta.`
         );
         player.log.unshift(
             "📋 O empresário encerrou o processo desta luta."
@@ -2622,9 +2937,6 @@ function createManagerTestOffer() {
     ) {
         return false;
     }
-    /*
-       Não criar oferta durante descanso.
-    */
     if (
         player.postFightRestActive === true &&
         Number(
@@ -2655,7 +2967,6 @@ function createManagerTestOffer() {
 }
 /* =========================================================
    FORÇAR OFERTA
-   ÚTIL PARA TESTE
 ========================================================= */
 function forceManagerFightOffer() {
     const player =
@@ -2666,9 +2977,6 @@ function forceManagerFightOffer() {
     ) {
         return false;
     }
-    /*
-       Não forçar oferta durante descanso.
-    */
     if (
         player.postFightRestActive === true &&
         Number(
