@@ -162,94 +162,254 @@ function fightGetPlayerOverall() {
    nextFight.opponent JÁ EXISTE.
 ========================================================= */
 
+/* =========================================================
+   OBTER ADVERSÁRIO DA LUTA
+   VERSÃO COMPATÍVEL COM TODOS OS FORMATOS
+   Prioridade:
+   1. nextFight.opponent
+   2. nextFight.opponentData
+   3. dados antigos salvos diretamente em nextFight
+   4. mmaWorld.fighters como último fallback
+   IMPORTANTE:
+   Nunca gerar um novo adversário aqui.
+   O adversário da luta deve permanecer o mesmo.
+========================================================= */
 function getCurrentFightOpponent() {
-
     const player =
         fightPlayer();
-
     const fight =
-        player.nextFight;
-
+        player?.nextFight;
     if (!fight) {
-
         return null;
-
     }
-
-
     /* =====================================================
-       PRIORIDADE ABSOLUTA:
-       ADVERSÁRIO GRAVADO NA LUTA
+       1. FORMATO ATUAL
+       nextFight.opponent
     ===================================================== */
-
     if (
         fight.opponent &&
-        typeof fight.opponent ===
-        "object"
+        typeof fight.opponent === "object"
     ) {
-
         return fight.opponent;
-
     }
-
-
     /* =====================================================
-       COMPATIBILIDADE COM ESTRUTURAS ANTIGAS
+       2. FORMATO ANTIGO
+       nextFight.opponentData
     ===================================================== */
-
     if (
         fight.opponentData &&
-        typeof fight.opponentData ===
-        "object"
+        typeof fight.opponentData === "object"
     ) {
-
         return fight.opponentData;
-
     }
-
-
     /* =====================================================
-       SE SÓ EXISTE NOME,
-       TENTAR ENCONTRAR NO MUNDO.
-       ISSO É APENAS FALLBACK.
+       3. MIGRAÇÃO DE SAVE ANTIGO
+       Alguns saves possuem somente:
+       opponentName
+       opponentOverall
+       opponentPower
+       opponentStyle
+       opponentAge
+       etc.
+       Nesse caso reconstruímos o objeto.
     ===================================================== */
-
+    const opponentName =
+        fight.opponentName ||
+        fight.opponentDisplayName ||
+        fight.opponent_name;
+    if (opponentName) {
+        let opponentOverall =
+            Number(
+                fight.opponentOverall
+            );
+        if (
+            !Number.isFinite(opponentOverall) ||
+            opponentOverall <= 0
+        ) {
+            opponentOverall =
+                Number(
+                    fight.opponentPower
+                );
+        }
+        if (
+            !Number.isFinite(opponentOverall) ||
+            opponentOverall <= 0
+        ) {
+            opponentOverall = 45;
+        }
+        opponentOverall =
+            fightClamp(
+                Math.round(
+                    opponentOverall
+                ),
+                30,
+                99
+            );
+        const opponent = {
+            id:
+                fight.opponentId ||
+                (
+                    "OPP-LEGACY-" +
+                    Date.now() +
+                    "-" +
+                    fightRandomInt(
+                        1000,
+                        9999
+                    )
+                ),
+            name:
+                opponentName,
+            displayName:
+                opponentName,
+            overall:
+                opponentOverall,
+            power:
+                opponentOverall,
+            age:
+                Number.isFinite(
+                    Number(
+                        fight.opponentAge
+                    )
+                )
+                    ?
+                    Number(
+                        fight.opponentAge
+                    )
+                    :
+                    25,
+            country:
+                fight.opponentCountry ||
+                player.country ||
+                "Brasil",
+            style:
+                fight.opponentStyle ||
+                "Completo",
+            wins:
+                Number.isFinite(
+                    Number(
+                        fight.opponentWins
+                    )
+                )
+                    ?
+                    Number(
+                        fight.opponentWins
+                    )
+                    :
+                    0,
+            losses:
+                Number.isFinite(
+                    Number(
+                        fight.opponentLosses
+                    )
+                )
+                    ?
+                    Number(
+                        fight.opponentLosses
+                    )
+                    :
+                    0,
+            draws:
+                Number.isFinite(
+                    Number(
+                        fight.opponentDraws
+                    )
+                )
+                    ?
+                    Number(
+                        fight.opponentDraws
+                    )
+                    :
+                    0
+        };
+        /* =================================================
+           GRAVAR A MIGRAÇÃO NA PRÓPRIA LUTA
+        ================================================= */
+        fight.opponent =
+            opponent;
+        fight.opponentName =
+            opponent.name;
+        fight.opponentDisplayName =
+            opponent.displayName;
+        fight.opponentOverall =
+            opponent.overall;
+        fight.opponentPower =
+            opponent.power;
+        /*
+           Salvar imediatamente para que
+           o problema não volte no próximo reload.
+        */
+        try {
+            if (
+                typeof window.saveGame ===
+                "function"
+            ) {
+                window.saveGame();
+            }
+            else if (
+                typeof window.save ===
+                "function"
+            ) {
+                window.save();
+            }
+        }
+        catch (error) {
+            console.warn(
+                "Não foi possível salvar a migração do adversário:",
+                error
+            );
+        }
+        return opponent;
+    }
+    /* =====================================================
+       4. ÚLTIMO FALLBACK
+       Procurar no mundo de lutadores.
+    ===================================================== */
     if (
-        fight.opponentName &&
         typeof window.mmaWorld !==
         "undefined" &&
         Array.isArray(
             window.mmaWorld.fighters
         )
     ) {
-
         const found =
             window.mmaWorld.fighters.find(
                 function(fighter) {
-
                     return (
                         fighter.name ===
                         fight.opponentName ||
                         fighter.displayName ===
                         fight.opponentName
                     );
-
                 }
             );
-
         if (found) {
-
+            fight.opponent =
+                found;
+            fight.opponentName =
+                found.displayName ||
+                found.name;
+            fight.opponentOverall =
+                Number(
+                    found.overall ||
+                    found.power ||
+                    45
+                );
+            fight.opponentPower =
+                fight.opponentOverall;
+            try {
+                if (
+                    typeof window.saveGame ===
+                    "function"
+                ) {
+                    window.saveGame();
+                }
+            }
+            catch (error) {}
             return found;
-
         }
-
     }
-
-
     return null;
-
 }
-
 
 /* =========================================================
    NORMALIZAR ADVERSÁRIO
