@@ -2,7 +2,12 @@
    MMA LIFE DYNASTY
    MAIN.JS
    CONTROLADOR PRINCIPAL DA INTERFACE
-   VERSÃO ATUALIZADA — OFERTAS DE LUTA
+   VERSÃO ATUALIZADA
+   - Ofertas de luta
+   - Amador sem bolsa
+   - Profissional com bolsa
+   - Luta agendada permanece no dia
+   - Não gerar nova oferta quando existe luta marcada
 ========================================================= */
 /* =========================================================
    UTILIDADES
@@ -77,15 +82,88 @@ function normalizeMainPlayer() {
         Array.isArray(p.log)
             ? p.log
             : [];
-    /*
+    /* =====================================================
        SISTEMA DE LUTAS
-    */
+    ===================================================== */
     p.fightOffers =
         Array.isArray(p.fightOffers)
             ? p.fightOffers
             : [];
     p.nextFight =
         p.nextFight || null;
+    /* =====================================================
+       NORMALIZAÇÃO DAS OFERTAS
+    ===================================================== */
+    p.fightOffers.forEach(function (offer) {
+        if (!offer) {
+            return;
+        }
+        offer.year =
+            Number(
+                offer.year || p.year
+            );
+        offer.week =
+            Number(
+                offer.week || (p.week + 1)
+            );
+        offer.opponent =
+            offer.opponent ||
+            "Adversário desconhecido";
+        offer.opponentOverall =
+            Number(
+                offer.opponentOverall || 45
+            );
+        offer.weight =
+            offer.weight ||
+            p.weight;
+        /*
+           AMADOR NÃO TEM BOLSA
+        */
+        if (!isProfessionalPlayer(p)) {
+            offer.purse = 0;
+        } else {
+            offer.purse =
+                Number(
+                    offer.purse || 0
+                );
+        }
+    });
+    /* =====================================================
+       NORMALIZAÇÃO DA PRÓXIMA LUTA
+    ===================================================== */
+    if (p.nextFight) {
+        p.nextFight.year =
+            Number(
+                p.nextFight.year || p.year
+            );
+        p.nextFight.week =
+            Number(
+                p.nextFight.week || p.week
+            );
+        p.nextFight.opponent =
+            p.nextFight.opponent ||
+            "Adversário desconhecido";
+        p.nextFight.opponentOverall =
+            Number(
+                p.nextFight.opponentOverall || 45
+            );
+        p.nextFight.weight =
+            p.nextFight.weight ||
+            p.weight;
+        /*
+           AMADOR NÃO TEM BOLSA
+        */
+        if (
+            !isProfessionalPlayer(p)
+        ) {
+            p.nextFight.purse = 0;
+        } else {
+            p.nextFight.purse =
+                Number(
+                    p.nextFight.purse || 0
+                );
+        }
+    }
     p.managerSearchAfterRest =
         Boolean(
             p.managerSearchAfterRest
@@ -95,6 +173,27 @@ function normalizeMainPlayer() {
             p.managerNextSearchWeek || 0
         );
     return p;
+}
+/* =========================================================
+   IDENTIFICAR PROFISSIONAL
+========================================================= */
+function isProfessionalPlayer(p) {
+    if (!p) {
+        return false;
+    }
+    return (
+        p.careerStage === "professional" ||
+        (
+            p.professional &&
+            p.professional.active === true
+        )
+    );
+}
+/* =========================================================
+   IDENTIFICAR AMADOR
+========================================================= */
+function isAmateurPlayer(p) {
+    return !isProfessionalPlayer(p);
 }
 /* =========================================================
    SALVAR
@@ -128,7 +227,10 @@ function mainSave() {
 /* =========================================================
    VISIBILIDADE
 ========================================================= */
-function forceDisplay(element, displayValue) {
+function forceDisplay(
+    element,
+    displayValue
+) {
     if (!element) {
         return;
     }
@@ -589,10 +691,28 @@ function home() {
     else if (
         p.nextFight
     ) {
-        statusText =
-            "Luta agendada";
-        statusIcon =
-            "🥊";
+        if (
+            fightIsToday(p)
+        ) {
+            statusText =
+                "LUTA HOJE";
+            statusIcon =
+                "🥊";
+        }
+        else if (
+            fightIsPastDue(p)
+        ) {
+            statusText =
+                "Luta aguardando combate";
+            statusIcon =
+                "🥊";
+        }
+        else {
+            statusText =
+                `Luta agendada — semana ${p.nextFight.week}`;
+            statusIcon =
+                "🥊";
+        }
     }
     else if (
         p.fightOffers &&
@@ -904,7 +1024,6 @@ function openCamp() {
 }
 /* =========================================================
    LUTAS
-   CORREÇÃO DAS OFERTAS
 ========================================================= */
 function openFight() {
     showGame();
@@ -914,34 +1033,95 @@ function openFight() {
         return;
     }
     /*
+       Se existe uma luta marcada,
+       ela SEMPRE tem prioridade.
+    */
+    if (
+        p.nextFight
+    ) {
+        renderFightOffers();
+        return;
+    }
+    /*
        Se o sistema externo existir,
        continua usando ele.
+       Porém, caso existam ofertas,
+       mostramos nossa tela.
     */
     if (
         typeof window.fightScreen ===
         "function"
     ) {
         window.fightScreen();
-        /*
-           Caso o sistema externo não
-           mostre as ofertas, desenhamos
-           a tela por cima apenas se
-           existirem ofertas.
-        */
         setTimeout(
             function () {
+                const current =
+                    normalizeMainPlayer();
                 if (
-                    p.fightOffers &&
-                    p.fightOffers.length
+                    current &&
+                    (
+                        current.nextFight ||
+                        (
+                            current.fightOffers &&
+                            current.fightOffers.length
+                        )
+                    )
                 ) {
                     renderFightOffers();
                 }
             },
-            0
+            50
         );
         return;
     }
     renderFightOffers();
+}
+/* =========================================================
+   VERIFICAR SE A LUTA É HOJE
+========================================================= */
+function fightIsToday(p) {
+    if (
+        !p ||
+        !p.nextFight
+    ) {
+        return false;
+    }
+    return (
+        Number(p.nextFight.year) ===
+        Number(p.year) &&
+        Number(p.nextFight.week) ===
+        Number(p.week)
+    );
+}
+/* =========================================================
+   VERIFICAR SE A LUTA JÁ PASSOU
+========================================================= */
+function fightIsPastDue(p) {
+    if (
+        !p ||
+        !p.nextFight
+    ) {
+        return false;
+    }
+    const fightYear =
+        Number(
+            p.nextFight.year || p.year
+        );
+    const fightWeek =
+        Number(
+            p.nextFight.week || p.week
+        );
+    const currentYear =
+        Number(p.year);
+    const currentWeek =
+        Number(p.week);
+    return (
+        fightYear < currentYear ||
+        (
+            fightYear === currentYear &&
+            fightWeek < currentWeek
+        )
+    );
 }
 /* =========================================================
    GERAR OFERTA DE LUTA
@@ -953,8 +1133,8 @@ function generateFightOffer() {
         return null;
     }
     /*
-       Não gerar oferta se já existe
-       luta marcada ou descanso.
+       NÃO GERAR OFERTA SE JÁ EXISTE LUTA
+       OU DESCANSO.
     */
     if (
         p.nextFight ||
@@ -964,26 +1144,26 @@ function generateFightOffer() {
     }
     const overall =
         getOverall();
-    const stage =
-        p.careerStage ||
-        "amateur";
+    const professional =
+        isProfessionalPlayer(p);
     let opponentBase =
         overall;
     let eventName =
-        "Evento Regional";
+        "";
     let purse =
-        500;
+        0;
     let opponentName =
-        "Rival Regional";
-    if (
-        stage === "professional" ||
-        p.professional.active
-    ) {
+        "";
+    /* =====================================================
+       PROFISSIONAL
+    ===================================================== */
+    if (professional) {
         opponentBase =
             overall +
             Math.floor(
                 Math.random() * 11
-            ) - 5;
+            ) -
+            5;
         eventName =
             "Evento Profissional";
         purse =
@@ -1009,17 +1189,24 @@ function generateFightOffer() {
                 )
             ];
     }
+    /* =====================================================
+       AMADOR
+    ===================================================== */
     else {
         opponentBase =
             overall +
             Math.floor(
                 Math.random() * 15
-            ) - 7;
+            ) -
+            7;
+        eventName =
+            "Evento Amador";
+        /*
+           IMPORTANTE:
+           AMADOR NÃO TEM BOLSA.
+        */
         purse =
-            200 +
-            Math.floor(
-                Math.random() * 800
-            );
+            0;
         const names = [
             "João Pereira",
             "Pedro Lima",
@@ -1062,6 +1249,10 @@ function generateFightOffer() {
             eventName,
         purse:
             purse,
+        /*
+           A luta é oferecida para
+           a próxima semana.
+        */
         week:
             p.week + 1,
         year:
@@ -1111,7 +1302,7 @@ function ensureFightOffer() {
     return true;
 }
 /* =========================================================
-   MOSTRAR OFERTAS
+   MOSTRAR OFERTAS / LUTAS
 ========================================================= */
 function renderFightOffers() {
     const content =
@@ -1125,8 +1316,8 @@ function renderFightOffers() {
         return;
     }
     /*
-       Se não houver oferta,
-       tenta gerar uma.
+       Se não existe luta e não existe oferta,
+       gera uma.
     */
     if (
         !p.nextFight &&
@@ -1141,16 +1332,55 @@ function renderFightOffers() {
                 ⚔️ LUTAS
             </div>
     `;
+    /* =====================================================
+       PRÓXIMA LUTA
+    ===================================================== */
     if (
         p.nextFight
     ) {
         const fight =
             p.nextFight;
+        const today =
+            fightIsToday(p);
+        const pastDue =
+            fightIsPastDue(p);
         html += `
             <div class="card">
                 <div class="title">
-                    🥊 PRÓXIMA LUTA
+                    ${
+                        today
+                            ? "🥊 LUTA HOJE"
+                            : "🥊 PRÓXIMA LUTA"
+                    }
                 </div>
+                ${
+                    today
+                        ? `
+                            <div class="statline">
+                                <span>
+                                    Situação
+                                </span>
+                                <b>
+                                    🔥 COMBATE HOJE
+                                </b>
+                            </div>
+                          `
+                        : ""
+                }
+                ${
+                    pastDue
+                        ? `
+                            <div class="statline">
+                                <span>
+                                    Situação
+                                </span>
+                                <b>
+                                    ⏳ Aguardando combate
+                                </b>
+                            </div>
+                          `
+                        : ""
+                }
                 <div class="statline">
                     <span>
                         Adversário
@@ -1195,6 +1425,14 @@ function renderFightOffers() {
                         }
                     </b>
                 </div>
+        `;
+        /*
+           BOLSA SOMENTE PARA PROFISSIONAL
+        */
+        if (
+            isProfessionalPlayer(p)
+        ) {
+            html += `
                 <div class="statline">
                     <span>
                         Bolsa
@@ -1205,9 +1443,45 @@ function renderFightOffers() {
                         )}
                     </b>
                 </div>
+            `;
+        }
+        /*
+           Botão para entrar no sistema
+           de combate, se existir.
+        */
+        if (
+            typeof window.startFight ===
+            "function"
+        ) {
+            html += `
+                <button
+                    class="green"
+                    onclick="startFight()"
+                >
+                    🥊 LUTAR AGORA
+                </button>
+            `;
+        }
+        else if (
+            typeof window.fightNow ===
+            "function"
+        ) {
+            html += `
+                <button
+                    class="green"
+                    onclick="fightNow()"
+                >
+                    🥊 LUTAR AGORA
+                </button>
+            `;
+        }
+        html += `
             </div>
         `;
     }
+    /* =====================================================
+       DESCANSO
+    ===================================================== */
     else if (
         p.postFightRestActive
     ) {
@@ -1233,16 +1507,22 @@ function renderFightOffers() {
             </div>
         `;
     }
+    /* =====================================================
+       OFERTAS
+    ===================================================== */
     else if (
         p.fightOffers.length
     ) {
         html += `
             <p>
-                📩 Você recebeu uma oferta de luta.
+                📩 Você recebeu oferta(s) de luta.
             </p>
         `;
         p.fightOffers.forEach(
-            function (offer, index) {
+            function (
+                offer,
+                index
+            ) {
                 html += `
                     <div class="card">
                         <div class="title">
@@ -1280,16 +1560,28 @@ function renderFightOffers() {
                                 ${offer.week}
                             </b>
                         </div>
+                `;
+                /*
+                   PROFISSIONAL TEM BOLSA.
+                   AMADOR NÃO TEM.
+                */
+                if (
+                    isProfessionalPlayer(p)
+                ) {
+                    html += `
                         <div class="statline">
                             <span>
                                 Bolsa
                             </span>
                             <b>
                                 $${Math.round(
-                                    offer.purse
+                                    offer.purse || 0
                                 )}
                             </b>
                         </div>
+                    `;
+                }
+                html += `
                         <button
                             class="green"
                             onclick="acceptFightOffer(${index})"
@@ -1307,6 +1599,9 @@ function renderFightOffers() {
             }
         );
     }
+    /* =====================================================
+       NENHUMA OFERTA
+    ===================================================== */
     else {
         html += `
             <p>
@@ -1354,6 +1649,18 @@ function acceptFightOffer(index) {
     if (!offer) {
         return;
     }
+    /*
+       DEFINIR BOLSA CORRETAMENTE
+    */
+    let fightPurse = 0;
+    if (
+        isProfessionalPlayer(p)
+    ) {
+        fightPurse =
+            Number(
+                offer.purse || 0
+            );
+    }
     p.nextFight = {
         opponent:
             offer.opponent,
@@ -1361,15 +1668,29 @@ function acceptFightOffer(index) {
             offer.opponentOverall,
         event:
             offer.event,
+        /*
+           AMADOR = 0
+           PROFISSIONAL = BOLSA
+        */
         purse:
-            offer.purse,
+            fightPurse,
         week:
-            offer.week,
+            Number(
+                offer.week ||
+                (p.week + 1)
+            ),
         year:
-            offer.year,
+            Number(
+                offer.year ||
+                p.year
+            ),
         weight:
-            offer.weight
+            offer.weight ||
+            p.weight
     };
+    /*
+       LIMPAR OFERTAS
+    */
     p.fightOffers =
         [];
     p.managerSearching =
@@ -1453,12 +1774,14 @@ function nextWeek() {
     if (!p) {
         return;
     }
-    /*
-       Impede o navegador de tentar
-       reposicionar a página.
-    */
     const oldScroll =
         window.scrollY;
+    /* =====================================================
+       IMPORTANTE:
+       NÃO APAGAR LUTA AGENDADA.
+       Se a semana chegar à semana da luta,
+       nextFight continua salvo.
+    ===================================================== */
     /* =====================================================
        1 — PROCESSAR CAMP
     ===================================================== */
@@ -1497,6 +1820,10 @@ function nextWeek() {
                 p.week
             ] || []
             : [];
+    /*
+       Não aplicar treino se existe luta
+       marcada para esta semana.
+    */
     if (
         plan.length &&
         !p.nextFight
@@ -1609,6 +1936,11 @@ function nextWeek() {
     /* =====================================================
        5 — EMPRESÁRIO
     ===================================================== */
+    /*
+       MUITO IMPORTANTE:
+       O empresário só procura luta se
+       NÃO houver luta marcada.
+    */
     if (
         p.manager &&
         !p.nextFight &&
@@ -1655,17 +1987,37 @@ function nextWeek() {
         );
     }
     /* =====================================================
-       8 — GERAR OFERTA
-       AGORA É FEITO PELO MAIN.JS
+       8 — PRESERVAR A LUTA AGENDADA
     ===================================================== */
+    /*
+       Se a luta chegou à semana marcada,
+       NÃO apagar.
+       Ela permanece em p.nextFight.
+    */
+    if (
+        p.nextFight &&
+        fightIsToday(p)
+    ) {
+        p.log.unshift(
+            `🥊 Hoje é dia da luta contra ${p.nextFight.opponent}.`
+        );
+    }
+    /* =====================================================
+       9 — GERAR NOVA OFERTA
+    ===================================================== */
+    /*
+       Nunca gerar nova oferta se:
+       - existe luta marcada;
+       - existe descanso;
+       - já existe oferta.
+    */
     if (
         !p.nextFight &&
         !p.postFightRestActive &&
         !p.fightOffers.length
     ) {
         /*
-           Se existir empresário,
-           procura uma luta.
+           Empresário tenta primeiro.
         */
         if (
             p.manager &&
@@ -1683,8 +2035,8 @@ function nextWeek() {
             }
         }
         /*
-           Depois da tentativa externa,
-           garante que exista uma oferta.
+           Se o sistema externo não gerou,
+           nosso sistema garante uma oferta.
         */
         if (
             !p.fightOffers.length
@@ -1692,15 +2044,17 @@ function nextWeek() {
             ensureFightOffer();
         }
     }
+    /* =====================================================
+       10 — SALVAR
+    ===================================================== */
     mainSave();
-    /*
-       Atualiza a tela sem chamar
-       scrollTo(0,0).
-    */
+    /* =====================================================
+       11 — ATUALIZAR HOME
+    ===================================================== */
     home();
-    /*
-       Mantém a posição do usuário.
-    */
+    /* =====================================================
+       12 — RESTAURAR SCROLL
+    ===================================================== */
     try {
         window.scrollTo(
             0,
@@ -2049,6 +2403,14 @@ window.rejectFightOffer =
     rejectFightOffer;
 window.requestFightOffer =
     requestFightOffer;
+window.isProfessionalPlayer =
+    isProfessionalPlayer;
+window.isAmateurPlayer =
+    isAmateurPlayer;
+window.fightIsToday =
+    fightIsToday;
+window.fightIsPastDue =
+    fightIsPastDue;
 /* =========================================================
    INICIALIZAÇÃO
 ========================================================= */
