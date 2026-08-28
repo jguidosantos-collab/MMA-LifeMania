@@ -576,3 +576,11 @@ select:focus {
 #game {
     padding-bottom: 100px;
 }
+/* =========================================================
+   CONTROLE DE TELAS
+   IMPORTANTE: elementos com .hidden ficam realmente ocultos
+========================================================= */
+
+.hidden {
+    display: none !important;
+}
