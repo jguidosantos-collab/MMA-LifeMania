@@ -2,7 +2,22 @@
    MMA LIFE DYNASTY
    MANAGERS.JS
    EMPRESÁRIO — SISTEMA COMPLETO
-   VERSÃO SEGURA / COMPATÍVEL
+   VERSÃO INTEGRADA COM O PROJETO ATUAL
+
+   COMPATIBILIDADE:
+   - player.js
+   - main.js
+   - fights.js
+   - save.js
+
+   PRINCÍPIOS:
+   - window.player é a fonte única de dados
+   - managerFightOffer é a oferta principal
+   - fightOffers funciona como espelho de compatibilidade
+   - nextFight é a única luta efetivamente marcada
+   - manager NÃO navega automaticamente para home()
+   - adversário é preservado dentro da luta
+   - contrato ativo bloqueia novas ofertas
 ========================================================= */
 
 
@@ -11,16 +26,24 @@
 ========================================================= */
 
 const MANAGER_CONFIG = {
+
     minCampWeeks: 4,
     maxCampWeeks: 8,
+
     postFightRestWeeks: 2,
+
     minSearchWaitWeeks: 1,
     maxSearchWaitWeeks: 4,
+
     offerChance: 0.60,
+
     minContractFights: 3,
     maxContractFights: 5,
+
     professionalMinAge: 18,
+
     professionalDecisionCooldownWeeks: 12
+
 };
 
 
@@ -29,6 +52,11 @@ const MANAGER_CONFIG = {
 ========================================================= */
 
 const MANAGER_EVENTS = [
+
+    /* =====================================================
+       REGIONAL
+    ===================================================== */
+
     {
         name: "MMA Fight Night",
         category: "regional",
@@ -42,6 +70,7 @@ const MANAGER_EVENTS = [
         ppv: false,
         elite: false
     },
+
     {
         name: "Brazil Combat",
         category: "regional",
@@ -55,6 +84,7 @@ const MANAGER_EVENTS = [
         ppv: false,
         elite: false
     },
+
     {
         name: "Fight Arena",
         category: "regional",
@@ -68,6 +98,7 @@ const MANAGER_EVENTS = [
         ppv: false,
         elite: false
     },
+
     {
         name: "Future Fighters",
         category: "regional",
@@ -81,6 +112,7 @@ const MANAGER_EVENTS = [
         ppv: false,
         elite: false
     },
+
     {
         name: "National Combat",
         category: "regional",
@@ -95,6 +127,11 @@ const MANAGER_EVENTS = [
         elite: false
     },
 
+
+    /* =====================================================
+       NACIONAL
+    ===================================================== */
+
     {
         name: "Warriors Championship",
         category: "national",
@@ -108,6 +145,7 @@ const MANAGER_EVENTS = [
         ppv: false,
         elite: false
     },
+
     {
         name: "Combat Warriors",
         category: "national",
@@ -121,6 +159,7 @@ const MANAGER_EVENTS = [
         ppv: false,
         elite: false
     },
+
     {
         name: "Cage Warriors Brasil",
         category: "national",
@@ -134,6 +173,7 @@ const MANAGER_EVENTS = [
         ppv: false,
         elite: false
     },
+
     {
         name: "Ultimate Fight League",
         category: "national",
@@ -148,6 +188,11 @@ const MANAGER_EVENTS = [
         elite: false
     },
 
+
+    /* =====================================================
+       INTERNACIONAL
+    ===================================================== */
+
     {
         name: "PFL",
         category: "world",
@@ -161,6 +206,7 @@ const MANAGER_EVENTS = [
         ppv: true,
         elite: false
     },
+
     {
         name: "Bellator",
         category: "world",
@@ -174,6 +220,7 @@ const MANAGER_EVENTS = [
         ppv: true,
         elite: false
     },
+
     {
         name: "ONE Championship",
         category: "world",
@@ -187,6 +234,7 @@ const MANAGER_EVENTS = [
         ppv: true,
         elite: false
     },
+
     {
         name: "Rizin",
         category: "world",
@@ -201,6 +249,11 @@ const MANAGER_EVENTS = [
         elite: false
     },
 
+
+    /* =====================================================
+       ELITE
+    ===================================================== */
+
     {
         name: "UFC",
         category: "elite",
@@ -214,6 +267,7 @@ const MANAGER_EVENTS = [
         ppv: true,
         elite: true
     },
+
     {
         name: "UFC — Evento Grande",
         category: "elite",
@@ -227,6 +281,7 @@ const MANAGER_EVENTS = [
         ppv: true,
         elite: true
     },
+
     {
         name: "UFC — Disputa de Título",
         category: "elite",
@@ -240,6 +295,7 @@ const MANAGER_EVENTS = [
         ppv: true,
         elite: true
     },
+
     {
         name: "UFC — Defesa de Cinturão",
         category: "elite",
@@ -253,6 +309,7 @@ const MANAGER_EVENTS = [
         ppv: true,
         elite: true
     }
+
 ];
 
 
@@ -264,7 +321,7 @@ window.mmaManager = null;
 
 
 /* =========================================================
-   UTILIDADES
+   PLAYER
 ========================================================= */
 
 function managerPlayer() {
@@ -273,21 +330,32 @@ function managerPlayer() {
         !window.player &&
         typeof window.createDefaultPlayer === "function"
     ) {
+
         try {
+
             window.player =
                 window.createDefaultPlayer();
+
         }
         catch (error) {
+
             console.warn(
-                "Não foi possível criar player padrão:",
+                "MANAGER: não foi possível criar player:",
                 error
             );
+
         }
+
     }
 
     return window.player || null;
+
 }
 
+
+/* =========================================================
+   SAVE
+========================================================= */
 
 function managerSave() {
 
@@ -296,92 +364,80 @@ function managerSave() {
         if (
             typeof window.saveGame === "function"
         ) {
-            window.saveGame();
+
+            return window.saveGame();
+
+        }
+
+        if (
+            typeof window.save === "function"
+        ) {
+
+            return window.save();
+
         }
 
     }
     catch (error) {
 
         console.warn(
-            "Erro ao salvar jogo:",
+            "MANAGER: erro ao salvar:",
             error
         );
 
     }
+
+    return false;
+
 }
 
 
-/*
+/* =========================================================
+   ATUALIZAÇÃO SEGURA DA INTERFACE
+
    IMPORTANTE:
+   NÃO chamar home() automaticamente.
 
-   Não chamamos home() automaticamente se existir
-   uma função de renderização mais específica.
-
-   Isso reduz o risco de o manager interferir
-   no fluxo principal do jogo.
-*/
+   Isso evita que uma ação do empresário
+   tire o jogador da tela atual.
+========================================================= */
 
 function managerRefreshUI() {
 
     try {
 
         if (
-            typeof window.renderHome === "function"
-        ) {
-            window.renderHome();
-            return;
-        }
-
-    }
-    catch (error) {
-        console.warn(
-            "Erro em renderHome:",
-            error
-        );
-    }
-
-
-    try {
-
-        if (
             typeof window.updateUI === "function"
         ) {
+
             window.updateUI();
-            return;
+
         }
 
     }
     catch (error) {
+
         console.warn(
-            "Erro em updateUI:",
+            "MANAGER: erro em updateUI:",
             error
         );
-    }
-
-
-    try {
-
-        if (
-            typeof window.home === "function"
-        ) {
-            window.home();
-        }
 
     }
-    catch (error) {
-        console.warn(
-            "Erro ao atualizar home:",
-            error
-        );
-    }
+
 }
 
 
+/* =========================================================
+   UTILIDADES
+========================================================= */
+
 function managerRandom(min, max) {
 
-    return Math.random() *
-        (max - min) +
-        min;
+    return (
+        Math.random() *
+        (max - min)
+    ) + min;
+
 }
 
 
@@ -393,6 +449,7 @@ function managerRandomInt(min, max) {
             max + 1
         )
     );
+
 }
 
 
@@ -405,6 +462,51 @@ function managerClamp(value, min, max) {
             value
         )
     );
+
+}
+
+
+function managerNumber(value, fallback = 0) {
+
+    const number =
+        Number(value);
+
+    return Number.isFinite(number)
+        ? number
+        : fallback;
+
+}
+
+
+/* =========================================================
+   SEMANA ABSOLUTA
+
+   Mantém compatibilidade com o calendário
+   do main.js.
+========================================================= */
+
+function managerAbsoluteWeek(
+    year,
+    week
+) {
+
+    const y =
+        managerNumber(
+            year,
+            2026
+        );
+
+    const w =
+        managerNumber(
+            week,
+            0
+        );
+
+    return (
+        y * 53 +
+        w
+    );
+
 }
 
 
@@ -418,142 +520,367 @@ function ensureManagerData() {
         managerPlayer();
 
     if (!player) {
-        return;
+        return null;
     }
 
 
     if (
         typeof player.manager === "undefined"
     ) {
+
         player.manager = null;
+
     }
 
 
     if (
-        !Array.isArray(player.managerOffers)
+        !Array.isArray(
+            player.managerOffers
+        )
     ) {
+
         player.managerOffers = [];
+
+    }
+
+
+    if (
+        typeof player.managerFightOffer === "undefined"
+    ) {
+
+        player.managerFightOffer = null;
+
+    }
+
+
+    if (
+        !Array.isArray(
+            player.fightOffers
+        )
+    ) {
+
+        player.fightOffers = [];
+
     }
 
 
     if (
         typeof player.managerSearchCooldown !== "number"
     ) {
+
         player.managerSearchCooldown = 0;
+
     }
 
 
     if (
         typeof player.managerLastOfferWeek !== "number"
     ) {
+
         player.managerLastOfferWeek = -999;
+
     }
 
 
     if (
         typeof player.managerOfferId !== "number"
     ) {
+
         player.managerOfferId = 0;
+
     }
 
 
     if (
         typeof player.managerSearching !== "boolean"
     ) {
+
         player.managerSearching = false;
+
     }
 
 
     if (
         typeof player.managerSearchWeek !== "number"
     ) {
+
         player.managerSearchWeek = -999;
+
     }
 
 
     if (
         typeof player.managerOfferPending !== "boolean"
     ) {
+
         player.managerOfferPending = false;
+
     }
 
 
     if (
         typeof player.managerContractFightNumber !== "number"
     ) {
+
         player.managerContractFightNumber = 0;
+
     }
 
 
     if (
         typeof player.managerContractTotalFights !== "number"
     ) {
+
         player.managerContractTotalFights = 0;
+
     }
 
 
     if (
         typeof player.managerContractEvent !== "string"
     ) {
+
         player.managerContractEvent = "";
+
     }
 
 
     if (
         typeof player.managerContractCategory !== "string"
     ) {
+
         player.managerContractCategory = "";
+
     }
 
 
     if (
         typeof player.postFightRestWeeks !== "number"
     ) {
+
         player.postFightRestWeeks = 0;
+
     }
 
 
     if (
         typeof player.postFightRestActive !== "boolean"
     ) {
+
         player.postFightRestActive = false;
+
     }
 
 
     if (
         typeof player.managerNextSearchWeek !== "number"
     ) {
+
         player.managerNextSearchWeek = 0;
+
+    }
+
+
+    if (
+        typeof player.managerSearchAfterRest !== "boolean"
+    ) {
+
+        player.managerSearchAfterRest = false;
+
     }
 
 
     if (
         typeof player.professionalDecisionPending !== "boolean"
     ) {
+
         player.professionalDecisionPending = false;
+
     }
 
 
     if (
         typeof player.professionalDecisionMade !== "boolean"
     ) {
+
         player.professionalDecisionMade = false;
+
     }
 
 
     if (
         typeof player.professionalDecisionWeek !== "number"
     ) {
+
         player.professionalDecisionWeek = -999;
+
     }
+
+
+    if (
+        !player.professional ||
+        typeof player.professional !== "object"
+    ) {
+
+        player.professional = {
+
+            active: false,
+            wins: 0,
+            losses: 0,
+            draws: 0,
+            ranking: null
+
+        };
+
+    }
+
+
+    if (
+        !player.amateur ||
+        typeof player.amateur !== "object"
+    ) {
+
+        player.amateur = {
+
+            wins: 0,
+            losses: 0,
+            draws: 0,
+            ranking: 50
+
+        };
+
+    }
+
+
+    if (
+        !Array.isArray(player.log)
+    ) {
+
+        player.log = [];
+
+    }
+
+
+    /*
+       Compatibilidade com ofertas antigas.
+    */
+
+    if (
+        player.managerFightOffer &&
+        !Array.isArray(player.fightOffers)
+    ) {
+
+        player.fightOffers = [
+            player.managerFightOffer
+        ];
+
+    }
+
+
+    /*
+       Compatibilidade com nextFight antigo.
+    */
+
+    if (player.nextFight) {
+
+        const fight =
+            player.nextFight;
+
+
+        if (
+            fight.fightWeek === undefined
+        ) {
+
+            if (
+                fight.week !== undefined
+            ) {
+
+                fight.fightWeek =
+                    managerNumber(
+                        fight.week,
+                        managerNumber(
+                            player.week,
+                            0
+                        ) + 2
+                    );
+
+            }
+            else {
+
+                fight.fightWeek =
+                    managerNumber(
+                        player.week,
+                        0
+                    ) + 2;
+
+            }
+
+        }
+
+
+        if (
+            fight.fightYear === undefined
+        ) {
+
+            fight.fightYear =
+                managerNumber(
+                    fight.year,
+                    managerNumber(
+                        player.year,
+                        2026
+                    )
+                );
+
+        }
+
+
+        fight.week =
+            fight.fightWeek;
+
+
+        if (
+            !fight.status
+        ) {
+
+            fight.status =
+                "scheduled";
+
+        }
+
+    }
+
+
+    return player;
+
 }
 
 
 /* =========================================================
-   EMPRESÁRIO
+   EMPRESÁRIO ATIVO
 ========================================================= */
 
 function hasManager() {
+
+    const player =
+        ensureManagerData();
+
+    if (!player) {
+        return false;
+    }
+
+    return Boolean(
+        player.manager &&
+        player.manager.active !== false
+    );
+
+}
+
+
+/* =========================================================
+   PROFISSIONAL
+========================================================= */
+
+function managerIsProfessional() {
 
     const player =
         managerPlayer();
@@ -562,12 +889,32 @@ function hasManager() {
         return false;
     }
 
-    ensureManagerData();
 
     return Boolean(
-        player.manager &&
-        player.manager.active !== false
+
+        player.careerStage === "professional" ||
+
+        (
+            player.professional &&
+            player.professional.active === true
+        )
+
     );
+
+}
+
+
+/* =========================================================
+   AMADOR
+
+   Regra simples e segura:
+   se não é profissional, é amador.
+========================================================= */
+
+function managerIsAmateur() {
+
+    return !managerIsProfessional();
+
 }
 
 
@@ -600,7 +947,13 @@ function managerGetPlayerOverall() {
                 Number.isFinite(value) &&
                 value > 0
             ) {
-                return value;
+
+                return managerClamp(
+                    Math.round(value),
+                    1,
+                    99
+                );
+
             }
 
         }
@@ -609,55 +962,64 @@ function managerGetPlayerOverall() {
     catch (error) {}
 
 
-    const value =
+    const fallback =
         Number(
-            player.overall || 45
+            player.overall
         );
 
 
-    return (
-        Number.isFinite(value) &&
-        value > 0
-    )
-        ?
-        value
-        :
-        45;
+    if (
+        Number.isFinite(fallback) &&
+        fallback > 0
+    ) {
+
+        return managerClamp(
+            Math.round(fallback),
+            1,
+            99
+        );
+
+    }
+
+
+    return 45;
+
 }
 
 
 /* =========================================================
-   AMADOR / PROFISSIONAL
+   ESTÁGIO DE CARREIRA
 ========================================================= */
 
-function managerIsAmateur() {
+function managerGetCareerStage() {
 
     const player =
         managerPlayer();
 
     if (!player) {
-        return true;
+        return "amateur";
     }
 
 
     if (
-        player.careerStage === "amateur"
+        managerIsProfessional()
     ) {
-        return true;
+
+        if (
+            player.careerStage
+        ) {
+
+            return player.careerStage;
+
+        }
+
+        return "professional";
+
     }
 
 
-    if (
-        player.professional &&
-        player.professional.active === true
-    ) {
-        return false;
-    }
+    return "amateur";
 
-
-    return Number(
-        player.age || 15
-    ) < 18;
 }
 
 
@@ -717,22 +1079,29 @@ function generateManagerOpponent() {
     if (
         player &&
         player.name &&
-        name === player.name
+        name.toLowerCase() ===
+        String(player.name).toLowerCase()
     ) {
-        name = "Ricardo Martins";
+
+        name =
+            "Ricardo Martins";
+
     }
 
 
     const styles = [
+
         "Striker",
         "Wrestler",
         "Grappler",
         "Completo"
+
     ];
 
 
     const opponentOverall =
         managerClamp(
+
             Math.round(
                 overall +
                 managerRandomInt(
@@ -740,8 +1109,10 @@ function generateManagerOpponent() {
                     8
                 )
             ),
+
             30,
             95
+
         );
 
 
@@ -800,69 +1171,141 @@ function generateManagerOpponent() {
 
         draws:
             0
+
     };
+
 }
 
 
 /* =========================================================
    EVENTO
+
+   PROGRESSÃO:
+   AMADOR:
+   somente regional
+
+   PROFISSIONAL:
+   OVR < 50  -> regional
+   OVR < 65  -> nacional
+   OVR < 75  -> internacional
+   OVR >= 75 -> elite
 ========================================================= */
 
 function generateManagerEvent() {
+
+    const player =
+        managerPlayer();
 
     const overall =
         managerGetPlayerOverall();
 
 
-    let available =
-        MANAGER_EVENTS.filter(
-            function(event) {
-
-                if (
-                    overall < 50
-                ) {
-                    return (
-                        event.category ===
-                        "regional"
-                    );
-                }
-
-
-                if (
-                    overall < 65
-                ) {
-                    return (
-                        event.category === "regional" ||
-                        event.category === "national"
-                    );
-                }
-
-
-                if (
-                    overall < 75
-                ) {
-                    return (
-                        event.category === "regional" ||
-                        event.category === "national" ||
-                        event.category === "world"
-                    );
-                }
-
-
-                return true;
-            }
-        );
+    let available = [];
 
 
     if (
-        available.length === 0
+        managerIsAmateur()
     ) {
 
         available =
             MANAGER_EVENTS.filter(
-                event =>
-                    event.category ===
-                    "regional"
+                function(event) {
+
+                    return (
+                        event.category ===
+                        "regional"
+                    );
+
+                }
+            );
+
+    }
+    else if (
+        overall < 50
+    ) {
+
+        available =
+            MANAGER_EVENTS.filter(
+                function(event) {
+
+                    return (
+                        event.category ===
+                        "regional"
+                    );
+
+                }
+            );
+
+    }
+    else if (
+        overall < 65
+    ) {
+
+        available =
+            MANAGER_EVENTS.filter(
+                function(event) {
+
+                    return (
+
+                        event.category ===
+                        "regional" ||
+
+                        event.category ===
+                        "national"
+
+                    );
+
+                }
+            );
+
+    }
+    else if (
+        overall < 75
+    ) {
+
+        available =
+            MANAGER_EVENTS.filter(
+                function(event) {
+
+                    return (
+
+                        event.category ===
+                        "regional" ||
+
+                        event.category ===
+                        "national" ||
+
+                        event.category ===
+                        "world"
+
+                    );
+
+                }
+            );
+
+    }
+    else {
+
+        available =
+            MANAGER_EVENTS.slice();
+
+    }
+
+
+    if (
+        !available.length
+    ) {
+
+        available =
+            MANAGER_EVENTS.filter(
+                function(event) {
+
+                    return (
+                        event.category ===
+                        "regional"
+                    );
+
+                }
             );
 
     }
@@ -918,7 +1361,9 @@ function generateManagerEvent() {
                 event.type === "title" ||
                 event.type === "title_defense"
             )
+
     };
+
 }
 
 
@@ -927,12 +1372,16 @@ function generateManagerEvent() {
 ========================================================= */
 
 function calculateRegionalPurse() {
+
     return 200;
+
 }
 
 
 function calculateNationalPurse() {
+
     return 1000;
+
 }
 
 
@@ -940,6 +1389,7 @@ function calculateWorldPurse() {
 
     const player =
         managerPlayer();
+
 
     const fightNumber =
         Number(
@@ -951,27 +1401,26 @@ function calculateWorldPurse() {
     if (
         fightNumber <= 3
     ) {
+
         return 8000;
+
     }
 
 
     if (
         fightNumber <= 6
     ) {
+
         return 10000;
+
     }
 
 
-    return managerClamp(
-        Math.round(
-            managerRandom(
-                80000,
-                350000
-            )
-        ),
+    return managerRandomInt(
         80000,
         350000
     );
+
 }
 
 
@@ -979,6 +1428,7 @@ function calculateElitePurse(event) {
 
     const player =
         managerPlayer();
+
 
     const fightNumber =
         Number(
@@ -988,13 +1438,16 @@ function calculateElitePurse(event) {
 
 
     if (
+        event &&
         event.type === "elite"
     ) {
 
         if (
             fightNumber <= 0
         ) {
+
             return 12000;
+
         }
 
 
@@ -1010,30 +1463,20 @@ function calculateElitePurse(event) {
         }
 
 
-        return managerClamp(
-            Math.round(
-                managerRandom(
-                    200000,
-                    1000000
-                )
-            ),
+        return managerRandomInt(
             200000,
             1000000
         );
+
     }
 
 
     if (
+        event &&
         event.type === "elite_big"
     ) {
 
-        return managerClamp(
-            Math.round(
-                managerRandom(
-                    25000,
-                    1000000
-                )
-            ),
+        return managerRandomInt(
             25000,
             1000000
         );
@@ -1042,17 +1485,14 @@ function calculateElitePurse(event) {
 
 
     if (
-        event.type === "title" ||
-        event.type === "title_defense"
+        event &&
+        (
+            event.type === "title" ||
+            event.type === "title_defense"
+        )
     ) {
 
-        return managerClamp(
-            Math.round(
-                managerRandom(
-                    200000,
-                    1000000
-                )
-            ),
+        return managerRandomInt(
             200000,
             1000000
         );
@@ -1061,6 +1501,7 @@ function calculateElitePurse(event) {
 
 
     return 12000;
+
 }
 
 
@@ -1074,53 +1515,70 @@ function calculateManagerPurse(event) {
     if (
         event.category === "regional"
     ) {
+
         return calculateRegionalPurse();
+
     }
 
 
     if (
         event.category === "national"
     ) {
+
         return calculateNationalPurse();
+
     }
 
 
     if (
         event.category === "world"
     ) {
+
         return calculateWorldPurse();
+
     }
 
 
     if (
         event.category === "elite"
     ) {
-        return calculateElitePurse(event);
+
+        return calculateElitePurse(
+            event
+        );
+
     }
 
 
     return 200;
+
 }
 
 
 /* =========================================================
-   BÔNUS
+   BÔNUS DE VITÓRIA
 ========================================================= */
 
-function calculateManagerWinBonus(purse) {
+function calculateManagerWinBonus(
+    purse
+) {
 
     if (
         managerIsAmateur()
     ) {
+
         return 0;
+
     }
 
 
-    return Math.round(
-        Number(
-            purse || 0
+    return Math.max(
+        0,
+        Math.round(
+            Number(purse || 0)
         )
     );
+
 }
 
 
@@ -1145,64 +1603,57 @@ function createNegotiationData(
 
         return {
 
-            available:
-                false,
+            available: false,
 
-            currentPurse:
-                purse,
+            currentPurse: purse,
 
-            minimum:
-                purse,
+            minimum: purse,
 
-            maximum:
-                purse,
+            maximum: purse,
 
-            requested:
-                purse,
+            requested: purse,
 
-            successChance:
-                100,
+            successChance: 100,
 
-            ppvAvailable:
-                false,
+            ppvAvailable: false,
 
-            ppv:
-                0,
+            ppv: 0,
 
-            negotiated:
-                false,
+            negotiated: false,
 
-            accepted:
-                false
+            accepted: false
 
         };
+
     }
 
 
     const minimum =
-        Number(
-            purse
+        Math.max(
+            0,
+            Number(purse || 0)
         );
 
 
     const maximum =
         Math.min(
+
             1000000,
+
             Math.max(
                 minimum,
                 Math.round(
                     minimum * 2
                 )
             )
+
         );
 
 
     const requested =
-        Math.round(
-            managerRandom(
-                minimum,
-                maximum
-            )
+        managerRandomInt(
+            minimum,
+            maximum
         );
 
 
@@ -1219,11 +1670,16 @@ function createNegotiationData(
         ratio * 75;
 
 
-    successChance +=
+    const managerNegotiation =
         Number(
             player?.manager?.negotiation ||
             50
-        ) * 0.15;
+        );
+
+
+    successChance +=
+        managerNegotiation *
+        0.15;
 
 
     successChance =
@@ -1247,213 +1703,124 @@ function createNegotiationData(
 
     return {
 
-        available:
-            true,
+        available: true,
 
-        currentPurse:
-            purse,
+        currentPurse: minimum,
 
-        minimum:
-            minimum,
+        minimum: minimum,
 
-        maximum:
-            maximum,
+        maximum: maximum,
 
-        requested:
-            requested,
+        requested: requested,
 
-        successChance:
-            successChance,
+        successChance: successChance,
 
-        ppvAvailable:
-            true,
+        ppvAvailable: true,
 
-        ppv:
-            ppv,
+        ppv: ppv,
 
         negotiationType:
             event.category,
 
-        negotiated:
-            false,
+        negotiated: false,
 
-        accepted:
-            false
+        accepted: false
+
     };
+
 }
 
 
 /* =========================================================
-   NEGOCIAR OFERTA
+   ESPELHAR OFERTA PARA MAIN.JS
+
+   managerFightOffer:
+   fonte principal.
+
+   fightOffers:
+   compatibilidade com sistemas
+   que esperam a fila de ofertas.
 ========================================================= */
 
-function negotiateManagerFightOffer() {
+function syncManagerOfferToMain() {
 
     const player =
-        managerPlayer();
-
-    ensureManagerData();
-
+        ensureManagerData();
 
     if (!player) {
-        return false;
-    }
-
-
-    const offer =
-        player.managerFightOffer;
-
-
-    if (!offer) {
-
-        alert(
-            "Não existe nenhuma oferta para negociar."
-        );
-
-        return false;
+        return;
     }
 
 
     if (
-        !offer.negotiation ||
-        offer.negotiation.available !== true
+        player.managerFightOffer
     ) {
 
-        alert(
-            "Esta oferta não pode ser negociada."
-        );
+        player.fightOffers = [
+            player.managerFightOffer
+        ];
 
-        return false;
-    }
-
-
-    if (
-        offer.negotiation.negotiated === true
-    ) {
-
-        alert(
-            "Esta oferta já foi negociada."
-        );
-
-        return false;
-    }
-
-
-    const negotiation =
-        offer.negotiation;
-
-
-    const roll =
-        Math.random() * 100;
-
-
-    negotiation.negotiated =
-        true;
-
-
-    if (
-        roll <=
-        Number(
-            negotiation.successChance
-        )
-    ) {
-
-        const newPurse =
-            Number(
-                negotiation.requested
-            );
-
-
-        offer.purse =
-            newPurse;
-
-
-        offer.fightPurse =
-            newPurse;
-
-
-        offer.winBonus =
-            calculateManagerWinBonus(
-                newPurse
-            );
-
-
-        offer.totalWinPayout =
-            newPurse +
-            offer.winBonus;
-
-
-        negotiation.currentPurse =
-            newPurse;
-
-
-        negotiation.accepted =
-            true;
-
-
-        if (
-            Array.isArray(player.log)
-        ) {
-
-            player.log.unshift(
-                `🤝 Negociação aceita! A bolsa foi aumentada para $${newPurse.toLocaleString("en-US")}.`
-            );
-
-        }
+        player.managerOffers = [
+            player.managerFightOffer
+        ];
 
     }
     else {
 
-        negotiation.accepted =
-            false;
+        player.fightOffers = [];
 
-
-        if (
-            Array.isArray(player.log)
-        ) {
-
-            player.log.unshift(
-                "❌ A organização recusou a negociação. A oferta original continua válida."
-            );
-
-        }
+        player.managerOffers = [];
 
     }
 
-
-    player.managerFightOffer =
-        offer;
-
-
-    player.managerOfferPending =
-        true;
-
-
-    managerSave();
-    managerRefreshUI();
-
-
-    return negotiation.accepted;
 }
 
 
 /* =========================================================
-   GERAR OFERTA
+   REMOVER OFERTA
+========================================================= */
+
+function clearManagerOffer() {
+
+    const player =
+        ensureManagerData();
+
+    if (!player) {
+        return;
+    }
+
+
+    player.managerFightOffer =
+        null;
+
+    player.managerOfferPending =
+        false;
+
+    player.managerOffers =
+        [];
+
+    player.fightOffers =
+        [];
+
+}
+
+
+/* =========================================================
+   OFERTA DE LUTA
 ========================================================= */
 
 function generateManagerFightOffer() {
 
     const player =
-        managerPlayer();
-
-    ensureManagerData();
-
+        ensureManagerData();
 
     if (
         !player ||
         !hasManager()
     ) {
+
         return null;
+
     }
 
 
@@ -1469,20 +1836,22 @@ function generateManagerFightOffer() {
         generateManagerEvent();
 
 
+    /*
+       Amador não recebe bolsa.
+    */
+
     const purse =
         amateur
-            ?
-            0
-            :
-            calculateManagerPurse(event);
+            ? 0
+            : calculateManagerPurse(
+                event
+            );
 
 
     const winBonus =
         amateur
-            ?
-            0
-            :
-            calculateManagerWinBonus(
+            ? 0
+            : calculateManagerWinBonus(
                 purse
             );
 
@@ -1503,43 +1872,36 @@ function generateManagerFightOffer() {
 
     const negotiation =
         amateur
-            ?
-            {
-                available:
-                    false,
+            ? {
 
-                currentPurse:
-                    0,
+                available: false,
+                currentPurse: 0,
+                minimum: 0,
+                maximum: 0,
+                requested: 0,
+                successChance: 100,
+                ppvAvailable: false,
+                ppv: 0,
+                negotiated: false,
+                accepted: false
 
-                minimum:
-                    0,
-
-                maximum:
-                    0,
-
-                requested:
-                    0,
-
-                successChance:
-                    100,
-
-                ppvAvailable:
-                    false,
-
-                ppv:
-                    0,
-
-                negotiated:
-                    false,
-
-                accepted:
-                    false
             }
-            :
-            createNegotiationData(
+            : createNegotiationData(
                 purse,
                 event
             );
+
+
+    const currentWeek =
+        Number(
+            player.week || 0
+        );
+
+
+    const currentYear =
+        Number(
+            player.year || 2026
+        );
 
 
     return {
@@ -1554,14 +1916,10 @@ function generateManagerFightOffer() {
             "pending",
 
         createdWeek:
-            Number(
-                player.week || 0
-            ),
+            currentWeek,
 
         createdYear:
-            Number(
-                player.year || 2026
-            ),
+            currentYear,
 
         eventName:
             event.name,
@@ -1662,9 +2020,14 @@ function generateManagerFightOffer() {
         fightWeek:
             null,
 
+        fightYear:
+            null,
+
         weeksRemaining:
             campWeeks
+
     };
+
 }
 
 
@@ -1675,17 +2038,22 @@ function generateManagerFightOffer() {
 function managerCanSearchFight() {
 
     const player =
-        managerPlayer();
-
-    ensureManagerData();
-
+        ensureManagerData();
 
     if (
         !player ||
         !hasManager()
     ) {
+
         return false;
+
     }
+
+
+    /*
+       Amador/profissionalização continua
+       sendo tratada separadamente.
+    */
 
 
     if (
@@ -1694,21 +2062,44 @@ function managerCanSearchFight() {
             player.postFightRestWeeks || 0
         ) > 0
     ) {
+
         return false;
+
     }
 
 
     if (
         player.nextFight
     ) {
+
         return false;
+
     }
 
 
     if (
         player.managerFightOffer
     ) {
+
         return false;
+
+    }
+
+
+    /*
+       Não procurar nova luta enquanto
+       contrato ainda possui lutas.
+    */
+
+    if (
+        player.currentContract &&
+        Number(
+            player.currentContract.fightsRemaining || 0
+        ) > 0
+    ) {
+
+        return false;
+
     }
 
 
@@ -1717,7 +2108,9 @@ function managerCanSearchFight() {
             player.managerSearchCooldown || 0
         ) > 0
     ) {
+
         return false;
+
     }
 
 
@@ -1733,11 +2126,29 @@ function managerCanSearchFight() {
             player.managerNextSearchWeek || 0
         )
     ) {
+
         return false;
+
     }
 
 
     return true;
+
+}
+
+
+/* =========================================================
+   COMPATIBILIDADE
+
+   Alguns sistemas antigos podem chamar:
+
+   managerSearchForFight()
+========================================================= */
+
+function managerSearchForFight() {
+
+    return processManagerFightOffer();
+
 }
 
 
@@ -1748,40 +2159,27 @@ function managerCanSearchFight() {
 function processManagerFightOffer() {
 
     const player =
-        managerPlayer();
-
-    ensureManagerData();
-
+        ensureManagerData();
 
     if (
         !player ||
         !hasManager()
     ) {
+
         return null;
+
     }
 
 
     if (
-        player.postFightRestActive === true &&
-        Number(
-            player.postFightRestWeeks || 0
-        ) > 0
+        !managerCanSearchFight()
     ) {
-        return null;
-    }
 
+        return (
+            player.managerFightOffer ||
+            null
+        );
 
-    if (
-        player.nextFight
-    ) {
-        return null;
-    }
-
-
-    if (
-        player.managerFightOffer
-    ) {
-        return player.managerFightOffer;
     }
 
 
@@ -1792,22 +2190,14 @@ function processManagerFightOffer() {
 
 
     if (
-        currentWeek <
-        Number(
-            player.managerNextSearchWeek || 0
-        )
-    ) {
-        return null;
-    }
-
-
-    if (
         currentWeek ===
         Number(
             player.managerLastOfferWeek
         )
     ) {
+
         return null;
+
     }
 
 
@@ -1841,10 +2231,12 @@ function processManagerFightOffer() {
 
 
         managerSave();
+
         managerRefreshUI();
 
 
         return null;
+
     }
 
 
@@ -1858,6 +2250,7 @@ function processManagerFightOffer() {
             false;
 
         return null;
+
     }
 
 
@@ -1877,8 +2270,7 @@ function processManagerFightOffer() {
         currentWeek;
 
 
-    player.managerOffers =
-        [];
+    syncManagerOfferToMain();
 
 
     if (
@@ -1906,10 +2298,176 @@ function processManagerFightOffer() {
 
 
     managerSave();
+
     managerRefreshUI();
 
 
     return offer;
+
+}
+
+
+/* =========================================================
+   NEGOCIAR OFERTA
+========================================================= */
+
+function negotiateManagerFightOffer() {
+
+    const player =
+        ensureManagerData();
+
+    if (!player) {
+        return false;
+    }
+
+
+    const offer =
+        player.managerFightOffer;
+
+
+    if (!offer) {
+
+        alert(
+            "Não existe nenhuma oferta para negociar."
+        );
+
+        return false;
+
+    }
+
+
+    if (
+        !offer.negotiation ||
+        offer.negotiation.available !== true
+    ) {
+
+        alert(
+            "Esta oferta não pode ser negociada."
+        );
+
+        return false;
+
+    }
+
+
+    if (
+        offer.negotiation.negotiated === true
+    ) {
+
+        alert(
+            "Esta oferta já foi negociada."
+        );
+
+        return false;
+
+    }
+
+
+    const negotiation =
+        offer.negotiation;
+
+
+    const roll =
+        Math.random() * 100;
+
+
+    negotiation.negotiated =
+        true;
+
+
+    if (
+        roll <=
+        Number(
+            negotiation.successChance
+        )
+    ) {
+
+        const newPurse =
+            Number(
+                negotiation.requested
+            );
+
+
+        offer.purse =
+            newPurse;
+
+        offer.fightPurse =
+            newPurse;
+
+
+        offer.winBonus =
+            calculateManagerWinBonus(
+                newPurse
+            );
+
+
+        offer.totalWinPayout =
+            newPurse +
+            offer.winBonus;
+
+
+        negotiation.currentPurse =
+            newPurse;
+
+
+        negotiation.accepted =
+            true;
+
+
+        offer.ppvPercentage =
+            Number(
+                negotiation.ppv || 0
+            );
+
+
+        if (
+            Array.isArray(player.log)
+        ) {
+
+            player.log.unshift(
+                `🤝 Negociação aceita! A bolsa foi aumentada para $${newPurse.toLocaleString("en-US")}.`
+            );
+
+        }
+
+    }
+    else {
+
+        negotiation.accepted =
+            false;
+
+
+        if (
+            Array.isArray(player.log)
+        ) {
+
+            player.log.unshift(
+                "❌ A organização recusou a negociação. A oferta original continua válida."
+            );
+
+        }
+
+    }
+
+
+    player.managerFightOffer =
+        offer;
+
+
+    player.managerOfferPending =
+        true;
+
+
+    syncManagerOfferToMain();
+
+
+    managerSave();
+
+    managerRefreshUI();
+
+
+    return negotiation.accepted;
+
 }
 
 
@@ -1920,10 +2478,7 @@ function processManagerFightOffer() {
 function acceptManagerFightOffer() {
 
     const player =
-        managerPlayer();
-
-    ensureManagerData();
-
+        ensureManagerData();
 
     if (!player) {
         return false;
@@ -1941,6 +2496,7 @@ function acceptManagerFightOffer() {
         );
 
         return false;
+
     }
 
 
@@ -1951,16 +2507,20 @@ function acceptManagerFightOffer() {
         );
 
         return false;
+
     }
 
 
-    if (player.nextFight) {
+    if (
+        player.nextFight
+    ) {
 
         alert(
             "Você já possui uma luta marcada."
         );
 
         return false;
+
     }
 
 
@@ -1976,17 +2536,41 @@ function acceptManagerFightOffer() {
         );
 
         return false;
+
+    }
+
+
+    /*
+       Proteção contra dois contratos simultâneos.
+    */
+
+    if (
+        player.currentContract &&
+        Number(
+            player.currentContract.fightsRemaining || 0
+        ) > 0
+    ) {
+
+        alert(
+            "Você já possui um contrato ativo."
+        );
+
+        return false;
+
     }
 
 
     const campWeeks =
         managerClamp(
+
             Number(
                 offer.campWeeks ||
                 MANAGER_CONFIG.minCampWeeks
             ),
+
             MANAGER_CONFIG.minCampWeeks,
             MANAGER_CONFIG.maxCampWeeks
+
         );
 
 
@@ -1996,15 +2580,61 @@ function acceptManagerFightOffer() {
         );
 
 
-    const fightWeek =
-        currentWeek +
+    const currentYear =
+        Number(
+            player.year || 2026
+        );
+
+
+    const fightAbsolute =
+        managerAbsoluteWeek(
+            currentYear,
+            currentWeek
+        ) +
         campWeeks;
+
+
+    const fightYear =
+        Math.floor(
+            fightAbsolute / 53
+        );
+
+
+    const fightWeek =
+        fightAbsolute % 53;
 
 
     const opponent =
         {
             ...offer.opponent
         };
+
+
+    /*
+       Segurança contra OVR inválido.
+    */
+
+    const opponentPower =
+        managerClamp(
+
+            Number(
+                opponent.power ||
+                opponent.overall ||
+                45
+            ),
+
+            1,
+            99
+
+        );
+
+
+    opponent.power =
+        opponentPower;
+
+
+    opponent.overall =
+        opponentPower;
 
 
     player.nextFight = {
@@ -2019,7 +2649,7 @@ function acceptManagerFightOffer() {
             ),
 
         status:
-            "camp",
+            "scheduled",
 
         event:
             offer.event,
@@ -2045,24 +2675,17 @@ function acceptManagerFightOffer() {
             opponent,
 
         opponentName:
-            offer.opponentName,
+            opponent.name,
 
         opponentDisplayName:
-            offer.opponentDisplayName,
+            opponent.displayName ||
+            opponent.name,
 
         opponentOverall:
-            Number(
-                offer.opponentOverall ||
-                opponent.overall ||
-                45
-            ),
+            opponentPower,
 
         opponentPower:
-            Number(
-                offer.opponentPower ||
-                opponent.power ||
-                45
-            ),
+            opponentPower,
 
         purse:
             Number(
@@ -2110,8 +2733,24 @@ function acceptManagerFightOffer() {
         campStartWeek:
             currentWeek,
 
+        campStartYear:
+            currentYear,
+
         fightWeek:
             fightWeek,
+
+        fightYear:
+            fightYear,
+
+        /*
+           Compatibilidade com main.js
+        */
+
+        week:
+            fightWeek,
+
+        year:
+            fightYear,
 
         weeksRemaining:
             campWeeks,
@@ -2120,9 +2759,7 @@ function acceptManagerFightOffer() {
             currentWeek,
 
         acceptedYear:
-            Number(
-                player.year || 2026
-            ),
+            currentYear,
 
         ppvAvailable:
             Boolean(
@@ -2139,6 +2776,7 @@ function acceptManagerFightOffer() {
 
         completed:
             false
+
     };
 
 
@@ -2166,87 +2804,68 @@ function acceptManagerFightOffer() {
         offer.eventCategory;
 
 
+    player.currentContract = {
+
+        event:
+            offer.eventName,
+
+        eventName:
+            offer.eventName,
+
+        category:
+            offer.eventCategory,
+
+        type:
+            offer.eventType,
+
+        totalFights:
+            Number(
+                offer.contractFights || 1
+            ),
+
+        fightsCompleted:
+            0,
+
+        fightsRemaining:
+            Number(
+                offer.contractFights || 1
+            ),
+
+        purse:
+            Number(
+                offer.purse || 0
+            ),
+
+        winBonus:
+            Number(
+                offer.winBonus || 0
+            ),
+
+        ppv:
+            Number(
+                offer.ppvPercentage || 0
+            )
+
+    };
+
+
     /*
-       Não sobrescreve contrato existente.
+       Oferta deixa de existir.
     */
 
-    if (
-        !player.currentContract
-    ) {
+    clearManagerOffer();
 
-        player.currentContract = {
-
-            event:
-                offer.eventName,
-
-            eventName:
-                offer.eventName,
-
-            category:
-                offer.eventCategory,
-
-            type:
-                offer.eventType,
-
-            totalFights:
-                Number(
-                    offer.contractFights || 1
-                ),
-
-            fightsCompleted:
-                0,
-
-            fightsRemaining:
-                Number(
-                    offer.contractFights || 1
-                ),
-
-            purse:
-                Number(
-                    offer.purse || 0
-                ),
-
-            winBonus:
-                Number(
-                    offer.winBonus || 0
-                ),
-
-            ppv:
-                Number(
-                    offer.ppvPercentage || 0
-                )
-        };
-
-    }
-
-
-    /* =====================================================
-       LIMPAR OFERTA
-    ===================================================== */
-
-    player.managerFightOffer =
-        null;
-
-    player.managerOfferPending =
-        false;
-
-    player.managerOffers =
-        [];
 
     player.managerSearching =
         false;
+
 
     player.managerSearchCooldown =
         0;
 
 
-    /*
-       Impede nova busca enquanto
-       existe luta marcada.
-    */
-
     player.managerNextSearchWeek =
-        fightWeek;
+        fightAbsolute;
 
 
     if (
@@ -2288,10 +2907,12 @@ function acceptManagerFightOffer() {
 
 
     managerSave();
+
     managerRefreshUI();
 
 
     return true;
+
 }
 
 
@@ -2302,10 +2923,7 @@ function acceptManagerFightOffer() {
 function declineManagerFightOffer() {
 
     const player =
-        managerPlayer();
-
-    ensureManagerData();
-
+        ensureManagerData();
 
     if (
         !player ||
@@ -2317,6 +2935,7 @@ function declineManagerFightOffer() {
         );
 
         return false;
+
     }
 
 
@@ -2325,17 +2944,15 @@ function declineManagerFightOffer() {
         "adversário";
 
 
-    player.managerFightOffer =
-        null;
+    clearManagerOffer();
 
-    player.managerOfferPending =
-        false;
-
-    player.managerOffers =
-        [];
 
     player.managerSearching =
         false;
+
+
+    player.managerSearchCooldown =
+        0;
 
 
     const currentWeek =
@@ -2350,10 +2967,6 @@ function declineManagerFightOffer() {
             2,
             4
         );
-
-
-    player.managerSearchCooldown =
-        0;
 
 
     if (
@@ -2372,10 +2985,12 @@ function declineManagerFightOffer() {
 
 
     managerSave();
+
     managerRefreshUI();
 
 
     return true;
+
 }
 
 
@@ -2400,15 +3015,21 @@ function isInFightCamp() {
     if (
         fight.completed === true
     ) {
+
         return false;
+
     }
 
 
     return (
+
         fight.status === "camp" ||
         fight.status === "scheduled" ||
+        fight.status === "ready" ||
         fight.status === "fight_day"
+
     );
+
 }
 
 
@@ -2433,39 +3054,47 @@ function managerIsFightDay() {
     if (
         fight.completed === true
     ) {
+
         return false;
+
     }
 
 
     if (
         fight.status === "fight_day"
     ) {
-        return true;
-    }
-
-
-    if (
-        typeof fight.fightWeek === "number" &&
-        Number(player.week || 0) >=
-        fight.fightWeek
-    ) {
 
         return true;
 
     }
 
 
-    if (
-        typeof fight.weeksRemaining === "number" &&
-        fight.weeksRemaining <= 0
-    ) {
-
-        return true;
-
-    }
+    const currentAbsolute =
+        managerAbsoluteWeek(
+            player.year,
+            player.week
+        );
 
 
-    return false;
+    const fightAbsolute =
+        managerAbsoluteWeek(
+
+            fight.fightYear ||
+            fight.year ||
+            player.year,
+
+            fight.fightWeek ||
+            fight.week ||
+            player.week
+
+        );
+
+
+    return (
+        currentAbsolute >=
+        fightAbsolute
+    );
+
 }
 
 
@@ -2476,47 +3105,49 @@ function managerIsFightDay() {
 function processManagerCampWeek() {
 
     const player =
-        managerPlayer();
-
-    ensureManagerData();
-
+        ensureManagerData();
 
     const fight =
         player?.nextFight;
 
 
     if (
+        !player ||
         !fight ||
         fight.completed === true
     ) {
+
         return;
+
     }
 
 
-    const currentWeek =
-        Number(
-            player.week || 0
+    const currentAbsolute =
+        managerAbsoluteWeek(
+            player.year,
+            player.week
         );
 
 
-    const fightWeek =
-        Number(
-            fight.fightWeek
+    const fightAbsolute =
+        managerAbsoluteWeek(
+
+            fight.fightYear ||
+            fight.year ||
+            player.year,
+
+            fight.fightWeek ||
+            fight.week ||
+            player.week
+
         );
-
-
-    if (
-        !Number.isFinite(fightWeek)
-    ) {
-        return;
-    }
 
 
     const remaining =
         Math.max(
             0,
-            fightWeek -
-            currentWeek
+            fightAbsolute -
+            currentAbsolute
         );
 
 
@@ -2525,14 +3156,15 @@ function processManagerCampWeek() {
 
 
     if (
-        currentWeek <
-        fightWeek
+        currentAbsolute <
+        fightAbsolute
     ) {
 
         fight.status =
             "camp";
 
         return;
+
     }
 
 
@@ -2566,6 +3198,7 @@ function processManagerCampWeek() {
         managerSave();
 
     }
+
 }
 
 
@@ -2576,20 +3209,20 @@ function processManagerCampWeek() {
 function processManagerPostFightRest() {
 
     const player =
-        managerPlayer();
-
-    ensureManagerData();
+        ensureManagerData();
 
 
     if (
         !player ||
         player.postFightRestActive !== true
     ) {
+
         return false;
+
     }
 
 
-    const remaining =
+    let remaining =
         Number(
             player.postFightRestWeeks || 0
         );
@@ -2606,18 +3239,23 @@ function processManagerPostFightRest() {
             false;
 
         return false;
+
     }
 
 
-    player.postFightRestWeeks =
+    remaining =
         Math.max(
             0,
             remaining - 1
         );
 
 
+    player.postFightRestWeeks =
+        remaining;
+
+
     if (
-        player.postFightRestWeeks <= 0
+        remaining <= 0
     ) {
 
         player.postFightRestWeeks =
@@ -2625,6 +3263,10 @@ function processManagerPostFightRest() {
 
         player.postFightRestActive =
             false;
+
+
+        player.managerSearchAfterRest =
+            true;
 
 
         const currentWeek =
@@ -2663,7 +3305,7 @@ function processManagerPostFightRest() {
         ) {
 
             player.log.unshift(
-                `🛌 Recuperação pós-luta: ${player.postFightRestWeeks} semana(s) restante(s).`
+                `🛌 Recuperação pós-luta: ${remaining} semana(s) restante(s).`
             );
 
         }
@@ -2675,6 +3317,7 @@ function processManagerPostFightRest() {
 
 
     return true;
+
 }
 
 
@@ -2685,21 +3328,21 @@ function processManagerPostFightRest() {
 function processManagerWeek() {
 
     const player =
-        managerPlayer();
-
-    ensureManagerData();
+        ensureManagerData();
 
 
     if (
         !player ||
         !hasManager()
     ) {
+
         return;
+
     }
 
 
     /*
-       DESCANSO TEM PRIORIDADE.
+       RECUPERAÇÃO TEM PRIORIDADE.
     */
 
     if (
@@ -2709,11 +3352,12 @@ function processManagerWeek() {
         processManagerPostFightRest();
 
         return;
+
     }
 
 
     /*
-       CAMP / LUTA.
+       LUTA MARCADA.
     */
 
     if (
@@ -2723,6 +3367,7 @@ function processManagerWeek() {
         processManagerCampWeek();
 
         return;
+
     }
 
 
@@ -2735,24 +3380,42 @@ function processManagerWeek() {
     ) {
 
         return;
+
     }
 
 
     /*
-       BUSCA.
+       PROFISSIONALIZAÇÃO.
+    */
+
+    if (
+        managerCanAskProfessional()
+    ) {
+
+        processManagerProfessionalTransition();
+
+        return;
+
+    }
+
+
+    /*
+       BUSCAR LUTA.
     */
 
     processManagerFightOffer();
+
 }
 
 
 /* =========================================================
-   BLOQUEAR AVANÇO
+   BLOQUEAR AVANÇO NA SEMANA DA LUTA
 ========================================================= */
 
 function managerShouldBlockWeekAdvance() {
 
     return managerIsFightDay();
+
 }
 
 
@@ -2763,6 +3426,7 @@ function managerShouldBlockWeekAdvance() {
 function managerCanFightNow() {
 
     return managerIsFightDay();
+
 }
 
 
@@ -2773,18 +3437,21 @@ function managerCanFightNow() {
 function completeManagerFight(result) {
 
     const player =
-        managerPlayer();
+        ensureManagerData();
 
-    ensureManagerData();
+
+    if (
+        !player ||
+        !player.nextFight
+    ) {
+
+        return false;
+
+    }
 
 
     const fight =
-        player?.nextFight;
-
-
-    if (!fight) {
-        return false;
-    }
+        player.nextFight;
 
 
     fight.status =
@@ -2815,10 +3482,13 @@ function completeManagerFight(result) {
 
         player.currentContract.fightsRemaining =
             Math.max(
+
                 0,
+
                 Number(
                     player.currentContract.fightsRemaining || 0
                 ) - 1
+
             );
 
 
@@ -2879,6 +3549,10 @@ function completeManagerFight(result) {
         true;
 
 
+    player.managerSearchAfterRest =
+        false;
+
+
     /* =====================================================
        LIMPAR LUTA
     ===================================================== */
@@ -2887,16 +3561,7 @@ function completeManagerFight(result) {
         null;
 
 
-    player.managerFightOffer =
-        null;
-
-
-    player.managerOffers =
-        [];
-
-
-    player.managerOfferPending =
-        false;
+    clearManagerOffer();
 
 
     player.managerSearching =
@@ -2934,10 +3599,12 @@ function completeManagerFight(result) {
 
 
     managerSave();
+
     managerRefreshUI();
 
 
     return true;
+
 }
 
 
@@ -2948,16 +3615,16 @@ function completeManagerFight(result) {
 function cancelManagerFight(reason) {
 
     const player =
-        managerPlayer();
-
-    ensureManagerData();
+        ensureManagerData();
 
 
     if (
         !player ||
         !player.nextFight
     ) {
+
         return false;
+
     }
 
 
@@ -2970,16 +3637,11 @@ function cancelManagerFight(reason) {
         null;
 
 
-    player.managerFightOffer =
-        null;
+    clearManagerOffer();
 
 
-    player.managerOfferPending =
+    player.managerSearching =
         false;
-
-
-    player.managerOffers =
-        [];
 
 
     player.managerSearchCooldown =
@@ -3008,10 +3670,12 @@ function cancelManagerFight(reason) {
 
 
     managerSave();
+
     managerRefreshUI();
 
 
     return true;
+
 }
 
 
@@ -3022,9 +3686,7 @@ function cancelManagerFight(reason) {
 function managerCanAskProfessional() {
 
     const player =
-        managerPlayer();
-
-    ensureManagerData();
+        ensureManagerData();
 
 
     if (!player) {
@@ -3035,7 +3697,9 @@ function managerCanAskProfessional() {
     if (
         !managerIsAmateur()
     ) {
+
         return false;
+
     }
 
 
@@ -3045,32 +3709,41 @@ function managerCanAskProfessional() {
         ) <
         MANAGER_CONFIG.professionalMinAge
     ) {
+
         return false;
+
     }
 
 
     if (
         !hasManager()
     ) {
+
         return false;
+
     }
 
 
     if (
         player.professionalDecisionMade === true
     ) {
+
         return false;
+
     }
 
 
     if (
         player.professionalDecisionPending === true
     ) {
+
         return false;
+
     }
 
 
     return true;
+
 }
 
 
@@ -3081,15 +3754,15 @@ function managerCanAskProfessional() {
 function askProfessionalTransition() {
 
     const player =
-        managerPlayer();
-
-    ensureManagerData();
+        ensureManagerData();
 
 
     if (
         !managerCanAskProfessional()
     ) {
+
         return false;
+
     }
 
 
@@ -3115,7 +3788,9 @@ function askProfessionalTransition() {
 
         const answer =
             window.confirm(
+
                 "Seu empresário acredita que você está pronto para se tornar profissional.\n\nDeseja migrar para o MMA profissional?"
+
             );
 
 
@@ -3123,26 +3798,35 @@ function askProfessionalTransition() {
             answer
         ) {
 
-            acceptProfessionalTransition();
+            return acceptProfessionalTransition();
 
         }
-        else {
 
-            declineProfessionalTransition();
 
-        }
+        return declineProfessionalTransition();
 
     }
     catch (error) {
 
         console.warn(
-            "Não foi possível abrir a confirmação de profissionalização."
+            "MANAGER: não foi possível abrir confirmação profissional."
         );
+
+        /*
+           Não deixar estado travado
+           se o navegador impedir confirm().
+        */
+
+        player.professionalDecisionPending =
+            false;
+
+        managerSave();
 
     }
 
 
-    return true;
+    return false;
+
 }
 
 
@@ -3153,13 +3837,23 @@ function askProfessionalTransition() {
 function acceptProfessionalTransition() {
 
     const player =
-        managerPlayer();
-
-    ensureManagerData();
+        ensureManagerData();
 
 
     if (!player) {
         return false;
+    }
+
+
+    if (
+        Number(
+            player.age || 0
+        ) <
+        MANAGER_CONFIG.professionalMinAge
+    ) {
+
+        return false;
+
     }
 
 
@@ -3184,7 +3878,9 @@ function acceptProfessionalTransition() {
     if (
         !player.professional
     ) {
+
         player.professional = {};
+
     }
 
 
@@ -3195,21 +3891,27 @@ function acceptProfessionalTransition() {
     if (
         typeof player.professional.wins !== "number"
     ) {
+
         player.professional.wins = 0;
+
     }
 
 
     if (
         typeof player.professional.losses !== "number"
     ) {
+
         player.professional.losses = 0;
+
     }
 
 
     if (
         typeof player.professional.draws !== "number"
     ) {
+
         player.professional.draws = 0;
+
     }
 
 
@@ -3239,10 +3941,12 @@ function acceptProfessionalTransition() {
 
 
     managerSave();
+
     managerRefreshUI();
 
 
     return true;
+
 }
 
 
@@ -3253,9 +3957,7 @@ function acceptProfessionalTransition() {
 function declineProfessionalTransition() {
 
     const player =
-        managerPlayer();
-
-    ensureManagerData();
+        ensureManagerData();
 
 
     if (!player) {
@@ -3288,11 +3990,25 @@ function declineProfessionalTransition() {
     }
 
 
+    /*
+       Depois da decisão, permite nova
+       avaliação somente após cooldown.
+    */
+
+    player.managerNextSearchWeek =
+        Number(
+            player.week || 0
+        ) +
+        MANAGER_CONFIG.professionalDecisionCooldownWeeks;
+
+
     managerSave();
+
     managerRefreshUI();
 
 
     return true;
+
 }
 
 
@@ -3303,19 +4019,50 @@ function declineProfessionalTransition() {
 function processManagerProfessionalTransition() {
 
     const player =
-        managerPlayer();
-
-    ensureManagerData();
+        ensureManagerData();
 
 
     if (
+        !player ||
         !managerCanAskProfessional()
     ) {
+
         return false;
+
+    }
+
+
+    /*
+       Cooldown real após decisão.
+    */
+
+    const currentWeek =
+        Number(
+            player.week || 0
+        );
+
+
+    const decisionWeek =
+        Number(
+            player.professionalDecisionWeek ||
+            -999
+        );
+
+
+    if (
+        decisionWeek > -999 &&
+        currentWeek <
+        decisionWeek +
+        MANAGER_CONFIG.professionalDecisionCooldownWeeks
+    ) {
+
+        return false;
+
     }
 
 
     return askProfessionalTransition();
+
 }
 
 
@@ -3420,6 +4167,7 @@ function getAvailableManagers() {
         }
 
     ];
+
 }
 
 
@@ -3430,9 +4178,7 @@ function getAvailableManagers() {
 function hireManager(managerId) {
 
     const player =
-        managerPlayer();
-
-    ensureManagerData();
+        ensureManagerData();
 
 
     if (!player) {
@@ -3460,6 +4206,7 @@ function hireManager(managerId) {
         );
 
         return false;
+
     }
 
 
@@ -3489,16 +4236,7 @@ function hireManager(managerId) {
     };
 
 
-    player.managerFightOffer =
-        null;
-
-
-    player.managerOffers =
-        [];
-
-
-    player.managerOfferPending =
-        false;
+    clearManagerOffer();
 
 
     player.managerSearching =
@@ -3539,10 +4277,12 @@ function hireManager(managerId) {
 
 
     managerSave();
+
     managerRefreshUI();
 
 
     return true;
+
 }
 
 
@@ -3553,16 +4293,16 @@ function hireManager(managerId) {
 function fireManager() {
 
     const player =
-        managerPlayer();
-
-    ensureManagerData();
+        ensureManagerData();
 
 
     if (
         !player ||
         !hasManager()
     ) {
+
         return false;
+
     }
 
 
@@ -3575,16 +4315,7 @@ function fireManager() {
         null;
 
 
-    player.managerFightOffer =
-        null;
-
-
-    player.managerOffers =
-        [];
-
-
-    player.managerOfferPending =
-        false;
+    clearManagerOffer();
 
 
     player.managerSearching =
@@ -3611,10 +4342,12 @@ function fireManager() {
 
 
     managerSave();
+
     managerRefreshUI();
 
 
     return true;
+
 }
 
 
@@ -3625,16 +4358,16 @@ function fireManager() {
 function createManagerTestOffer() {
 
     const player =
-        managerPlayer();
-
-    ensureManagerData();
+        ensureManagerData();
 
 
     if (
         !player ||
         !hasManager()
     ) {
+
         return false;
+
     }
 
 
@@ -3642,7 +4375,21 @@ function createManagerTestOffer() {
         player.nextFight ||
         player.postFightRestActive
     ) {
+
         return false;
+
+    }
+
+
+    if (
+        player.currentContract &&
+        Number(
+            player.currentContract.fightsRemaining || 0
+        ) > 0
+    ) {
+
+        return false;
+
     }
 
 
@@ -3663,15 +4410,16 @@ function createManagerTestOffer() {
         true;
 
 
-    player.managerOffers =
-        [];
+    syncManagerOfferToMain();
 
 
     managerSave();
+
     managerRefreshUI();
 
 
     return true;
+
 }
 
 
@@ -3682,16 +4430,16 @@ function createManagerTestOffer() {
 function forceManagerFightOffer() {
 
     const player =
-        managerPlayer();
-
-    ensureManagerData();
+        ensureManagerData();
 
 
     if (
         !player ||
         !hasManager()
     ) {
+
         return false;
+
     }
 
 
@@ -3699,7 +4447,21 @@ function forceManagerFightOffer() {
         player.nextFight ||
         player.postFightRestActive
     ) {
+
         return false;
+
+    }
+
+
+    if (
+        player.currentContract &&
+        Number(
+            player.currentContract.fightsRemaining || 0
+        ) > 0
+    ) {
+
+        return false;
+
     }
 
 
@@ -3720,15 +4482,16 @@ function forceManagerFightOffer() {
         true;
 
 
-    player.managerOffers =
-        [];
+    syncManagerOfferToMain();
 
 
     managerSave();
+
     managerRefreshUI();
 
 
     return offer;
+
 }
 
 
@@ -3739,15 +4502,14 @@ function forceManagerFightOffer() {
 function getManagerFightOffer() {
 
     const player =
-        managerPlayer();
-
-    ensureManagerData();
+        ensureManagerData();
 
 
     return (
         player?.managerFightOffer ||
         null
     );
+
 }
 
 
@@ -3761,15 +4523,14 @@ function getManagerCurrentFight() {
         player?.nextFight ||
         null
     );
+
 }
 
 
 function getManagerPostFightRest() {
 
     const player =
-        managerPlayer();
-
-    ensureManagerData();
+        ensureManagerData();
 
 
     return {
@@ -3783,6 +4544,7 @@ function getManagerPostFightRest() {
             )
 
     };
+
 }
 
 
@@ -3793,38 +4555,46 @@ function getManagerPostFightRest() {
 function processManagerContractYear() {
 
     const player =
-        managerPlayer();
-
-    ensureManagerData();
+        ensureManagerData();
 
 
     if (
-        player?.manager
+        !player?.manager
     ) {
 
-        player.manager.experience =
-            managerClamp(
-                Number(
-                    player.manager.experience || 50
-                ) + 1,
-                1,
-                100
-            );
-
-
-        player.manager.network =
-            managerClamp(
-                Number(
-                    player.manager.network || 50
-                ) + 1,
-                1,
-                100
-            );
+        return;
 
     }
 
 
+    player.manager.experience =
+        managerClamp(
+
+            Number(
+                player.manager.experience || 50
+            ) + 1,
+
+            1,
+            100
+
+        );
+
+
+    player.manager.network =
+        managerClamp(
+
+            Number(
+                player.manager.network || 50
+            ) + 1,
+
+            1,
+            100
+
+        );
+
+
     managerSave();
+
 }
 
 
@@ -3875,6 +4645,17 @@ window.managerShouldBlockWeekAdvance =
 
 window.processManagerFightOffer =
     processManagerFightOffer;
+
+/*
+   COMPATIBILIDADE COM VERSÕES ANTIGAS
+*/
+
+window.managerSearchForFight =
+    managerSearchForFight;
+
+window.searchManagerFight =
+    managerSearchForFight;
+
 
 window.processManagerCampWeek =
     processManagerCampWeek;
