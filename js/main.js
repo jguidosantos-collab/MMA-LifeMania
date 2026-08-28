@@ -1509,16 +1509,15 @@ document.addEventListener(
             const p =
                 normalizeMainPlayer();
             if (
-                loaded &&
-                p &&
-                p.name
-            ) {
-                showGame();
-                home();
-            }
-            else {
-                startGame();
-            }
+    p &&
+    p.name
+) {
+    showGame();
+    home();
+}
+else {
+    startGame();
+}
         }
         catch (error) {
             console.error(
