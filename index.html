@@ -1,196 +1,107 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
-
 <head>
     <meta charset="UTF-8">
-
-    
-<meta
-    name="viewport"
-    content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
->
-
-    <title>TESTE MMA LIFE</title>
-
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+    >
+    <title>MMA LIFE DYNASTY</title>
     <link
         rel="stylesheet"
-        href="css/style.css"
+        href="css/style.css?v=13"
     >
 </head>
-
 <body>
-
 <header class="top">
-
     <div class="logo">
         🥊 MMA LIFE
     </div>
-
     <div class="edition">
         DYNASTY
     </div>
-
 </header>
-
-
 <main>
-
     <!-- =========================================
-         TELA DE CRIAÇÃO / INÍCIO
+         CRIAÇÃO DO ATLETA
     ========================================== -->
-
     <section id="creation">
-
         <div id="creator"></div>
-
     </section>
-
-
     <!-- =========================================
          JOGO
     ========================================== -->
-
     <section
         id="game"
         class="hidden"
     >
-
         <div id="content"></div>
-
     </section>
-
 </main>
-
-
 <!-- =========================================
-     MENU DO JOGO
+     MENU PRINCIPAL
 ========================================== -->
-
 <nav
     id="tabs"
     class="tabs hidden"
 >
-
     <button onclick="tab('home')">
-
         <span>🏠</span>
-
-        <small>
-            Início
-        </small>
-
+        <small>Início</small>
     </button>
-
-
     <button onclick="tab('career')">
-
         <span>🥊</span>
-
-        <small>
-            Carreira
-        </small>
-
+        <small>Carreira</small>
     </button>
-
-
     <button onclick="tab('train')">
-
         <span>🏋️</span>
-
-        <small>
-            Treino
-        </small>
-
+        <small>Treino</small>
     </button>
-
-
     <button onclick="tab('fight')">
-
         <span>⚔️</span>
-
-        <small>
-            Lutas
-        </small>
-
+        <small>Lutas</small>
     </button>
-
-
     <button onclick="tab('team')">
-
         <span>🏢</span>
-
-        <small>
-            Equipe
-        </small>
-
+        <small>Equipe</small>
     </button>
-
-
     <button onclick="tab('life')">
-
         <span>❤️</span>
-
-        <small>
-            Vida
-        </small>
-
+        <small>Vida</small>
     </button>
-
-
     <button onclick="tab('ranking')">
-
         <span>🏆</span>
-
-        <small>
-            Ranking
-        </small>
-
+        <small>Ranking</small>
     </button>
-
 </nav>
-
-
 <!-- =========================================
-     ARQUIVOS DO JOGO
+     SISTEMA DO JOGO
+     
+     IMPORTANTE:
+     Os arquivos são carregados primeiro.
+     MAIN.JS fica SEMPRE POR ÚLTIMO.
 ========================================== -->
-
-<script src="js/player.js?v=10"></script>
-
-<script src="js/training.js"></script>
-
-<script src="js/fights.js"></script>
-
-<script src="js/managers.js"></script>
-
-<script src="js/family.js?v=2"></script>
-
-    <script src="js/teams.js"></script>
-
-<script src="js/life.js?v=4"></script>
-
-<script src="js/save.js"></script>
-
-<script src="js/fighters.js"></script>
-
-<script src="js/events.js"></script>
-
-<script src="js/rankings.js"></script>
-
-<script src="js/promotions.js"></script>
-
-<script src="js/contracts.js"></script>
-
-<script src="js/championship.js"></script>
-
-<script src="js/opportunities.js"></script>
-
-   <script src="js/pfl.js?v=1"></script> 
-    
-<!-- MAIN SEMPRE POR ÚLTIMO -->
-
-<script src="js/main.js?v=11"></script>
-
-
+<script src="js/player.js?v=13"></script>
+<script src="js/training.js?v=13"></script>
+<script src="js/fights.js?v=13"></script>
+<script src="js/managers.js?v=13"></script>
+<script src="js/family.js?v=13"></script>
+<script src="js/teams.js?v=13"></script>
+<script src="js/life.js?v=13"></script>
+<script src="js/save.js?v=13"></script>
+<script src="js/fighters.js?v=13"></script>
+<script src="js/events.js?v=13"></script>
+<script src="js/rankings.js?v=13"></script>
+<script src="js/promotions.js?v=13"></script>
+<script src="js/contracts.js?v=13"></script>
+<script src="js/championship.js?v=13"></script>
+<script src="js/opportunities.js?v=13"></script>
+<script src="js/pfl.js?v=13"></script>
+<!-- =========================================
+     CONTROLE PRINCIPAL
+     
+     TEM QUE SER O ÚLTIMO SCRIPT.
+========================================== -->
+<script src="js/main.js?v=13"></script>
 </body>
-
 </html>
