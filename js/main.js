@@ -1,12 +1,6 @@
 /* =========================================================
    MMA LIFE DYNASTY
    MAIN.JS
-   CONTROLE PRINCIPAL DO JOGO
-========================================================= */
-
-
-/* =========================================================
-   ESTADO PRINCIPAL
 ========================================================= */
 
 let currentPlayer = null;
@@ -17,9 +11,7 @@ let currentPlayer = null;
 ========================================================= */
 
 function getElement(id) {
-
     return document.getElementById(id);
-
 }
 
 
@@ -29,21 +21,15 @@ function showScreen(screenId) {
         document.querySelectorAll(".screen");
 
     screens.forEach(screen => {
-
         screen.classList.remove("active");
-
     });
-
 
     const target =
         getElement(screenId);
 
     if (target) {
-
         target.classList.add("active");
-
     }
-
 }
 
 
@@ -56,13 +42,9 @@ function showHomeMessage(message) {
     const element =
         getElement("load-message");
 
-    if (!element) {
-        return;
+    if (element) {
+        element.textContent = message || "";
     }
-
-    element.textContent =
-        message || "";
-
 }
 
 
@@ -71,18 +53,14 @@ function showGameMessage(message) {
     const element =
         getElement("game-message");
 
-    if (!element) {
-        return;
+    if (element) {
+        element.textContent = message || "";
     }
-
-    element.textContent =
-        message || "";
-
 }
 
 
 /* =========================================================
-   FORMATAÇÃO
+   DINHEIRO
 ========================================================= */
 
 function formatMoney(value) {
@@ -90,21 +68,13 @@ function formatMoney(value) {
     const amount =
         Number(value) || 0;
 
-
-    return new Intl.NumberFormat(
-        "pt-BR",
-        {
-            style: "currency",
-            currency: "USD",
-            maximumFractionDigits: 0
-        }
-    ).format(amount);
+    return "$" + Math.floor(amount).toLocaleString("pt-BR");
 
 }
 
 
 /* =========================================================
-   ATUALIZAR DASHBOARD
+   DASHBOARD
 ========================================================= */
 
 function updateDashboard() {
@@ -113,18 +83,14 @@ function updateDashboard() {
         return;
     }
 
-
     const player =
         currentPlayer;
-
 
     const record =
         getRecordString(player);
 
-
     const weightClass =
         WEIGHT_CLASSES[player.weightClass];
-
 
     const style =
         FIGHT_STYLES[player.style];
@@ -133,54 +99,42 @@ function updateDashboard() {
     getElement("dashboard-name").textContent =
         player.name;
 
-
     getElement("dashboard-record").textContent =
         record;
-
 
     getElement("dashboard-age").textContent =
         player.age;
 
-
     getElement("dashboard-week").textContent =
         player.week;
-
 
     getElement("dashboard-year").textContent =
         player.year;
 
-
     getElement("dashboard-ovr").textContent =
         player.ovr;
-
 
     getElement("dashboard-potential").textContent =
         player.potential;
 
-
     getElement("dashboard-health").textContent =
         Math.round(player.health);
 
-
     getElement("dashboard-energy").textContent =
         Math.round(player.energy);
-
 
     getElement("dashboard-weight").textContent =
         weightClass
             ? `${weightClass.name} — ${weightClass.limitKg} kg`
             : player.weightClass;
 
-
     getElement("dashboard-style").textContent =
         style
             ? style.name
             : player.style;
 
-
     getElement("dashboard-country").textContent =
         player.country;
-
 
     getElement("dashboard-money").textContent =
         formatMoney(player.money);
@@ -198,38 +152,11 @@ function startNewGame() {
 
     showScreen("screen-creation");
 
-
-    const nameInput =
-        getElement("player-name");
-
-    const cityInput =
-        getElement("player-city");
-
-
-    if (nameInput) {
-
-        nameInput.value = "";
-
-        setTimeout(() => {
-
-            nameInput.focus();
-
-        }, 100);
-
-    }
-
-
-    if (cityInput) {
-
-        cityInput.value = "";
-
-    }
-
 }
 
 
 /* =========================================================
-   VOLTAR PARA HOME
+   VOLTAR
 ========================================================= */
 
 function backToHome() {
@@ -275,12 +202,6 @@ function createNewPlayerFromForm() {
             "Digite o nome do lutador."
         );
 
-        if (nameInput) {
-
-            nameInput.focus();
-
-        }
-
         return;
 
     }
@@ -311,47 +232,49 @@ function createNewPlayerFromForm() {
             : "Balanced";
 
 
-    currentPlayer =
-        createPlayer({
+    try {
 
-            name: name,
+        currentPlayer =
+            createPlayer({
 
-            country: country,
+                name: name,
 
-            city: city,
+                country: country,
 
-            weightClass: weightClass,
+                city: city,
 
-            style: style
+                weightClass: weightClass,
 
-        });
+                style: style
+
+            });
 
 
-    GameEngine.initialize();
+        updateDashboard();
 
 
-    const saveResult =
+        showScreen(
+            "screen-dashboard"
+        );
+
+
         saveGame(currentPlayer);
 
 
-    updateDashboard();
-
-
-    showScreen(
-        "screen-dashboard"
-    );
-
-
-    if (saveResult.success) {
-
         showGameMessage(
-            "Carreira criada. Boa sorte!"
+            "Carreira criada com sucesso."
         );
 
-    } else {
 
-        showGameMessage(
-            "Carreira criada."
+    } catch (error) {
+
+        console.error(
+            "Erro ao criar lutador:",
+            error
+        );
+
+        alert(
+            "Erro ao criar o lutador. Verifique os arquivos JavaScript."
         );
 
     }
@@ -394,38 +317,48 @@ function loadSavedGame() {
     }
 
 
-    currentPlayer =
-        createPlayer(savedPlayer);
+    try {
+
+        currentPlayer =
+            createPlayer(savedPlayer);
 
 
-    GameEngine.initialize();
+        updateDashboard();
 
 
-    updateDashboard();
+        showScreen(
+            "screen-dashboard"
+        );
 
 
-    showScreen(
-        "screen-dashboard"
-    );
+        showGameMessage(
+            "Jogo carregado com sucesso."
+        );
 
+    } catch (error) {
 
-    showGameMessage(
-        "Jogo carregado com sucesso."
-    );
+        console.error(
+            "Erro ao carregar jogo:",
+            error
+        );
+
+        showHomeMessage(
+            "Erro ao carregar o jogo."
+        );
+
+    }
 
 }
 
 
 /* =========================================================
-   SALVAR JOGO ATUAL
+   SALVAR
 ========================================================= */
 
 function saveCurrentGame() {
 
     if (!currentPlayer) {
-
         return;
-
     }
 
 
@@ -447,9 +380,7 @@ function saveCurrentGame() {
 function advanceGameWeek() {
 
     if (!currentPlayer) {
-
         return;
-
     }
 
 
@@ -479,17 +410,13 @@ function advanceGameWeek() {
     if (result.newYear) {
 
         showGameMessage(
-
             `Novo ano! Você agora tem ${result.age} anos.`
-
         );
 
     } else {
 
         showGameMessage(
-
             `Semana ${result.week} avançada.`
-
         );
 
     }
@@ -503,52 +430,36 @@ function advanceGameWeek() {
 
 function openTraining() {
 
-    if (!currentPlayer) {
-
-        return;
-
-    }
-
-
     showGameMessage(
-
-        "Sistema de treinamento será ativado nesta etapa."
-
+        "O sistema de treinamento será adicionado em seguida."
     );
 
 }
 
 
 /* =========================================================
-   EVENTOS DOS BOTÕES
+   EVENTOS
 ========================================================= */
 
 function setupEvents() {
 
-
     const newGameButton =
         getElement("btn-new-game");
-
 
     const loadGameButton =
         getElement("btn-load-game");
 
-
     const createPlayerButton =
         getElement("btn-create-player");
-
 
     const backHomeButton =
         getElement("btn-back-home");
 
-
     const trainingButton =
         getElement("btn-training");
 
-
     const advanceWeekButton =
         getElement("btn-advance-week");
-
 
     const saveButton =
         getElement("btn-save-game");
@@ -556,70 +467,56 @@ function setupEvents() {
 
     if (newGameButton) {
 
-        newGameButton.addEventListener(
-            "click",
-            startNewGame
-        );
+        newGameButton.onclick =
+            startNewGame;
 
     }
 
 
     if (loadGameButton) {
 
-        loadGameButton.addEventListener(
-            "click",
-            loadSavedGame
-        );
+        loadGameButton.onclick =
+            loadSavedGame;
 
     }
 
 
     if (createPlayerButton) {
 
-        createPlayerButton.addEventListener(
-            "click",
-            createNewPlayerFromForm
-        );
+        createPlayerButton.onclick =
+            createNewPlayerFromForm;
 
     }
 
 
     if (backHomeButton) {
 
-        backHomeButton.addEventListener(
-            "click",
-            backToHome
-        );
+        backHomeButton.onclick =
+            backToHome;
 
     }
 
 
     if (trainingButton) {
 
-        trainingButton.addEventListener(
-            "click",
-            openTraining
-        );
+        trainingButton.onclick =
+            openTraining;
 
     }
 
 
     if (advanceWeekButton) {
 
-        advanceWeekButton.addEventListener(
-            "click",
-            advanceGameWeek
-        );
+        advanceWeekButton.onclick =
+            advanceGameWeek;
 
     }
 
 
     if (saveButton) {
 
-        saveButton.addEventListener(
-            "click",
-            saveCurrentGame
-        );
+        saveButton.onclick =
+            saveCurrentGame;
 
     }
 
@@ -634,9 +531,7 @@ function initializeGame() {
 
     setupEvents();
 
-
     currentPlayer = null;
-
 
     showScreen(
         "screen-home"
