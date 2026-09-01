@@ -1,3 +1,4 @@
+alert("MAIN.JS CARREGOU");
 /* =========================================================
    MMA LIFE DYNASTY
    MAIN.JS
