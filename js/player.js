@@ -1,336 +1,574 @@
 /* =========================================================
-   MMA LIFE DYNASTY
-   PLAYER.JS
-   BASE DEFINITIVA DO JOGADOR
-   VERSÃO CORRIGIDA
+MMA LIFE DYNASTY
+PLAYER.JS
+SISTEMA BASE DO LUTADOR
 ========================================================= */
-var player = null;
+
 /* =========================================================
-   CRIAR JOGADOR PADRÃO
+CONFIGURAÇÕES
 ========================================================= */
-function createDefaultPlayer() {
-    player = {
-        /* =====================================================
-           IDENTIDADE
-        ===================================================== */
-        name: "",
-        country: "Brasil",
-        weight: "Peso Leve",
-        style: "Completo",
-        age: 15,
-        careerStage: "amateur",
-        week: 0,
-        year: 2026,
-        money: 500,
-        fame: 0,
-        /* =====================================================
-           POTENCIAL
-        ===================================================== */
-        potential: Math.floor(Math.random() * 13) + 78,
-        /* =====================================================
-           OVERALL INICIAL
-        ===================================================== */
-        overall: getInitialOverall(),
-        /* =====================================================
-           AMADOR
-        ===================================================== */
-        amateur: {
-            wins: 0,
-            losses: 0,
-            draws: 0,
-            ranking: 50
-        },
-        /* =====================================================
-           PROFISSIONAL
-        ===================================================== */
-        professional: {
-            active: false,
-            wins: 0,
-            losses: 0,
-            draws: 0,
-            ranking: null
-        },
-        /* =====================================================
-           ATRIBUTOS
-        ===================================================== */
-        attributes: {
-            strength: 45,
-            striking: 45,
-            wrestling: 45,
-            grappling: 45,
-            cardio: 45,
-            technique: 45,
-            defense: 45,
-            fightIQ: 40,
-            chin: 45,
-            offense: 45,
-            blocking: 45,
-            mental: 45,
-            discipline: 50,
-            confidence: 40
-        },
-        /* =====================================================
-           CONDIÇÃO
-        ===================================================== */
-        health: 100,
-        fatigue: 0,
-        /* =====================================================
-           EQUIPE
-        ===================================================== */
-        team: null,
-        teamOffers: [],
-        /* =====================================================
-           EMPRESÁRIO
-        ===================================================== */
-        manager: null,
-        managerOffers: [],
-        managerFightOffer: null,
-        managerSearchCooldown: 0,
-        managerLastOfferWeek: -999,
-        managerOfferId: 0,
-        managerSearching: false,
-        managerSearchWeek: -999,
-        managerOfferPending: false,
-        managerContractFightNumber: 0,
-        managerContractTotalFights: 0,
-        managerContractEvent: "",
-        managerContractCategory: "",
-        managerNextSearchWeek: 0,
-        postFightRestWeeks: 0,
-        postFightRestActive: false,
-        managerSearchAfterRest: false,
-        /* =====================================================
-           PROFISSIONALIZAÇÃO
-        ===================================================== */
-        professionalDecisionPending: false,
-        professionalDecisionMade: false,
-        professionalDecisionWeek: -999,
-        /* =====================================================
-           CARREIRA
-        ===================================================== */
-        nextFight: null,
-        currentPromotion: null,
-        currentContract: null,
-        contractNegotiation: false,
-        contractOffers: [],
-        contracts: [],
-        opportunities: [],
-        promotionHistory: {},
-        /* =====================================================
-           CAMPEONATO / CINTURÕES
-        ===================================================== */
-        championship: {
-            title: null,
-            organization: null,
-            weightClass: null,
-            defenses: 0,
-            titleWins: 0,
-            titleLosses: 0,
-            interim: false,
-            formerChampion: false
-        },
-        titles: [],
-        titleHistory: [],
-        /* =====================================================
-           TREINAMENTO
-        ===================================================== */
-        trainingPlan: {
-            weeks: {}
-        },
-        /* =====================================================
-           PATROCÍNIOS
-        ===================================================== */
-        sponsors: {
-            active: [],
-            offers: [],
-            history: [],
-            maxSlots: 4,
-            totalIncome: 0
-        },
-        /* =====================================================
-           METAS
-        ===================================================== */
-        goals: {
-            active: [],
-            completed: [],
-            failed: [],
-            progress: {}
-        },
-        /* =====================================================
-           REDES SOCIAIS
-        ===================================================== */
-        socialMedia: {
-            followers: 0,
-            likes: 0,
-            posts: 0,
-            engagement: 0,
-            reputation: 0,
-            verified: false,
-            platformLevel: 0,
-            history: []
-        },
-        /* =====================================================
-           NOTÍCIAS / IMPRENSA
-        ===================================================== */
-        media: {
-            headlines: [],
-            interviews: [],
-            appearances: [],
-            pressReputation: 0,
-            publicImage: 0
-        },
-        /* =====================================================
-           FINANÇAS
-        ===================================================== */
-        finances: {
-            careerIncome: 0,
-            fightIncome: 0,
-            sponsorIncome: 0,
-            investmentIncome: 0,
-            propertyIncome: 0,
-            expenses: 0,
-            taxesPaid: 0,
-            legalExpenses: 0,
-            netWorth: 500,
-            history: []
-        },
-        /* =====================================================
-           PATRIMÔNIO
-        ===================================================== */
-        assets: {
-            houses: [],
-            vehicles: [],
-            businesses: [],
-            other: []
-        },
-        /* =====================================================
-           INVESTIMENTOS
-        ===================================================== */
-        investments: {
-            stocks: [],
-            funds: [],
-            realEstate: [],
-            businesses: [],
-            other: [],
-            totalInvested: 0,
-            totalProfit: 0,
-            history: []
-        },
-        /* =====================================================
-           IMPOSTOS
-        ===================================================== */
-        taxes: {
-            country: "Brasil",
-            taxRate: 0,
-            accumulated: 0,
-            paid: 0,
-            pending: 0,
-            history: []
-        },
-        /* =====================================================
-           QUESTÕES JURÍDICAS
-        ===================================================== */
-        legal: {
-            activeCases: [],
-            completedCases: [],
-            lawsuitsWon: 0,
-            lawsuitsLost: 0,
-            settlements: 0,
-            legalExpenses: 0,
-            reputationImpact: 0
-        },
-        /* =====================================================
-           VIDA
-        ===================================================== */
-        relationship: "Solteiro",
-        partner: null,
-        married: false,
-        children: [],
-        /* =====================================================
-           LEGADO / FAMÍLIA
-        ===================================================== */
-        legacy: {
-            generation: 1,
-            familyName: "",
-            descendants: [],
-            legacyScore: 0
-        },
-        /* =====================================================
-           HISTÓRICO
-        ===================================================== */
-        log: [
-            "🥊 Sua carreira começou aos 15 anos."
-        ]
-    };
-    return player;
+
+const PLAYER_CONFIG = {
+
+startingAge: 15,
+startingMoney: 0,
+startingHealth: 100,
+startingEnergy: 100,
+startingMorale: 70,
+startingConfidence: 50,
+startingFame: 0,
+startingFollowers: 0,
+startingExperience: 0
+
+};
+
+/* =========================================================
+CATEGORIAS
+========================================================= */
+
+const WEIGHT_CLASSES = {
+
+Flyweight: {
+    name: "Flyweight",
+    limitKg: 56.7
+},
+Bantamweight: {
+    name: "Bantamweight",
+    limitKg: 61.2
+},
+Featherweight: {
+    name: "Featherweight",
+    limitKg: 65.8
+},
+Lightweight: {
+    name: "Lightweight",
+    limitKg: 70.3
+},
+Welterweight: {
+    name: "Welterweight",
+    limitKg: 77.1
+},
+Middleweight: {
+    name: "Middleweight",
+    limitKg: 83.9
+},
+"Light Heavyweight": {
+    name: "Light Heavyweight",
+    limitKg: 93.0
+},
+Heavyweight: {
+    name: "Heavyweight",
+    limitKg: 120.2
 }
+
+};
+
 /* =========================================================
-   GERAR OVERALL INICIAL
+ESTILOS
 ========================================================= */
-function getInitialOverall() {
-    var roll = Math.random();
-    if (roll < 0.05) {
-        return 40;
-    }
-    if (roll < 0.10) {
-        return 41;
-    }
-    if (roll < 0.20) {
-        return 42;
-    }
-    if (roll < 0.35) {
-        return 43;
-    }
-    if (roll < 0.55) {
-        return 44;
-    }
-    if (roll < 0.75) {
-        return 45;
-    }
-    if (roll < 0.88) {
-        return 46;
-    }
-    if (roll < 0.95) {
-        return 47;
-    }
-    if (roll < 0.98) {
-        return 48;
-    }
-    if (roll < 0.995) {
-        return 49;
-    }
-    return 50;
+
+const FIGHT_STYLES = {
+
+Striker: {
+    name: "Striker"
+},
+Wrestler: {
+    name: "Wrestler"
+},
+Grappler: {
+    name: "Grappler"
+},
+Balanced: {
+    name: "Completo"
 }
+
+};
+
 /* =========================================================
-   COMPATIBILIDADE
+ATRIBUTOS BASE
 ========================================================= */
-function createPlayer() {
-    return createDefaultPlayer();
-}
-/* =========================================================
-   GARANTIR JOGADOR EXISTENTE
-========================================================= */
-function ensurePlayer() {
-    if (
-        !player ||
-        typeof player !== "object"
-    ) {
-        createDefaultPlayer();
+
+function createBaseAttributes() {
+
+return {
+    striking: {
+        boxing: randomAttribute(45, 60),
+        kickboxing: randomAttribute(45, 60),
+        power: randomAttribute(45, 60),
+        speed: randomAttribute(45, 60),
+        accuracy: randomAttribute(45, 60)
+    },
+    wrestling: {
+        takedowns: randomAttribute(45, 60),
+        takedownDefense: randomAttribute(45, 60),
+        control: randomAttribute(45, 60),
+        scrambling: randomAttribute(45, 60)
+    },
+    grappling: {
+        submission: randomAttribute(45, 60),
+        submissionDefense: randomAttribute(45, 60),
+        groundGame: randomAttribute(45, 60),
+        transitions: randomAttribute(45, 60)
+    },
+    physical: {
+        strength: randomAttribute(45, 60),
+        cardio: randomAttribute(45, 60),
+        durability: randomAttribute(45, 60),
+        recovery: randomAttribute(45, 60)
+    },
+    mental: {
+        fightIQ: randomAttribute(45, 60),
+        composure: randomAttribute(45, 60),
+        aggression: randomAttribute(45, 60),
+        discipline: randomAttribute(45, 60)
     }
-    return player;
+};
+
 }
+
 /* =========================================================
-   DISPONIBILIZAR GLOBALMENTE
+ATRIBUTO ALEATÓRIO
 ========================================================= */
-window.player = player;
-window.createDefaultPlayer =
-    createDefaultPlayer;
-window.createPlayer =
-    createPlayer;
-window.ensurePlayer =
-    ensurePlayer;
-window.getInitialOverall =
-    getInitialOverall;
+
+function randomAttribute(min, max) {
+
+return Math.floor(
+    Math.random() * (max - min + 1)
+) + min;
+
+}
+
 /* =========================================================
-   FIM DO PLAYER.JS
+CALCULAR OVR
 ========================================================= */
+
+function calculateOverall(attributes) {
+
+const values = [];
+Object.values(attributes).forEach(category => {
+    Object.values(category).forEach(value => {
+        values.push(Number(value));
+    });
+});
+if (values.length === 0) {
+    return 0;
+}
+const total = values.reduce(
+    (sum, value) => sum + value,
+    0
+);
+return Math.round(total / values.length);
+
+}
+
+/* =========================================================
+CALCULAR POTENCIAL
+========================================================= */
+
+function calculatePotential(attributes) {
+
+const overall = calculateOverall(attributes);
+const potentialBonus = Math.floor(
+    Math.random() * 21
+);
+return Math.min(
+    99,
+    Math.max(
+        overall + 10,
+        overall + potentialBonus
+    )
+);
+
+}
+
+/* =========================================================
+CRIAR LUTADOR
+========================================================= */
+
+function createPlayer(data = {}) {
+
+const attributes =
+    data.attributes ||
+    createBaseAttributes();
+const overall =
+    data.ovr ??
+    calculateOverall(attributes);
+const potential =
+    data.potential ??
+    calculatePotential(attributes);
+return {
+    /* IDENTIDADE */
+    id:
+        data.id ||
+        generatePlayerId(),
+    name:
+        data.name ||
+        "Novo Lutador",
+    country:
+        data.country ||
+        "Brasil",
+    city:
+        data.city ||
+        "São Paulo",
+    /* IDADE / TEMPO */
+    age:
+        data.age ??
+        PLAYER_CONFIG.startingAge,
+    birthYear:
+        data.birthYear ??
+        new Date().getFullYear() - PLAYER_CONFIG.startingAge,
+    week:
+        data.week ??
+        1,
+    year:
+        data.year ??
+        1,
+    /* CARREIRA */
+    careerStage:
+        data.careerStage ||
+        "Amateur",
+    professional:
+        data.professional ??
+        false,
+    weightClass:
+        data.weightClass ||
+        "Lightweight",
+    style:
+        data.style ||
+        "Balanced",
+    /* ATRIBUTOS */
+    attributes,
+    ovr: overall,
+    potential,
+    /* STATUS */
+    health:
+        data.health ??
+        PLAYER_CONFIG.startingHealth,
+    energy:
+        data.energy ??
+        PLAYER_CONFIG.startingEnergy,
+    morale:
+        data.morale ??
+        PLAYER_CONFIG.startingMorale,
+    confidence:
+        data.confidence ??
+        PLAYER_CONFIG.startingConfidence,
+    fame:
+        data.fame ??
+        PLAYER_CONFIG.startingFame,
+    followers:
+        data.followers ??
+        PLAYER_CONFIG.startingFollowers,
+    experience:
+        data.experience ??
+        PLAYER_CONFIG.startingExperience,
+    /* PESO */
+    weight:
+        data.weight ??
+        getDefaultWeight(data.weightClass || "Lightweight"),
+    /* RECORD */
+    record: {
+        wins:
+            data.record?.wins ??
+            0,
+        losses:
+            data.record?.losses ??
+            0,
+        draws:
+            data.record?.draws ??
+            0,
+        knockouts:
+            data.record?.knockouts ??
+            0,
+        submissions:
+            data.record?.submissions ??
+            0,
+        decisions:
+            data.record?.decisions ??
+            0
+    },
+    /* FINANÇAS */
+    money:
+        data.money ??
+        PLAYER_CONFIG.startingMoney,
+    careerEarnings:
+        data.careerEarnings ??
+        0,
+    /* HISTÓRICO */
+    fights:
+        data.fights ||
+        [],
+    championships:
+        data.championships ||
+        [],
+    contracts:
+        data.contracts ||
+        [],
+    /* TREINAMENTO */
+    training: {
+        sessions:
+            data.training?.sessions ??
+            0,
+        totalSessions:
+            data.training?.totalSessions ??
+            0,
+        weeksTrained:
+            data.training?.weeksTrained ??
+            0
+    },
+    /* RELACIONAMENTOS */
+    relationships:
+        data.relationships ||
+        [],
+    /* FAMÍLIA */
+    family: {
+        partner:
+            data.family?.partner ||
+            null,
+        children:
+            data.family?.children ||
+            [],
+        parents:
+            data.family?.parents ||
+            []
+    },
+    /* LEGADO */
+    legacy: {
+        legacyScore:
+            data.legacy?.legacyScore ??
+            0,
+        goatScore:
+            data.legacy?.goatScore ??
+            0,
+        hallOfFame:
+            data.legacy?.hallOfFame ??
+            false
+    },
+    /* METADADOS */
+    createdAt:
+        data.createdAt ||
+        new Date().toISOString(),
+    lastUpdated:
+        new Date().toISOString()
+};
+
+}
+
+/* =========================================================
+ID DO LUTADOR
+========================================================= */
+
+function generatePlayerId() {
+
+return (
+    "fighter_" +
+    Date.now() +
+    "_" +
+    Math.floor(
+        Math.random() * 100000
+    )
+);
+
+}
+
+/* =========================================================
+PESO INICIAL
+========================================================= */
+
+function getDefaultWeight(weightClass) {
+
+const category =
+    WEIGHT_CLASSES[weightClass];
+if (!category) {
+    return 70;
+}
+/*
+   O peso inicial fica propositalmente
+   acima do limite da categoria.
+   O sistema de weight cut será criado
+   posteriormente.
+*/
+return Math.round(
+    category.limitKg * 1.08 * 10
+) / 10;
+
+}
+
+/* =========================================================
+RECALCULAR OVR
+========================================================= */
+
+function refreshPlayerOverall(player) {
+
+if (!player || !player.attributes) {
+    return;
+}
+player.ovr =
+    calculateOverall(
+        player.attributes
+    );
+
+}
+
+/* =========================================================
+AUMENTAR ATRIBUTO
+========================================================= */
+
+function increaseAttribute(
+player,
+category,
+attribute,
+amount
+) {
+
+if (
+    !player ||
+    !player.attributes ||
+    !player.attributes[category] ||
+    player.attributes[category][attribute] === undefined
+) {
+    return false;
+}
+const current =
+    Number(
+        player.attributes[category][attribute]
+    );
+const potentialLimit =
+    Number(player.potential || 99);
+player.attributes[category][attribute] =
+    Math.min(
+        potentialLimit,
+        current + amount
+    );
+refreshPlayerOverall(player);
+return true;
+
+}
+
+/* =========================================================
+GANHAR EXPERIÊNCIA
+========================================================= */
+
+function addExperience(player, amount) {
+
+if (!player) {
+    return;
+}
+player.experience =
+    Math.max(
+        0,
+        player.experience + amount
+    );
+
+}
+
+/* =========================================================
+RECORD
+========================================================= */
+
+function getRecordString(player) {
+
+if (!player || !player.record) {
+    return "0-0-0";
+}
+return (
+    `${player.record.wins}-` +
+    `${player.record.losses}-` +
+    `${player.record.draws}`
+);
+
+}
+
+/* =========================================================
+REGISTRAR VITÓRIA
+========================================================= */
+
+function registerWin(
+player,
+method = “decision”
+) {
+
+if (!player || !player.record) {
+    return;
+}
+player.record.wins++;
+if (method === "ko" || method === "tko") {
+    player.record.knockouts++;
+}
+if (method === "submission") {
+    player.record.submissions++;
+}
+if (method === "decision") {
+    player.record.decisions++;
+}
+
+}
+
+/* =========================================================
+REGISTRAR DERROTA
+========================================================= */
+
+function registerLoss(
+player,
+method = “decision”
+) {
+
+if (!player || !player.record) {
+    return;
+}
+player.record.losses++;
+
+}
+
+/* =========================================================
+REGISTRAR EMPATE
+========================================================= */
+
+function registerDraw(player) {
+
+if (!player || !player.record) {
+    return;
+}
+player.record.draws++;
+
+}
+
+/* =========================================================
+LIMITAR STATUS
+========================================================= */
+
+function clampPlayerStats(player) {
+
+if (!player) {
+    return;
+}
+player.health =
+    clamp(player.health, 0, 100);
+player.energy =
+    clamp(player.energy, 0, 100);
+player.morale =
+    clamp(player.morale, 0, 100);
+player.confidence =
+    clamp(player.confidence, 0, 100);
+player.fame =
+    Math.max(0, player.fame);
+player.followers =
+    Math.max(0, player.followers);
+
+}
+
+/* =========================================================
+CLAMP
+========================================================= */
+
+function clamp(value, min, max) {
+
+return Math.min(
+    max,
+    Math.max(
+        min,
+        Number(value) || 0
+    )
+);
+
+}
