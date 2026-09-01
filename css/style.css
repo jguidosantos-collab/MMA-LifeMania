@@ -1,586 +1,432 @@
 /* =========================================================
-   MMA LIFE — TEMA ESCURO
+MMA LIFE DYNASTY
+STYLE.CSS
+INTERFACE BASE
 ========================================================= */
 
-html {
-    touch-action: manipulation;
-    -webkit-text-size-adjust: 100%;
-}
-
-body {
-    touch-action: manipulation;
-    overscroll-behavior: none;
-}
-
-button,
-input,
-select,
-textarea {
-    touch-action: manipulation;
-}
 * {
     box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    }
+
+html,
+body {
+width: 100%;
+min-height: 100%;
 }
 
 body {
-    margin: 0;
-    padding: 0;
-    background: #0b0d10;
-    color: #f1f1f1;
-    font-family: Arial, Helvetica, sans-serif;
+background: #0b0b0d;
+color: #f4f4f4;
+font-family: -apple-system, BlinkMacSystemFont, “Segoe UI”,
+Roboto, Helvetica, Arial, sans-serif;
 }
 
 button,
 input,
 select {
-    font-family: inherit;
+font: inherit;
 }
 
 button {
-    border: 0;
-    cursor: pointer;
+cursor: pointer;
 }
 
 /* =========================================================
-   CONTAINER
+APP
 ========================================================= */
 
-#content {
-    width: 100%;
-    max-width: 900px;
-    margin: 0 auto;
-    padding: 16px;
+#app {
+width: 100%;
+min-height: 100vh;
+}
+
+/* =========================================================
+TELAS
+========================================================= */
+
+.screen {
+display: none;
+width: 100%;
+min-height: 100vh;
+}
+
+.screen.active {
+display: block;
+}
+
+/* =========================================================
+TELA INICIAL
+========================================================= */
+
+#screen-home {
+display: none;
+align-items: center;
+justify-content: center;
+}
+
+#screen-home.active {
+display: flex;
 }
 
 .home-container {
-    width: 100%;
+width: 100%;
+max-width: 520px;
+padding: 32px 24px;
+text-align: center;
+}
+
+/* LOGO */
+
+.logo-area {
+margin-bottom: 32px;
+}
+
+.logo-main {
+font-size: 48px;
+font-weight: 900;
+letter-spacing: -2px;
+line-height: 0.95;
+}
+
+.logo-sub {
+margin-top: 6px;
+font-size: 24px;
+font-weight: 800;
+letter-spacing: 8px;
+}
+
+/* DESCRIÇÃO */
+
+.home-description {
+color: #a8a8ad;
+font-size: 16px;
+line-height: 1.6;
+margin-bottom: 42px;
 }
 
 /* =========================================================
-   CARDS
+BOTÕES
 ========================================================= */
 
-.card,
-.stat-card,
-.fight-card,
-.career-card,
-.team-preview,
-.condition-card,
-.empty-card {
-    background: #15181d;
-    border: 1px solid #292e36;
-    border-radius: 14px;
-    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.35);
+.home-buttons {
+display: flex;
+flex-direction: column;
+gap: 12px;
 }
 
-.card {
-    padding: 18px;
-    margin-bottom: 14px;
+.primary-button,
+.secondary-button {
+width: 100%;
+min-height: 54px;
+border-radius: 12px;
+border: 1px solid transparent;
+font-size: 15px;
+font-weight: 800;
+letter-spacing: 0.5px;
+transition: transform 0.15s ease, opacity 0.15s ease;
 }
 
-.card .card {
-    background: #101318;
+.primary-button {
+background: #f4f4f4;
+color: #0b0b0d;
+}
+
+.secondary-button {
+background: #18181c;
+color: #f4f4f4;
+border-color: #2b2b30;
+}
+
+.primary-button:hover,
+.secondary-button:hover {
+opacity: 0.9;
+}
+
+.primary-button:active,
+.secondary-button:active {
+transform: scale(0.98);
+}
+
+.primary-button.large {
+min-height: 60px;
+font-size: 16px;
+}
+
+.text-button {
+background: transparent;
+border: none;
+color: #9d9da4;
+padding: 14px;
+font-size: 14px;
+}
+
+.text-button:hover {
+color: #ffffff;
 }
 
 /* =========================================================
-   TÍTULOS
+MENSAGENS
 ========================================================= */
 
-.title {
-    font-size: 20px;
-    font-weight: 800;
-    color: #ffffff;
-    margin-bottom: 16px;
-}
-
-.section-title {
-    margin: 22px 0 10px;
-    font-size: 14px;
-    font-weight: 800;
-    color: #aeb6c2;
-    letter-spacing: 1px;
+.message,
+.game-message {
+min-height: 24px;
+margin-top: 16px;
+color: #a8a8ad;
+font-size: 14px;
+line-height: 1.4;
 }
 
 /* =========================================================
-   CABEÇALHO DO LUTADOR
+CRIAÇÃO
 ========================================================= */
 
-.fighter-header {
-    display: flex;
-    align-items: center;
-    gap: 15px;
-    padding: 18px;
-    margin-bottom: 14px;
-    background: linear-gradient(
-        135deg,
-        #181c22,
-        #101216
-    );
-    border: 1px solid #303640;
-    border-radius: 16px;
+.page-container {
+width: 100%;
+max-width: 600px;
+margin: 0 auto;
+padding: 32px 20px 48px;
 }
 
-.fighter-avatar {
-    width: 70px;
-    height: 70px;
-    border-radius: 50%;
-    background: #222831;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 34px;
+.page-header {
+margin-bottom: 30px;
 }
 
-.fighter-name {
-    font-size: 24px;
-    font-weight: 900;
-    color: #ffffff;
+.page-header h1 {
+font-size: 28px;
+font-weight: 900;
+letter-spacing: -0.5px;
 }
 
-.fighter-country,
-.fighter-weight {
-    margin-top: 4px;
-    color: #9ba4b0;
-    font-size: 14px;
+.page-header p {
+margin-top: 8px;
+color: #96969d;
+font-size: 15px;
+}
+
+.creation-form {
+display: flex;
+flex-direction: column;
+gap: 18px;
+}
+
+.form-group {
+display: flex;
+flex-direction: column;
+gap: 8px;
+}
+
+.form-group label {
+color: #c8c8cd;
+font-size: 13px;
+font-weight: 700;
+}
+
+.form-group input,
+.form-group select {
+width: 100%;
+min-height: 52px;
+padding: 0 14px;
+border: 1px solid #2c2c31;
+border-radius: 10px;
+outline: none;
+background: #17171b;
+color: #ffffff;
+}
+
+.form-group input:focus,
+.form-group select:focus {
+border-color: #77777e;
 }
 
 /* =========================================================
-   STATUS
+DASHBOARD
 ========================================================= */
 
-.stats-grid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 10px;
+.dashboard-container {
+width: 100%;
+max-width: 700px;
+margin: 0 auto;
+padding: 24px 18px 48px;
+}
+
+/* CABEÇALHO */
+
+.dashboard-header {
+display: flex;
+justify-content: space-between;
+align-items: flex-start;
+gap: 20px;
+margin-bottom: 22px;
+}
+
+.small-label {
+display: block;
+margin-bottom: 5px;
+color: #77777e;
+font-size: 10px;
+font-weight: 800;
+letter-spacing: 1.5px;
+}
+
+.dashboard-header h1 {
+font-size: 28px;
+font-weight: 900;
+}
+
+.record {
+text-align: right;
+}
+
+.record strong {
+font-size: 18px;
+}
+
+/* =========================================================
+TEMPO
+========================================================= */
+
+.time-card {
+display: grid;
+grid-template-columns: repeat(3, 1fr);
+gap: 8px;
+margin-bottom: 14px;
+}
+
+.time-card > div {
+padding: 16px 10px;
+border: 1px solid #26262b;
+border-radius: 12px;
+background: #141417;
+text-align: center;
+}
+
+.time-card span {
+display: block;
+margin-bottom: 6px;
+color: #77777e;
+font-size: 10px;
+font-weight: 800;
+letter-spacing: 1px;
+}
+
+.time-card strong {
+font-size: 19px;
+}
+
+/* =========================================================
+STATUS
+========================================================= */
+
+.status-grid {
+display: grid;
+grid-template-columns: repeat(2, 1fr);
+gap: 8px;
+margin-bottom: 14px;
 }
 
 .stat-card {
-    padding: 14px;
+padding: 18px;
+border: 1px solid #26262b;
+border-radius: 12px;
+background: #141417;
 }
 
-.stat-card span,
-.statline span {
-    color: #8e98a6;
-    font-size: 12px;
+.stat-card span {
+display: block;
+margin-bottom: 7px;
+color: #77777e;
+font-size: 10px;
+font-weight: 800;
+letter-spacing: 1px;
 }
 
 .stat-card strong {
-    display: block;
-    margin-top: 5px;
-    font-size: 20px;
-    color: #ffffff;
+font-size: 27px;
+font-weight: 900;
 }
 
 /* =========================================================
-   STATLINE
+INFORMAÇÕES
 ========================================================= */
 
-.statline {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 15px;
-    padding: 11px 0;
-    border-bottom: 1px solid #252a31;
+.info-card {
+margin-bottom: 18px;
+padding: 4px 16px;
+border: 1px solid #26262b;
+border-radius: 12px;
+background: #141417;
 }
 
-.statline:last-child {
-    border-bottom: 0;
+.info-row {
+display: flex;
+justify-content: space-between;
+gap: 20px;
+padding: 15px 0;
+border-bottom: 1px solid #242429;
 }
 
-.statline b {
-    color: #ffffff;
-    text-align: right;
+.info-row:last-child {
+border-bottom: none;
+}
+
+.info-row span {
+color: #85858c;
+font-size: 13px;
+}
+
+.info-row strong {
+font-size: 13px;
+text-align: right;
 }
 
 /* =========================================================
-   BOTÕES
+AÇÕES
 ========================================================= */
 
-button,
-.main-button {
-    width: 100%;
-    padding: 13px 15px;
-    margin-top: 9px;
-    border-radius: 10px;
-    background: #242a32;
-    color: #ffffff;
-    font-weight: 800;
-    font-size: 14px;
-    border: 1px solid #343b45;
-    transition: 0.15s;
-}
-
-button:active,
-.main-button:active {
-    transform: scale(0.98);
-}
-
-button:hover,
-.main-button:hover {
-    background: #303740;
-}
-
-button.green,
-.main-button.green {
-    background: #145c3a;
-    border-color: #20784c;
-}
-
-button.green:hover {
-    background: #197148;
-}
-
-button.red,
-.main-button.red {
-    background: #7d2026;
-    border-color: #a82b33;
-}
-
-button.blue {
-    background: #174c78;
-    border-color: #24689e;
-}
-
-button.gray,
-.main-button.gray {
-    background: #292d33;
-    border-color: #3a414a;
+.dashboard-actions {
+display: flex;
+flex-direction: column;
+gap: 10px;
 }
 
 /* =========================================================
-   QUICK GRID
-========================================================= */
-
-.quick-grid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 10px;
-}
-
-.quick-grid button {
-    min-height: 85px;
-    background: #15191f;
-    border: 1px solid #2b323b;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    gap: 7px;
-    font-size: 25px;
-}
-
-.quick-grid button span {
-    font-size: 12px;
-    color: #b7bec8;
-}
-
-/* =========================================================
-   PRÓXIMA LUTA
-========================================================= */
-
-.fight-card {
-    padding: 18px;
-}
-
-.fight-event {
-    color: #d8a83e;
-    font-weight: 800;
-    margin-bottom: 18px;
-}
-
-.fight-versus {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 10px;
-}
-
-.fighter-side {
-    text-align: center;
-    flex: 1;
-}
-
-.mini-avatar {
-    font-size: 30px;
-    margin-bottom: 7px;
-}
-
-.vs {
-    font-size: 20px;
-    font-weight: 900;
-    color: #d8a83e;
-}
-
-.fight-details {
-    display: flex;
-    justify-content: space-between;
-    margin-top: 18px;
-    color: #a7afba;
-    font-size: 13px;
-}
-
-/* =========================================================
-   OVERALL
-========================================================= */
-
-.overall-panel {
-    padding: 16px;
-    background: #101318;
-    border: 1px solid #2b3139;
-    border-radius: 12px;
-    margin-bottom: 14px;
-}
-
-.overall-number {
-    font-size: 42px;
-    font-weight: 900;
-    color: #ffffff;
-}
-
-.potential {
-    color: #d8a83e;
-    font-weight: 800;
-}
-
-.progress {
-    width: 100%;
-    height: 8px;
-    background: #292e35;
-    border-radius: 20px;
-    overflow: hidden;
-    margin-top: 8px;
-}
-
-.progress-fill {
-    height: 100%;
-    background: #d8a83e;
-    border-radius: 20px;
-}
-
-/* =========================================================
-   CALENDÁRIO
-========================================================= */
-
-.calendar-panel {
-    background: #15181d;
-    border: 1px solid #292f37;
-    border-radius: 14px;
-    padding: 16px;
-    margin-bottom: 14px;
-}
-
-.calendar-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 15px;
-}
-
-.calendar-week {
-    font-size: 22px;
-    font-weight: 900;
-}
-
-.calendar-year {
-    color: #8f99a5;
-    font-size: 13px;
-}
-
-.calendar-event {
-    padding: 12px;
-    background: #101318;
-    border: 1px solid #272d35;
-    border-radius: 10px;
-    margin-top: 8px;
-}
-
-.calendar-event strong {
-    color: #ffffff;
-}
-
-.calendar-event small {
-    display: block;
-    margin-top: 5px;
-    color: #89929e;
-}
-
-/* =========================================================
-   CAMP
-========================================================= */
-
-.camp-week {
-    padding: 13px;
-    background: #101318;
-    border: 1px solid #292f37;
-    border-radius: 10px;
-    margin-top: 9px;
-}
-
-.camp-week-title {
-    font-weight: 900;
-    color: #ffffff;
-}
-
-.camp-training {
-    margin-top: 6px;
-    color: #aab2bd;
-    font-size: 13px;
-}
-
-/* =========================================================
-   FORMULÁRIOS
-========================================================= */
-
-input,
-select {
-    width: 100%;
-    padding: 13px;
-    margin-top: 9px;
-    background: #101318;
-    color: #ffffff;
-    border: 1px solid #343b45;
-    border-radius: 9px;
-    outline: none;
-}
-
-input:focus,
-select:focus {
-    border-color: #d8a83e;
-}
-
-/* =========================================================
-   START SCREEN
-========================================================= */
-
-.start-screen {
-    min-height: 80vh;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    text-align: center;
-    padding: 25px;
-}
-
-.start-logo {
-    font-size: 70px;
-}
-
-.start-screen h1 {
-    font-size: 42px;
-    margin: 10px 0;
-    font-weight: 900;
-}
-
-.start-subtitle {
-    color: #9da6b2;
-    line-height: 1.6;
-}
-
-.start-preview {
-    width: 100%;
-    max-width: 500px;
-    padding: 18px;
-    margin: 20px 0;
-    display: flex;
-    gap: 15px;
-    text-align: left;
-    background: #15181d;
-    border: 1px solid #2b3139;
-    border-radius: 14px;
-}
-
-.start-fighter {
-    font-size: 45px;
-}
-
-.start-preview-text {
-    display: flex;
-    flex-direction: column;
-    gap: 7px;
-}
-
-.start-preview-text span {
-    color: #9099a5;
-    font-size: 13px;
-    line-height: 1.5;
-}
-
-.start-button {
-    max-width: 500px;
-    background: #145c3a;
-    border-color: #20784c;
-}
-
-.start-footer {
-    margin-top: 20px;
-    color: #666f7b;
-    font-size: 11px;
-}
-
-/* =========================================================
-   VIDA / FAMÍLIA
-========================================================= */
-
-.condition-card {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    padding: 15px;
-    gap: 15px;
-}
-
-.condition-card span {
-    display: block;
-    color: #858f9c;
-    font-size: 12px;
-}
-
-.condition-card strong {
-    display: block;
-    margin-top: 5px;
-}
-
-/* =========================================================
-   RESPONSIVO
+RESPONSIVIDADE
 ========================================================= */
 
 @media (min-width: 700px) {
 
-    .stats-grid {
-        grid-template-columns:
-            repeat(4, 1fr);
-    }
-
-    .quick-grid {
-        grid-template-columns:
-            repeat(3, 1fr);
-    }
-
+.home-container {
+    padding-top: 70px;
 }
-#tabs {
-    display: flex !important;
-    position: fixed;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    z-index: 9999;
-    visibility: visible !important;
-    opacity: 1 !important;
+.logo-main {
+    font-size: 62px;
+}
+.dashboard-container,
+.page-container {
+    padding-top: 45px;
+}
+.status-grid {
+    grid-template-columns: repeat(4, 1fr);
+}
+.stat-card {
+    padding: 16px;
+}
+.stat-card strong {
+    font-size: 24px;
 }
 
-#tabs.hidden {
-    display: none !important;
 }
 
-#game {
-    padding-bottom: 100px;
-}
 /* =========================================================
-   CONTROLE DE TELAS
-   IMPORTANTE: elementos com .hidden ficam realmente ocultos
+ACESSIBILIDADE
 ========================================================= */
 
-.hidden {
-    display: none !important;
+button:focus-visible,
+input:focus-visible,
+select:focus-visible {
+outline: 2px solid #ffffff;
+outline-offset: 2px;
 }
