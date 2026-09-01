@@ -1,170 +1,212 @@
 /* =========================================================
-   MMA LIFE DYNASTY
-   SAVE.JS
-   SISTEMA DE SALVAMENTO E CARREGAMENTO
-   VERSÃO CORRIGIDA
+MMA LIFE DYNASTY
+SAVE.JS
+SISTEMA DE SAVE / LOAD
 ========================================================= */
+
 /* =========================================================
-   CHAVE DO SAVE
+CONFIGURAÇÕES
 ========================================================= */
-const SAVE_KEY = "mmaLifePlayer";
+
+const SAVE_CONFIG = {
+
+storageKey:
+    "mma_life_dynasty_save_v1",
+version:
+    1
+
+};
+
 /* =========================================================
-   SALVAR JOGO
+SALVAR JOGO
 ========================================================= */
-function saveGame() {
-    try {
-        if (
-            typeof window.player === "undefined" ||
-            !window.player
-        ) {
-            console.warn(
-                "Não foi possível salvar: player inexistente."
-            );
-            return false;
-        }
-        localStorage.setItem(
-            SAVE_KEY,
-            JSON.stringify(
-                window.player
-            )
-        );
-        return true;
-    }
-    catch (error) {
-        console.error(
-            "Erro ao salvar o jogo:",
-            error
-        );
-        return false;
-    }
+
+function saveGame(player) {
+
+if (!player) {
+    return {
+        success: false,
+        message: "Nenhum lutador para salvar."
+    };
 }
-/* =========================================================
-   ALIAS — SAVE
-   OUTROS ARQUIVOS USAM window.save()
-========================================================= */
-function save() {
-    return saveGame();
+try {
+    player.lastUpdated =
+        new Date().toISOString();
+    const saveData = {
+        version:
+            SAVE_CONFIG.version,
+        savedAt:
+            new Date().toISOString(),
+        player:
+            player
+    };
+    localStorage.setItem(
+        SAVE_CONFIG.storageKey,
+        JSON.stringify(saveData)
+    );
+    return {
+        success: true,
+        message: "Jogo salvo com sucesso."
+    };
+} catch (error) {
+    console.error(
+        "Erro ao salvar jogo:",
+        error
+    );
+    return {
+        success: false,
+        message:
+            "Não foi possível salvar o jogo."
+    };
 }
+
+}
+
 /* =========================================================
-   CARREGAR JOGO
+CARREGAR JOGO
 ========================================================= */
+
 function loadGame() {
-    try {
-        const raw =
-            localStorage.getItem(
-                SAVE_KEY
-            );
-        if (!raw) {
-            return false;
-        }
-        const data =
-            JSON.parse(raw);
-        if (
-            !data ||
-            typeof data !== "object"
-        ) {
-            return false;
-        }
-        /*
-           IMPORTANTE:
-           Não substituir o objeto player inteiro
-           de forma cega.
-           Mantemos a referência global e copiamos
-           os dados do save para ela.
-        */
-        if (
-            typeof window.player === "undefined" ||
-            !window.player
-        ) {
-            window.player = {};
-        }
-        Object.assign(
-            window.player,
-            data
+
+try {
+    const rawData =
+        localStorage.getItem(
+            SAVE_CONFIG.storageKey
         );
-        /*
-           Garantir estruturas essenciais.
-        */
-        window.player.attributes =
-            window.player.attributes || {};
-        window.player.amateur =
-            window.player.amateur || {
-                wins: 0,
-                losses: 0,
-                draws: 0,
-                ranking: 50
-            };
-        window.player.professional =
-            window.player.professional || {
-                active: false,
-                wins: 0,
-                losses: 0,
-                draws: 0,
-                ranking: null
-            };
-        window.player.trainingPlan =
-            window.player.trainingPlan || {
-                weeks: {}
-            };
-        window.player.trainingPlan.weeks =
-            window.player.trainingPlan.weeks || {};
-        window.player.children =
-            Array.isArray(
-                window.player.children
-            )
-            ? window.player.children
-            : [];
-        window.player.log =
-            Array.isArray(
-                window.player.log
-            )
-            ? window.player.log
-            : [];
-        return true;
+    if (!rawData) {
+        return null;
     }
-    catch (error) {
-        console.error(
-            "Erro ao carregar o jogo:",
-            error
-        );
-        return false;
+    const saveData =
+        JSON.parse(rawData);
+    if (
+        !saveData ||
+        !saveData.player
+    ) {
+        return null;
     }
+    return saveData.player;
+} catch (error) {
+    console.error(
+        "Erro ao carregar jogo:",
+        error
+    );
+    return null;
 }
-/* =========================================================
-   ALIAS — LOAD
-   O MAIN.JS USA window.load()
-========================================================= */
-function load() {
-    return loadGame();
+
 }
+
 /* =========================================================
-   APAGAR SAVE
+VERIFICAR SE EXISTE SAVE
 ========================================================= */
-function clearSave() {
-    try {
-        localStorage.removeItem(
-            SAVE_KEY
-        );
-        return true;
-    }
-    catch (error) {
-        console.error(
-            "Erro ao apagar save:",
-            error
-        );
-        return false;
-    }
+
+function hasSaveGame() {
+
+try {
+    return Boolean(
+        localStorage.getItem(
+            SAVE_CONFIG.storageKey
+        )
+    );
+} catch (error) {
+    return false;
 }
+
+}
+
 /* =========================================================
-   EXPORTAR FUNÇÕES
+APAGAR SAVE
 ========================================================= */
-window.saveGame =
-    saveGame;
-window.save =
-    save;
-window.loadGame =
-    loadGame;
-window.load =
-    load;
-window.clearSave =
-    clearSave;
+
+function deleteSaveGame() {
+
+try {
+    localStorage.removeItem(
+        SAVE_CONFIG.storageKey
+    );
+    return true;
+} catch (error) {
+    console.error(
+        "Erro ao apagar save:",
+        error
+    );
+    return false;
+}
+
+}
+
+/* =========================================================
+EXPORTAR SAVE
+========================================================= */
+
+function exportSave(player) {
+
+if (!player) {
+    return null;
+}
+const saveData = {
+    version:
+        SAVE_CONFIG.version,
+    exportedAt:
+        new Date().toISOString(),
+    player:
+        player
+};
+return JSON.stringify(
+    saveData,
+    null,
+    2
+);
+
+}
+
+/* =========================================================
+IMPORTAR SAVE
+========================================================= */
+
+function importSave(jsonData) {
+
+if (!jsonData) {
+    return {
+        success: false,
+        player: null,
+        message:
+            "Nenhum dado foi fornecido."
+    };
+}
+try {
+    const saveData =
+        typeof jsonData === "string"
+            ? JSON.parse(jsonData)
+            : jsonData;
+    if (
+        !saveData ||
+        !saveData.player
+    ) {
+        return {
+            success: false,
+            player: null,
+            message:
+                "Save inválido."
+        };
+    }
+    return {
+        success: true,
+        player:
+            saveData.player,
+        message:
+            "Save importado com sucesso."
+    };
+} catch (error) {
+    console.error(
+        "Erro ao importar save:",
+        error
+    );
+    return {
+        success: false,
+        player: null,
+        message:
+            "Não foi possível importar o save."
+    };
+}
+
+}
