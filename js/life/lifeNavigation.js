@@ -2,10 +2,11 @@
    MMA LIFE DYNASTY
    LIFE NAVIGATION
    ------------------------------------------------------------
-   Navegação entre as áreas da vida do jogador.
+   Sistema central de navegação da área LIFE.
+   Versão corrigida e completa.
    ============================================================ */
 
-const LIFE_NAVIGATION_VERSION = 2;
+const LIFE_NAVIGATION_VERSION = 3;
 
 const LIFE_NAVIGATION_CONFIG = {
     version: LIFE_NAVIGATION_VERSION,
@@ -65,7 +66,6 @@ const LIFE_NAVIGATION_CONFIG = {
    ============================================================ */
 
 const navigationState = {
-
     database: null,
 
     initialized: false,
@@ -90,7 +90,6 @@ const navigationState = {
    ============================================================ */
 
 function clone(value) {
-
     if (
         value === undefined ||
         value === null
@@ -99,30 +98,23 @@ function clone(value) {
     }
 
     try {
-
         return JSON.parse(
             JSON.stringify(value)
         );
-
     } catch (error) {
-
         return value;
     }
 }
 
 
 function normalizeText(value) {
-
     return String(value ?? "")
         .trim()
         .toLowerCase();
 }
 
 
-function generateId(
-    prefix = "navigation"
-) {
-
+function generateId(prefix = "navigation") {
     return (
         `${prefix}_` +
         `${Date.now()}_` +
@@ -134,7 +126,6 @@ function generateId(
 
 
 function ensureArray(value) {
-
     return Array.isArray(value)
         ? value
         : [];
@@ -142,7 +133,6 @@ function ensureArray(value) {
 
 
 function ensureObject(value) {
-
     return (
         value &&
         typeof value === "object"
@@ -157,29 +147,22 @@ function ensureObject(value) {
    ============================================================ */
 
 function getDatabase() {
-
     return navigationState.database;
 }
 
 
 function setDatabase(database) {
-
-    navigationState.database =
-        database;
-
-    return database;
+    navigationState.database = database;
+    ensureDatabase();
+    return navigationState.database;
 }
 
 
-function ensureDatabase(
-    database = navigationState.database
-) {
-
+function ensureDatabase(database = navigationState.database) {
     if (
         !database ||
         typeof database !== "object"
     ) {
-
         navigationState.database = {};
     }
 
@@ -187,7 +170,6 @@ function ensureDatabase(
         !navigationState.database.life ||
         typeof navigationState.database.life !== "object"
     ) {
-
         navigationState.database.life = {};
     }
 
@@ -195,14 +177,13 @@ function ensureDatabase(
         !navigationState.database.life.navigation ||
         typeof navigationState.database.life.navigation !== "object"
     ) {
-
         navigationState.database.life.navigation = {
-
             version:
                 LIFE_NAVIGATION_VERSION,
 
             currentSection:
-                LIFE_NAVIGATION_CONFIG.defaultSection,
+                LIFE_NAVIGATION_CONFIG
+                    .defaultSection,
 
             previousSection: null,
 
@@ -221,11 +202,9 @@ function ensureDatabase(
    ============================================================ */
 
 function getSectionIds() {
-
     return Object.keys(
         LIFE_NAVIGATION_CONFIG.sections
     ).filter(sectionId => {
-
         return (
             LIFE_NAVIGATION_CONFIG
                 .sections[sectionId] !== false
@@ -235,79 +214,46 @@ function getSectionIds() {
 
 
 function normalizeSection(section) {
-
     const normalized =
         normalizeText(section);
 
     if (!normalized) {
-
         return null;
     }
 
     const aliases = {
-
         home: "overview",
-
         dashboard: "overview",
-
         profile: "overview",
 
-        relationship:
-            "relationships",
+        relationship: "relationships",
+        relationships: "relationships",
 
-        relationships:
-            "relationships",
+        family: "family",
 
-        family:
-            "family",
+        career: "career",
 
-        career:
-            "career",
+        finance: "finances",
+        finances: "finances",
+        money: "finances",
 
-        finance:
-            "finances",
+        lifestyle: "lifestyle",
+        life_style: "lifestyle",
 
-        finances:
-            "finances",
+        media: "media",
+        social: "media",
 
-        money:
-            "finances",
+        history: "history",
+        timeline: "history",
 
-        lifestyle:
-            "lifestyle",
+        milestones: "milestones",
+        achievements: "milestones",
 
-        life_style:
-            "lifestyle",
+        dynasty: "dynasty",
+        legacy: "dynasty",
 
-        media:
-            "media",
-
-        social:
-            "media",
-
-        history:
-            "history",
-
-        timeline:
-            "history",
-
-        milestones:
-            "milestones",
-
-        achievements:
-            "milestones",
-
-        dynasty:
-            "dynasty",
-
-        legacy:
-            "dynasty",
-
-        notification:
-            "notifications",
-
-        notifications:
-            "notifications"
+        notification: "notifications",
+        notifications: "notifications"
     };
 
     const resolved =
@@ -318,7 +264,6 @@ function normalizeSection(section) {
         !getSectionIds()
             .includes(resolved)
     ) {
-
         return null;
     }
 
@@ -327,7 +272,6 @@ function normalizeSection(section) {
 
 
 function isValidSection(section) {
-
     return Boolean(
         normalizeSection(section)
     );
@@ -335,30 +279,24 @@ function isValidSection(section) {
 
 
 /* ============================================================
-   INFORMAÇÕES DAS SEÇÕES
+   INFORMAÇÕES
    ============================================================ */
 
 function getCurrentSection() {
-
-    return navigationState
-        .currentSection;
+    return navigationState.currentSection;
 }
 
 
 function getPreviousSection() {
-
-    return navigationState
-        .previousSection;
+    return navigationState.previousSection;
 }
 
 
 function getSectionLabel(section) {
-
     const normalized =
         normalizeSection(section);
 
     if (!normalized) {
-
         return null;
     }
 
@@ -371,12 +309,10 @@ function getSectionLabel(section) {
 
 
 function getSectionIcon(section) {
-
     const normalized =
         normalizeSection(section);
 
     if (!normalized) {
-
         return null;
     }
 
@@ -389,28 +325,21 @@ function getSectionIcon(section) {
 
 
 function getSection(section) {
-
     const normalized =
         normalizeSection(section);
 
     if (!normalized) {
-
         return null;
     }
 
     return {
-
         id: normalized,
 
         label:
-            getSectionLabel(
-                normalized
-            ),
+            getSectionLabel(normalized),
 
         icon:
-            getSectionIcon(
-                normalized
-            ),
+            getSectionIcon(normalized),
 
         enabled:
             LIFE_NAVIGATION_CONFIG
@@ -424,10 +353,8 @@ function getSection(section) {
 
 
 function getSections() {
-
     return getSectionIds()
         .map(section => {
-
             return getSection(section);
         });
 }
@@ -438,27 +365,21 @@ function getSections() {
    ============================================================ */
 
 function normalizeHistoryItem(item) {
-
     if (
         !item ||
         typeof item !== "object"
     ) {
-
         return null;
     }
 
     const section =
-        normalizeSection(
-            item.section
-        );
+        normalizeSection(item.section);
 
     if (!section) {
-
         return null;
     }
 
     return {
-
         id:
             item.id ||
             generateId(),
@@ -481,31 +402,24 @@ function addNavigationHistory(
     section,
     previousSection
 ) {
-
     const item =
         normalizeHistoryItem({
-
             section,
-
             previousSection,
-
             timestamp:
                 new Date().toISOString()
         });
 
     if (!item) {
-
         return null;
     }
 
-    navigationState.history
-        .push(item);
+    navigationState.history.push(item);
 
     if (
         navigationState.history.length >
         navigationState.maxHistory
     ) {
-
         navigationState.history =
             navigationState.history.slice(
                 -navigationState.maxHistory
@@ -519,7 +433,6 @@ function addNavigationHistory(
 function getNavigationHistory(
     limit = 20
 ) {
-
     const safeLimit =
         Math.max(
             1,
@@ -535,7 +448,6 @@ function getNavigationHistory(
 
 
 function clearNavigationHistory() {
-
     navigationState.history = [];
 
     syncPersistentState();
@@ -549,12 +461,10 @@ function clearNavigationHistory() {
    ============================================================ */
 
 function syncPersistentState() {
-
     const database =
         ensureDatabase();
 
     database.life.navigation = {
-
         version:
             LIFE_NAVIGATION_VERSION,
 
@@ -573,14 +483,11 @@ function syncPersistentState() {
             navigationState.lastNavigationAt
     };
 
-    return (
-        database.life.navigation
-    );
+    return database.life.navigation;
 }
 
 
 function loadPersistentState() {
-
     const database =
         ensureDatabase();
 
@@ -605,13 +512,13 @@ function loadPersistentState() {
         ensureArray(
             stored.history
         )
-        .map(item =>
-            normalizeHistoryItem(item)
-        )
-        .filter(Boolean)
-        .slice(
-            -navigationState.maxHistory
-        );
+            .map(item =>
+                normalizeHistoryItem(item)
+            )
+            .filter(Boolean)
+            .slice(
+                -navigationState.maxHistory
+            );
 
     navigationState.lastNavigationAt =
         stored.lastNavigationAt ||
@@ -626,12 +533,9 @@ function loadPersistentState() {
    ============================================================ */
 
 function addListener(callback) {
-
     if (
-        typeof callback !==
-        "function"
+        typeof callback !== "function"
     ) {
-
         return false;
     }
 
@@ -639,9 +543,9 @@ function addListener(callback) {
         !navigationState.listeners
             .includes(callback)
     ) {
-
-        navigationState.listeners
-            .push(callback);
+        navigationState.listeners.push(
+            callback
+        );
     }
 
     return true;
@@ -649,47 +553,158 @@ function addListener(callback) {
 
 
 function removeListener(callback) {
-
     const index =
         navigationState.listeners
             .indexOf(callback);
 
     if (index === -1) {
-
         return false;
     }
 
-    navigationState.listeners
-        .splice(index, 1);
+    navigationState.listeners.splice(
+        index,
+        1
+    );
 
     return true;
 }
 
 
 function notifyListeners(event) {
+    navigationState.listeners
+        .slice()
+        .forEach(listener => {
+            try {
+                listener(
+                    clone(event)
+                );
+            } catch (error) {
+                console.error(
+                    "[MMA LIFE DYNASTY] " +
+                    "Life Navigation listener error:",
+                    error
+                );
+            }
+        });
+}
 
-    const listeners =
-        navigationState
-            .listeners
-            .slice();
 
-    listeners.forEach(listener => {
+/* ============================================================
+   EVENTO DOM
+   ============================================================ */
 
+function dispatchNavigationEvent(event) {
+    if (
+        typeof window === "undefined" ||
+        typeof window.dispatchEvent !==
+            "function"
+    ) {
+        return;
+    }
+
+    try {
+        window.dispatchEvent(
+            new CustomEvent(
+                "mma-life-navigation",
+                {
+                    detail:
+                        clone(event)
+                }
+            )
+        );
+    } catch (error) {
         try {
-
-            listener(
-                clone(event)
+            window.dispatchEvent(
+                new Event(
+                    "mma-life-navigation"
+                )
             );
-
-        } catch (error) {
-
-            console.error(
-                "[MMA LIFE DYNASTY] " +
-                "lifeNavigation listener error:",
-                error
-            );
+        } catch (ignored) {
+            /* ambiente sem DOM */
         }
-    });
+    }
+}
+
+
+/* ============================================================
+   HASH
+   ============================================================ */
+
+function sectionToHash(section) {
+    const normalized =
+        normalizeSection(section);
+
+    if (!normalized) {
+        return "";
+    }
+
+    return `#life/${normalized}`;
+}
+
+
+function hashToSection(hash) {
+    const value =
+        String(hash || "")
+            .trim()
+            .replace(/^#/, "");
+
+    if (!value) {
+        return null;
+    }
+
+    if (
+        value.startsWith("life/")
+    ) {
+        return normalizeSection(
+            value.slice(5)
+        );
+    }
+
+    return normalizeSection(value);
+}
+
+
+function updateHash(section) {
+    if (
+        typeof window === "undefined"
+    ) {
+        return false;
+    }
+
+    const hash =
+        sectionToHash(section);
+
+    if (!hash) {
+        return false;
+    }
+
+    try {
+        if (
+            window.history &&
+            typeof window.history
+                .replaceState === "function"
+        ) {
+            window.history.replaceState(
+                null,
+                "",
+                hash
+            );
+        } else {
+            window.location.hash =
+                hash;
+        }
+
+        return true;
+    } catch (error) {
+        try {
+            window.location.hash =
+                hash;
+        } catch (ignored) {
+            return false;
+        }
+
+        return true;
+    }
 }
 
 
@@ -701,42 +716,29 @@ function navigate(
     section,
     options = {}
 ) {
-
     const normalized =
         normalizeSection(section);
 
     if (!normalized) {
-
         return {
-
             success: false,
-
             changed: false,
-
-            error:
-                "INVALID_SECTION",
-
+            error: "INVALID_SECTION",
             section: null
         };
     }
 
     const previous =
-        navigationState
-            .currentSection;
+        navigationState.currentSection;
 
     if (
         previous === normalized &&
         options.force !== true
     ) {
-
         return {
-
             success: true,
-
             changed: false,
-
             section: normalized,
-
             previousSection: previous
         };
     }
@@ -750,15 +752,24 @@ function navigate(
     navigationState.lastNavigationAt =
         new Date().toISOString();
 
-    addNavigationHistory(
-        normalized,
-        previous
-    );
+    if (
+        options.addHistory !== false
+    ) {
+        addNavigationHistory(
+            normalized,
+            previous
+        );
+    }
 
     syncPersistentState();
 
-    const event = {
+    if (
+        options.updateHash !== false
+    ) {
+        updateHash(normalized);
+    }
 
+    const event = {
         type: "navigation",
 
         section: normalized,
@@ -772,16 +783,13 @@ function navigate(
 
     notifyListeners(event);
 
+    dispatchNavigationEvent(event);
+
     return {
-
         success: true,
-
         changed: true,
-
         section: normalized,
-
         previousSection: previous,
-
         event
     };
 }
@@ -791,7 +799,6 @@ function goTo(
     section,
     options = {}
 ) {
-
     return navigate(
         section,
         options
@@ -800,21 +807,14 @@ function goTo(
 
 
 function goBack() {
-
     const previous =
-        navigationState
-            .previousSection;
+        navigationState.previousSection;
 
     if (!previous) {
-
         return {
-
             success: false,
-
             changed: false,
-
-            error:
-                "NO_PREVIOUS_SECTION"
+            error: "NO_PREVIOUS_SECTION"
         };
     }
 
@@ -828,24 +828,17 @@ function goBack() {
 
 
 function goHome() {
-
-    return navigate(
-        "overview"
-    );
+    return navigate("overview");
 }
 
 
 function refresh() {
-
-    const current =
-        navigationState
-            .currentSection;
-
     return navigate(
-        current,
+        navigationState.currentSection,
         {
             force: true,
-            refresh: true
+            refresh: true,
+            addHistory: false
         }
     );
 }
@@ -856,7 +849,6 @@ function refresh() {
    ============================================================ */
 
 function getCurrentIndex() {
-
     return getSectionIds()
         .indexOf(
             navigationState
@@ -866,18 +858,13 @@ function getCurrentIndex() {
 
 
 function goNext() {
-
     const sections =
         getSectionIds();
 
     if (!sections.length) {
-
         return {
-
             success: false,
-
-            error:
-                "NO_SECTIONS"
+            error: "NO_SECTIONS"
         };
     }
 
@@ -889,8 +876,7 @@ function goNext() {
             ? 0
             : (
                 currentIndex + 1
-            ) %
-            sections.length;
+            ) % sections.length;
 
     return navigate(
         sections[nextIndex]
@@ -899,18 +885,13 @@ function goNext() {
 
 
 function goPrevious() {
-
     const sections =
         getSectionIds();
 
     if (!sections.length) {
-
         return {
-
             success: false,
-
-            error:
-                "NO_SECTIONS"
+            error: "NO_SECTIONS"
         };
     }
 
@@ -933,13 +914,11 @@ function goPrevious() {
    ============================================================ */
 
 function openOverview() {
-
     return navigate("overview");
 }
 
 
 function openRelationships() {
-
     return navigate(
         "relationships"
     );
@@ -947,65 +926,46 @@ function openRelationships() {
 
 
 function openFamily() {
-
     return navigate("family");
 }
 
 
 function openCareer() {
-
     return navigate("career");
 }
 
 
 function openFinances() {
-
-    return navigate(
-        "finances"
-    );
+    return navigate("finances");
 }
 
 
 function openLifestyle() {
-
-    return navigate(
-        "lifestyle"
-    );
+    return navigate("lifestyle");
 }
 
 
 function openMedia() {
-
     return navigate("media");
 }
 
 
 function openHistory() {
-
-    return navigate(
-        "history"
-    );
+    return navigate("history");
 }
 
 
 function openMilestones() {
-
-    return navigate(
-        "milestones"
-    );
+    return navigate("milestones");
 }
 
 
 function openDynasty() {
-
-    return navigate(
-        "dynasty"
-    );
+    return navigate("dynasty");
 }
 
 
 function openNotifications() {
-
     return navigate(
         "notifications"
     );
@@ -1013,254 +973,114 @@ function openNotifications() {
 
 
 /* ============================================================
-   HASH / URL
-   ============================================================ */
-
-function sectionToHash(section) {
-
-    const normalized =
-        normalizeSection(section);
-
-    if (!normalized) {
-
-        return "";
-    }
-
-    return `#life/${normalized}`;
-}
-
-
-function hashToSection(hash) {
-
-    const value =
-        String(hash || "")
-            .trim()
-            .replace(/^#/, "");
-
-    if (!value) {
-
-        return null;
-    }
-
-    if (
-        value.startsWith("life/")
-    ) {
-
-        return normalizeSection(
-            value.slice(5)
-        );
-    }
-
-    return normalizeSection(value);
-}
-
-
-function updateHash(section) {
-
-    if (
-        typeof window ===
-        "undefined"
-    ) {
-
-        return false;
-    }
-
-    const hash =
-        sectionToHash(section);
-
-    if (!hash) {
-
-        return false;
-    }
-
-    try {
-
-        window.history
-            .replaceState(
-                null,
-                "",
-                hash
-            );
-
-        return true;
-
-    } catch (error) {
-
-        window.location.hash =
-            hash;
-
-        return true;
-    }
-}
-
-
-/* ============================================================
    LIFE UI
    ============================================================ */
 
-function getLifeUIAPI() {
-
+function getLifeUI() {
     if (
-        typeof globalThis !==
-        "undefined" &&
-        globalThis.lifeUIAPI
+        typeof window === "undefined"
     ) {
-
-        return globalThis.lifeUIAPI;
+        return null;
     }
 
-    return null;
+    return (
+        window.MMA_LIFE_LIFE_UI ||
+        window.MMA_LIFE_UI ||
+        null
+    );
 }
 
 
-function renderCurrentSection(
-    options = {}
-) {
+function renderCurrentSection() {
+    const ui =
+        getLifeUI();
 
-    const api =
-        getLifeUIAPI();
-
-    const section =
-        navigationState
-            .currentSection;
-
-    if (!api) {
-
+    if (!ui) {
         return {
-
             success: false,
-
-            error:
-                "LIFE_UI_NOT_AVAILABLE",
-
-            section
+            reason: "LIFE_UI_NOT_FOUND"
         };
     }
 
+    const section =
+        navigationState.currentSection;
+
     try {
-
         if (
-            typeof api.renderSection ===
+            typeof ui.navigate ===
             "function"
         ) {
-
-            return {
-
-                success: true,
-
-                section,
-
-                result:
-                    api.renderSection(
-                        section,
-                        options
-                    )
-            };
+            return ui.navigate(
+                section
+            );
         }
 
         if (
-            typeof api.update ===
+            typeof ui.render ===
             "function"
         ) {
-
-            return {
-
-                success: true,
-
-                section,
-
-                result:
-                    api.update(
-                        options
-                    )
-            };
+            return ui.render(
+                section
+            );
         }
 
         if (
-            typeof api.refresh ===
+            typeof ui.showSection ===
             "function"
         ) {
-
-            return {
-
-                success: true,
-
-                section,
-
-                result:
-                    api.refresh(
-                        options
-                    )
-            };
+            return ui.showSection(
+                section
+            );
         }
-
-        return {
-
-            success: false,
-
-            error:
-                "NO_RENDER_METHOD",
-
-            section
-        };
-
     } catch (error) {
-
         console.error(
             "[MMA LIFE DYNASTY] " +
-            "Life UI render error:",
+            "Erro ao renderizar Life UI:",
             error
         );
 
         return {
-
             success: false,
-
-            error:
-                "RENDER_ERROR",
-
-            section,
-
-            message:
-                error.message
+            error
         };
     }
+
+    return {
+        success: false,
+        reason: "NO_UI_METHOD"
+    };
 }
 
 
-function navigateAndRender(
-    section,
-    options = {}
-) {
+/* ============================================================
+   HASH LISTENER
+   ============================================================ */
 
-    const navigation =
-        navigate(
-            section,
-            options
-        );
-
+function handleHashChange() {
     if (
-        !navigation.success
+        typeof window === "undefined"
     ) {
-
-        return navigation;
+        return false;
     }
 
-    updateHash(
-        navigation.section
-    );
-
-    const render =
-        renderCurrentSection(
-            options
+    const section =
+        hashToSection(
+            window.location.hash
         );
 
-    return {
+    if (!section) {
+        return false;
+    }
 
-        ...navigation,
+    navigate(
+        section,
+        {
+            updateHash: false,
+            addHistory: false
+        }
+    );
 
-        render
-    };
+    return true;
 }
 
 
@@ -1271,51 +1091,73 @@ function navigateAndRender(
 function initialize(
     database = null
 ) {
-
     if (database) {
-
-        setDatabase(
-            database
-        );
+        setDatabase(database);
+    } else {
+        ensureDatabase();
     }
-
-    ensureDatabase();
 
     loadPersistentState();
 
     navigationState.initialized =
         true;
 
-    return {
+    if (
+        typeof window !== "undefined"
+    ) {
+        if (
+            !navigationState
+                .hashListenerAttached
+        ) {
+            window.addEventListener(
+                "hashchange",
+                handleHashChange
+            );
 
+            navigationState
+                .hashListenerAttached = true;
+        }
+
+        const hashSection =
+            hashToSection(
+                window.location.hash
+            );
+
+        if (hashSection) {
+            navigationState.currentSection =
+                hashSection;
+        }
+
+        updateHash(
+            navigationState.currentSection
+        );
+    }
+
+    syncPersistentState();
+
+    return {
         success: true,
+
+        initialized: true,
 
         version:
             LIFE_NAVIGATION_VERSION,
 
         currentSection:
             navigationState
-                .currentSection,
-
-        sections:
-            getSections()
+                .currentSection
     };
 }
 
 
 function init(database = null) {
-
-    return initialize(
-        database
-    );
+    return initialize(database);
 }
 
 
-/* ============================================================
-   RESET
-   ============================================================ */
-
 function reset() {
+    navigationState.initialized =
+        false;
 
     navigationState.currentSection =
         LIFE_NAVIGATION_CONFIG
@@ -1331,50 +1173,45 @@ function reset() {
 
     syncPersistentState();
 
-    return {
-
-        success: true,
-
-        section:
-            navigationState
-                .currentSection
-    };
+    return initialize(
+        navigationState.database
+    );
 }
 
 
 /* ============================================================
-   ESTADO
+   ESTADO PÚBLICO
    ============================================================ */
 
 function getState() {
-
     return {
-
         version:
             LIFE_NAVIGATION_VERSION,
 
         initialized:
-            navigationState
-                .initialized,
+            navigationState.initialized,
 
         currentSection:
-            navigationState
-                .currentSection,
+            navigationState.currentSection,
 
         previousSection:
-            navigationState
-                .previousSection,
+            navigationState.previousSection,
 
         history:
-            getNavigationHistory(
-                navigationState
-                    .maxHistory
+            clone(
+                navigationState.history
             ),
 
         lastNavigationAt:
-            navigationState
-                .lastNavigationAt
+            navigationState.lastNavigationAt
     };
+}
+
+
+function getConfig() {
+    return clone(
+        LIFE_NAVIGATION_CONFIG
+    );
 }
 
 
@@ -1401,6 +1238,8 @@ const lifeNavigationAPI = {
 
     getState,
 
+    getConfig,
+
     getDatabase,
 
     setDatabase,
@@ -1413,17 +1252,31 @@ const lifeNavigationAPI = {
 
     isValidSection,
 
-    getCurrentSection,
+    getSections,
 
-    getPreviousSection,
+    getSection,
 
     getSectionLabel,
 
     getSectionIcon,
 
-    getSection,
+    getCurrentSection,
 
-    getSections,
+    getPreviousSection,
+
+    getCurrentIndex,
+
+    getNavigationHistory,
+
+    clearNavigationHistory,
+
+    addNavigationHistory,
+
+    addListener,
+
+    removeListener,
+
+    notifyListeners,
 
     navigate,
 
@@ -1438,28 +1291,6 @@ const lifeNavigationAPI = {
     goNext,
 
     goPrevious,
-
-    navigateAndRender,
-
-    renderCurrentSection,
-
-    updateHash,
-
-    sectionToHash,
-
-    hashToSection,
-
-    addListener,
-
-    removeListener,
-
-    getNavigationHistory,
-
-    clearNavigationHistory,
-
-    syncPersistentState,
-
-    loadPersistentState,
 
     openOverview,
 
@@ -1481,185 +1312,105 @@ const lifeNavigationAPI = {
 
     openDynasty,
 
-    openNotifications
+    openNotifications,
+
+    sectionToHash,
+
+    hashToSection,
+
+    updateHash,
+
+    handleHashChange,
+
+    renderCurrentSection
 };
 
 
 /* ============================================================
-   GLOBAL
+   API GLOBAL
    ============================================================ */
 
 if (
-    typeof globalThis !==
-    "undefined"
+    typeof window !== "undefined"
 ) {
+    window.MMA_LIFE_LIFE_NAVIGATION =
+        lifeNavigationAPI;
 
-    globalThis.lifeNavigationAPI =
+    window.MMA_LIFE_NAVIGATION =
         lifeNavigationAPI;
 }
 
 
 /* ============================================================
-   EXPORT
+   EXPORTS
    ============================================================ */
 
 export {
-
     LIFE_NAVIGATION_VERSION,
-
     LIFE_NAVIGATION_CONFIG,
 
     navigationState,
 
-    lifeNavigationAPI,
-
     initialize,
-
     init,
-
     reset,
 
     getState,
+    getConfig,
 
     getDatabase,
-
     setDatabase,
-
     ensureDatabase,
 
     getSectionIds,
-
     normalizeSection,
-
     isValidSection,
 
-    getCurrentSection,
-
-    getPreviousSection,
-
+    getSections,
+    getSection,
     getSectionLabel,
-
     getSectionIcon,
 
-    getSection,
+    getCurrentSection,
+    getPreviousSection,
+    getCurrentIndex,
 
-    getSections,
+    getNavigationHistory,
+    clearNavigationHistory,
+    addNavigationHistory,
+
+    addListener,
+    removeListener,
+    notifyListeners,
 
     navigate,
-
     goTo,
-
     goBack,
-
     goHome,
-
     refresh,
 
     goNext,
-
     goPrevious,
 
-    navigateAndRender,
-
-    renderCurrentSection,
-
-    updateHash,
+    openOverview,
+    openRelationships,
+    openFamily,
+    openCareer,
+    openFinances,
+    openLifestyle,
+    openMedia,
+    openHistory,
+    openMilestones,
+    openDynasty,
+    openNotifications,
 
     sectionToHash,
-
     hashToSection,
+    updateHash,
+    handleHashChange,
 
-    addListener,
-
-    removeListener,
-
-    getNavigationHistory,
-
-    clearNavigationHistory,
-
-    syncPersistentState,
-
-    loadPersistentState,
-
-    openOverview,
-
-    openRelationships,
-
-    openFamily,
-
-    openCareer,
-
-    openFinances,
-
-    openLifestyle,
-
-    openMedia,
-
-    openHistory,
-
-    openMilestones,
-
-    openDynasty,
-
-    openNotifications
+    renderCurrentSection
 };
 
 
-/* ============================================================
-   AUTO-INICIALIZAÇÃO
-   ============================================================ */
-
-try {
-
-    if (
-        typeof document !==
-        "undefined"
-    ) {
-
-        if (
-            document.readyState ===
-            "loading"
-        ) {
-
-            document.addEventListener(
-                "DOMContentLoaded",
-                () => {
-
-                    try {
-
-                        if (
-                            !navigationState
-                                .initialized
-                        ) {
-
-                            initialize();
-                        }
-
-                    } catch (error) {
-
-                        console.error(
-                            "[MMA LIFE DYNASTY] " +
-                            "Life Navigation initialization error:",
-                            error
-                        );
-                    }
-                },
-                {
-                    once: true
-                }
-            );
-
-        } else {
-
-            initialize();
-        }
-    }
-
-} catch (error) {
-
-    console.error(
-        "[MMA LIFE DYNASTY] " +
-        "Life Navigation boot error:",
-        error
-    );
-}
+export default lifeNavigationAPI;
