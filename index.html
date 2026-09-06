@@ -2,209 +2,313 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
+
     <meta
         name="viewport"
         content="width=device-width, initial-scale=1.0"
     >
+
     <meta
         name="theme-color"
         content="#0b0b0b"
     >
+
     <title>MMA Life Dynasty</title>
+
     <link
         rel="stylesheet"
         href="./css/style.css"
     >
+
     <style>
         /* =====================================================
-           BOOT / LOADING
+           BOOT SCREEN
            ===================================================== */
+
         #boot-screen {
             position: fixed;
             inset: 0;
             z-index: 99999;
+
             display: flex;
             align-items: center;
             justify-content: center;
+
             background: #0b0b0b;
             color: #ffffff;
+
             font-family:
                 Arial,
                 Helvetica,
                 sans-serif;
+
             transition:
                 opacity 0.25s ease,
                 visibility 0.25s ease;
         }
+
         #boot-screen.hidden {
             opacity: 0;
             visibility: hidden;
             pointer-events: none;
         }
+
         .boot-content {
             width: min(90%, 420px);
             text-align: center;
         }
+
         .boot-title {
             margin: 0 0 10px;
             font-size: 32px;
             font-weight: 800;
             letter-spacing: 1px;
         }
+
         .boot-subtitle {
             margin: 0 0 28px;
             color: #999999;
             font-size: 14px;
         }
+
         .boot-loading {
             display: flex;
             align-items: center;
             justify-content: center;
             gap: 10px;
+
             color: #cccccc;
             font-size: 14px;
         }
+
         .boot-spinner {
             width: 18px;
             height: 18px;
+
             border: 2px solid #333333;
             border-top-color: #ffffff;
+
             border-radius: 50%;
+
             animation:
                 boot-spin 0.8s linear infinite;
         }
+
         @keyframes boot-spin {
             to {
                 transform: rotate(360deg);
             }
         }
+
         /* =====================================================
            START SCREEN
            ===================================================== */
+
         #start-screen {
             position: fixed;
             inset: 0;
             z-index: 99998;
+
             display: none;
             align-items: center;
             justify-content: center;
+
             background: #0b0b0b;
             color: #ffffff;
+
             font-family:
                 Arial,
                 Helvetica,
                 sans-serif;
         }
+
         #start-screen.visible {
             display: flex;
         }
+
         .start-content {
             width: min(90%, 460px);
             text-align: center;
         }
+
         .start-title {
             margin: 0;
+
             font-size: 42px;
             font-weight: 900;
             letter-spacing: 1px;
         }
+
         .start-subtitle {
-            margin:
-                10px 0 35px;
+            margin: 10px 0 35px;
+
             color: #999999;
             font-size: 15px;
         }
+
         .start-buttons {
             display: flex;
             flex-direction: column;
             gap: 12px;
         }
+
         .start-button {
             width: 100%;
+
             padding: 16px 20px;
+
             border: 1px solid #333333;
             border-radius: 10px;
+
             background: #171717;
             color: #ffffff;
+
             font-size: 16px;
             font-weight: 700;
+
             cursor: pointer;
+
             transition:
                 background 0.15s ease,
                 transform 0.15s ease;
         }
+
         .start-button:hover {
             background: #222222;
         }
+
         .start-button:active {
             transform: scale(0.98);
         }
+
         .start-button.primary {
             background: #ffffff;
             color: #000000;
             border-color: #ffffff;
         }
+
         .start-button.primary:hover {
             background: #dddddd;
         }
+
         .start-button:disabled {
             opacity: 0.45;
             cursor: not-allowed;
         }
+
         /* =====================================================
            GAME ROOT
            ===================================================== */
+
         #game-root {
             min-height: 100vh;
         }
+
         /* =====================================================
-           ERROR
+           BOOT ERROR
            ===================================================== */
+
         #boot-error {
             display: none;
+
             margin-top: 20px;
+
             color: #ff6b6b;
+
             font-size: 13px;
             line-height: 1.5;
         }
+
         #boot-error.visible {
             display: block;
         }
+
+        /* =====================================================
+           FALLBACK
+           ===================================================== */
+
+        #boot-retry {
+            display: none;
+
+            margin-top: 15px;
+
+            padding: 12px 18px;
+
+            border: 1px solid #444;
+            border-radius: 8px;
+
+            background: #171717;
+            color: #fff;
+
+            cursor: pointer;
+        }
+
+        #boot-retry.visible {
+            display: inline-block;
+        }
     </style>
 </head>
+
 <body>
+
     <!-- =====================================================
-         BOOT SCREEN
+         BOOT
          ===================================================== -->
+
     <div id="boot-screen">
+
         <div class="boot-content">
+
             <h1 class="boot-title">
                 MMA LIFE DYNASTY
             </h1>
+
             <p class="boot-subtitle">
                 Construindo seu universo...
             </p>
+
             <div class="boot-loading">
+
                 <span class="boot-spinner"></span>
+
                 <span id="boot-status">
                     Inicializando o universo...
                 </span>
+
             </div>
+
             <div id="boot-error"></div>
+
+            <button
+                id="boot-retry"
+                type="button"
+            >
+                TENTAR NOVAMENTE
+            </button>
+
         </div>
+
     </div>
+
+
     <!-- =====================================================
          START SCREEN
          ===================================================== -->
+
     <div id="start-screen">
+
         <div class="start-content">
+
             <h1 class="start-title">
                 MMA LIFE DYNASTY
             </h1>
+
             <p class="start-subtitle">
                 Viva sua carreira. Construa seu legado.
             </p>
+
             <div class="start-buttons">
+
                 <button
                     id="new-game-button"
                     class="start-button primary"
@@ -212,6 +316,7 @@
                 >
                     NOVO JOGO
                 </button>
+
                 <button
                     id="continue-game-button"
                     class="start-button"
@@ -220,412 +325,520 @@
                 >
                     CONTINUAR
                 </button>
+
             </div>
+
         </div>
+
     </div>
+
+
     <!-- =====================================================
          GAME ROOT
          ===================================================== -->
+
     <main id="game-root"></main>
+
+
     <!-- =====================================================
-         MAIN GAME
+         SAFE BOOT
          ===================================================== -->
-    <script type="module">
-        /* =====================================================
-           ELEMENTOS
-           ===================================================== */
-        const bootScreen =
-            document.getElementById(
-                "boot-screen"
-            );
-        const startScreen =
-            document.getElementById(
-                "start-screen"
-            );
-        const bootStatus =
-            document.getElementById(
-                "boot-status"
-            );
-        const bootError =
-            document.getElementById(
-                "boot-error"
-            );
-        const newGameButton =
-            document.getElementById(
-                "new-game-button"
-            );
-        const continueGameButton =
-            document.getElementById(
-                "continue-game-button"
-            );
-        /* =====================================================
-           ESTADO
-           ===================================================== */
-        let gameReady = false;
-        let game =
-            null;
-        /* =====================================================
-           STATUS
-           ===================================================== */
-        function setBootStatus(
-            text
-        ) {
-            if (
-                bootStatus
-            ) {
-                bootStatus.textContent =
-                    text;
-            }
-        }
-        function showBootError(
-            error
-        ) {
-            if (!bootError) {
-                return;
-            }
-            const message =
-                error?.message ||
-                String(error) ||
-                "Erro desconhecido.";
-            bootError.textContent =
-                "Erro ao inicializar o jogo: " +
-                message;
-            bootError.classList.add(
-                "visible"
-            );
-        }
-        /* =====================================================
-           MOSTRAR MENU
-           ===================================================== */
-        function showStartScreen() {
-            gameReady =
-                true;
-            setBootStatus(
-                "Pronto."
-            );
-            if (
-                bootScreen
-            ) {
-                bootScreen.classList.add(
-                    "hidden"
+
+    <script>
+        (function () {
+
+            "use strict";
+
+            const bootScreen =
+                document.getElementById(
+                    "boot-screen"
                 );
+
+            const startScreen =
+                document.getElementById(
+                    "start-screen"
+                );
+
+            const bootStatus =
+                document.getElementById(
+                    "boot-status"
+                );
+
+            const bootError =
+                document.getElementById(
+                    "boot-error"
+                );
+
+            const bootRetry =
+                document.getElementById(
+                    "boot-retry"
+                );
+
+            const newGameButton =
+                document.getElementById(
+                    "new-game-button"
+                );
+
+            const continueGameButton =
+                document.getElementById(
+                    "continue-game-button"
+                );
+
+
+            let ready = false;
+
+
+            /* =================================================
+               STATUS
+               ================================================= */
+
+            function setStatus(text) {
+
+                if (bootStatus) {
+                    bootStatus.textContent =
+                        text;
+                }
+
             }
-            if (
-                startScreen
-            ) {
-                startScreen.classList.add(
+
+
+            /* =================================================
+               ERROR
+               ================================================= */
+
+            function showError(error) {
+
+                console.error(
+                    "[MMA LIFE DYNASTY]",
+                    error
+                );
+
+                if (!bootError) {
+                    return;
+                }
+
+                const message =
+                    error &&
+                    error.message
+                        ? error.message
+                        : String(error);
+
+                bootError.textContent =
+                    "Falha na inicialização: " +
+                    message;
+
+                bootError.classList.add(
                     "visible"
                 );
-            }
-        }
-        /* =====================================================
-           ENCONTRAR GAME API
-           ===================================================== */
-        function getGameAPI() {
-            return (
-                window.MMA_LIFE_GAME ||
-                window.MMA_LIFE_MAIN ||
-                window.mmaLifeGame ||
-                null
-            );
-        }
-        /* =====================================================
-           NOVO JOGO
-           ===================================================== */
-        async function newGame() {
-            if (!gameReady) {
-                return;
-            }
-            const api =
-                getGameAPI();
-            if (!api) {
-                showBootError(
-                    new Error(
-                        "MMA_LIFE_GAME não foi encontrado."
-                    )
-                );
-                return;
-            }
-            game =
-                api;
-            try {
-                newGameButton.disabled =
-                    true;
-                continueGameButton.disabled =
-                    true;
-                /*
-                 * Primeiro garante que
-                 * o sistema está inicializado.
-                 */
-                if (
-                    typeof api.initialize ===
-                    "function"
-                ) {
-                    await api.initialize();
-                }
-                /*
-                 * Tenta criar o personagem
-                 * através da UI existente.
-                 */
-                const characterCreation =
-                    window.characterCreationAPI;
-                if (
-                    characterCreation &&
-                    typeof characterCreation.start ===
-                    "function"
-                ) {
-                    characterCreation.start(
-                        api.getGameState
-                            ? api.getGameState()
-                            : null
+
+                if (bootRetry) {
+                    bootRetry.classList.add(
+                        "visible"
                     );
-                } else if (
-                    characterCreation &&
-                    typeof characterCreation.open ===
-                    "function"
-                ) {
-                    characterCreation.open();
-                } else {
+                }
+
+            }
+
+
+            /* =================================================
+               API
+               ================================================= */
+
+            function getAPI() {
+
+                return (
+                    window.MMA_LIFE_GAME ||
+                    window.MMA_LIFE_MAIN ||
+                    window.mmaLifeGame ||
+                    null
+                );
+
+            }
+
+
+            /* =================================================
+               MOSTRAR MENU
+               ================================================= */
+
+            function showStartScreen() {
+
+                if (ready) {
+                    return;
+                }
+
+                ready = true;
+
+                setStatus(
+                    "Pronto."
+                );
+
+                if (bootScreen) {
+                    bootScreen.classList.add(
+                        "hidden"
+                    );
+                }
+
+                if (startScreen) {
+                    startScreen.classList.add(
+                        "visible"
+                    );
+                }
+
+                console.log(
+                    "[MMA LIFE DYNASTY] " +
+                    "Tela inicial liberada."
+                );
+
+            }
+
+
+            /* =================================================
+               NOVO JOGO
+               ================================================= */
+
+            async function newGame() {
+
+                const api =
+                    getAPI();
+
+                if (!api) {
+
+                    showError(
+                        new Error(
+                            "A API principal do jogo não foi encontrada."
+                        )
+                    );
+
+                    return;
+                }
+
+                try {
+
+                    newGameButton.disabled =
+                        true;
+
+                    setStatus(
+                        "Preparando novo lutador..."
+                    );
+
+
                     /*
-                     * Se não existir uma tela
-                     * de criação exposta, inicia
-                     * o jogo normalmente.
+                     * Inicialização principal
                      */
+
+                    if (
+                        typeof api.initialize ===
+                        "function"
+                    ) {
+
+                        await api.initialize();
+
+                    }
+
+
+                    /*
+                     * API de criação
+                     */
+
+                    const creation =
+                        window.characterCreationAPI;
+
+
+                    if (
+                        creation &&
+                        typeof creation.start ===
+                        "function"
+                    ) {
+
+                        await creation.start(
+                            api.getGameState
+                                ? api.getGameState()
+                                : null
+                        );
+
+                    }
+
+                    else if (
+                        creation &&
+                        typeof creation.open ===
+                        "function"
+                    ) {
+
+                        await creation.open();
+
+                    }
+
+                    else if (
+                        creation &&
+                        typeof creation.render ===
+                        "function"
+                    ) {
+
+                        const root =
+                            document.getElementById(
+                                "game-root"
+                            );
+
+                        await creation.render(
+                            root
+                        );
+
+                    }
+
+                    else if (
+                        typeof api.start ===
+                        "function"
+                    ) {
+
+                        await api.start();
+
+                    }
+
+
+                    if (startScreen) {
+
+                        startScreen.classList.remove(
+                            "visible"
+                        );
+
+                    }
+
+
+                } catch (error) {
+
+                    newGameButton.disabled =
+                        false;
+
+                    showError(
+                        error
+                    );
+
+                }
+
+            }
+
+
+            /* =================================================
+               CONTINUAR
+               ================================================= */
+
+            async function continueGame() {
+
+                const api =
+                    getAPI();
+
+                if (!api) {
+                    return;
+                }
+
+                try {
+
+                    continueGameButton.disabled =
+                        true;
+
+
+                    if (
+                        typeof api.load ===
+                        "function"
+                    ) {
+
+                        const result =
+                            await api.load();
+
+                        if (
+                            result &&
+                            result.success === false
+                        ) {
+
+                            throw new Error(
+                                result.error ||
+                                "Não foi possível carregar o jogo."
+                            );
+
+                        }
+
+                    }
+
+
                     if (
                         typeof api.start ===
                         "function"
                     ) {
+
                         await api.start();
+
                     }
-                }
-                /*
-                 * Esconde o menu inicial.
-                 */
-                if (
-                    startScreen
-                ) {
-                    startScreen.classList.remove(
-                        "visible"
-                    );
-                }
-            } catch (error) {
-                console.error(
-                    "[MMA LIFE DYNASTY]",
-                    error
-                );
-                showBootError(
-                    error
-                );
-                newGameButton.disabled =
-                    false;
-            }
-        }
-        /* =====================================================
-           CONTINUAR
-           ===================================================== */
-        async function continueGame() {
-            const api =
-                getGameAPI();
-            if (!api) {
-                return;
-            }
-            try {
-                continueGameButton.disabled =
-                    true;
-                let result =
-                    null;
-                if (
-                    typeof api.load ===
-                    "function"
-                ) {
-                    result =
-                        await api.load();
-                }
-                if (
-                    result &&
-                    result.success === false
-                ) {
-                    throw new Error(
-                        result.error ||
-                        "Não foi possível carregar o jogo."
-                    );
-                }
-                if (
-                    typeof api.start ===
-                    "function"
-                ) {
-                    await api.start();
-                }
-                if (
-                    startScreen
-                ) {
-                    startScreen.classList.remove(
-                        "visible"
-                    );
-                }
-            } catch (error) {
-                console.error(
-                    "[MMA LIFE DYNASTY]",
-                    error
-                );
-                showBootError(
-                    error
-                );
-                continueGameButton.disabled =
-                    false;
-            }
-        }
-        /* =====================================================
-           BOTÕES
-           ===================================================== */
-        if (
-            newGameButton
-        ) {
-            newGameButton.addEventListener(
-                "click",
-                newGame
-            );
-        }
-        if (
-            continueGameButton
-        ) {
-            continueGameButton.addEventListener(
-                "click",
-                continueGame
-            );
-        }
-        /* =====================================================
-           GAME READY
-           ===================================================== */
-        window.addEventListener(
-            "mma-life-game-ready",
-            function (
-                event
-            ) {
-                console.log(
-                    "[MMA LIFE DYNASTY] " +
-                    "Evento de jogo pronto recebido.",
-                    event
-                );
-                game =
-                    getGameAPI();
-                /*
-                 * Verifica se existe
-                 * save disponível.
-                 */
-                try {
-                    const saveAPI =
-                        window.saveAPI;
-                    if (
-                        saveAPI &&
-                        typeof saveAPI.hasSave ===
-                        "function"
-                    ) {
-                        continueGameButton.disabled =
-                            !saveAPI.hasSave();
-                    } else {
-                        /*
-                         * Por segurança,
-                         * CONTINUAR fica
-                         * desativado até
-                         * encontrarmos um save.
-                         */
-                        continueGameButton.disabled =
-                            true;
+
+
+                    if (startScreen) {
+
+                        startScreen.classList.remove(
+                            "visible"
+                        );
+
                     }
+
                 } catch (error) {
-                    console.warn(
-                        "[MMA LIFE DYNASTY] " +
-                        "Não foi possível verificar save.",
+
+                    continueGameButton.disabled =
+                        false;
+
+                    showError(
                         error
                     );
-                    continueGameButton.disabled =
-                        true;
+
                 }
-                showStartScreen();
+
             }
-        );
-        /* =====================================================
-           FALLBACK DE BOOT
-           ===================================================== */
-        window.addEventListener(
-            "error",
-            function (
-                event
-            ) {
-                console.error(
-                    "[MMA LIFE DYNASTY] Erro global:",
-                    event.error ||
-                    event.message
+
+
+            /* =================================================
+               EVENTOS DOS BOTÕES
+               ================================================= */
+
+            if (newGameButton) {
+
+                newGameButton.addEventListener(
+                    "click",
+                    newGame
                 );
+
             }
-        );
-        window.addEventListener(
-            "unhandledrejection",
-            function (
-                event
-            ) {
-                console.error(
-                    "[MMA LIFE DYNASTY] Promise rejeitada:",
-                    event.reason
+
+
+            if (continueGameButton) {
+
+                continueGameButton.addEventListener(
+                    "click",
+                    continueGame
                 );
+
             }
-        );
-        /* =====================================================
-           IMPORTAR MAIN
-           ===================================================== */
-        try {
-            setBootStatus(
-                "Carregando sistemas..."
+
+
+            if (bootRetry) {
+
+                bootRetry.addEventListener(
+                    "click",
+                    function () {
+
+                        window.location.reload();
+
+                    }
+                );
+
+            }
+
+
+            /* =================================================
+               EVENTO DO MAIN
+               ================================================= */
+
+            window.addEventListener(
+                "mma-life-game-ready",
+                function (event) {
+
+                    console.log(
+                        "[MMA LIFE DYNASTY] " +
+                        "GAME READY",
+                        event
+                    );
+
+                    showStartScreen();
+
+                }
             );
-            await import(
-                "./js/main.js"
+
+
+            /* =================================================
+               ERROS GLOBAIS
+               ================================================= */
+
+            window.addEventListener(
+                "error",
+                function (event) {
+
+                    console.error(
+                        "[MMA LIFE DYNASTY] Erro global:",
+                        event.error ||
+                        event.message
+                    );
+
+                }
             );
-            /*
-             * O main.js deveria disparar
-             * mma-life-game-ready.
-             *
-             * Mas colocamos um pequeno
-             * fallback caso a API já
-             * esteja pronta e o evento
-             * tenha sido emitido antes
-             * deste listener.
-             */
+
+
+            window.addEventListener(
+                "unhandledrejection",
+                function (event) {
+
+                    console.error(
+                        "[MMA LIFE DYNASTY] Promise rejeitada:",
+                        event.reason
+                    );
+
+                }
+            );
+
+
+            /* =================================================
+               FALLBACK ABSOLUTO
+               =================================================
+
+               Mesmo que o main.js falhe, o usuário
+               não ficará preso infinitamente na
+               tela "Construindo seu universo".
+
+               Depois de 4 segundos, verificamos
+               a API e liberamos a tela inicial.
+               */
+
             setTimeout(
                 function () {
-                    if (
-                        !gameReady
-                    ) {
-                        const api =
-                            getGameAPI();
-                        if (
-                            api &&
-                            (
-                                api.state ||
-                                typeof api.initialize ===
-                                "function"
-                            )
-                        ) {
-                            console.log(
-                                "[MMA LIFE DYNASTY] " +
-                                "API encontrada pelo fallback."
-                            );
-                            showStartScreen();
-                        }
+
+                    if (ready) {
+                        return;
                     }
+
+                    const api =
+                        getAPI();
+
+                    if (api) {
+
+                        console.warn(
+                            "[MMA LIFE DYNASTY] " +
+                            "Fallback encontrou a API."
+                        );
+
+                        showStartScreen();
+
+                    } else {
+
+                        showError(
+                            new Error(
+                                "main.js não disponibilizou a API do jogo."
+                            )
+                        );
+
+                    }
+
                 },
-                250
+                4000
             );
-        } catch (error) {
-            console.error(
-                "[MMA LIFE DYNASTY] " +
-                "Falha ao carregar main.js:",
-                error
-            );
-            showBootError(
-                error
-            );
-        }
+
+
+        })();
     </script>
+
+
+    <!-- =====================================================
+         MAIN GAME MODULE
+         ===================================================== -->
+
+    <script
+        type="module"
+        src="./js/main.js"
+    ></script>
+
 </body>
 </html>
