@@ -1,182 +1,51 @@
 /* ============================================================
    MMA LIFE DYNASTY
-   CHARACTER CREATION
+   CHARACTER CREATION SYSTEM
    ============================================================ */
 
-"use strict";
-
-/* ============================================================
-   CONFIG
-   ============================================================ */
-
-const CHARACTER_CREATION_VERSION = 1;
-
-const CREATION_STEPS = [
-    "identity",
-    "physical",
-    "style",
-    "personality",
-    "confirmation"
-];
-
-const DEFAULT_CHARACTER = {
-    firstName: "",
-    lastName: "",
-    nickname: "",
-    gender: "male",
-
-    age: 18,
-
-    country: "Brazil",
-    city: "São Paulo",
-
-    weightClass: "lightweight",
-
-    height: 175,
-    weight: 70,
-
-    fightingStyle: "mixed",
-    stance: "orthodox",
-
-    personality: "disciplined",
-
-    attributes: {
-        striking: 50,
-        grappling: 50,
-        wrestling: 50,
-        submission: 50,
-        defense: 50,
-        cardio: 50,
-        strength: 50,
-        speed: 50,
-        chin: 50,
-        fightIQ: 50
-    },
-
-    potential: {
-        overall: 50,
-        ceiling: 75
-    },
-
-    genetics: {
-        athleticism: 50,
-        durability: 50,
-        strength: 50,
-        speed: 50,
-        cardio: 50
-    }
-};
-
-
-/* ============================================================
-   STATE
-   ============================================================ */
+const CHARACTER_CREATION_VERSION = "2.0.0";
 
 const characterCreationState = {
-
     initialized: false,
-
-    currentStep: "identity",
-
     completed: false,
 
-    character: cloneCreationData(
-        DEFAULT_CHARACTER
-    )
+    currentStep: 1,
+    totalSteps: 5,
 
+    identity: {
+        firstName: "",
+        lastName: "",
+        nickname: "",
+        country: "Brasil",
+        city: ""
+    },
+
+    physical: {
+        age: 16,
+        height: 1.75,
+        weight: 70,
+        weightClass: "Leve"
+    },
+
+    style: {
+        fightingStyle: "MMA",
+        stance: "Ortodoxo"
+    },
+
+    personality: {
+        discipline: 70,
+        confidence: 60,
+        aggression: 50,
+        intelligence: 60,
+        charisma: 50
+    },
+
+    attributes: {},
+    potential: 0,
+    genetics: {},
+
+    createdCharacter: null
 };
-
-
-/* ============================================================
-   UTILITIES
-   ============================================================ */
-
-function cloneCreationData(data) {
-
-    try {
-
-        return JSON.parse(
-            JSON.stringify(data)
-        );
-
-    } catch {
-
-        return {
-            ...data
-        };
-
-    }
-
-}
-
-
-function clampCreation(
-    value,
-    min,
-    max
-) {
-
-    const number =
-        Number(value);
-
-    if (
-        Number.isNaN(number)
-    ) {
-
-        return min;
-
-    }
-
-    return Math.max(
-        min,
-        Math.min(
-            max,
-            number
-        )
-    );
-
-}
-
-
-function normalizeCreationText(
-    value
-) {
-
-    return String(
-        value ?? ""
-    )
-        .trim()
-        .replace(/\s+/g, " ");
-
-}
-
-
-function capitalizeCreation(
-    value
-) {
-
-    const text =
-        normalizeCreationText(
-            value
-        );
-
-    if (!text) {
-
-        return "";
-
-    }
-
-    return text
-        .toLowerCase()
-        .split(" ")
-        .map(
-            word =>
-                word.charAt(0).toUpperCase() +
-                word.slice(1)
-        )
-        .join(" ");
-
-}
 
 
 /* ============================================================
@@ -184,90 +53,31 @@ function capitalizeCreation(
    ============================================================ */
 
 const CREATION_OPTIONS = {
-
-    genders: [
-        {
-            id: "male",
-            name: "Masculino"
-        },
-        {
-            id: "female",
-            name: "Feminino"
-        }
-    ],
-
     countries: [
-        {
-            id: "Brazil",
-            name: "Brasil"
-        },
-        {
-            id: "United States",
-            name: "Estados Unidos"
-        },
-        {
-            id: "Mexico",
-            name: "México"
-        },
-        {
-            id: "Argentina",
-            name: "Argentina"
-        },
-        {
-            id: "Canada",
-            name: "Canadá"
-        },
-        {
-            id: "United Kingdom",
-            name: "Reino Unido"
-        },
-        {
-            id: "France",
-            name: "França"
-        },
-        {
-            id: "Germany",
-            name: "Alemanha"
-        },
-        {
-            id: "Spain",
-            name: "Espanha"
-        },
-        {
-            id: "Russia",
-            name: "Rússia"
-        },
-        {
-            id: "Georgia",
-            name: "Geórgia"
-        },
-        {
-            id: "Japan",
-            name: "Japão"
-        },
-        {
-            id: "South Korea",
-            name: "Coreia do Sul"
-        },
-        {
-            id: "Thailand",
-            name: "Tailândia"
-        },
-        {
-            id: "Australia",
-            name: "Austrália"
-        }
+        "Brasil",
+        "Estados Unidos",
+        "México",
+        "Argentina",
+        "Canadá",
+        "Reino Unido",
+        "Irlanda",
+        "França",
+        "Espanha",
+        "Portugal",
+        "Japão",
+        "Coreia do Sul",
+        "Austrália",
+        "Rússia"
     ],
 
     cities: {
-
-        Brazil: [
+        "Brasil": [
             "São Paulo",
             "Rio de Janeiro",
-            "Curitiba",
             "Belo Horizonte",
-            "Porto Alegre",
             "Brasília",
+            "Curitiba",
+            "Porto Alegre",
             "Salvador",
             "Recife",
             "Fortaleza",
@@ -276,812 +86,600 @@ const CREATION_OPTIONS = {
             "Macapá"
         ],
 
-        "United States": [
-            "New York",
-            "Los Angeles",
+        "Estados Unidos": [
             "Las Vegas",
+            "Los Angeles",
             "Miami",
+            "New York",
             "Chicago",
             "Houston",
-            "Atlanta"
+            "Dallas"
         ],
 
-        Mexico: [
-            "Mexico City",
+        "México": [
+            "Cidade do México",
             "Guadalajara",
             "Monterrey"
         ],
 
-        Argentina: [
+        "Argentina": [
             "Buenos Aires",
-            "Córdoba"
+            "Córdoba",
+            "Rosário"
         ],
 
-        Canada: [
+        "Canadá": [
             "Toronto",
             "Montreal",
             "Vancouver"
         ],
 
-        "United Kingdom": [
-            "London",
+        "Reino Unido": [
+            "Londres",
             "Manchester",
-            "Birmingham"
+            "Liverpool"
         ],
 
-        France: [
+        "Irlanda": [
+            "Dublin",
+            "Cork"
+        ],
+
+        "França": [
             "Paris",
-            "Lyon"
+            "Lyon",
+            "Marselha"
         ],
 
-        Germany: [
-            "Berlin",
-            "Munich"
-        ],
-
-        Spain: [
+        "Espanha": [
             "Madrid",
-            "Barcelona"
+            "Barcelona",
+            "Valência"
         ],
 
-        Russia: [
-            "Moscow",
-            "Makhachkala"
+        "Portugal": [
+            "Lisboa",
+            "Porto",
+            "Braga"
         ],
 
-        Georgia: [
-            "Tbilisi"
-        ],
-
-        Japan: [
+        "Japão": [
             "Tokyo",
-            "Osaka"
+            "Osaka",
+            "Kyoto"
         ],
 
-        "South Korea": [
-            "Seoul"
+        "Coreia do Sul": [
+            "Seul",
+            "Busan",
+            "Incheon"
         ],
 
-        Thailand: [
-            "Bangkok",
-            "Phuket"
-        ],
-
-        Australia: [
+        "Austrália": [
             "Sydney",
-            "Melbourne"
-        ]
+            "Melbourne",
+            "Brisbane"
+        ],
 
+        "Rússia": [
+            "Moscou",
+            "São Petersburgo",
+            "Kazan"
+        ]
     },
 
-    weightClasses: [
-
-        {
-            id: "flyweight",
-            name: "Peso Mosca",
-            min: 56.7,
-            max: 57
-        },
-
-        {
-            id: "bantamweight",
-            name: "Peso Galo",
-            min: 57,
-            max: 61.2
-        },
-
-        {
-            id: "featherweight",
-            name: "Peso Pena",
-            min: 61.2,
-            max: 65.8
-        },
-
-        {
-            id: "lightweight",
-            name: "Peso Leve",
-            min: 65.8,
-            max: 70.3
-        },
-
-        {
-            id: "welterweight",
-            name: "Peso Meio-Médio",
-            min: 70.3,
-            max: 77.1
-        },
-
-        {
-            id: "middleweight",
-            name: "Peso Médio",
-            min: 77.1,
-            max: 83.9
-        },
-
-        {
-            id: "light_heavyweight",
-            name: "Peso Meio-Pesado",
-            min: 83.9,
-            max: 93
-        },
-
-        {
-            id: "heavyweight",
-            name: "Peso Pesado",
-            min: 93,
-            max: 120.2
-        }
-
-    ],
-
     fightingStyles: [
-
-        {
-            id: "mixed",
-            name: "Completo",
-            description:
-                "Equilibrado entre trocação, quedas e chão."
-        },
-
-        {
-            id: "striker",
-            name: "Striker",
-            description:
-                "Especialista em boxe, kickboxing e muay thai."
-        },
-
-        {
-            id: "wrestler",
-            name: "Wrestler",
-            description:
-                "Foco em quedas, controle e ground and pound."
-        },
-
-        {
-            id: "grappler",
-            name: "Grappler",
-            description:
-                "Especialista em jiu-jitsu e finalizações."
-        }
-
+        "MMA",
+        "Boxe",
+        "Muay Thai",
+        "Kickboxing",
+        "Jiu-Jitsu",
+        "Wrestling",
+        "Judô",
+        "Sambo",
+        "Karate"
     ],
 
     stances: [
-
-        {
-            id: "orthodox",
-            name: "Ortodoxo"
-        },
-
-        {
-            id: "southpaw",
-            name: "Canhoto"
-        },
-
-        {
-            id: "switch",
-            name: "Switch"
-        }
-
+        "Ortodoxo",
+        "Canhoto"
     ],
 
-    personalities: [
-
-        {
-            id: "disciplined",
-            name: "Disciplinado",
-            description:
-                "Melhor consistência nos treinos."
-        },
-
-        {
-            id: "aggressive",
-            name: "Agressivo",
-            description:
-                "Busca intensidade e pressão nas lutas."
-        },
-
-        {
-            id: "calm",
-            name: "Calmo",
-            description:
-                "Maior estabilidade sob pressão."
-        },
-
-        {
-            id: "charismatic",
-            name: "Carismático",
-            description:
-                "Maior potencial de fama e popularidade."
-        },
-
-        {
-            id: "ambitious",
-            name: "Ambicioso",
-            description:
-                "Busca evolução rápida e grandes oportunidades."
-        }
-
+    weightClasses: [
+        "Mosca",
+        "Galo",
+        "Pena",
+        "Leve",
+        "Meio-Médio",
+        "Médio",
+        "Meio-Pesado",
+        "Pesado"
     ]
-
 };
 
 
 /* ============================================================
-   GETTERS
+   WEIGHT CLASS LIMITS
+   ============================================================ */
+
+const WEIGHT_CLASS_LIMITS = {
+    "Mosca": 57,
+    "Galo": 61,
+    "Pena": 66,
+    "Leve": 70,
+    "Meio-Médio": 77,
+    "Médio": 84,
+    "Meio-Pesado": 93,
+    "Pesado": 120
+};
+
+
+/* ============================================================
+   UTILS
+   ============================================================ */
+
+function clamp(value, min, max) {
+    return Math.max(min, Math.min(max, value));
+}
+
+
+function randomInt(min, max) {
+    return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+
+function normalizeNumber(value, fallback = 0) {
+    const number = Number(value);
+
+    if (!Number.isFinite(number)) {
+        return fallback;
+    }
+
+    return number;
+}
+
+
+function safeString(value) {
+    if (value === null || value === undefined) {
+        return "";
+    }
+
+    return String(value).trim();
+}
+
+
+function escapeHTML(value) {
+    return safeString(value)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+}
+
+
+/* ============================================================
+   INITIALIZATION
+   ============================================================ */
+
+function initializeCharacterCreation() {
+    if (characterCreationState.initialized) {
+        return getCharacterCreationState();
+    }
+
+    characterCreationState.initialized = true;
+
+    return getCharacterCreationState();
+}
+
+
+function resetCharacterCreation() {
+    characterCreationState.completed = false;
+    characterCreationState.currentStep = 1;
+
+    characterCreationState.identity = {
+        firstName: "",
+        lastName: "",
+        nickname: "",
+        country: "Brasil",
+        city: ""
+    };
+
+    characterCreationState.physical = {
+        age: 16,
+        height: 1.75,
+        weight: 70,
+        weightClass: "Leve"
+    };
+
+    characterCreationState.style = {
+        fightingStyle: "MMA",
+        stance: "Ortodoxo"
+    };
+
+    characterCreationState.personality = {
+        discipline: 70,
+        confidence: 60,
+        aggression: 50,
+        intelligence: 60,
+        charisma: 50
+    };
+
+    characterCreationState.attributes = {};
+    characterCreationState.potential = 0;
+    characterCreationState.genetics = {};
+    characterCreationState.createdCharacter = null;
+
+    return getCharacterCreationState();
+}
+
+
+/* ============================================================
+   STATE
    ============================================================ */
 
 function getCharacterCreationState() {
-
-    return characterCreationState;
-
+    return JSON.parse(
+        JSON.stringify(characterCreationState)
+    );
 }
 
 
 function getCharacterCreationData() {
+    return {
+        identity: {
+            ...characterCreationState.identity
+        },
 
-    return cloneCreationData(
-        characterCreationState.character
-    );
+        physical: {
+            ...characterCreationState.physical
+        },
 
-}
+        style: {
+            ...characterCreationState.style
+        },
 
+        personality: {
+            ...characterCreationState.personality
+        },
 
-function getCurrentCreationStep() {
+        attributes: {
+            ...characterCreationState.attributes
+        },
 
-    return characterCreationState.currentStep;
+        potential: characterCreationState.potential,
 
+        genetics: {
+            ...characterCreationState.genetics
+        }
+    };
 }
 
 
 function getCreationOptions() {
-
-    return cloneCreationData(
-        CREATION_OPTIONS
+    return JSON.parse(
+        JSON.stringify(CREATION_OPTIONS)
     );
+}
 
+
+function getCurrentCreationStep() {
+    return characterCreationState.currentStep;
 }
 
 
 /* ============================================================
-   SET CHARACTER DATA
+   CITY
    ============================================================ */
 
-function setCharacterField(
-    field,
-    value
-) {
-
-    if (
-        !field
-    ) {
-
-        return false;
-
-    }
+function getCitiesForCountry(country) {
+    return CREATION_OPTIONS.cities[country] || [];
+}
 
 
-    if (
-        field.includes(".")
-    ) {
+/* ============================================================
+   SETTERS
+   ============================================================ */
 
-        const parts =
-            field.split(".");
-
-        let target =
-            characterCreationState.character;
-
-
-        for (
-            let i = 0;
-            i < parts.length - 1;
-            i++
-        ) {
-
-            if (
-                !target[parts[i]]
-            ) {
-
-                target[parts[i]] = {};
-
-            }
-
-            target =
-                target[parts[i]];
-
-        }
-
-
-        target[
-            parts[parts.length - 1]
-        ] = value;
-
-
+function setCharacterField(field, value) {
+    if (field in characterCreationState.identity) {
+        characterCreationState.identity[field] = safeString(value);
         return true;
-
     }
-
-
-    if (
-        Object.prototype.hasOwnProperty.call(
-            characterCreationState.character,
-            field
-        )
-    ) {
-
-        characterCreationState.character[
-            field
-        ] = value;
-
-        return true;
-
-    }
-
 
     return false;
-
 }
 
 
-/* ============================================================
-   IDENTITY
-   ============================================================ */
-
-function setIdentity(
-    data = {}
-) {
-
-    if (
-        data.firstName !== undefined
-    ) {
-
-        characterCreationState.character.firstName =
-            capitalizeCreation(
-                data.firstName
-            );
-
+function setIdentity(data = {}) {
+    if (data.firstName !== undefined) {
+        characterCreationState.identity.firstName =
+            safeString(data.firstName);
     }
 
-
-    if (
-        data.lastName !== undefined
-    ) {
-
-        characterCreationState.character.lastName =
-            capitalizeCreation(
-                data.lastName
-            );
-
+    if (data.lastName !== undefined) {
+        characterCreationState.identity.lastName =
+            safeString(data.lastName);
     }
 
-
-    if (
-        data.nickname !== undefined
-    ) {
-
-        characterCreationState.character.nickname =
-            normalizeCreationText(
-                data.nickname
-            );
-
+    if (data.nickname !== undefined) {
+        characterCreationState.identity.nickname =
+            safeString(data.nickname);
     }
 
+    if (data.country !== undefined) {
+        characterCreationState.identity.country =
+            safeString(data.country);
 
-    if (
-        data.gender !== undefined
-    ) {
-
-        const validGender =
-            CREATION_OPTIONS.genders
-                .some(
-                    item =>
-                        item.id ===
-                        data.gender
-                );
+        const cities =
+            getCitiesForCountry(characterCreationState.identity.country);
 
         if (
-            validGender
+            cities.length > 0 &&
+            !cities.includes(characterCreationState.identity.city)
         ) {
-
-            characterCreationState.character.gender =
-                data.gender;
-
+            characterCreationState.identity.city = cities[0];
         }
-
     }
 
+    if (data.city !== undefined) {
+        characterCreationState.identity.city =
+            safeString(data.city);
+    }
 
     return getCharacterCreationData();
-
 }
 
 
-/* ============================================================
-   LOCATION
-   ============================================================ */
+function setLocation(country, city) {
+    setIdentity({
+        country,
+        city
+    });
 
-function setLocation(
-    country,
-    city
-) {
+    return getCharacterCreationData();
+}
 
-    const validCountry =
-        CREATION_OPTIONS.countries
-            .some(
-                item =>
-                    item.id === country
+
+function setPhysical(data = {}) {
+    if (data.age !== undefined) {
+        characterCreationState.physical.age =
+            clamp(
+                normalizeNumber(data.age, 16),
+                14,
+                60
             );
-
-
-    if (
-        !validCountry
-    ) {
-
-        return false;
-
     }
 
-
-    characterCreationState.character.country =
-        country;
-
-
-    const availableCities =
-        CREATION_OPTIONS.cities[
-            country
-        ] || [];
-
-
-    if (
-        city &&
-        availableCities.includes(
-            city
-        )
-    ) {
-
-        characterCreationState.character.city =
-            city;
-
-    } else {
-
-        characterCreationState.character.city =
-            availableCities[0] ||
-            "";
-
+    if (data.height !== undefined) {
+        characterCreationState.physical.height =
+            clamp(
+                normalizeNumber(data.height, 1.75),
+                1.40,
+                2.20
+            );
     }
 
+    if (data.weight !== undefined) {
+        characterCreationState.physical.weight =
+            clamp(
+                normalizeNumber(data.weight, 70),
+                45,
+                160
+            );
+    }
 
-    return true;
+    if (data.weightClass !== undefined) {
+        characterCreationState.physical.weightClass =
+            safeString(data.weightClass);
+    }
 
+    return getCharacterCreationData();
 }
 
 
-function getCitiesForCountry(
-    country
-) {
+function setPhysicalData(data = {}) {
+    return setPhysical(data);
+}
 
-    return [
-        ...(
-            CREATION_OPTIONS.cities[
-                country
-            ] || []
-        )
+
+function setStyleData(data = {}) {
+    if (data.fightingStyle !== undefined) {
+        characterCreationState.style.fightingStyle =
+            safeString(data.fightingStyle);
+    }
+
+    if (data.stance !== undefined) {
+        characterCreationState.style.stance =
+            safeString(data.stance);
+    }
+
+    return getCharacterCreationData();
+}
+
+
+function setStyle(data = {}) {
+    return setStyleData(data);
+}
+
+
+function setPersonality(data = {}) {
+    const fields = [
+        "discipline",
+        "confidence",
+        "aggression",
+        "intelligence",
+        "charisma"
     ];
 
-}
-
-
-/* ============================================================
-   PHYSICAL
-   ============================================================ */
-
-function setPhysicalData(
-    data = {}
-) {
-
-    if (
-        data.age !== undefined
-    ) {
-
-        characterCreationState.character.age =
-            clampCreation(
-                data.age,
-                18,
-                40
-            );
-
-    }
-
-
-    if (
-        data.height !== undefined
-    ) {
-
-        characterCreationState.character.height =
-            clampCreation(
-                data.height,
-                150,
-                220
-            );
-
-    }
-
-
-    if (
-        data.weight !== undefined
-    ) {
-
-        characterCreationState.character.weight =
-            clampCreation(
-                data.weight,
-                50,
-                150
-            );
-
-    }
-
-
-    if (
-        data.weightClass !== undefined
-    ) {
-
-        const valid =
-            CREATION_OPTIONS.weightClasses
-                .some(
-                    item =>
-                        item.id ===
-                        data.weightClass
+    for (const field of fields) {
+        if (data[field] !== undefined) {
+            characterCreationState.personality[field] =
+                clamp(
+                    normalizeNumber(
+                        data[field],
+                        characterCreationState.personality[field]
+                    ),
+                    0,
+                    100
                 );
-
-        if (
-            valid
-        ) {
-
-            characterCreationState.character.weightClass =
-                data.weightClass;
-
         }
-
     }
-
 
     return getCharacterCreationData();
-
 }
 
 
 /* ============================================================
-   STYLE
-   ============================================================ */
-
-function setStyleData(
-    data = {}
-) {
-
-    if (
-        data.fightingStyle !== undefined
-    ) {
-
-        const valid =
-            CREATION_OPTIONS.fightingStyles
-                .some(
-                    item =>
-                        item.id ===
-                        data.fightingStyle
-                );
-
-        if (
-            valid
-        ) {
-
-            characterCreationState.character.fightingStyle =
-                data.fightingStyle;
-
-        }
-
-    }
-
-
-    if (
-        data.stance !== undefined
-    ) {
-
-        const valid =
-            CREATION_OPTIONS.stances
-                .some(
-                    item =>
-                        item.id ===
-                        data.stance
-                );
-
-        if (
-            valid
-        ) {
-
-            characterCreationState.character.stance =
-                data.stance;
-
-        }
-
-    }
-
-
-    return getCharacterCreationData();
-
-}
-
-
-/* ============================================================
-   PERSONALITY
-   ============================================================ */
-
-function setPersonality(
-    personality
-) {
-
-    const valid =
-        CREATION_OPTIONS.personalities
-            .some(
-                item =>
-                    item.id ===
-                    personality
-            );
-
-
-    if (
-        !valid
-    ) {
-
-        return false;
-
-    }
-
-
-    characterCreationState.character.personality =
-        personality;
-
-
-    return true;
-
-}
-
-
-/* ============================================================
-   STARTING ATTRIBUTES
+   ATTRIBUTES
    ============================================================ */
 
 function generateStartingAttributes() {
-
-    const character =
-        characterCreationState.character;
-
+    const personality =
+        characterCreationState.personality;
 
     const style =
-        character.fightingStyle;
+        characterCreationState.style.fightingStyle;
 
+    const base = randomInt(48, 65);
 
-    const attributes =
-        cloneCreationData(
-            DEFAULT_CHARACTER.attributes
-        );
+    const attributes = {
+        striking: clamp(
+            base +
+            randomInt(-8, 8) +
+            Math.round((personality.aggression - 50) * 0.15),
+            1,
+            100
+        ),
 
+        grappling: clamp(
+            base +
+            randomInt(-8, 8) +
+            Math.round((personality.intelligence - 50) * 0.15),
+            1,
+            100
+        ),
 
-    if (
-        style === "striker"
-    ) {
+        wrestling: clamp(
+            base +
+            randomInt(-8, 8) +
+            Math.round((personality.discipline - 50) * 0.12),
+            1,
+            100
+        ),
 
-        attributes.striking += 12;
-        attributes.speed += 6;
+        cardio: clamp(
+            base +
+            randomInt(-6, 10) +
+            Math.round((personality.discipline - 50) * 0.18),
+            1,
+            100
+        ),
 
-    }
+        strength: clamp(
+            base +
+            randomInt(-8, 8),
+            1,
+            100
+        ),
 
+        speed: clamp(
+            base +
+            randomInt(-8, 10),
+            1,
+            100
+        ),
 
-    if (
-        style === "wrestler"
-    ) {
+        defense: clamp(
+            base +
+            randomInt(-8, 8) +
+            Math.round((personality.intelligence - 50) * 0.15),
+            1,
+            100
+        ),
 
-        attributes.wrestling += 12;
-        attributes.strength += 5;
+        chin: clamp(
+            base +
+            randomInt(-7, 8),
+            1,
+            100
+        ),
 
-    }
+        recovery: clamp(
+            base +
+            randomInt(-7, 8) +
+            Math.round((personality.discipline - 50) * 0.10),
+            1,
+            100
+        ),
 
-
-    if (
-        style === "grappler"
-    ) {
-
-        attributes.grappling += 10;
-        attributes.submission += 10;
-
-    }
-
-
-    if (
-        style === "mixed"
-    ) {
-
-        attributes.fightIQ += 5;
-        attributes.defense += 5;
-
-    }
-
-
-    const personality =
-        character.personality;
-
-
-    if (
-        personality === "disciplined"
-    ) {
-
-        attributes.cardio += 4;
-
-    }
-
-
-    if (
-        personality === "aggressive"
-    ) {
-
-        attributes.striking += 4;
-        attributes.strength += 3;
-
-    }
-
-
-    if (
-        personality === "calm"
-    ) {
-
-        attributes.defense += 5;
-        attributes.fightIQ += 4;
-
-    }
-
-
-    if (
-        personality === "ambitious"
-    ) {
-
-        attributes.cardio += 3;
-        attributes.speed += 3;
-
-    }
-
-
-    if (
-        personality === "charismatic"
-    ) {
-
-        attributes.fightIQ += 2;
-
-    }
-
-
-    for (
-        const key of Object.keys(
-            attributes
+        mental: clamp(
+            base +
+            randomInt(-6, 10) +
+            Math.round((personality.confidence - 50) * 0.20),
+            1,
+            100
         )
-    ) {
+    };
 
-        attributes[key] =
-            clampCreation(
-                attributes[key],
-                1,
-                100
-            );
 
+    /*
+     * Pequenas especializações pelo estilo escolhido.
+     */
+
+    if (style === "Boxe") {
+        attributes.striking += 6;
+        attributes.speed += 3;
+    }
+
+    if (style === "Muay Thai") {
+        attributes.striking += 5;
+        attributes.chin += 3;
+    }
+
+    if (style === "Kickboxing") {
+        attributes.striking += 5;
+        attributes.speed += 3;
+    }
+
+    if (style === "Jiu-Jitsu") {
+        attributes.grappling += 7;
+        attributes.defense += 4;
+    }
+
+    if (style === "Wrestling") {
+        attributes.wrestling += 8;
+        attributes.grappling += 4;
+    }
+
+    if (style === "Judô") {
+        attributes.grappling += 6;
+        attributes.wrestling += 5;
+    }
+
+    if (style === "Sambo") {
+        attributes.grappling += 6;
+        attributes.wrestling += 5;
+    }
+
+    if (style === "Karate") {
+        attributes.speed += 5;
+        attributes.striking += 4;
     }
 
 
-    characterCreationState.character.attributes =
+    for (const key of Object.keys(attributes)) {
+        attributes[key] =
+            clamp(attributes[key], 1, 100);
+    }
+
+
+    characterCreationState.attributes =
         attributes;
 
-
-    return cloneCreationData(
-        attributes
-    );
-
+    return {
+        ...attributes
+    };
 }
 
 
@@ -1090,68 +688,33 @@ function generateStartingAttributes() {
    ============================================================ */
 
 function generateStartingPotential() {
+    const personality =
+        characterCreationState.personality;
 
-    const character =
-        characterCreationState.character;
+    let potential =
+        randomInt(65, 92);
 
-
-    const base =
-        65;
-
-
-    const variation =
-        Math.floor(
-            Math.random() * 21
-        ) - 10;
-
-
-    let ceiling =
-        base +
-        variation;
-
-
-    if (
-        character.personality ===
-        "ambitious"
-    ) {
-
-        ceiling += 5;
-
-    }
-
-
-    if (
-        character.personality ===
-        "disciplined"
-    ) {
-
-        ceiling += 3;
-
-    }
-
-
-    ceiling =
-        clampCreation(
-            ceiling,
-            45,
-            90
+    potential +=
+        Math.round(
+            (personality.discipline - 50) * 0.10
         );
 
+    potential +=
+        Math.round(
+            (personality.intelligence - 50) * 0.08
+        );
 
-    characterCreationState.character.potential =
-        {
-            overall: Math.round(
-                ceiling * 0.65
-            ),
+    potential =
+        clamp(
+            potential,
+            50,
+            99
+        );
 
-            ceiling
-        };
+    characterCreationState.potential =
+        potential;
 
-
-    return cloneCreationData(
-        characterCreationState.character.potential
-    );
-
+    return potential;
 }
 
 
@@ -1160,97 +723,21 @@ function generateStartingPotential() {
    ============================================================ */
 
 function generateStartingGenetics() {
+    const genetics = {
+        durability: randomInt(40, 90),
+        naturalStrength: randomInt(40, 90),
+        naturalSpeed: randomInt(40, 90),
+        cardioPotential: randomInt(40, 90),
+        injuryResistance: randomInt(40, 90),
+        recoveryPotential: randomInt(40, 90)
+    };
 
-    const character =
-        characterCreationState.character;
-
-
-    const genetics =
-        cloneCreationData(
-            DEFAULT_CHARACTER.genetics
-        );
-
-
-    const height =
-        Number(
-            character.height
-        );
-
-
-    if (
-        height >= 185
-    ) {
-
-        genetics.athleticism += 5;
-        genetics.strength += 4;
-
-    }
-
-
-    if (
-        height <= 165
-    ) {
-
-        genetics.speed += 5;
-
-    }
-
-
-    const style =
-        character.fightingStyle;
-
-
-    if (
-        style === "wrestler"
-    ) {
-
-        genetics.strength += 4;
-
-    }
-
-
-    if (
-        style === "striker"
-    ) {
-
-        genetics.speed += 4;
-
-    }
-
-
-    if (
-        style === "grappler"
-    ) {
-
-        genetics.durability += 3;
-
-    }
-
-
-    for (
-        const key of Object.keys(
-            genetics
-        )
-    ) {
-
-        genetics[key] =
-            clampCreation(
-                genetics[key],
-                1,
-                100
-            );
-
-    }
-
-
-    characterCreationState.character.genetics =
+    characterCreationState.genetics =
         genetics;
 
-
-    return cloneCreationData(
-        genetics
-    );
-
+    return {
+        ...genetics
+    };
 }
 
 
@@ -1259,122 +746,255 @@ function generateStartingGenetics() {
    ============================================================ */
 
 function validateCharacterCreation() {
-
-    const character =
-        characterCreationState.character;
-
-
     const errors = [];
 
+    const identity =
+        characterCreationState.identity;
 
-    if (
-        !character.firstName
-    ) {
+    const physical =
+        characterCreationState.physical;
 
-        errors.push(
-            "Informe o primeiro nome."
-        );
 
+    if (!identity.firstName) {
+        errors.push("Digite seu primeiro nome.");
+    }
+
+
+    if (!identity.lastName) {
+        errors.push("Digite seu sobrenome.");
+    }
+
+
+    if (!identity.country) {
+        errors.push("Selecione seu país.");
+    }
+
+
+    if (!identity.city) {
+        errors.push("Selecione sua cidade.");
     }
 
 
     if (
-        !character.lastName
+        physical.age < 14 ||
+        physical.age > 60
     ) {
-
-        errors.push(
-            "Informe o sobrenome."
-        );
-
+        errors.push("A idade precisa estar entre 14 e 60 anos.");
     }
 
 
     if (
-        character.age < 18
+        physical.height < 1.40 ||
+        physical.height > 2.20
     ) {
-
-        errors.push(
-            "O personagem precisa ter pelo menos 18 anos."
-        );
-
+        errors.push("A altura informada é inválida.");
     }
 
 
     if (
-        character.age > 40
+        physical.weight < 45 ||
+        physical.weight > 160
     ) {
-
-        errors.push(
-            "A idade inicial não pode ultrapassar 40 anos."
-        );
-
+        errors.push("O peso informado é inválido.");
     }
 
 
-    if (
-        !character.country
-    ) {
-
-        errors.push(
-            "Escolha um país."
-        );
-
-    }
-
-
-    if (
-        !character.city
-    ) {
-
-        errors.push(
-            "Escolha uma cidade."
-        );
-
-    }
-
-
-    if (
-        !character.weightClass
-    ) {
-
-        errors.push(
-            "Escolha uma categoria de peso."
-        );
-
-    }
-
-
-    if (
-        !character.fightingStyle
-    ) {
-
-        errors.push(
-            "Escolha um estilo de luta."
-        );
-
-    }
-
-
-    if (
-        !character.personality
-    ) {
-
-        errors.push(
-            "Escolha uma personalidade."
-        );
-
+    if (!physical.weightClass) {
+        errors.push("Selecione uma categoria de peso.");
     }
 
 
     return {
-
-        valid:
-            errors.length === 0,
-
+        valid: errors.length === 0,
         errors
-
     };
+}
 
+
+function validateCurrentCreationStep() {
+    const step =
+        characterCreationState.currentStep;
+
+    const errors = [];
+
+
+    if (step === 1) {
+        if (!characterCreationState.identity.firstName) {
+            errors.push("Digite seu primeiro nome.");
+        }
+
+        if (!characterCreationState.identity.lastName) {
+            errors.push("Digite seu sobrenome.");
+        }
+    }
+
+
+    if (step === 2) {
+        if (!characterCreationState.identity.country) {
+            errors.push("Selecione seu país.");
+        }
+
+        if (!characterCreationState.identity.city) {
+            errors.push("Selecione sua cidade.");
+        }
+    }
+
+
+    if (step === 3) {
+        const physical =
+            characterCreationState.physical;
+
+        if (
+            physical.age < 14 ||
+            physical.age > 60
+        ) {
+            errors.push("Idade inválida.");
+        }
+
+        if (
+            physical.height < 1.40 ||
+            physical.height > 2.20
+        ) {
+            errors.push("Altura inválida.");
+        }
+
+        if (
+            physical.weight < 45 ||
+            physical.weight > 160
+        ) {
+            errors.push("Peso inválido.");
+        }
+    }
+
+
+    if (step === 4) {
+        if (!characterCreationState.style.fightingStyle) {
+            errors.push("Escolha um estilo de luta.");
+        }
+    }
+
+
+    return {
+        valid: errors.length === 0,
+        errors
+    };
+}
+
+
+/* ============================================================
+   STEP CONTROL
+   ============================================================ */
+
+function goToCreationStep(step) {
+    const target =
+        clamp(
+            normalizeNumber(step, 1),
+            1,
+            characterCreationState.totalSteps
+        );
+
+    characterCreationState.currentStep =
+        target;
+
+    return target;
+}
+
+
+function nextCreationStep() {
+    const validation =
+        validateCurrentCreationStep();
+
+    if (!validation.valid) {
+        return {
+            success: false,
+            errors: validation.errors,
+            step: characterCreationState.currentStep
+        };
+    }
+
+    if (
+        characterCreationState.currentStep <
+        characterCreationState.totalSteps
+    ) {
+        characterCreationState.currentStep++;
+    }
+
+    return {
+        success: true,
+        step: characterCreationState.currentStep
+    };
+}
+
+
+function previousCreationStep() {
+    if (characterCreationState.currentStep > 1) {
+        characterCreationState.currentStep--;
+    }
+
+    return {
+        success: true,
+        step: characterCreationState.currentStep
+    };
+}
+
+
+/* ============================================================
+   CHARACTER SUMMARY
+   ============================================================ */
+
+function getCharacterCreationSummary() {
+    const identity =
+        characterCreationState.identity;
+
+    const physical =
+        characterCreationState.physical;
+
+    const style =
+        characterCreationState.style;
+
+    return {
+        name:
+            `${identity.firstName} ${identity.lastName}`.trim(),
+
+        displayName:
+            identity.nickname ||
+            `${identity.firstName} ${identity.lastName}`.trim(),
+
+        nickname:
+            identity.nickname,
+
+        country:
+            identity.country,
+
+        city:
+            identity.city,
+
+        age:
+            physical.age,
+
+        height:
+            physical.height,
+
+        weight:
+            physical.weight,
+
+        weightClass:
+            physical.weightClass,
+
+        fightingStyle:
+            style.fightingStyle,
+
+        stance:
+            style.stance,
+
+        potential:
+            characterCreationState.potential,
+
+        attributes:
+            {
+                ...characterCreationState.attributes
+            }
+    };
 }
 
 
@@ -1383,1773 +1003,216 @@ function validateCharacterCreation() {
    ============================================================ */
 
 function finalizeCharacterCreation() {
-
     const validation =
         validateCharacterCreation();
 
-
-    if (
-        !validation.valid
-    ) {
-
+    if (!validation.valid) {
         return {
-
             success: false,
-
-            errors:
-                validation.errors
-
+            errors: validation.errors
         };
-
     }
 
 
+    /*
+     * Gera os valores iniciais somente no momento
+     * em que o personagem realmente é criado.
+     */
+
     generateStartingAttributes();
-
     generateStartingPotential();
-
     generateStartingGenetics();
 
 
-    const character =
-        getCharacterCreationData();
+    const identity =
+        characterCreationState.identity;
+
+    const physical =
+        characterCreationState.physical;
+
+    const style =
+        characterCreationState.style;
 
 
-    character.fullName =
-        `${character.firstName} ${character.lastName}`
-            .trim();
+    const fullName =
+        `${identity.firstName} ${identity.lastName}`.trim();
 
 
-    character.displayName =
-        character.nickname ||
-        character.fullName;
+    const displayName =
+        identity.nickname ||
+        fullName;
 
 
-    character.createdAt =
-        new Date().toISOString();
+    /*
+     * O objeto abaixo é o personagem que será entregue
+     * ao restante do jogo.
+     */
+
+    const character = {
+        id:
+            `fighter_${Date.now()}_${randomInt(1000, 9999)}`,
+
+        firstName:
+            identity.firstName,
+
+        lastName:
+            identity.lastName,
+
+        fullName,
+
+        name:
+            fullName,
+
+        displayName,
+
+        nickname:
+            identity.nickname,
+
+        country:
+            identity.country,
+
+        city:
+            identity.city,
+
+        age:
+            physical.age,
+
+        birthAge:
+            physical.age,
+
+        height:
+            physical.height,
+
+        weight:
+            physical.weight,
+
+        weightClass:
+            physical.weightClass,
+
+        fightingStyle:
+            style.fightingStyle,
+
+        style:
+            style.fightingStyle,
+
+        stance:
+            style.stance,
+
+        attributes:
+            {
+                ...characterCreationState.attributes
+            },
+
+        potential:
+            characterCreationState.potential,
+
+        genetics:
+            {
+                ...characterCreationState.genetics
+            },
+
+        personality:
+            {
+                ...characterCreationState.personality
+            },
+
+        careerStage:
+            physical.age >= 18
+                ? "regional"
+                : "amateur",
+
+        careerLevel:
+            physical.age >= 18
+                ? 2
+                : 1,
+
+        amateur:
+            {
+                active:
+                    physical.age < 18,
+
+                fights:
+                    0,
+
+                wins:
+                    0,
+
+                losses:
+                    0,
+
+                draws:
+                    0
+            },
+
+        professional:
+            {
+                active:
+                    physical.age >= 18,
+
+                fights:
+                    0,
+
+                wins:
+                    0,
+
+                losses:
+                    0,
+
+                draws:
+                    0
+            },
+
+        record:
+            {
+                wins: 0,
+                losses: 0,
+                draws: 0,
+                total: 0
+            },
+
+        fame:
+            0,
+
+        followers:
+            0,
+
+        money:
+            0,
+
+        health:
+            100,
+
+        energy:
+            100,
+
+        fatigue:
+            0,
+
+        confidence:
+            characterCreationState.personality.confidence,
+
+        moral:
+            75,
+
+        experience:
+            0,
+
+        createdAt:
+            new Date().toISOString()
+    };
 
 
-    characterCreationState.character =
+    characterCreationState.createdCharacter =
         character;
-
 
     characterCreationState.completed =
         true;
 
 
     return {
-
         success: true,
-
-        character:
-            getCharacterCreationData()
-
+        character
     };
-
-}
-
-
-/* ============================================================
-   STEP NAVIGATION
-   ============================================================ */
-
-function goToCreationStep(
-    step
-) {
-
-    if (
-        !CREATION_STEPS.includes(
-            step
-        )
-    ) {
-
-        return false;
-
-    }
-
-
-    characterCreationState.currentStep =
-        step;
-
-
-    return true;
-
-}
-
-
-function nextCreationStep() {
-
-    const index =
-        CREATION_STEPS.indexOf(
-            characterCreationState.currentStep
-        );
-
-
-    if (
-        index < 0 ||
-        index >=
-        CREATION_STEPS.length - 1
-    ) {
-
-        return false;
-
-    }
-
-
-    characterCreationState.currentStep =
-        CREATION_STEPS[
-            index + 1
-        ];
-
-
-    return true;
-
-}
-
-
-function previousCreationStep() {
-
-    const index =
-        CREATION_STEPS.indexOf(
-            characterCreationState.currentStep
-        );
-
-
-    if (
-        index <= 0
-    ) {
-
-        return false;
-
-    }
-
-
-    characterCreationState.currentStep =
-        CREATION_STEPS[
-            index - 1
-        ];
-
-
-    return true;
-
-}
-
-
-/* ============================================================
-   RESET
-   ============================================================ */
-
-function resetCharacterCreation() {
-
-    characterCreationState.currentStep =
-        "identity";
-
-    characterCreationState.completed =
-        false;
-
-    characterCreationState.character =
-        cloneCreationData(
-            DEFAULT_CHARACTER
-        );
-
-
-    return getCharacterCreationData();
-
-}
-
-
-/* ============================================================
-   SUMMARY
-   ============================================================ */
-
-function getCharacterCreationSummary() {
-
-    const character =
-        characterCreationState.character;
-
-
-    const weightClass =
-        CREATION_OPTIONS.weightClasses
-            .find(
-                item =>
-                    item.id ===
-                    character.weightClass
-            );
-
-
-    const style =
-        CREATION_OPTIONS.fightingStyles
-            .find(
-                item =>
-                    item.id ===
-                    character.fightingStyle
-            );
-
-
-    const personality =
-        CREATION_OPTIONS.personalities
-            .find(
-                item =>
-                    item.id ===
-                    character.personality
-            );
-
-
-    return {
-
-        name:
-            character.fullName ||
-            `${character.firstName} ${character.lastName}`
-                .trim(),
-
-        nickname:
-            character.nickname,
-
-        age:
-            character.age,
-
-        location:
-            `${character.city}, ${character.country}`,
-
-        weightClass:
-            weightClass?.name ||
-            character.weightClass,
-
-        weight:
-            character.weight,
-
-        height:
-            character.height,
-
-        style:
-            style?.name ||
-            character.fightingStyle,
-
-        personality:
-            personality?.name ||
-            character.personality,
-
-        stance:
-            character.stance,
-
-        attributes:
-            cloneCreationData(
-                character.attributes
-            ),
-
-        potential:
-            cloneCreationData(
-                character.potential
-            ),
-
-        genetics:
-            cloneCreationData(
-                character.genetics
-            )
-
-    };
-
-}
-
-
-/* ============================================================
-   RENDER
-   ============================================================ */
-
-function renderCharacterCreation(
-    container
-) {
-
-    if (
-        !container
-    ) {
-
-        return null;
-
-    }
-
-
-    const character =
-        characterCreationState.character;
-
-
-    const summary =
-        getCharacterCreationSummary();
-
-
-    container.innerHTML = `
-
-        <section
-            class="character-creation"
-            data-version="${CHARACTER_CREATION_VERSION}"
-        >
-
-            <header class="creation-header">
-
-                <div>
-
-                    <span class="creation-kicker">
-                        MMA LIFE DYNASTY
-                    </span>
-
-                    <h1>
-                        Crie seu lutador
-                    </h1>
-
-                    <p>
-                        Sua carreira começa aqui.
-                    </p>
-
-                </div>
-
-                <div class="creation-step">
-                    Etapa
-                    ${CREATION_STEPS.indexOf(
-                        characterCreationState.currentStep
-                    ) + 1}
-                    /
-                    ${CREATION_STEPS.length}
-                </div>
-
-            </header>
-
-
-            <div class="creation-progress">
-
-                ${CREATION_STEPS.map(
-                    (step, index) => `
-
-                        <button
-                            type="button"
-                            class="creation-progress-step ${
-                                step ===
-                                characterCreationState.currentStep
-                                    ? "active"
-                                    : ""
-                            }"
-                            data-creation-step="${step}"
-                        >
-                            ${index + 1}
-                        </button>
-
-                    `
-                ).join("")}
-
-            </div>
-
-
-            <div class="creation-layout">
-
-
-                <div class="creation-panel">
-
-                    ${
-                        characterCreationState.currentStep ===
-                        "identity"
-
-                            ? renderIdentityStep()
-
-                            : ""
-                    }
-
-
-                    ${
-                        characterCreationState.currentStep ===
-                        "physical"
-
-                            ? renderPhysicalStep()
-
-                            : ""
-                    }
-
-
-                    ${
-                        characterCreationState.currentStep ===
-                        "style"
-
-                            ? renderStyleStep()
-
-                            : ""
-                    }
-
-
-                    ${
-                        characterCreationState.currentStep ===
-                        "personality"
-
-                            ? renderPersonalityStep()
-
-                            : ""
-                    }
-
-
-                    ${
-                        characterCreationState.currentStep ===
-                        "confirmation"
-
-                            ? renderConfirmationStep()
-
-                            : ""
-                    }
-
-
-                    <div class="creation-navigation">
-
-                        <button
-                            type="button"
-                            class="creation-button secondary"
-                            data-creation-action="previous"
-                            ${
-                                characterCreationState.currentStep ===
-                                "identity"
-                                    ? "disabled"
-                                    : ""
-                            }
-                        >
-                            VOLTAR
-                        </button>
-
-
-                        ${
-                            characterCreationState.currentStep !==
-                            "confirmation"
-
-                                ? `
-
-                                    <button
-                                        type="button"
-                                        class="creation-button primary"
-                                        data-creation-action="next"
-                                    >
-                                        CONTINUAR
-                                    </button>
-
-                                `
-
-                                : `
-
-                                    <button
-                                        type="button"
-                                        class="creation-button primary"
-                                        data-creation-action="finish"
-                                    >
-                                        COMEÇAR CARREIRA
-                                    </button>
-
-                                `
-                        }
-
-                    </div>
-
-                </div>
-
-
-                <aside class="creation-preview">
-
-                    <div class="preview-label">
-                        SEU LUTADOR
-                    </div>
-
-                    <h2>
-                        ${
-                            summary.name ||
-                            "Novo Lutador"
-                        }
-                    </h2>
-
-
-                    ${
-                        summary.nickname
-
-                            ? `
-                                <div class="preview-nickname">
-                                    "${escapeCreationHtml(
-                                        summary.nickname
-                                    )}"
-                                </div>
-                            `
-
-                            : ""
-                    }
-
-
-                    <div class="preview-grid">
-
-                        <div>
-                            <span>IDADE</span>
-                            <strong>
-                                ${summary.age}
-                            </strong>
-                        </div>
-
-                        <div>
-                            <span>PESO</span>
-                            <strong>
-                                ${summary.weight}
-                                kg
-                            </strong>
-                        </div>
-
-                        <div>
-                            <span>ALTURA</span>
-                            <strong>
-                                ${summary.height}
-                                cm
-                            </strong>
-                        </div>
-
-                        <div>
-                            <span>CATEGORIA</span>
-                            <strong>
-                                ${summary.weightClass}
-                            </strong>
-                        </div>
-
-                    </div>
-
-
-                    <div class="preview-section">
-
-                        <span>LOCALIZAÇÃO</span>
-
-                        <strong>
-                            ${escapeCreationHtml(
-                                summary.location
-                            )}
-                        </strong>
-
-                    </div>
-
-
-                    <div class="preview-section">
-
-                        <span>ESTILO</span>
-
-                        <strong>
-                            ${escapeCreationHtml(
-                                summary.style
-                            )}
-                        </strong>
-
-                    </div>
-
-
-                    <div class="preview-section">
-
-                        <span>PERSONALIDADE</span>
-
-                        <strong>
-                            ${escapeCreationHtml(
-                                summary.personality
-                            )}
-                        </strong>
-
-                    </div>
-
-
-                    <div class="preview-section">
-
-                        <span>BASE DE POTENCIAL</span>
-
-                        <div class="preview-bar">
-
-                            <div
-                                style="
-                                    width: ${
-                                        summary.potential?.ceiling ||
-                                        0
-                                    }%;
-                                "
-                            ></div>
-
-                        </div>
-
-                        <strong>
-                            ${
-                                summary.potential?.ceiling ||
-                                "?"
-                            }
-                            / 100
-                        </strong>
-
-                    </div>
-
-                </aside>
-
-            </div>
-
-        </section>
-
-    `;
-
-
-    bindCharacterCreationEvents(
-        container
-    );
-
-
-    return container;
-
-}
-
-
-/* ============================================================
-   STEP RENDERERS
-   ============================================================ */
-
-function renderIdentityStep() {
-
-    const character =
-        characterCreationState.character;
-
-
-    return `
-
-        <div class="creation-step-content">
-
-            <div class="creation-title">
-
-                <span>01</span>
-
-                <div>
-                    <h2>Identidade</h2>
-
-                    <p>
-                        Quem será o protagonista da sua história?
-                    </p>
-                </div>
-
-            </div>
-
-
-            <div class="creation-form-grid">
-
-                <label>
-
-                    <span>Nome</span>
-
-                    <input
-                        type="text"
-                        data-creation-field="firstName"
-                        value="${escapeCreationHtml(
-                            character.firstName
-                        )}"
-                        placeholder="Ex.: João"
-                        maxlength="30"
-                    >
-
-                </label>
-
-
-                <label>
-
-                    <span>Sobrenome</span>
-
-                    <input
-                        type="text"
-                        data-creation-field="lastName"
-                        value="${escapeCreationHtml(
-                            character.lastName
-                        )}"
-                        placeholder="Ex.: Silva"
-                        maxlength="40"
-                    >
-
-                </label>
-
-
-                <label>
-
-                    <span>Apelido</span>
-
-                    <input
-                        type="text"
-                        data-creation-field="nickname"
-                        value="${escapeCreationHtml(
-                            character.nickname
-                        )}"
-                        placeholder="Opcional"
-                        maxlength="25"
-                    >
-
-                </label>
-
-
-                <label>
-
-                    <span>Sexo</span>
-
-                    <select
-                        data-creation-field="gender"
-                    >
-
-                        ${CREATION_OPTIONS.genders
-                            .map(
-                                item => `
-
-                                    <option
-                                        value="${item.id}"
-                                        ${
-                                            character.gender ===
-                                            item.id
-                                                ? "selected"
-                                                : ""
-                                        }
-                                    >
-                                        ${item.name}
-                                    </option>
-
-                                `
-                            )
-                            .join("")}
-
-                    </select>
-
-                </label>
-
-
-                <label>
-
-                    <span>País</span>
-
-                    <select
-                        data-creation-field="country"
-                    >
-
-                        ${CREATION_OPTIONS.countries
-                            .map(
-                                item => `
-
-                                    <option
-                                        value="${item.id}"
-                                        ${
-                                            character.country ===
-                                            item.id
-                                                ? "selected"
-                                                : ""
-                                        }
-                                    >
-                                        ${item.name}
-                                    </option>
-
-                                `
-                            )
-                            .join("")}
-
-                    </select>
-
-                </label>
-
-
-                <label>
-
-                    <span>Cidade</span>
-
-                    <select
-                        data-creation-field="city"
-                    >
-
-                        ${getCitiesForCountry(
-                            character.country
-                        )
-                            .map(
-                                city => `
-
-                                    <option
-                                        value="${escapeCreationHtml(
-                                            city
-                                        )}"
-                                        ${
-                                            character.city ===
-                                            city
-                                                ? "selected"
-                                                : ""
-                                        }
-                                    >
-                                        ${escapeCreationHtml(
-                                            city
-                                        )}
-                                    </option>
-
-                                `
-                            )
-                            .join("")}
-
-                    </select>
-
-                </label>
-
-            </div>
-
-        </div>
-
-    `;
-
-}
-
-
-function renderPhysicalStep() {
-
-    const character =
-        characterCreationState.character;
-
-
-    return `
-
-        <div class="creation-step-content">
-
-            <div class="creation-title">
-
-                <span>02</span>
-
-                <div>
-                    <h2>Físico</h2>
-
-                    <p>
-                        Defina a base física do seu atleta.
-                    </p>
-                </div>
-
-            </div>
-
-
-            <div class="creation-form-grid">
-
-                <label>
-
-                    <span>Idade inicial</span>
-
-                    <input
-                        type="number"
-                        min="18"
-                        max="40"
-                        data-creation-field="age"
-                        value="${character.age}"
-                    >
-
-                </label>
-
-
-                <label>
-
-                    <span>Altura (cm)</span>
-
-                    <input
-                        type="number"
-                        min="150"
-                        max="220"
-                        data-creation-field="height"
-                        value="${character.height}"
-                    >
-
-                </label>
-
-
-                <label>
-
-                    <span>Peso (kg)</span>
-
-                    <input
-                        type="number"
-                        min="50"
-                        max="150"
-                        step="0.1"
-                        data-creation-field="weight"
-                        value="${character.weight}"
-                    >
-
-                </label>
-
-
-                <label>
-
-                    <span>Categoria</span>
-
-                    <select
-                        data-creation-field="weightClass"
-                    >
-
-                        ${CREATION_OPTIONS.weightClasses
-                            .map(
-                                item => `
-
-                                    <option
-                                        value="${item.id}"
-                                        ${
-                                            character.weightClass ===
-                                            item.id
-                                                ? "selected"
-                                                : ""
-                                        }
-                                    >
-                                        ${item.name}
-                                    </option>
-
-                                `
-                            )
-                            .join("")}
-
-                    </select>
-
-                </label>
-
-            </div>
-
-
-            <div class="creation-info">
-
-                <strong>
-                    Importante
-                </strong>
-
-                <p>
-                    A categoria define os adversários,
-                    eventos e oportunidades disponíveis
-                    durante sua carreira.
-                </p>
-
-            </div>
-
-        </div>
-
-    `;
-
-}
-
-
-function renderStyleStep() {
-
-    const character =
-        characterCreationState.character;
-
-
-    return `
-
-        <div class="creation-step-content">
-
-            <div class="creation-title">
-
-                <span>03</span>
-
-                <div>
-                    <h2>Estilo de luta</h2>
-
-                    <p>
-                        Escolha a identidade dentro do cage.
-                    </p>
-                </div>
-
-            </div>
-
-
-            <div class="creation-choice-grid">
-
-                ${CREATION_OPTIONS.fightingStyles
-                    .map(
-                        item => `
-
-                            <button
-                                type="button"
-                                class="
-                                    creation-choice
-                                    ${
-                                        character.fightingStyle ===
-                                        item.id
-                                            ? "selected"
-                                            : ""
-                                    }
-                                "
-                                data-style="${item.id}"
-                            >
-
-                                <strong>
-                                    ${item.name}
-                                </strong>
-
-                                <span>
-                                    ${item.description}
-                                </span>
-
-                            </button>
-
-                        `
-                    )
-                    .join("")}
-
-            </div>
-
-
-            <div class="creation-subsection">
-
-                <h3>
-                    Base de postura
-                </h3>
-
-
-                <div class="creation-inline-options">
-
-                    ${CREATION_OPTIONS.stances
-                        .map(
-                            item => `
-
-                                <button
-                                    type="button"
-                                    class="
-                                        creation-option
-                                        ${
-                                            character.stance ===
-                                            item.id
-                                                ? "selected"
-                                                : ""
-                                        }
-                                    "
-                                    data-stance="${item.id}"
-                                >
-                                    ${item.name}
-                                </button>
-
-                            `
-                        )
-                        .join("")}
-
-                </div>
-
-            </div>
-
-        </div>
-
-    `;
-
-}
-
-
-function renderPersonalityStep() {
-
-    const character =
-        characterCreationState.character;
-
-
-    return `
-
-        <div class="creation-step-content">
-
-            <div class="creation-title">
-
-                <span>04</span>
-
-                <div>
-                    <h2>Personalidade</h2>
-
-                    <p>
-                        Sua personalidade influencia sua jornada.
-                    </p>
-                </div>
-
-            </div>
-
-
-            <div class="creation-choice-grid">
-
-                ${CREATION_OPTIONS.personalities
-                    .map(
-                        item => `
-
-                            <button
-                                type="button"
-                                class="
-                                    creation-choice
-                                    ${
-                                        character.personality ===
-                                        item.id
-                                            ? "selected"
-                                            : ""
-                                    }
-                                "
-                                data-personality="${item.id}"
-                            >
-
-                                <strong>
-                                    ${item.name}
-                                </strong>
-
-                                <span>
-                                    ${item.description}
-                                </span>
-
-                            </button>
-
-                        `
-                    )
-                    .join("")}
-
-            </div>
-
-        </div>
-
-    `;
-
-}
-
-
-function renderConfirmationStep() {
-
-    const summary =
-        getCharacterCreationSummary();
-
-
-    return `
-
-        <div class="creation-step-content">
-
-            <div class="creation-title">
-
-                <span>05</span>
-
-                <div>
-                    <h2>Confirmação</h2>
-
-                    <p>
-                        Este será o início da sua dinastia.
-                    </p>
-                </div>
-
-            </div>
-
-
-            <div class="confirmation-card">
-
-                <h2>
-                    ${escapeCreationHtml(
-                        summary.name ||
-                        "Novo Lutador"
-                    )}
-                </h2>
-
-
-                ${
-                    summary.nickname
-
-                        ? `
-                            <p>
-                                "${escapeCreationHtml(
-                                    summary.nickname
-                                )}"
-                            </p>
-                        `
-
-                        : ""
-                }
-
-
-                <div class="confirmation-grid">
-
-                    <div>
-                        <span>Idade</span>
-                        <strong>
-                            ${summary.age}
-                        </strong>
-                    </div>
-
-                    <div>
-                        <span>Localização</span>
-                        <strong>
-                            ${escapeCreationHtml(
-                                summary.location
-                            )}
-                        </strong>
-                    </div>
-
-                    <div>
-                        <span>Categoria</span>
-                        <strong>
-                            ${escapeCreationHtml(
-                                summary.weightClass
-                            )}
-                        </strong>
-                    </div>
-
-                    <div>
-                        <span>Estilo</span>
-                        <strong>
-                            ${escapeCreationHtml(
-                                summary.style
-                            )}
-                        </strong>
-                    </div>
-
-                    <div>
-                        <span>Personalidade</span>
-                        <strong>
-                            ${escapeCreationHtml(
-                                summary.personality
-                            )}
-                        </strong>
-                    </div>
-
-                    <div>
-                        <span>Postura</span>
-                        <strong>
-                            ${escapeCreationHtml(
-                                summary.stance
-                            )}
-                        </strong>
-                    </div>
-
-                </div>
-
-            </div>
-
-
-            <div class="creation-warning">
-
-                <strong>
-                    Sua carreira começa agora.
-                </strong>
-
-                <p>
-                    Depois de confirmar, o personagem
-                    será registrado no universo do MMA Life Dynasty.
-                </p>
-
-            </div>
-
-        </div>
-
-    `;
-
-}
-
-
-/* ============================================================
-   EVENTS
-   ============================================================ */
-
-function bindCharacterCreationEvents(
-    container
-) {
-
-    const fields =
-        container.querySelectorAll(
-            "[data-creation-field]"
-        );
-
-
-    fields.forEach(
-        field => {
-
-            field.addEventListener(
-                "change",
-                event => {
-
-                    const input =
-                        event.currentTarget;
-
-                    const key =
-                        input.dataset.creationField;
-
-                    let value =
-                        input.value;
-
-
-                    if (
-                        [
-                            "age",
-                            "height",
-                            "weight"
-                        ].includes(
-                            key
-                        )
-                    ) {
-
-                        value =
-                            Number(
-                                value
-                            );
-
-                    }
-
-
-                    if (
-                        key ===
-                        "country"
-                    ) {
-
-                        setLocation(
-                            value
-                        );
-
-
-                        refreshCharacterCreation(
-                            container
-                        );
-
-
-                        return;
-
-                    }
-
-
-                    if (
-                        key ===
-                        "city"
-                    ) {
-
-                        setLocation(
-                            characterCreationState
-                                .character
-                                .country,
-                            value
-                        );
-
-
-                        refreshCharacterCreation(
-                            container
-                        );
-
-
-                        return;
-
-                    }
-
-
-                    setCharacterField(
-                        key,
-                        value
-                    );
-
-
-                    refreshCharacterCreation(
-                        container
-                    );
-
-                }
-            );
-
-
-            field.addEventListener(
-                "input",
-                event => {
-
-                    const input =
-                        event.currentTarget;
-
-                    const key =
-                        input.dataset.creationField;
-
-
-                    if (
-                        [
-                            "firstName",
-                            "lastName",
-                            "nickname"
-                        ].includes(
-                            key
-                        )
-                    ) {
-
-                        setCharacterField(
-                            key,
-                            input.value
-                        );
-
-                    }
-
-                }
-            );
-
-        }
-    );
-
-
-    container
-        .querySelectorAll(
-            "[data-style]"
-        )
-        .forEach(
-            button => {
-
-                button.addEventListener(
-                    "click",
-                    () => {
-
-                        setStyleData(
-                            {
-                                fightingStyle:
-                                    button.dataset.style
-                            }
-                        );
-
-
-                        refreshCharacterCreation(
-                            container
-                        );
-
-                    }
-                );
-
-            }
-        );
-
-
-    container
-        .querySelectorAll(
-            "[data-stance]"
-        )
-        .forEach(
-            button => {
-
-                button.addEventListener(
-                    "click",
-                    () => {
-
-                        setStyleData(
-                            {
-                                stance:
-                                    button.dataset.stance
-                            }
-                        );
-
-
-                        refreshCharacterCreation(
-                            container
-                        );
-
-                    }
-                );
-
-            }
-        );
-
-
-    container
-        .querySelectorAll(
-            "[data-personality]"
-        )
-        .forEach(
-            button => {
-
-                button.addEventListener(
-                    "click",
-                    () => {
-
-                        setPersonality(
-                            button.dataset.personality
-                        );
-
-
-                        refreshCharacterCreation(
-                            container
-                        );
-
-                    }
-                );
-
-            }
-        );
-
-
-    container
-        .querySelectorAll(
-            "[data-creation-step]"
-        )
-        .forEach(
-            button => {
-
-                button.addEventListener(
-                    "click",
-                    () => {
-
-                        goToCreationStep(
-                            button.dataset.creationStep
-                        );
-
-
-                        refreshCharacterCreation(
-                            container
-                        );
-
-                    }
-                );
-
-            }
-        );
-
-
-    const previous =
-        container.querySelector(
-            '[data-creation-action="previous"]'
-        );
-
-
-    if (
-        previous
-    ) {
-
-        previous.addEventListener(
-            "click",
-            () => {
-
-                previousCreationStep();
-
-                refreshCharacterCreation(
-                    container
-                );
-
-            }
-        );
-
-    }
-
-
-    const next =
-        container.querySelector(
-            '[data-creation-action="next"]'
-        );
-
-
-    if (
-        next
-    ) {
-
-        next.addEventListener(
-            "click",
-            () => {
-
-                const validation =
-                    validateCurrentCreationStep();
-
-
-                if (
-                    !validation.valid
-                ) {
-
-                    showCreationMessage(
-                        validation.errors[0]
-                    );
-
-                    return;
-
-                }
-
-
-                nextCreationStep();
-
-                refreshCharacterCreation(
-                    container
-                );
-
-            }
-        );
-
-    }
-
-
-    const finish =
-        container.querySelector(
-            '[data-creation-action="finish"]'
-        );
-
-
-    if (
-        finish
-    ) {
-
-        finish.addEventListener(
-            "click",
-            () => {
-
-                const result =
-                    finalizeCharacterCreation();
-
-
-                if (
-                    !result.success
-                ) {
-
-                    showCreationMessage(
-                        result.errors[0]
-                    );
-
-                    return;
-
-                }
-
-
-                showCreationMessage(
-                    "Personagem criado com sucesso!"
-                );
-
-
-                document.dispatchEvent(
-                    new CustomEvent(
-                        "mma-life-character-created",
-                        {
-                            detail: {
-                                character:
-                                    result.character
-                            }
-                        }
-                    )
-                );
-
-            }
-        );
-
-    }
-
-}
-
-
-/* ============================================================
-   STEP VALIDATION
-   ============================================================ */
-
-function validateCurrentCreationStep() {
-
-    const character =
-        characterCreationState.character;
-
-
-    const errors = [];
-
-
-    switch (
-        characterCreationState.currentStep
-    ) {
-
-        case "identity":
-
-            if (
-                !character.firstName
-            ) {
-
-                errors.push(
-                    "Informe o nome."
-                );
-
-            }
-
-
-            if (
-                !character.lastName
-            ) {
-
-                errors.push(
-                    "Informe o sobrenome."
-                );
-
-            }
-
-            break;
-
-
-        case "physical":
-
-            if (
-                character.age < 18
-            ) {
-
-                errors.push(
-                    "A idade mínima é 18 anos."
-                );
-
-            }
-
-
-            if (
-                character.height < 150
-            ) {
-
-                errors.push(
-                    "Informe uma altura válida."
-                );
-
-            }
-
-
-            if (
-                character.weight < 50
-            ) {
-
-                errors.push(
-                    "Informe um peso válido."
-                );
-
-            }
-
-            break;
-
-
-        case "style":
-
-            if (
-                !character.fightingStyle
-            ) {
-
-                errors.push(
-                    "Escolha um estilo de luta."
-                );
-
-            }
-
-            break;
-
-
-        case "personality":
-
-            if (
-                !character.personality
-            ) {
-
-                errors.push(
-                    "Escolha uma personalidade."
-                );
-
-            }
-
-            break;
-
-
-        default:
-
-            break;
-
-    }
-
-
-    return {
-
-        valid:
-            errors.length === 0,
-
-        errors
-
-    };
-
-}
-
-
-/* ============================================================
-   REFRESH
-   ============================================================ */
-
-function refreshCharacterCreation(
-    container
-) {
-
-    if (
-        !container
-    ) {
-
-        return;
-
-    }
-
-
-    renderCharacterCreation(
-        container
-    );
-
 }
 
 
@@ -3157,661 +1220,1519 @@ function refreshCharacterCreation(
    MESSAGE
    ============================================================ */
 
-function showCreationMessage(
-    message
-) {
-
-    const toast =
-        document.getElementById(
-            "game-toast-container"
-        );
-
-
-    if (
-        toast
-    ) {
-
-        const element =
-            document.createElement(
-                "div"
-            );
-
-
-        element.className =
-            "game-toast";
-
-
-        element.textContent =
-            message;
-
-
-        toast.appendChild(
-            element
-        );
-
-
-        setTimeout(
-            () => {
-
-                element.remove();
-
-            },
-            3000
-        );
-
-
-        return;
-
-    }
-
-
+function showCreationMessage(message) {
     console.log(
-        "[MMA LIFE]",
+        "[MMA LIFE DYNASTY]",
         message
     );
 
-}
 
-
-/* ============================================================
-   HTML ESCAPE
-   ============================================================ */
-
-function escapeCreationHtml(
-    value
-) {
-
-    return String(
-        value ?? ""
-    )
-        .replace(
-            /&/g,
-            "&amp;"
-        )
-        .replace(
-            /</g,
-            "&lt;"
-        )
-        .replace(
-            />/g,
-            "&gt;"
-        )
-        .replace(
-            /"/g,
-            "&quot;"
-        )
-        .replace(
-            /'/g,
-            "&#039;"
+    let container =
+        document.getElementById(
+            "character-creation-message"
         );
 
-}
 
+    if (!container) {
+        container =
+            document.createElement("div");
 
-/* ============================================================
-   INJECT DEFAULT STYLES
-   ============================================================ */
+        container.id =
+            "character-creation-message";
 
-function injectCharacterCreationStyles() {
+        container.style.position =
+            "fixed";
 
-    if (
-        document.getElementById(
-            "mma-life-character-creation-styles"
-        )
-    ) {
+        container.style.left =
+            "50%";
 
-        return;
+        container.style.bottom =
+            "24px";
 
+        container.style.transform =
+            "translateX(-50%)";
+
+        container.style.zIndex =
+            "99999";
+
+        container.style.padding =
+            "12px 20px";
+
+        container.style.borderRadius =
+            "12px";
+
+        container.style.background =
+            "#151515";
+
+        container.style.color =
+            "#ffffff";
+
+        container.style.border =
+            "1px solid rgba(255,255,255,.15)";
+
+        container.style.boxShadow =
+            "0 10px 30px rgba(0,0,0,.45)";
+
+        container.style.fontFamily =
+            "Arial, sans-serif";
+
+        document.body.appendChild(container);
     }
 
 
-    const style =
-        document.createElement(
-            "style"
+    container.textContent =
+        message;
+
+
+    container.style.display =
+        "block";
+
+
+    clearTimeout(
+        container._hideTimer
+    );
+
+
+    container._hideTimer =
+        setTimeout(() => {
+            container.style.display =
+                "none";
+        }, 3500);
+}
+
+
+/* ============================================================
+   START GAME BRIDGE
+   ============================================================ */
+
+async function startGameAfterCharacterCreation(character) {
+    console.log(
+        "[MMA LIFE DYNASTY] Iniciando carreira...",
+        character
+    );
+
+
+    /*
+     * Primeiro tentamos utilizar a API principal
+     * do jogo.
+     */
+
+    const gameAPI =
+        globalThis.MMA_LIFE_GAME;
+
+
+    if (gameAPI) {
+
+        /*
+         * Método recomendado.
+         */
+
+        if (
+            typeof gameAPI.startNewGame ===
+            "function"
+        ) {
+            const result =
+                await gameAPI.startNewGame(
+                    character
+                );
+
+            return result !== false;
+        }
+
+
+        /*
+         * Compatibilidade com uma versão
+         * alternativa da API.
+         */
+
+        if (
+            typeof gameAPI.startCareer ===
+            "function"
+        ) {
+            const result =
+                await gameAPI.startCareer(
+                    character
+                );
+
+            return result !== false;
+        }
+    }
+
+
+    /*
+     * Se o main.js ainda não possui uma função
+     * específica para iniciar a carreira, emitimos
+     * o evento. O main.js poderá capturá-lo.
+     */
+
+    document.dispatchEvent(
+        new CustomEvent(
+            "mma-life-character-created",
+            {
+                detail: {
+                    character
+                }
+            }
+        )
+    );
+
+
+    /*
+     * Damos um pequeno tempo para que listeners
+     * externos processem o evento.
+     */
+
+    await new Promise(
+        resolve => setTimeout(resolve, 50)
+    );
+
+
+    return true;
+}
+
+
+/* ============================================================
+   EVENT BINDING
+   ============================================================ */
+
+function bindCharacterCreationEvents(container) {
+    if (!container) {
+        return;
+    }
+
+
+    /*
+     * INPUTS
+     */
+
+    const firstName =
+        container.querySelector(
+            '[data-creation-field="firstName"]'
+        );
+
+    if (firstName) {
+        firstName.addEventListener(
+            "input",
+            event => {
+                setCharacterField(
+                    "firstName",
+                    event.target.value
+                );
+            }
+        );
+    }
+
+
+    const lastName =
+        container.querySelector(
+            '[data-creation-field="lastName"]'
+        );
+
+    if (lastName) {
+        lastName.addEventListener(
+            "input",
+            event => {
+                setCharacterField(
+                    "lastName",
+                    event.target.value
+                );
+            }
+        );
+    }
+
+
+    const nickname =
+        container.querySelector(
+            '[data-creation-field="nickname"]'
+        );
+
+    if (nickname) {
+        nickname.addEventListener(
+            "input",
+            event => {
+                setCharacterField(
+                    "nickname",
+                    event.target.value
+                );
+            }
+        );
+    }
+
+
+    const country =
+        container.querySelector(
+            '[data-creation-field="country"]'
+        );
+
+    if (country) {
+        country.addEventListener(
+            "change",
+            event => {
+                setLocation(
+                    event.target.value,
+                    ""
+                );
+
+                refreshCharacterCreation(
+                    container
+                );
+            }
+        );
+    }
+
+
+    const city =
+        container.querySelector(
+            '[data-creation-field="city"]'
+        );
+
+    if (city) {
+        city.addEventListener(
+            "change",
+            event => {
+                setCharacterField(
+                    "city",
+                    event.target.value
+                );
+            }
+        );
+    }
+
+
+    const age =
+        container.querySelector(
+            '[data-creation-field="age"]'
+        );
+
+    if (age) {
+        age.addEventListener(
+            "input",
+            event => {
+                setPhysical({
+                    age:
+                        event.target.value
+                });
+            }
+        );
+    }
+
+
+    const height =
+        container.querySelector(
+            '[data-creation-field="height"]'
+        );
+
+    if (height) {
+        height.addEventListener(
+            "input",
+            event => {
+                setPhysical({
+                    height:
+                        event.target.value
+                });
+            }
+        );
+    }
+
+
+    const weight =
+        container.querySelector(
+            '[data-creation-field="weight"]'
+        );
+
+    if (weight) {
+        weight.addEventListener(
+            "input",
+            event => {
+                setPhysical({
+                    weight:
+                        event.target.value
+                });
+            }
+        );
+    }
+
+
+    const weightClass =
+        container.querySelector(
+            '[data-creation-field="weightClass"]'
+        );
+
+    if (weightClass) {
+        weightClass.addEventListener(
+            "change",
+            event => {
+                setPhysical({
+                    weightClass:
+                        event.target.value
+                });
+            }
+        );
+    }
+
+
+    const fightingStyle =
+        container.querySelector(
+            '[data-creation-field="fightingStyle"]'
+        );
+
+    if (fightingStyle) {
+        fightingStyle.addEventListener(
+            "change",
+            event => {
+                setStyleData({
+                    fightingStyle:
+                        event.target.value
+                });
+            }
+        );
+    }
+
+
+    const stance =
+        container.querySelector(
+            '[data-creation-field="stance"]'
+        );
+
+    if (stance) {
+        stance.addEventListener(
+            "change",
+            event => {
+                setStyleData({
+                    stance:
+                        event.target.value
+                });
+            }
+        );
+    }
+
+
+    /*
+     * BOTÕES DE ESTILO
+     */
+
+    const styleButtons =
+        container.querySelectorAll(
+            '[data-creation-style]'
         );
 
 
-    style.id =
-        "mma-life-character-creation-styles";
-
-
-    style.textContent = `
-
-        .character-creation {
-            width: min(1180px, calc(100% - 32px));
-            margin: 0 auto;
-            padding: 32px 0 60px;
-        }
-
-
-        .creation-header {
-            display: flex;
-            align-items: flex-end;
-            justify-content: space-between;
-            gap: 20px;
-            margin-bottom: 24px;
-        }
-
-
-        .creation-kicker {
-            display: block;
-            font-size: 11px;
-            font-weight: 800;
-            letter-spacing: 2px;
-            opacity: .55;
-            margin-bottom: 8px;
-        }
-
-
-        .creation-header h1 {
-            margin: 0;
-            font-size: clamp(30px, 5vw, 48px);
-            line-height: 1;
-        }
-
-
-        .creation-header p {
-            margin: 10px 0 0;
-            opacity: .6;
-        }
-
-
-        .creation-step {
-            font-size: 13px;
-            opacity: .55;
-            white-space: nowrap;
-        }
-
-
-        .creation-progress {
-            display: flex;
-            gap: 8px;
-            margin-bottom: 18px;
-        }
-
-
-        .creation-progress-step {
-            width: 36px;
-            height: 6px;
-            padding: 0;
-            border: 0;
-            border-radius: 99px;
-            background: rgba(255,255,255,.12);
-            font-size: 0;
-        }
-
-
-        .creation-progress-step.active {
-            background: #fff;
-        }
-
-
-        .creation-layout {
-            display: grid;
-            grid-template-columns:
-                minmax(0, 1fr)
-                320px;
-            gap: 18px;
-        }
-
-
-        .creation-panel,
-        .creation-preview {
-            border:
-                1px solid
-                rgba(255,255,255,.09);
-            border-radius: 16px;
-            background:
-                rgba(255,255,255,.035);
-        }
-
-
-        .creation-panel {
-            padding: 24px;
-        }
-
-
-        .creation-preview {
-            padding: 24px;
-            height: fit-content;
-            position: sticky;
-            top: 20px;
-        }
-
-
-        .creation-title {
-            display: flex;
-            gap: 16px;
-            align-items: flex-start;
-            margin-bottom: 28px;
-        }
-
-
-        .creation-title > span {
-            font-size: 12px;
-            font-weight: 900;
-            opacity: .4;
-        }
-
-
-        .creation-title h2 {
-            margin: 0;
-            font-size: 25px;
-        }
-
-
-        .creation-title p {
-            margin: 7px 0 0;
-            opacity: .55;
-            font-size: 14px;
-        }
-
-
-        .creation-form-grid {
-            display: grid;
-            grid-template-columns:
-                repeat(2, minmax(0, 1fr));
-            gap: 16px;
-        }
-
-
-        .creation-form-grid label {
-            display: grid;
-            gap: 8px;
-        }
-
-
-        .creation-form-grid label > span {
-            font-size: 12px;
-            font-weight: 700;
-            opacity: .65;
-        }
-
-
-        .creation-form-grid input,
-        .creation-form-grid select {
-            width: 100%;
-            min-height: 48px;
-            border:
-                1px solid
-                rgba(255,255,255,.10);
-            border-radius: 10px;
-            background: rgba(0,0,0,.25);
-            color: #fff;
-            padding: 0 13px;
-            outline: none;
-        }
-
-
-        .creation-form-grid input:focus,
-        .creation-form-grid select:focus {
-            border-color:
-                rgba(255,255,255,.35);
-        }
-
-
-        .creation-info,
-        .creation-warning {
-            margin-top: 20px;
-            padding: 15px;
-            border-radius: 11px;
-            background:
-                rgba(255,255,255,.045);
-        }
-
-
-        .creation-info strong,
-        .creation-warning strong {
-            font-size: 12px;
-            text-transform: uppercase;
-            letter-spacing: .7px;
-        }
-
-
-        .creation-info p,
-        .creation-warning p {
-            margin: 7px 0 0;
-            font-size: 13px;
-            line-height: 1.5;
-            opacity: .58;
-        }
-
-
-        .creation-choice-grid {
-            display: grid;
-            grid-template-columns:
-                repeat(2, minmax(0, 1fr));
-            gap: 12px;
-        }
-
-
-        .creation-choice {
-            text-align: left;
-            min-height: 110px;
-            padding: 17px;
-            border:
-                1px solid
-                rgba(255,255,255,.09);
-            border-radius: 12px;
-            background:
-                rgba(255,255,255,.025);
-            color: #fff;
-        }
-
-
-        .creation-choice strong {
-            display: block;
-            margin-bottom: 8px;
-        }
-
-
-        .creation-choice span {
-            display: block;
-            font-size: 13px;
-            line-height: 1.45;
-            opacity: .55;
-        }
-
-
-        .creation-choice.selected {
-            border-color:
-                rgba(255,255,255,.55);
-            background:
-                rgba(255,255,255,.09);
-        }
-
-
-        .creation-subsection {
-            margin-top: 25px;
-        }
-
-
-        .creation-subsection h3 {
-            margin: 0 0 12px;
-            font-size: 14px;
-        }
-
-
-        .creation-inline-options {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 8px;
-        }
-
-
-        .creation-option {
-            padding: 11px 15px;
-            border:
-                1px solid
-                rgba(255,255,255,.10);
-            border-radius: 9px;
-            background:
-                rgba(255,255,255,.025);
-            color: #fff;
-        }
-
-
-        .creation-option.selected {
-            background: #fff;
-            color: #000;
-        }
-
-
-        .creation-navigation {
-            display: flex;
-            justify-content: space-between;
-            gap: 12px;
-            margin-top: 30px;
-            padding-top: 20px;
-            border-top:
-                1px solid
-                rgba(255,255,255,.07);
-        }
-
-
-        .creation-button {
-            min-height: 46px;
-            padding: 0 18px;
-            border-radius: 10px;
-            border: 0;
-            font-weight: 800;
-        }
-
-
-        .creation-button.primary {
-            background: #fff;
-            color: #000;
-        }
-
-
-        .creation-button.secondary {
-            background:
-                rgba(255,255,255,.07);
-            color: #fff;
-        }
-
-
-        .creation-button:disabled {
-            opacity: .25;
-            cursor: not-allowed;
-        }
-
-
-        .preview-label {
-            font-size: 10px;
-            font-weight: 900;
-            letter-spacing: 1.7px;
-            opacity: .45;
-        }
-
-
-        .creation-preview h2 {
-            margin: 8px 0 0;
-            font-size: 27px;
-        }
-
-
-        .preview-nickname {
-            margin-top: 4px;
-            opacity: .55;
-            font-size: 13px;
-        }
-
-
-        .preview-grid {
-            display: grid;
-            grid-template-columns:
-                repeat(2, 1fr);
-            gap: 10px;
-            margin-top: 22px;
-        }
-
-
-        .preview-grid > div {
-            padding: 12px;
-            border-radius: 9px;
-            background:
-                rgba(255,255,255,.045);
-        }
-
-
-        .preview-grid span,
-        .preview-section > span {
-            display: block;
-            font-size: 9px;
-            font-weight: 800;
-            letter-spacing: 1px;
-            opacity: .42;
-            margin-bottom: 5px;
-        }
-
-
-        .preview-grid strong,
-        .preview-section strong {
-            font-size: 13px;
-        }
-
-
-        .preview-section {
-            margin-top: 15px;
-            padding-top: 15px;
-            border-top:
-                1px solid
-                rgba(255,255,255,.07);
-        }
-
-
-        .preview-bar {
-            width: 100%;
-            height: 5px;
-            overflow: hidden;
-            border-radius: 99px;
-            background:
-                rgba(255,255,255,.09);
-            margin: 8px 0;
-        }
-
-
-        .preview-bar div {
-            height: 100%;
-            background: #fff;
-            border-radius: inherit;
-        }
-
-
-        .confirmation-card {
-            padding: 20px;
-            border-radius: 13px;
-            background:
-                rgba(255,255,255,.045);
-        }
-
-
-        .confirmation-card h2 {
-            margin: 0;
-            font-size: 28px;
-        }
-
-
-        .confirmation-card > p {
-            margin: 6px 0 20px;
-            opacity: .55;
-        }
-
-
-        .confirmation-grid {
-            display: grid;
-            grid-template-columns:
-                repeat(2, minmax(0, 1fr));
-            gap: 10px;
-        }
-
-
-        .confirmation-grid > div {
-            padding: 12px;
-            border-radius: 9px;
-            background:
-                rgba(0,0,0,.18);
-        }
-
-
-        .confirmation-grid span {
-            display: block;
-            font-size: 10px;
-            opacity: .45;
-            margin-bottom: 5px;
-        }
-
-
-        .confirmation-grid strong {
-            font-size: 13px;
-        }
-
-
-        @media (
-            max-width: 820px
-        ) {
-
-            .creation-layout {
-                grid-template-columns: 1fr;
-            }
-
-            .creation-preview {
-                position: static;
-                order: -1;
-            }
-
-        }
-
-
-        @media (
-            max-width: 560px
-        ) {
-
-            .character-creation {
-                width:
-                    min(
-                        100% - 20px,
-                        1180px
+    styleButtons.forEach(
+        button => {
+            button.addEventListener(
+                "click",
+                event => {
+                    event.preventDefault();
+
+                    const style =
+                        button.dataset.creationStyle;
+
+                    setStyleData({
+                        fightingStyle:
+                            style
+                    });
+
+
+                    styleButtons.forEach(
+                        item => {
+                            item.classList.remove(
+                                "selected",
+                                "active"
+                            );
+                        }
                     );
-                padding-top: 20px;
-            }
 
-            .creation-header {
-                align-items: flex-start;
-                flex-direction: column;
-            }
 
-            .creation-panel,
-            .creation-preview {
-                padding: 17px;
-                border-radius: 13px;
-            }
-
-            .creation-form-grid,
-            .creation-choice-grid,
-            .confirmation-grid {
-                grid-template-columns: 1fr;
-            }
-
+                    button.classList.add(
+                        "selected",
+                        "active"
+                    );
+                }
+            );
         }
+    );
 
+
+    /*
+     * PERSONALIDADE
+     */
+
+    const personalityFields = [
+        "discipline",
+        "confidence",
+        "aggression",
+        "intelligence",
+        "charisma"
+    ];
+
+
+    personalityFields.forEach(
+        field => {
+            const element =
+                container.querySelector(
+                    `[data-creation-personality="${field}"]`
+                );
+
+            if (!element) {
+                return;
+            }
+
+
+            element.addEventListener(
+                "input",
+                event => {
+                    setPersonality({
+                        [field]:
+                            event.target.value
+                    });
+                }
+            );
+        }
+    );
+
+
+    /*
+     * NAVEGAÇÃO
+     */
+
+    const next =
+        container.querySelector(
+            '[data-creation-action="next"]'
+        );
+
+    if (next) {
+        next.addEventListener(
+            "click",
+            event => {
+                event.preventDefault();
+
+                const result =
+                    nextCreationStep();
+
+                if (!result.success) {
+                    showCreationMessage(
+                        result.errors[0]
+                    );
+
+                    return;
+                }
+
+                refreshCharacterCreation(
+                    container
+                );
+            }
+        );
+    }
+
+
+    const previous =
+        container.querySelector(
+            '[data-creation-action="previous"]'
+        );
+
+    if (previous) {
+        previous.addEventListener(
+            "click",
+            event => {
+                event.preventDefault();
+
+                previousCreationStep();
+
+                refreshCharacterCreation(
+                    container
+                );
+            }
+        );
+    }
+
+
+    /*
+     * ========================================================
+     * COMEÇAR CARREIRA
+     * ========================================================
+     *
+     * ESTA É A PARTE CORRIGIDA.
+     */
+
+    const finish =
+        container.querySelector(
+            '[data-creation-action="finish"]'
+        );
+
+
+    if (finish) {
+
+        finish.addEventListener(
+            "click",
+            async event => {
+
+                event.preventDefault();
+
+                /*
+                 * Evita duplo clique.
+                 */
+
+                if (
+                    finish.dataset.starting ===
+                    "true"
+                ) {
+                    return;
+                }
+
+
+                finish.dataset.starting =
+                    "true";
+
+
+                finish.disabled =
+                    true;
+
+
+                try {
+
+                    const result =
+                        finalizeCharacterCreation();
+
+
+                    if (!result.success) {
+
+                        showCreationMessage(
+                            result.errors[0] ||
+                            "Não foi possível criar o personagem."
+                        );
+
+                        finish.disabled =
+                            false;
+
+                        finish.dataset.starting =
+                            "false";
+
+                        return;
+                    }
+
+
+                    console.log(
+                        "[MMA LIFE DYNASTY] Personagem criado:",
+                        result.character
+                    );
+
+
+                    /*
+                     * Evento oficial de personagem criado.
+                     */
+
+                    document.dispatchEvent(
+                        new CustomEvent(
+                            "mma-life-character-created",
+                            {
+                                detail: {
+                                    character:
+                                        result.character
+                                }
+                            }
+                        )
+                    );
+
+
+                    showCreationMessage(
+                        "Personagem criado! Iniciando carreira..."
+                    );
+
+
+                    /*
+                     * Agora realmente tentamos iniciar
+                     * o jogo.
+                     */
+
+                    const started =
+                        await startGameAfterCharacterCreation(
+                            result.character
+                        );
+
+
+                    if (!started) {
+                        throw new Error(
+                            "A API principal do jogo não conseguiu iniciar a carreira."
+                        );
+                    }
+
+
+                    /*
+                     * Evento adicional para outros sistemas.
+                     */
+
+                    document.dispatchEvent(
+                        new CustomEvent(
+                            "mma-life-game-start-requested",
+                            {
+                                detail: {
+                                    character:
+                                        result.character
+                                }
+                            }
+                        )
+                    );
+
+
+                    /*
+                     * Se o main.js assumiu o controle,
+                     * ele fará a transição para o dashboard.
+                     */
+
+                } catch (error) {
+
+                    console.error(
+                        "[MMA LIFE DYNASTY] Erro ao iniciar carreira:",
+                        error
+                    );
+
+
+                    showCreationMessage(
+                        "Erro ao iniciar a carreira. Veja o console."
+                    );
+
+
+                    finish.disabled =
+                        false;
+
+                    finish.dataset.starting =
+                        "false";
+                }
+            }
+        );
+    }
+}
+
+
+/* ============================================================
+   REFRESH
+   ============================================================ */
+
+function refreshCharacterCreation(container) {
+    if (!container) {
+        return;
+    }
+
+    renderCharacterCreation(container);
+}
+
+
+/* ============================================================
+   RENDER
+   ============================================================ */
+
+function renderCharacterCreation(container) {
+    if (!container) {
+        console.error(
+            "[MMA LIFE DYNASTY] Container da criação não encontrado."
+        );
+
+        return;
+    }
+
+
+    initializeCharacterCreation();
+
+
+    const state =
+        characterCreationState;
+
+    const identity =
+        state.identity;
+
+    const physical =
+        state.physical;
+
+    const style =
+        state.style;
+
+    const personality =
+        state.personality;
+
+
+    const cities =
+        getCitiesForCountry(
+            identity.country
+        );
+
+
+    const step =
+        state.currentStep;
+
+
+    const fullName =
+        `${identity.firstName} ${identity.lastName}`.trim();
+
+
+    container.innerHTML = `
+        <section
+            class="creation-panel"
+            style="
+                min-height:100vh;
+                box-sizing:border-box;
+                padding:24px;
+                background:#0b0b0b;
+                color:#fff;
+                font-family:Arial,Helvetica,sans-serif;
+            "
+        >
+
+            <div
+                style="
+                    max-width:900px;
+                    margin:0 auto;
+                "
+            >
+
+                <div
+                    style="
+                        text-align:center;
+                        margin-bottom:30px;
+                    "
+                >
+
+                    <div
+                        style="
+                            font-size:13px;
+                            letter-spacing:3px;
+                            opacity:.65;
+                            margin-bottom:8px;
+                        "
+                    >
+                        MMA LIFE DYNASTY
+                    </div>
+
+                    <h1
+                        style="
+                            margin:0;
+                            font-size:32px;
+                        "
+                    >
+                        CRIE SEU LUTADOR
+                    </h1>
+
+                    <p
+                        style="
+                            margin:10px 0 0;
+                            opacity:.65;
+                        "
+                    >
+                        Construa sua carreira desde o início.
+                    </p>
+
+                </div>
+
+
+                <div
+                    style="
+                        display:flex;
+                        gap:8px;
+                        margin-bottom:25px;
+                    "
+                >
+
+                    ${[1, 2, 3, 4, 5]
+                        .map(
+                            number => `
+                                <div
+                                    style="
+                                        flex:1;
+                                        height:5px;
+                                        border-radius:10px;
+                                        background:${
+                                            number <= step
+                                                ? "#ffffff"
+                                                : "rgba(255,255,255,.15)"
+                                        };
+                                    "
+                                ></div>
+                            `
+                        )
+                        .join("")
+                    }
+
+                </div>
+
+
+                <div
+                    style="
+                        background:rgba(255,255,255,.045);
+                        border:1px solid rgba(255,255,255,.10);
+                        border-radius:20px;
+                        padding:24px;
+                    "
+                >
+
+                    ${renderCreationStep(step)}
+
+                </div>
+
+
+                <div
+                    style="
+                        margin-top:20px;
+                        display:flex;
+                        justify-content:space-between;
+                        gap:12px;
+                    "
+                >
+
+                    ${
+                        step > 1
+                            ? `
+                                <button
+                                    type="button"
+                                    data-creation-action="previous"
+                                    style="
+                                        padding:14px 22px;
+                                        border:1px solid rgba(255,255,255,.15);
+                                        border-radius:12px;
+                                        background:#151515;
+                                        color:#fff;
+                                        cursor:pointer;
+                                    "
+                                >
+                                    ← VOLTAR
+                                </button>
+                            `
+                            : `<div></div>`
+                    }
+
+
+                    ${
+                        step < 5
+                            ? `
+                                <button
+                                    type="button"
+                                    data-creation-action="next"
+                                    style="
+                                        padding:14px 28px;
+                                        border:0;
+                                        border-radius:12px;
+                                        background:#fff;
+                                        color:#000;
+                                        font-weight:700;
+                                        cursor:pointer;
+                                    "
+                                >
+                                    CONTINUAR →
+                                </button>
+                            `
+                            : `
+                                <button
+                                    type="button"
+                                    data-creation-action="finish"
+                                    style="
+                                        padding:15px 30px;
+                                        border:0;
+                                        border-radius:12px;
+                                        background:#fff;
+                                        color:#000;
+                                        font-weight:800;
+                                        cursor:pointer;
+                                    "
+                                >
+                                    COMEÇAR CARREIRA
+                                </button>
+                            `
+                    }
+
+                </div>
+
+
+                ${
+                    fullName
+                        ? `
+                            <div
+                                style="
+                                    margin-top:25px;
+                                    text-align:center;
+                                    opacity:.7;
+                                    font-size:14px;
+                                "
+                            >
+                                ${escapeHTML(fullName)}
+                            </div>
+                        `
+                        : ""
+                }
+
+            </div>
+
+        </section>
     `;
 
 
-    document.head.appendChild(
-        style
+    bindCharacterCreationEvents(
+        container
     );
-
 }
 
 
 /* ============================================================
-   INITIALIZE
+   STEP RENDER
    ============================================================ */
 
-function initializeCharacterCreation() {
+function renderCreationStep(step) {
 
-    injectCharacterCreationStyles();
+    if (step === 1) {
 
-    characterCreationState.initialized =
-        true;
+        return `
+            <div>
+
+                <h2>IDENTIDADE</h2>
+
+                <p style="opacity:.6;">
+                    Quem é você?
+                </p>
 
 
-    return {
+                <div
+                    style="
+                        display:grid;
+                        grid-template-columns:1fr 1fr;
+                        gap:16px;
+                    "
+                >
 
-        success: true,
+                    <label>
+                        <span>Nome</span>
 
-        state:
-            getCharacterCreationData()
+                        <input
+                            type="text"
+                            data-creation-field="firstName"
+                            value="${escapeHTML(characterCreationState.identity.firstName)}"
+                            placeholder="Seu nome"
+                            autocomplete="off"
+                            style="${inputStyle()}"
+                        >
+                    </label>
 
-    };
 
+                    <label>
+                        <span>Sobrenome</span>
+
+                        <input
+                            type="text"
+                            data-creation-field="lastName"
+                            value="${escapeHTML(characterCreationState.identity.lastName)}"
+                            placeholder="Seu sobrenome"
+                            autocomplete="off"
+                            style="${inputStyle()}"
+                        >
+                    </label>
+
+                </div>
+
+
+                <label
+                    style="
+                        display:block;
+                        margin-top:16px;
+                    "
+                >
+                    <span>Apelido / Nome de luta</span>
+
+                    <input
+                        type="text"
+                        data-creation-field="nickname"
+                        value="${escapeHTML(characterCreationState.identity.nickname)}"
+                        placeholder="Opcional"
+                        autocomplete="off"
+                        style="${inputStyle()}"
+                    >
+                </label>
+
+            </div>
+        `;
+    }
+
+
+    if (step === 2) {
+
+        const country =
+            characterCreationState.identity.country;
+
+        const city =
+            characterCreationState.identity.city;
+
+
+        return `
+            <div>
+
+                <h2>ORIGEM</h2>
+
+                <p style="opacity:.6;">
+                    Escolha onde sua história começa.
+                </p>
+
+
+                <label style="display:block;margin-top:20px;">
+                    <span>País</span>
+
+                    <select
+                        data-creation-field="country"
+                        style="${inputStyle()}"
+                    >
+
+                        ${CREATION_OPTIONS.countries
+                            .map(
+                                item => `
+                                    <option
+                                        value="${escapeHTML(item)}"
+                                        ${item === country ? "selected" : ""}
+                                    >
+                                        ${escapeHTML(item)}
+                                    </option>
+                                `
+                            )
+                            .join("")
+                        }
+
+                    </select>
+
+                </label>
+
+
+                <label
+                    style="
+                        display:block;
+                        margin-top:16px;
+                    "
+                >
+
+                    <span>Cidade</span>
+
+                    <select
+                        data-creation-field="city"
+                        style="${inputStyle()}"
+                    >
+
+                        ${
+                            getCitiesForCountry(country)
+                                .map(
+                                    item => `
+                                        <option
+                                            value="${escapeHTML(item)}"
+                                            ${item === city ? "selected" : ""}
+                                        >
+                                            ${escapeHTML(item)}
+                                        </option>
+                                    `
+                                )
+                                .join("")
+                        }
+
+                    </select>
+
+                </label>
+
+            </div>
+        `;
+    }
+
+
+    if (step === 3) {
+
+        return `
+            <div>
+
+                <h2>FÍSICO</h2>
+
+                <p style="opacity:.6;">
+                    Defina as características físicas iniciais.
+                </p>
+
+
+                <div
+                    style="
+                        display:grid;
+                        grid-template-columns:repeat(3,1fr);
+                        gap:16px;
+                        margin-top:20px;
+                    "
+                >
+
+                    <label>
+                        <span>Idade</span>
+
+                        <input
+                            type="number"
+                            min="14"
+                            max="60"
+                            data-creation-field="age"
+                            value="${characterCreationState.physical.age}"
+                            style="${inputStyle()}"
+                        >
+                    </label>
+
+
+                    <label>
+                        <span>Altura (m)</span>
+
+                        <input
+                            type="number"
+                            min="1.40"
+                            max="2.20"
+                            step="0.01"
+                            data-creation-field="height"
+                            value="${characterCreationState.physical.height}"
+                            style="${inputStyle()}"
+                        >
+                    </label>
+
+
+                    <label>
+                        <span>Peso (kg)</span>
+
+                        <input
+                            type="number"
+                            min="45"
+                            max="160"
+                            step="0.1"
+                            data-creation-field="weight"
+                            value="${characterCreationState.physical.weight}"
+                            style="${inputStyle()}"
+                        >
+                    </label>
+
+                </div>
+
+
+                <label
+                    style="
+                        display:block;
+                        margin-top:16px;
+                    "
+                >
+
+                    <span>Categoria de peso</span>
+
+                    <select
+                        data-creation-field="weightClass"
+                        style="${inputStyle()}"
+                    >
+
+                        ${CREATION_OPTIONS.weightClasses
+                            .map(
+                                item => `
+                                    <option
+                                        value="${escapeHTML(item)}"
+                                        ${
+                                            item ===
+                                            characterCreationState.physical.weightClass
+                                                ? "selected"
+                                                : ""
+                                        }
+                                    >
+                                        ${escapeHTML(item)}
+                                        ${
+                                            WEIGHT_CLASS_LIMITS[item]
+                                                ? ` — ${WEIGHT_CLASS_LIMITS[item]} kg`
+                                                : ""
+                                        }
+                                    </option>
+                                `
+                            )
+                            .join("")
+                        }
+
+                    </select>
+
+                </label>
+
+            </div>
+        `;
+    }
+
+
+    if (step === 4) {
+
+        return `
+            <div>
+
+                <h2>ESTILO DE LUTA</h2>
+
+                <p style="opacity:.6;">
+                    Escolha a base técnica do seu lutador.
+                </p>
+
+
+                <div
+                    style="
+                        display:grid;
+                        grid-template-columns:repeat(3,1fr);
+                        gap:10px;
+                        margin-top:20px;
+                    "
+                >
+
+                    ${CREATION_OPTIONS.fightingStyles
+                        .map(
+                            item => `
+                                <button
+                                    type="button"
+                                    data-creation-style="${escapeHTML(item)}"
+                                    class="${
+                                        item ===
+                                        characterCreationState.style.fightingStyle
+                                            ? "selected active"
+                                            : ""
+                                    }"
+                                    style="
+                                        padding:16px 10px;
+                                        border-radius:12px;
+                                        border:1px solid rgba(255,255,255,.15);
+                                        background:${
+                                            item ===
+                                            characterCreationState.style.fightingStyle
+                                                ? "#fff"
+                                                : "#151515"
+                                        };
+                                        color:${
+                                            item ===
+                                            characterCreationState.style.fightingStyle
+                                                ? "#000"
+                                                : "#fff"
+                                        };
+                                        cursor:pointer;
+                                    "
+                                >
+                                    ${escapeHTML(item)}
+                                </button>
+                            `
+                        )
+                        .join("")
+                    }
+
+                </div>
+
+
+                <label
+                    style="
+                        display:block;
+                        margin-top:20px;
+                    "
+                >
+
+                    <span>Base / Guarda</span>
+
+                    <select
+                        data-creation-field="stance"
+                        style="${inputStyle()}"
+                    >
+
+                        ${CREATION_OPTIONS.stances
+                            .map(
+                                item => `
+                                    <option
+                                        value="${escapeHTML(item)}"
+                                        ${
+                                            item ===
+                                            characterCreationState.style.stance
+                                                ? "selected"
+                                                : ""
+                                        }
+                                    >
+                                        ${escapeHTML(item)}
+                                    </option>
+                                `
+                            )
+                            .join("")
+                        }
+
+                    </select>
+
+                </label>
+
+            </div>
+        `;
+    }
+
+
+    if (step === 5) {
+
+        return `
+            <div>
+
+                <h2>PERSONALIDADE</h2>
+
+                <p style="opacity:.6;">
+                    Suas características mentais influenciam o desenvolvimento da carreira.
+                </p>
+
+
+                ${renderPersonalitySlider(
+                    "disciplina",
+                    "Disciplina",
+                    characterCreationState.personality.discipline
+                )}
+
+
+                ${renderPersonalitySlider(
+                    "confidence",
+                    "Confiança",
+                    characterCreationState.personality.confidence
+                )}
+
+
+                ${renderPersonalitySlider(
+                    "aggression",
+                    "Agressividade",
+                    characterCreationState.personality.aggression
+                )}
+
+
+                ${renderPersonalitySlider(
+                    "intelligence",
+                    "Inteligência",
+                    characterCreationState.personality.intelligence
+                )}
+
+
+                ${renderPersonalitySlider(
+                    "charisma",
+                    "Carisma",
+                    characterCreationState.personality.charisma
+                )}
+
+
+                <div
+                    style="
+                        margin-top:25px;
+                        padding:18px;
+                        border-radius:14px;
+                        background:rgba(255,255,255,.05);
+                    "
+                >
+
+                    <strong>
+                        Resumo
+                    </strong>
+
+                    <div
+                        style="
+                            margin-top:12px;
+                            line-height:1.8;
+                            opacity:.8;
+                        "
+                    >
+                        ${escapeHTML(
+                            characterCreationState.identity.firstName ||
+                            "Novo lutador"
+                        )}
+
+                        ${escapeHTML(
+                            characterCreationState.identity.lastName
+                        )}
+
+                        <br>
+
+                        ${escapeHTML(
+                            characterCreationState.style.fightingStyle
+                        )}
+
+                        ·
+
+                        ${escapeHTML(
+                            characterCreationState.style.stance
+                        )}
+
+                        <br>
+
+                        ${characterCreationState.physical.age}
+                        anos ·
+                        ${characterCreationState.physical.height}m ·
+                        ${characterCreationState.physical.weight}kg
+
+                    </div>
+
+                </div>
+
+            </div>
+        `;
+    }
+
+
+    return "";
 }
 
 
 /* ============================================================
-   API
+   PERSONALITY SLIDER
+   ============================================================ */
+
+function renderPersonalitySlider(
+    field,
+    label,
+    value
+) {
+
+    return `
+        <label
+            style="
+                display:block;
+                margin-top:20px;
+            "
+        >
+
+            <div
+                style="
+                    display:flex;
+                    justify-content:space-between;
+                    margin-bottom:8px;
+                "
+            >
+
+                <span>
+                    ${escapeHTML(label)}
+                </span>
+
+                <strong>
+                    ${value}
+                </strong>
+
+            </div>
+
+
+            <input
+                type="range"
+                min="0"
+                max="100"
+                value="${value}"
+                data-creation-personality="${escapeHTML(field)}"
+                style="
+                    width:100%;
+                "
+            >
+
+        </label>
+    `;
+}
+
+
+/* ============================================================
+   INPUT STYLE
+   ============================================================ */
+
+function inputStyle() {
+
+    return `
+        width:100%;
+        box-sizing:border-box;
+        margin-top:7px;
+        padding:13px 14px;
+        border-radius:10px;
+        border:1px solid rgba(255,255,255,.14);
+        background:#111111;
+        color:#ffffff;
+        outline:none;
+    `;
+}
+
+
+/* ============================================================
+   PUBLIC API
    ============================================================ */
 
 const characterCreationAPI = {
@@ -3840,20 +2761,20 @@ const characterCreationAPI = {
     setField:
         setCharacterField,
 
-    setIdentity:
-        setIdentity,
+    setIdentity,
 
-    setLocation:
-        setLocation,
+    setLocation,
 
     getCities:
         getCitiesForCountry,
 
-    setPhysical:
-        setPhysicalData,
+    setPhysical,
 
-    setStyle:
-        setStyleData,
+    setPhysicalData,
+
+    setStyle,
+
+    setStyleData,
 
     setPersonality,
 
@@ -3888,24 +2809,19 @@ const characterCreationAPI = {
         getCharacterCreationSummary,
 
     render:
-        renderCharacterCreation
+        renderCharacterCreation,
 
+    startGame:
+        startGameAfterCharacterCreation
 };
 
 
 /* ============================================================
-   GLOBAL
+   GLOBAL API
    ============================================================ */
 
-if (
-    typeof globalThis !==
-    "undefined"
-) {
-
-    globalThis.characterCreationAPI =
-        characterCreationAPI;
-
-}
+globalThis.characterCreationAPI =
+    characterCreationAPI;
 
 
 /* ============================================================
@@ -3913,66 +2829,32 @@ if (
    ============================================================ */
 
 export {
-
-    CHARACTER_CREATION_VERSION,
-
-    CREATION_STEPS,
-
-    CREATION_OPTIONS,
-
-    characterCreationState,
-
     characterCreationAPI,
-
     initializeCharacterCreation,
-
     resetCharacterCreation,
-
     getCharacterCreationState,
-
     getCharacterCreationData,
-
-    getCurrentCreationStep,
-
     getCreationOptions,
-
+    getCurrentCreationStep,
     setCharacterField,
-
     setIdentity,
-
     setLocation,
-
     getCitiesForCountry,
-
+    setPhysical,
     setPhysicalData,
-
+    setStyle,
     setStyleData,
-
     setPersonality,
-
     generateStartingAttributes,
-
     generateStartingPotential,
-
     generateStartingGenetics,
-
     validateCharacterCreation,
-
     validateCurrentCreationStep,
-
     finalizeCharacterCreation,
-
     goToCreationStep,
-
     nextCreationStep,
-
     previousCreationStep,
-
     getCharacterCreationSummary,
-
-    renderCharacterCreation
-
+    renderCharacterCreation,
+    startGameAfterCharacterCreation
 };
-
-
-export default characterCreationAPI;
