@@ -1,411 +1,46 @@
 /* ============================================================
    MMA LIFE DYNASTY
-   MAIN ENGINE
-   INTEGRAÇÃO CENTRAL DO JOGO
+   MAIN.JS — INTEGRAÇÃO PRINCIPAL
    ============================================================ */
-"use strict";
-/*
-    ESTE ARQUIVO É O MAESTRO DO JOGO.
-    Responsabilidades:
-    1. Criar o estado central.
-    2. Carregar os sistemas existentes.
-    3. Compartilhar o MESMO database entre todos os sistemas.
-    4. Inicializar a UI real.
-    5. Inicializar criação de personagem.
-    6. Receber o personagem criado.
-    7. Iniciar a carreira.
-    8. Entregar o controle para dashboard/UI.
-    9. Expor APIs globais para os módulos existentes.
-    10. Evitar dupla inicialização.
-*/
-/* ============================================================
-   VERSÃO
-   ============================================================ */
-const MAIN_VERSION = "MMA-LIFE-DYNASTY-CORE-2.0.0";
-/* ============================================================
-   ESTADO PRINCIPAL
-   ============================================================ */
+const MAIN_VERSION = "INTEGRATION-3.0.0";
 const mainState = {
     version: MAIN_VERSION,
-    status: "booting",
     initialized: false,
     started: false,
     careerStarted: false,
-    uiInitialized: false,
-    systemsInitialized: false,
     database: null,
-    characterCreation: null,
     ui: null,
     gameUI: null,
+    characterCreation: null,
     loadedModules: [],
     failedModules: [],
     errors: [],
-    bootTime: Date.now(),
     lastSave: null
 };
 /* ============================================================
-   DATABASE CENTRAL
+   UTILIDADES
    ============================================================ */
-function createDatabase() {
-    return {
-        meta: {
-            game:
-                "MMA Life Dynasty",
-            version:
-                "2.0.0",
-            engine:
-                "MMA Life Dynasty Engine",
-            createdAt:
-                new Date().toISOString(),
-            lastUpdated:
-                new Date().toISOString()
-        },
-        /* ====================================================
-           PLAYER
-           ==================================================== */
-        player: {
-            id: null,
-            firstName: "",
-            lastName: "",
-            fullName: "",
-            displayName: "",
-            nickname: "",
-            gender: "male",
-            age: 16,
-            country: "Brazil",
-            city: "São Paulo",
-            height: 1.75,
-            weight: 70,
-            weightClass: "lightweight",
-            fightingStyle: "MMA",
-            stance: "Ortodoxo",
-            personality: "disciplinado",
-            /* CARREIRA */
-            careerStage:
-                "amateur",
-            amateur:
-                true,
-            professional: {
-                active:
-                    false,
-                debutAge:
-                    null,
-                fights:
-                    0,
-                wins:
-                    0,
-                losses:
-                    0,
-                draws:
-                    0,
-                noContests:
-                    0
-            },
-            /* ATRIBUTOS */
-            attributes: {
-                striking: 50,
-                grappling: 50,
-                wrestling: 50,
-                submission: 50,
-                defense: 50,
-                cardio: 50,
-                strength: 50,
-                speed: 50,
-                chin: 50,
-                fightIQ: 50
-            },
-            /* POTENCIAL */
-            potential: {
-                overall: 50,
-                ceiling: 75
-            },
-            /* GENÉTICA */
-            genetics: {
-                athleticism: 50,
-                durability: 50,
-                strength: 50,
-                speed: 50,
-                cardio: 50
-            },
-            overall:
-                50,
-            confidence:
-                50,
-            morale:
-                50,
-            experience:
-                0,
-            fame:
-                0,
-            followers:
-                0,
-            reputation:
-                0,
-            health:
-                100,
-            energy:
-                100,
-            fatigue:
-                0,
-            money:
-                0
-        },
-        /* ====================================================
-           CAREER
-           ==================================================== */
-        career: {
-            stage:
-                "amateur",
-            promotion:
-                null,
-            manager:
-                null,
-            contract:
-                null,
-            ranking:
-                null,
-            reputation:
-                0,
-            record: {
-                wins:
-                    0,
-                losses:
-                    0,
-                draws:
-                    0,
-                noContests:
-                    0
-            },
-            history: []
-        },
-        /* ====================================================
-           TRAINING
-           ==================================================== */
-        training: {
-            energy:
-                100,
-            fatigue:
-                0,
-            weeklySchedule:
-                [],
-            currentCamp:
-                null,
-            sessions:
-                [],
-            improvements:
-                []
-        },
-        /* ====================================================
-           HEALTH
-           ==================================================== */
-        health: {
-            overall:
-                100,
-            injuries:
-                [],
-            recovery:
-                100,
-            medical:
-                [],
-            suspensions:
-                []
-        },
-        /* ====================================================
-           FIGHTS
-           ==================================================== */
-        fights: {
-            nextFight:
-                null,
-            currentFight:
-                null,
-            history:
-                [],
-            offers:
-                []
-        },
-        /* ====================================================
-           PROMOTIONS
-           ==================================================== */
-        promotions: {
-            current:
-                null,
-            available:
-                [],
-            offers:
-                [],
-            history:
-                []
-        },
-        /* ====================================================
-           BUSINESS
-           ==================================================== */
-        business: {
-            money:
-                0,
-            income:
-                0,
-            expenses:
-                0,
-            assets:
-                [],
-            investments:
-                [],
-            sponsors:
-                []
-        },
-        /* ====================================================
-           MEDIA
-           ==================================================== */
-        media: {
-            fame:
-                0,
-            followers:
-                0,
-            popularity:
-                0,
-            news:
-                [],
-            social:
-                []
-        },
-        /* ====================================================
-           WORLD
-           ==================================================== */
-        world: {
-            country:
-                "Brazil",
-            city:
-                "São Paulo",
-            organizations:
-                [],
-            fighters:
-                [],
-            events:
-                [],
-            rankings:
-                []
-        },
-        /* ====================================================
-           LIFE
-           ==================================================== */
-        life: {
-            relationship:
-                null,
-            spouse:
-                null,
-            children:
-                [],
-            family:
-                [],
-            lifestyle:
-                "normal"
-        },
-        /* ====================================================
-           DYNASTY
-           ==================================================== */
-        dynasty: {
-            active:
-                false,
-            generation:
-                1,
-            heir:
-                null,
-            familyHistory:
-                [],
-            legacy:
-                0
-        },
-        /* ====================================================
-           CALENDAR
-           ==================================================== */
-        calendar: {
-            year:
-                2026,
-            month:
-                1,
-            week:
-                1,
-            day:
-                1
-        },
-        /* ====================================================
-           HISTORY
-           ==================================================== */
-        history: [],
-        /* ====================================================
-           NOTIFICATIONS
-           ==================================================== */
-        notifications: [],
-        /* ====================================================
-           SETTINGS
-           ==================================================== */
-        settings: {
-            difficulty:
-                "normal",
-            language:
-                "pt-BR",
-            autosave:
-                true
-        }
-    };
-}
-/* ============================================================
-   GARANTIR ESTRUTURA
-   ============================================================ */
-function ensureDatabaseStructure(database) {
-    if (!database || typeof database !== "object") {
-        return createDatabase();
-    }
-    const fresh =
-        createDatabase();
-    function merge(target, source) {
-        Object.keys(source).forEach(key => {
-            if (
-                source[key] &&
-                typeof source[key] === "object" &&
-                !Array.isArray(source[key])
-            ) {
-                if (
-                    !target[key] ||
-                    typeof target[key] !== "object"
-                ) {
-                    target[key] = {};
-                }
-                merge(
-                    target[key],
-                    source[key]
-                );
-            } else if (
-                target[key] === undefined
-            ) {
-                target[key] =
-                    source[key];
-            }
-        });
-    }
-    merge(
-        database,
-        fresh
-    );
-    return database;
-}
-/* ============================================================
-   GLOBAL DATABASE
-   ============================================================ */
-function exposeDatabase() {
+function clone(value) {
     if (
-        typeof window === "undefined"
+        value === null ||
+        value === undefined
     ) {
-        return;
+        return value;
     }
-    window.MMA_LIFE_DATABASE =
-        mainState.database;
-    window.MMA_LIFE_STATE =
-        mainState;
+    try {
+        return structuredClone(value);
+    }
+    catch (error) {
+        try {
+            return JSON.parse(
+                JSON.stringify(value)
+            );
+        }
+        catch (fallbackError) {
+            return value;
+        }
+    }
 }
-/* ============================================================
-   ERROS
-   ============================================================ */
 function registerError(
     source,
     error
@@ -415,10 +50,7 @@ function registerError(
         message:
             error?.message ||
             String(error),
-        stack:
-            error?.stack ||
-            null,
-        timestamp:
+        time:
             new Date().toISOString()
     };
     mainState.errors.push(
@@ -429,758 +61,22 @@ function registerError(
         source,
         error
     );
+    return entry;
 }
-/* ============================================================
-   LOAD MODULE
-   ============================================================ */
-async function loadModule(
-    path
-) {
-    try {
-        const module =
-            await import(path);
-        if (
-            !mainState.loadedModules.includes(
-                path
-            )
-        ) {
-            mainState.loadedModules.push(
-                path
-            );
-        }
-        console.log(
-            "[MMA LIFE DYNASTY] ✓",
-            path
-        );
-        return {
-            success:
-                true,
-            path,
-            module
-        };
-    }
-    catch (error) {
-        if (
-            !mainState.failedModules.includes(
-                path
-            )
-        ) {
-            mainState.failedModules.push(
-                path
-            );
-        }
-        registerError(
-            path,
-            error
-        );
-        return {
-            success:
-                false,
-            path,
-            error
-        };
-    }
-}
-/* ============================================================
-   SISTEMAS DO JOGO
-   ============================================================ */
-/*
-    IMPORTANTE:
-    Não usamos mais "./ui/ui.js".
-    A UI real do projeto está dividida em:
-        ui/index.js
-        ui/gameUI.js
-        ui/bootstrap.js
-        telas individuais
-    Primeiro carregamos o ENGINE.
-    Depois carregamos a UI.
-*/
-const CORE_MODULES = [
-    "./core/time.js",
-    "./core/calendar.js",
-    "./core/events.js",
-    "./core/rng.js"
-];
-const PLAYER_MODULES = [
-    "./player/player.js",
-    "./player/attributes.js",
-    "./player/development.js"
-];
-const MMA_MODULES = [
-    "./mma/fights.js",
-    "./mma/fighters.js"
-];
-const CAREER_MODULES = [
-    "./career/career.js",
-    "./career/contracts.js",
-    "./career/managers.js"
-];
-const PROMOTION_MODULES = [
-    "./promotions/promotions.js",
-    "./promotions/rankings.js"
-];
-const LIFE_MODULES = [
-    "./life/life.js",
-    "./life/family.js"
-];
-const OTHER_MODULES = [
-    "./business/business.js",
-    "./media/media.js",
-    "./world/world.js"
-];
-/* ============================================================
-   UI MODULES
-   ============================================================ */
-const UI_MODULES = [
-    "./ui/layout.js",
-    "./ui/hud.js",
-    "./ui/mainMenu.js",
-    "./ui/screens.js",
-    "./ui/dashboard.js",
-    "./ui/careerScreen.js",
-    "./ui/trainingScreen.js",
-    "./ui/fightsScreen.js",
-    "./ui/lifeOverviewScreen.js",
-    "./ui/familyScreen.js",
-    "./ui/financesScreen.js",
-    "./ui/mediaScreen.js",
-    "./ui/dynastyScreen.js",
-    "./ui/promotionScreen.js",
-    "./ui/rankingsScreen.js",
-    "./ui/contractsScreen.js",
-    "./ui/profileScreen.js",
-    "./ui/settingsScreen.js",
-    "./ui/gameUI.js",
-    "./ui/characterCreation.js",
-    "./ui/index.js",
-    "./ui/bootstrap.js"
-];
-/* ============================================================
-   LOAD GAME SYSTEMS
-   ============================================================ */
-async function loadGameSystems() {
-    if (
-        mainState.systemsInitialized
-    ) {
-        return;
-    }
-    console.log(
-        "=========================================="
-    );
-    console.log(
-        "MMA LIFE DYNASTY"
-    );
-    console.log(
-        "Carregando sistemas..."
-    );
-    console.log(
-        "=========================================="
-    );
-    const groups = [
-        CORE_MODULES,
-        PLAYER_MODULES,
-        MMA_MODULES,
-        CAREER_MODULES,
-        PROMOTION_MODULES,
-        LIFE_MODULES,
-        OTHER_MODULES
-    ];
-    /*
-        Aqui usamos ordem.
-        Alguns sistemas dependem dos anteriores.
-        Portanto NÃO fazemos Promise.all em tudo.
-    */
-    for (
-        const group of groups
-    ) {
-        for (
-            const path of group
-        ) {
-            await loadModule(
-                path
-            );
-        }
-    }
-    /*
-        A UI vem depois do engine.
-    */
-    for (
-        const path of UI_MODULES
-    ) {
-        await loadModule(
-            path
-        );
-    }
-    mainState.systemsInitialized =
-        true;
-    console.log(
-        "=========================================="
-    );
-    console.log(
-        "Sistemas carregados:",
-        mainState.loadedModules.length
-    );
-    console.log(
-        "Sistemas com erro:",
-        mainState.failedModules.length
-    );
-    console.log(
-        "=========================================="
-    );
-}
-/* ============================================================
-   LOCALIZAR API
-   ============================================================ */
 function getGlobalAPI(
-    names
+    names = []
 ) {
-    if (
-        typeof window === "undefined"
-    ) {
-        return null;
-    }
     for (
         const name of names
     ) {
         if (
-            window[name]
+            globalThis[name]
         ) {
-            return window[name];
+            return globalThis[name];
         }
     }
     return null;
 }
-/* ============================================================
-   INITIALIZE UI
-   ============================================================ */
-async function initializeUI() {
-    if (
-        mainState.uiInitialized
-    ) {
-        return mainState.ui;
-    }
-    /*
-        ui/index.js exporta:
-            uiAPI
-        e também coloca:
-            window.uiAPI
-            window.MMA_LIFE_UI
-    */
-    const uiAPI =
-        getGlobalAPI([
-            "uiAPI",
-            "MMA_LIFE_UI"
-        ]);
-    const gameUIAPI =
-        getGlobalAPI([
-            "MMA_LIFE_GAME_UI"
-        ]);
-    if (
-        uiAPI
-    ) {
-        mainState.ui =
-            uiAPI;
-    }
-    if (
-        gameUIAPI
-    ) {
-        mainState.gameUI =
-            gameUIAPI;
-    }
-    /*
-        Se a UI principal foi carregada,
-        entregamos o database para ela.
-    */
-    if (
-        mainState.ui &&
-        typeof mainState.ui.initialize ===
-        "function"
-    ) {
-        try {
-            mainState.ui.initialize(
-                mainState.database,
-                {
-                    startAtCharacterCreation:
-                        true
-                }
-            );
-            mainState.uiInitialized =
-                true;
-        }
-        catch (error) {
-            registerError(
-                "ui.initialize",
-                error
-            );
-        }
-    }
-    /*
-        Caso ui/index.js ainda não tenha
-        colocado a API global, tentamos
-        diretamente o gameUI.
-    */
-    if (
-        !mainState.ui &&
-        mainState.gameUI &&
-        typeof mainState.gameUI.initialize ===
-        "function"
-    ) {
-        try {
-            mainState.gameUI.initialize(
-                mainState.database,
-                {
-                    render:
-                        true
-                }
-            );
-            mainState.uiInitialized =
-                true;
-        }
-        catch (error) {
-            registerError(
-                "gameUI.initialize",
-                error
-            );
-        }
-    }
-    /*
-        Character Creation
-    */
-    const characterCreationAPI =
-        getGlobalAPI([
-            "characterCreationAPI",
-            "MMA_LIFE_CHARACTER_CREATION"
-        ]);
-    if (
-        characterCreationAPI
-    ) {
-        mainState.characterCreation =
-            characterCreationAPI;
-    }
-    exposeDatabase();
-    return mainState.ui;
-}
-/* ============================================================
-   RENDER CHARACTER CREATION
-   ============================================================ */
-async function showCharacterCreation() {
-    await initializeUI();
-    /*
-        Primeira tentativa:
-        API principal da UI.
-    */
-    if (
-        mainState.ui &&
-        typeof mainState.ui.startCharacterCreation ===
-        "function"
-    ) {
-        try {
-            mainState.ui.startCharacterCreation(
-                mainState.database
-            );
-            return true;
-        }
-        catch (error) {
-            registerError(
-                "ui.startCharacterCreation",
-                error
-            );
-        }
-    }
-    /*
-        Segunda tentativa:
-        abrir diretamente pelo gameUI.
-    */
-    if (
-        mainState.gameUI &&
-        typeof mainState.gameUI.setActiveScreen ===
-        "function"
-    ) {
-        try {
-            mainState.gameUI.setActiveScreen(
-                "characterCreation"
-            );
-            return true;
-        }
-        catch (error) {
-            registerError(
-                "gameUI.characterCreation",
-                error
-            );
-        }
-    }
-    /*
-        Terceira tentativa:
-        Character Creation API.
-    */
-    if (
-        mainState.characterCreation &&
-        typeof mainState.characterCreation.render ===
-        "function"
-    ) {
-        try {
-            mainState.characterCreation.render(
-                mainState.database
-            );
-            return true;
-        }
-        catch (error) {
-            registerError(
-                "characterCreation.render",
-                error
-            );
-        }
-    }
-    return false;
-}
-/* ============================================================
-   NORMALIZAR PESO
-   ============================================================ */
-function normalizeWeightClass(
-    value
-) {
-    if (
-        !value
-    ) {
-        return "lightweight";
-    }
-    const map = {
-        "Mosca":
-            "flyweight",
-        "Galo":
-            "bantamweight",
-        "Pena":
-            "featherweight",
-        "Leve":
-            "lightweight",
-        "Meio-Médio":
-            "welterweight",
-        "Médio":
-            "middleweight",
-        "Meio-Pesado":
-            "light-heavyweight",
-        "Pesado":
-            "heavyweight"
-    };
-    if (
-        map[value]
-    ) {
-        return map[value];
-    }
-    return String(value)
-        .toLowerCase()
-        .replace(
-            /\s+/g,
-            "-"
-        );
-}
-/* ============================================================
-   CALCULAR OVR
-   ============================================================ */
-function calculateOverall(
-    attributes
-) {
-    if (
-        !attributes ||
-        typeof attributes !== "object"
-    ) {
-        return 50;
-    }
-    const values =
-        Object.values(
-            attributes
-        )
-            .map(
-                value =>
-                    Number(value)
-            )
-            .filter(
-                value =>
-                    Number.isFinite(value)
-            );
-    if (
-        !values.length
-    ) {
-        return 50;
-    }
-    const total =
-        values.reduce(
-            (
-                sum,
-                value
-            ) =>
-                sum + value,
-            0
-        );
-    return Math.round(
-        total /
-        values.length
-    );
-}
-/* ============================================================
-   APLICAR PERSONAGEM
-   ============================================================ */
-function applyCharacterToGame(
-    character
-) {
-    if (
-        !character
-    ) {
-        throw new Error(
-            "Personagem inválido."
-        );
-    }
-    mainState.database =
-        ensureDatabaseStructure(
-            mainState.database
-        );
-    const db =
-        mainState.database;
-    const player =
-        db.player;
-    /*
-        IDENTIDADE
-    */
-    player.id =
-        character.id ||
-        `player-${Date.now()}-${Math.random()
-            .toString(36)
-            .slice(2, 9)}`;
-    player.firstName =
-        character.firstName ||
-        character.name ||
-        "";
-    player.lastName =
-        character.lastName ||
-        "";
-    player.fullName =
-        character.fullName ||
-        `${player.firstName} ${player.lastName}`
-            .trim();
-    player.displayName =
-        character.displayName ||
-        character.nickname ||
-        player.fullName;
-    player.nickname =
-        character.nickname ||
-        "";
-    /*
-        DADOS PESSOAIS
-    */
-    player.gender =
-        character.gender ||
-        "male";
-    player.age =
-        Number(character.age) ||
-        16;
-    player.country =
-        character.country ||
-        "Brazil";
-    player.city =
-        character.city ||
-        "São Paulo";
-    /*
-        FÍSICO
-        Character Creation usa altura em metros.
-        Mantemos o padrão do jogo em metros.
-    */
-    player.height =
-        Number(character.height) ||
-        1.75;
-    player.weight =
-        Number(character.weight) ||
-        70;
-    player.weightClass =
-        normalizeWeightClass(
-            character.weightClass
-        );
-    /*
-        MMA
-    */
-    player.fightingStyle =
-        character.fightingStyle ||
-        character.style ||
-        "MMA";
-    player.stance =
-        character.stance ||
-        "Ortodoxo";
-    player.personality =
-        character.personality ||
-        "disciplinado";
-    /*
-        ATRIBUTOS
-    */
-    if (
-        character.attributes &&
-        typeof character.attributes ===
-        "object"
-    ) {
-        player.attributes = {
-            ...player.attributes,
-            ...character.attributes
-        };
-    }
-    /*
-        POTENCIAL
-    */
-    if (
-        character.potential &&
-        typeof character.potential ===
-        "object"
-    ) {
-        player.potential = {
-            ...player.potential,
-            ...character.potential
-        };
-    }
-    /*
-        GENÉTICA
-    */
-    if (
-        character.genetics &&
-        typeof character.genetics ===
-        "object"
-    ) {
-        player.genetics = {
-            ...player.genetics,
-            ...character.genetics
-        };
-    }
-    /*
-        OVR
-        Se o criador forneceu OVR,
-        preservamos.
-        Caso contrário calculamos.
-    */
-    player.overall =
-        Number(
-            character.overall
-        ) ||
-        calculateOverall(
-            player.attributes
-        );
-    /*
-        ESTADO INICIAL
-    */
-    player.careerStage =
-        "amateur";
-    player.amateur =
-        true;
-    player.professional = {
-        active:
-            false,
-        debutAge:
-            null,
-        fights:
-            0,
-        wins:
-            0,
-        losses:
-            0,
-        draws:
-            0,
-        noContests:
-            0
-    };
-    /*
-        CAREER DATABASE
-    */
-    db.career.stage =
-        "amateur";
-    db.career.promotion =
-        null;
-    db.career.manager =
-        null;
-    db.career.contract =
-        null;
-    db.career.ranking =
-        null;
-    db.career.record = {
-        wins:
-            0,
-        losses:
-            0,
-        draws:
-            0,
-        noContests:
-            0
-    };
-    /*
-        ENERGIA / SAÚDE
-    */
-    player.health =
-        100;
-    player.energy =
-        100;
-    player.fatigue =
-        0;
-    player.confidence =
-        50;
-    player.morale =
-        50;
-    player.experience =
-        0;
-    player.fame =
-        0;
-    player.followers =
-        0;
-    player.reputation =
-        0;
-    db.health.overall =
-        100;
-    db.health.recovery =
-        100;
-    db.training.energy =
-        100;
-    db.training.fatigue =
-        0;
-    /*
-        FINANÇAS
-    */
-    player.money =
-        0;
-    db.business.money =
-        0;
-    db.business.income =
-        0;
-    db.business.expenses =
-        0;
-    /*
-        MÍDIA
-    */
-    db.media.fame =
-        0;
-    db.media.followers =
-        0;
-    /*
-        MUNDO
-    */
-    db.world.country =
-        player.country;
-    db.world.city =
-        player.city;
-    /*
-        METADATA
-    */
-    db.meta.lastUpdated =
-        new Date().toISOString();
-    exposeDatabase();
-    /*
-        Deixa os sistemas enxergarem
-        o jogador imediatamente.
-    */
-    dispatchGameEvent(
-        "mma-life-player-updated",
-        {
-            player,
-            database: db
-        }
-    );
-    return player;
-}
-/* ============================================================
-   DISPATCH EVENT
-   ============================================================ */
 function dispatchGameEvent(
     name,
     detail = {}
@@ -1209,59 +105,1018 @@ function dispatchGameEvent(
     }
 }
 /* ============================================================
-   ESCONDER BOOT / START
+   DATABASE
    ============================================================ */
-function hideBootScreens() {
+function createDatabase() {
+    return {
+        meta: {
+            version:
+                MAIN_VERSION,
+            createdAt:
+                new Date().toISOString(),
+            lastUpdated:
+                new Date().toISOString()
+        },
+        /*
+         * IMPORTANTE:
+         * player começa NULL.
+         *
+         * Assim o sistema sabe que ainda
+         * estamos na criação do personagem.
+         */
+        player: null,
+        career: {
+            stage:
+                "amateur",
+            promotion:
+                null,
+            manager:
+                null,
+            contract:
+                null,
+            ranking:
+                null,
+            record: {
+                wins:
+                    0,
+                losses:
+                    0,
+                draws:
+                    0,
+                noContests:
+                    0
+            }
+        },
+        training: {
+            energy:
+                100,
+            maxEnergy:
+                100,
+            fatigue:
+                0,
+            week:
+                1,
+            sessions:
+                [],
+            schedule:
+                []
+        },
+        health: {
+            overall:
+                100,
+            recovery:
+                100,
+            injuries:
+                []
+        },
+        fights: {
+            current:
+                null,
+            next:
+                null,
+            history:
+                [],
+            offers:
+                []
+        },
+        fighters: [],
+        promotions: [],
+        rankings: [],
+        contracts: [],
+        life: {
+            relationships:
+                [],
+            partner:
+                null,
+            children:
+                [],
+            marriage:
+                null
+        },
+        family: {
+            members:
+                [],
+            children:
+                [],
+            inheritance:
+                null
+        },
+        dynasty: {
+            active:
+                false,
+            generation:
+                1,
+            successor:
+                null
+        },
+        business: {
+            money:
+                0,
+            income:
+                0,
+            expenses:
+                0,
+            assets:
+                []
+        },
+        media: {
+            fame:
+                0,
+            followers:
+                0,
+            news:
+                []
+        },
+        world: {
+            country:
+                "Brazil",
+            city:
+                "São Paulo",
+            year:
+                1,
+            week:
+                1
+        },
+        history: [],
+        notifications: [],
+        settings: {
+            language:
+                "pt-BR"
+        }
+    };
+}
+/* ============================================================
+   NORMALIZAÇÃO DO DATABASE
+   ============================================================ */
+function ensureDatabaseStructure(
+    database
+) {
+    const base =
+        createDatabase();
     if (
-        typeof document ===
-        "undefined"
+        !database ||
+        typeof database !==
+        "object"
+    ) {
+        return base;
+    }
+    const result = {
+        ...base,
+        ...database
+    };
+    result.meta = {
+        ...base.meta,
+        ...(database.meta || {})
+    };
+    result.career = {
+        ...base.career,
+        ...(database.career || {})
+    };
+    result.career.record = {
+        ...base.career.record,
+        ...(database.career?.record || {})
+    };
+    result.training = {
+        ...base.training,
+        ...(database.training || {})
+    };
+    result.health = {
+        ...base.health,
+        ...(database.health || {})
+    };
+    result.fights = {
+        ...base.fights,
+        ...(database.fights || {})
+    };
+    result.life = {
+        ...base.life,
+        ...(database.life || {})
+    };
+    result.family = {
+        ...base.family,
+        ...(database.family || {})
+    };
+    result.dynasty = {
+        ...base.dynasty,
+        ...(database.dynasty || {})
+    };
+    result.business = {
+        ...base.business,
+        ...(database.business || {})
+    };
+    result.media = {
+        ...base.media,
+        ...(database.media || {})
+    };
+    result.world = {
+        ...base.world,
+        ...(database.world || {})
+    };
+    result.settings = {
+        ...base.settings,
+        ...(database.settings || {})
+    };
+    if (
+        !Array.isArray(
+            result.history
+        )
+    ) {
+        result.history = [];
+    }
+    if (
+        !Array.isArray(
+            result.notifications
+        )
+    ) {
+        result.notifications = [];
+    }
+    if (
+        !Array.isArray(
+            result.fighters
+        )
+    ) {
+        result.fighters = [];
+    }
+    if (
+        !Array.isArray(
+            result.promotions
+        )
+    ) {
+        result.promotions = [];
+    }
+    if (
+        !Array.isArray(
+            result.rankings
+        )
+    ) {
+        result.rankings = [];
+    }
+    if (
+        !Array.isArray(
+            result.contracts
+        )
+    ) {
+        result.contracts = [];
+    }
+    return result;
+}
+/* ============================================================
+   EXPOR DATABASE GLOBALMENTE
+   ============================================================ */
+function exposeDatabase() {
+    if (
+        !mainState.database
     ) {
         return;
     }
-    const selectors = [
-        "#boot-screen",
-        "#bootScreen",
-        "#loading-screen",
-        "#loadingScreen",
-        "#start-screen",
-        "#startScreen",
-        ".boot-screen",
-        ".loading-screen",
-        ".start-screen",
-        "[data-boot-screen]",
-        "[data-loading-screen]",
-        "[data-start-screen]"
-    ];
-    selectors.forEach(
-        selector => {
-            document
-                .querySelectorAll(selector)
-                .forEach(element => {
-                    element.style.display =
-                        "none";
-                    element.style.pointerEvents =
-                        "none";
-                    element.setAttribute(
-                        "aria-hidden",
-                        "true"
-                    );
-                });
+    /*
+     * Mantém vários nomes porque
+     * os módulos antigos podem procurar
+     * por nomes diferentes.
+     */
+    globalThis.MMA_LIFE_DATABASE =
+        mainState.database;
+    globalThis.mmaLifeDatabase =
+        mainState.database;
+    globalThis.gameDatabase =
+        mainState.database;
+    globalThis.database =
+        mainState.database;
+    globalThis.MMA_LIFE_STATE =
+        mainState.database;
+    globalThis.mmaLifeState =
+        mainState.database;
+    /*
+     * Algumas partes do jogo usam
+     * "db".
+     */
+    globalThis.db =
+        mainState.database;
+}
+/* ============================================================
+   CARREGAMENTO DE MÓDULOS
+   ============================================================ */
+async function loadModule(
+    path
+) {
+    try {
+        await import(
+            path
+        );
+        if (
+            !mainState.loadedModules.includes(
+                path
+            )
+        ) {
+            mainState.loadedModules.push(
+                path
+            );
+        }
+        console.log(
+            "[MMA LIFE DYNASTY] Módulo carregado:",
+            path
+        );
+        return true;
+    }
+    catch (error) {
+        if (
+            !mainState.failedModules.includes(
+                path
+            )
+        ) {
+            mainState.failedModules.push(
+                path
+            );
+        }
+        registerError(
+            `module:${path}`,
+            error
+        );
+        return false;
+    }
+}
+/* ============================================================
+   MÓDULOS DO ENGINE
+   ============================================================ */
+const ENGINE_MODULES = [
+    "./core/time.js",
+    "./core/calendar.js",
+    "./core/events.js",
+    "./core/rng.js",
+    "./player/player.js",
+    "./player/attributes.js",
+    "./player/development.js",
+    "./training/training.js",
+    "./mma/fights.js",
+    "./mma/fighters.js",
+    "./career/career.js",
+    "./career/contracts.js",
+    "./career/managers.js",
+    "./promotions/promotions.js",
+    "./promotions/rankings.js",
+    "./life/life.js",
+    "./life/family.js",
+    "./business/business.js",
+    "./media/media.js",
+    "./world/world.js"
+];
+/* ============================================================
+   MÓDULOS DA UI
+   ============================================================ */
+const UI_MODULES = [
+    "./ui/gameUI.js",
+    "./ui/characterCreation.js",
+    "./ui/index.js",
+    "./ui/bootstrap.js"
+];
+/* ============================================================
+   CARREGAR ENGINE
+   ============================================================ */
+async function loadEngineModules() {
+    for (
+        const modulePath
+        of ENGINE_MODULES
+    ) {
+        await loadModule(
+            modulePath
+        );
+    }
+}
+/* ============================================================
+   CARREGAR UI
+   ============================================================ */
+async function loadUIModules() {
+    for (
+        const modulePath
+        of UI_MODULES
+    ) {
+        await loadModule(
+            modulePath
+        );
+    }
+}
+/* ============================================================
+   LOCALIZAR UI
+   ============================================================ */
+function resolveUIAPIs() {
+    mainState.gameUI =
+        getGlobalAPI([
+            "gameUIAPI",
+            "MMA_LIFE_GAME_UI"
+        ]);
+    mainState.characterCreation =
+        getGlobalAPI([
+            "characterCreationAPI",
+            "MMA_LIFE_CHARACTER_CREATION"
+        ]);
+    mainState.ui =
+        getGlobalAPI([
+            "uiAPI",
+            "MMA_LIFE_UI"
+        ]);
+}
+/* ============================================================
+   PREPARAR UI
+   ============================================================ */
+async function initializeUI() {
+    resolveUIAPIs();
+    /*
+     * Primeiro tentamos o bootstrap,
+     * pois ele é o orquestrador da UI.
+     */
+    const bootstrapAPI =
+        getGlobalAPI([
+            "bootstrapAPI",
+            "MMA_LIFE_UI_BOOTSTRAP"
+        ]);
+    if (
+        bootstrapAPI
+    ) {
+        try {
+            if (
+                typeof bootstrapAPI.initialize ===
+                "function"
+            ) {
+                await bootstrapAPI.initialize(
+                    mainState.database
+                );
+                resolveUIAPIs();
+                return true;
+            }
+            if (
+                typeof bootstrapAPI.init ===
+                "function"
+            ) {
+                await bootstrapAPI.init(
+                    mainState.database
+                );
+                resolveUIAPIs();
+                return true;
+            }
+        }
+        catch (error) {
+            registerError(
+                "bootstrap.initialize",
+                error
+            );
+        }
+    }
+    /*
+     * Caso o bootstrap não tenha
+     * inicializado, usamos uiAPI.
+     */
+    resolveUIAPIs();
+    if (
+        mainState.ui
+    ) {
+        try {
+            if (
+                typeof mainState.ui.initialize ===
+                "function"
+            ) {
+                await mainState.ui.initialize(
+                    mainState.database,
+                    {
+                        startAtCharacterCreation:
+                            !mainState.database.player
+                    }
+                );
+                return true;
+            }
+        }
+        catch (error) {
+            registerError(
+                "ui.initialize",
+                error
+            );
+        }
+    }
+    /*
+     * Último fallback:
+     * gameUI diretamente.
+     */
+    if (
+        mainState.gameUI
+    ) {
+        try {
+            if (
+                typeof mainState.gameUI.initialize ===
+                "function"
+            ) {
+                await mainState.gameUI.initialize(
+                    mainState.database,
+                    {
+                        render:
+                            true
+                    }
+                );
+                return true;
+            }
+        }
+        catch (error) {
+            registerError(
+                "gameUI.initialize",
+                error
+            );
+        }
+    }
+    return false;
+}
+/* ============================================================
+   INICIALIZAÇÃO
+   ============================================================ */
+async function initialize() {
+    if (
+        mainState.initialized
+    ) {
+        return {
+            success:
+                true,
+            database:
+                mainState.database
+        };
+    }
+    console.log(
+        "[MMA LIFE DYNASTY] Inicializando..."
+    );
+    mainState.database =
+        ensureDatabaseStructure(
+            mainState.database
+        );
+    exposeDatabase();
+    /*
+     * Engine primeiro.
+     */
+    await loadEngineModules();
+    /*
+     * UI depois.
+     */
+    await loadUIModules();
+    /*
+     * Localiza as APIs.
+     */
+    resolveUIAPIs();
+    /*
+     * Inicializa a UI somente agora.
+     */
+    await initializeUI();
+    /*
+     * Conecta o database novamente
+     * após a inicialização.
+     */
+    exposeDatabase();
+    mainState.initialized =
+        true;
+    mainState.status =
+        "ready";
+    dispatchGameEvent(
+        "mma-life-initialized",
+        {
+            database:
+                mainState.database,
+            main:
+                mainState
         }
     );
+    console.log(
+        "[MMA LIFE DYNASTY] Inicialização concluída."
+    );
+    return {
+        success:
+            true,
+        database:
+            mainState.database
+    };
+}
+/* ============================================================
+   CÁLCULO DE OVR
+   ============================================================ */
+function calculateOverall(
+    attributes
+) {
+    if (
+        !attributes ||
+        typeof attributes !==
+        "object"
+    ) {
+        return 50;
+    }
+    const values =
+        Object.values(
+            attributes
+        )
+            .map(
+                value =>
+                    Number(value)
+            )
+            .filter(
+                value =>
+                    Number.isFinite(value)
+            );
+    if (
+        values.length === 0
+    ) {
+        return 50;
+    }
+    return Math.round(
+        values.reduce(
+            (
+                total,
+                value
+            ) =>
+                total + value,
+            0
+        ) /
+        values.length
+    );
+}
+/* ============================================================
+   CATEGORIA DE PESO
+   ============================================================ */
+function normalizeWeightClass(
+    value
+) {
+    const map = {
+        "Mosca":
+            "flyweight",
+        "Galo":
+            "bantamweight",
+        "Pena":
+            "featherweight",
+        "Leve":
+            "lightweight",
+        "Meio-Médio":
+            "welterweight",
+        "Médio":
+            "middleweight",
+        "Meio-Pesado":
+            "light-heavyweight",
+        "Pesado":
+            "heavyweight"
+    };
+    if (
+        map[value]
+    ) {
+        return map[value];
+    }
+    if (
+        typeof value ===
+        "string"
+    ) {
+        return value
+            .toLowerCase()
+            .trim()
+            .replace(
+                /\s+/g,
+                "-"
+            );
+    }
+    return "lightweight";
+}
+/* ============================================================
+   APLICAR PERSONAGEM
+   ============================================================ */
+function applyCharacterToGame(
+    character
+) {
+    if (
+        !character ||
+        typeof character !==
+        "object"
+    ) {
+        throw new Error(
+            "Personagem inválido."
+        );
+    }
+    const db =
+        mainState.database;
+    if (
+        !db
+    ) {
+        throw new Error(
+            "Database não inicializado."
+        );
+    }
+    const player = {};
     /*
-        O container principal deve continuar
-        clicável.
-    */
-    const app =
-        document.querySelector(
-            "#app"
+     * IDENTIDADE
+     */
+    player.id =
+        character.id ||
+        `player-${Date.now()}`;
+    player.firstName =
+        character.firstName ||
+        character.name ||
+        "";
+    player.lastName =
+        character.lastName ||
+        "";
+    player.fullName =
+        character.fullName ||
+        `${player.firstName} ${player.lastName}`
+            .trim();
+    player.displayName =
+        character.displayName ||
+        character.nickname ||
+        player.fullName;
+    player.nickname =
+        character.nickname ||
+        "";
+    /*
+     * DADOS PESSOAIS
+     */
+    player.gender =
+        character.gender ||
+        "male";
+    player.age =
+        Number(
+            character.age
+        ) || 16;
+    player.country =
+        character.country ||
+        "Brazil";
+    player.city =
+        character.city ||
+        "São Paulo";
+    /*
+     * FÍSICO
+     */
+    player.height =
+        Number(
+            character.height
+        ) || 1.75;
+    player.weight =
+        Number(
+            character.weight
+        ) || 70;
+    player.weightClass =
+        normalizeWeightClass(
+            character.weightClass
+        );
+    /*
+     * ESTILO
+     */
+    player.fightingStyle =
+        character.fightingStyle ||
+        character.style ||
+        "MMA";
+    player.stance =
+        character.stance ||
+        "Ortodoxo";
+    /*
+     * PERSONALIDADE
+     */
+    player.personality =
+        character.personality ||
+        "disciplinado";
+    /*
+     * ATRIBUTOS
+     */
+    player.attributes = {
+        ...(character.attributes || {})
+    };
+    if (
+        Object.keys(
+            player.attributes
+        ).length === 0
+    ) {
+        player.attributes = {
+            striking:
+                50,
+            grappling:
+                50,
+            wrestling:
+                50,
+            cardio:
+                50,
+            strength:
+                50,
+            speed:
+                50,
+            defense:
+                50,
+            technique:
+                50
+        };
+    }
+    /*
+     * OVR
+     */
+    player.overall =
+        Number(
+            character.overall
+        ) ||
+        calculateOverall(
+            player.attributes
+        );
+    /*
+     * POTENCIAL
+     */
+    const potentialValue =
+        Number(
+            character.potential
         );
     if (
-        app
+        Number.isFinite(
+            potentialValue
+        )
     ) {
-        app.style.pointerEvents =
-            "auto";
+        player.potential = {
+            overall:
+                player.overall,
+            ceiling:
+                potentialValue
+        };
     }
+    else if (
+        character.potential &&
+        typeof character.potential ===
+        "object"
+    ) {
+        player.potential =
+            clone(
+                character.potential
+            );
+    }
+    else {
+        player.potential = {
+            overall:
+                player.overall,
+            ceiling:
+                Math.min(
+                    99,
+                    player.overall + 30
+                )
+        };
+    }
+    /*
+     * GENÉTICA
+     */
+    player.genetics =
+        character.genetics &&
+        typeof character.genetics ===
+        "object"
+            ? clone(
+                character.genetics
+            )
+            : {};
+    /*
+     * CARREIRA
+     *
+     * Menor de 18:
+     * AMADOR.
+     *
+     * 18+:
+     * PROFISSIONAL REGIONAL.
+     */
+    if (
+        player.age >= 18
+    ) {
+        player.careerStage =
+            "regional";
+        player.amateur =
+            false;
+        player.professional = {
+            active:
+                true,
+            debutAge:
+                player.age,
+            fights:
+                0,
+            wins:
+                0,
+            losses:
+                0,
+            draws:
+                0,
+            noContests:
+                0
+        };
+        db.career.stage =
+            "regional";
+    }
+    else {
+        player.careerStage =
+            "amateur";
+        player.amateur =
+            true;
+        player.professional = {
+            active:
+                false,
+            debutAge:
+                null,
+            fights:
+                0,
+            wins:
+                0,
+            losses:
+                0,
+            draws:
+                0,
+            noContests:
+                0
+        };
+        db.career.stage =
+            "amateur";
+    }
+    /*
+     * ESTADO
+     */
+    player.health =
+        100;
+    player.energy =
+        100;
+    player.fatigue =
+        0;
+    player.confidence =
+        50;
+    player.morale =
+        50;
+    player.experience =
+        0;
+    player.fame =
+        0;
+    player.followers =
+        0;
+    player.reputation =
+        0;
+    player.money =
+        0;
+    /*
+     * DATABASE
+     */
+    db.player =
+        player;
+    db.career.promotion =
+        null;
+    db.career.manager =
+        null;
+    db.career.contract =
+        null;
+    db.career.ranking =
+        null;
+    db.career.record = {
+        wins:
+            0,
+        losses:
+            0,
+        draws:
+            0,
+        noContests:
+            0
+    };
+    db.health.overall =
+        100;
+    db.health.recovery =
+        100;
+    db.training.energy =
+        100;
+    db.training.fatigue =
+        0;
+    db.business.money =
+        0;
+    db.business.income =
+        0;
+    db.business.expenses =
+        0;
+    db.media.fame =
+        0;
+    db.media.followers =
+        0;
+    db.world.country =
+        player.country;
+    db.world.city =
+        player.city;
+    db.meta.lastUpdated =
+        new Date().toISOString();
+    db.history.push({
+        type:
+            "character-created",
+        date:
+            new Date().toISOString(),
+        description:
+            "Novo lutador criado."
+    });
+    db.notifications.push({
+        type:
+            "system",
+        message:
+            "Sua carreira começou.",
+        date:
+            new Date().toISOString(),
+        read:
+            false
+    });
+    exposeDatabase();
+    dispatchGameEvent(
+        "mma-life-player-updated",
+        {
+            player,
+            database:
+                db
+        }
+    );
+    return player;
 }
 /* ============================================================
    SALVAR
@@ -1273,13 +1128,11 @@ function saveGame() {
         return false;
     }
     try {
-        const serialized =
-            JSON.stringify(
-                mainState.database
-            );
         localStorage.setItem(
             "mma-life-dynasty-save",
-            serialized
+            JSON.stringify(
+                mainState.database
+            )
         );
         mainState.lastSave =
             Date.now();
@@ -1294,7 +1147,7 @@ function saveGame() {
     }
 }
 /* ============================================================
-   CARREGAR SAVE
+   CARREGAR
    ============================================================ */
 function loadGame() {
     try {
@@ -1316,6 +1169,13 @@ function loadGame() {
                 saved
             );
         exposeDatabase();
+        dispatchGameEvent(
+            "mma-life-game-loaded",
+            {
+                database:
+                    mainState.database
+            }
+        );
         return mainState.database;
     }
     catch (error) {
@@ -1327,14 +1187,128 @@ function loadGame() {
     }
 }
 /* ============================================================
+   ATUALIZAR UI COM DATABASE
+   ============================================================ */
+function connectDatabaseToUI() {
+    resolveUIAPIs();
+    if (
+        mainState.ui
+    ) {
+        try {
+            if (
+                typeof mainState.ui.setDatabase ===
+                "function"
+            ) {
+                mainState.ui.setDatabase(
+                    mainState.database
+                );
+            }
+        }
+        catch (error) {
+            registerError(
+                "ui.setDatabase",
+                error
+            );
+        }
+    }
+    if (
+        mainState.gameUI
+    ) {
+        try {
+            if (
+                typeof mainState.gameUI.setDatabase ===
+                "function"
+            ) {
+                mainState.gameUI.setDatabase(
+                    mainState.database
+                );
+            }
+        }
+        catch (error) {
+            registerError(
+                "gameUI.setDatabase",
+                error
+            );
+        }
+    }
+}
+/* ============================================================
+   DASHBOARD
+   ============================================================ */
+async function showDashboard() {
+    connectDatabaseToUI();
+    resolveUIAPIs();
+    /*
+     * ui/index.js
+     */
+    if (
+        mainState.ui
+    ) {
+        try {
+            if (
+                typeof mainState.ui.openScreen ===
+                "function"
+            ) {
+                return await mainState.ui.openScreen(
+                    "dashboard"
+                );
+            }
+            if (
+                typeof mainState.ui.navigate ===
+                "function"
+            ) {
+                return await mainState.ui.navigate(
+                    "dashboard"
+                );
+            }
+            if (
+                typeof mainState.ui.openDashboard ===
+                "function"
+            ) {
+                return await mainState.ui.openDashboard();
+            }
+        }
+        catch (error) {
+            registerError(
+                "showDashboard.ui",
+                error
+            );
+        }
+    }
+    /*
+     * gameUI.js
+     */
+    if (
+        mainState.gameUI
+    ) {
+        try {
+            if (
+                typeof mainState.gameUI.setActiveScreen ===
+                "function"
+            ) {
+                return await mainState.gameUI.setActiveScreen(
+                    "dashboard"
+                );
+            }
+        }
+        catch (error) {
+            registerError(
+                "showDashboard.gameUI",
+                error
+            );
+        }
+    }
+    return false;
+}
+/* ============================================================
    START CAREER
    ============================================================ */
 async function startCareer(
     character
 ) {
     /*
-        Evita iniciar duas vezes.
-    */
+     * Evita duplo início.
+     */
     if (
         mainState.careerStarted
     ) {
@@ -1344,39 +1318,41 @@ async function startCareer(
             alreadyStarted:
                 true,
             player:
-                mainState.database.player
+                mainState.database?.player,
+            database:
+                mainState.database
         };
-    }
-    if (
-        !mainState.initialized
-    ) {
-        await initialize();
     }
     try {
         /*
-            1. Aplica personagem
-        */
-        applyCharacterToGame(
-            character
-        );
+         * Garante inicialização.
+         */
+        if (
+            !mainState.initialized
+        ) {
+            await initialize();
+        }
         /*
-            2. Estado do jogo
-        */
+         * Aplica personagem.
+         */
+        const player =
+            applyCharacterToGame(
+                character
+            );
+        /*
+         * Estado principal.
+         */
         mainState.started =
             true;
         mainState.careerStarted =
             true;
         mainState.status =
             "started";
-        /*
-            3. Expõe tudo
-        */
         exposeDatabase();
         /*
-            4. Permite que player.js
-               faça sua inicialização
-               caso tenha API.
-        */
+         * Atualiza player.js
+         * se ele possuir API.
+         */
         const playerAPI =
             getGlobalAPI([
                 "playerAPI",
@@ -1411,46 +1387,41 @@ async function startCareer(
             }
         }
         /*
-            5. Eventos
-        */
+         * Conecta o database à UI.
+         */
+        connectDatabaseToUI();
+        /*
+         * Eventos.
+         */
         dispatchGameEvent(
             "mma-life-career-started",
             {
-                player:
-                    mainState.database.player,
+                player,
                 database:
                     mainState.database,
                 state:
                     mainState.database
             }
         );
+        dispatchGameEvent(
+            "mma-life-player-updated",
+            {
+                player,
+                database:
+                    mainState.database
+            }
+        );
         /*
-            6. Salva
-        */
+         * Salva.
+         */
         saveGame();
         /*
-            7. Atualiza UI
-        */
-        if (
-            mainState.ui &&
-            typeof mainState.ui.setDatabase ===
-            "function"
-        ) {
-            mainState.ui.setDatabase(
-                mainState.database
-            );
-        }
-        /*
-            8. Dashboard real
-        */
+         * Dashboard.
+         */
         await showDashboard();
         /*
-            9. Esconde telas de boot
-        */
-        hideBootScreens();
-        /*
-            10. Atualiza
-        */
+         * Eventos finais.
+         */
         dispatchGameEvent(
             "mma-life-game-started",
             {
@@ -1459,6 +1430,10 @@ async function startCareer(
                 database:
                     mainState.database
             }
+        );
+        console.log(
+            "[MMA LIFE DYNASTY] CARREIRA INICIADA",
+            mainState.database.player
         );
         return {
             success:
@@ -1492,11 +1467,6 @@ async function startCareer(
 /* ============================================================
    START NEW GAME
    ============================================================ */
-/*
-    Alguns módulos podem procurar
-    por startNewGame.
-    Portanto mantemos os dois nomes.
-*/
 async function startNewGame(
     character
 ) {
@@ -1505,524 +1475,224 @@ async function startNewGame(
     );
 }
 /* ============================================================
-   DASHBOARD
+   EVENTO DA CRIAÇÃO DO PERSONAGEM
    ============================================================ */
-async function showDashboard() {
-    /*
-        UI principal
-    */
+function bindCharacterCreatedEvent() {
     if (
-        mainState.ui &&
-        typeof mainState.ui.openDashboard ===
-        "function"
+        typeof document ===
+        "undefined"
     ) {
-        try {
-            const result =
-                mainState.ui.openDashboard();
-            if (
-                mainState.ui.refresh
-            ) {
-                try {
-                    mainState.ui.refresh();
-                }
-                catch (error) {
-                    registerError(
-                        "ui.refresh.dashboard",
-                        error
-                    );
-                }
-            }
-            return result;
-        }
-        catch (error) {
-            registerError(
-                "ui.openDashboard",
-                error
-            );
-        }
-    }
-    /*
-        gameUI
-    */
-    if (
-        mainState.gameUI &&
-        typeof mainState.gameUI.setActiveScreen ===
-        "function"
-    ) {
-        try {
-            return mainState.gameUI.setActiveScreen(
-                "dashboard"
-            );
-        }
-        catch (error) {
-            registerError(
-                "gameUI.dashboard",
-                error
-            );
-        }
-    }
-    return false;
-}
-/* ============================================================
-   NAVEGAÇÃO
-   ============================================================ */
-function openScreen(
-    screen,
-    options = {}
-) {
-    if (
-        !screen
-    ) {
-        return false;
-    }
-    /*
-        UI principal
-    */
-    if (
-        mainState.ui &&
-        typeof mainState.ui.openScreen ===
-        "function"
-    ) {
-        try {
-            const result =
-                mainState.ui.openScreen(
-                    screen,
-                    options
-                );
-            if (
-                mainState.ui.refresh
-            ) {
-                try {
-                    mainState.ui.refresh(
-                        options
-                    );
-                }
-                catch (error) {
-                    registerError(
-                        `ui.refresh.${screen}`,
-                        error
-                    );
-                }
-            }
-            return result;
-        }
-        catch (error) {
-            registerError(
-                `ui.openScreen.${screen}`,
-                error
-            );
-        }
-    }
-    /*
-        gameUI
-    */
-    if (
-        mainState.gameUI &&
-        typeof mainState.gameUI.setActiveScreen ===
-        "function"
-    ) {
-        try {
-            return mainState.gameUI.setActiveScreen(
-                screen,
-                options
-            );
-        }
-        catch (error) {
-            registerError(
-                `gameUI.openScreen.${screen}`,
-                error
-            );
-        }
-    }
-    return false;
-}
-/* ============================================================
-   ATALHOS DE NAVEGAÇÃO
-   ============================================================ */
-function openCareer() {
-    return openScreen(
-        "career"
-    );
-}
-function openTraining() {
-    return openScreen(
-        "training"
-    );
-}
-function openFights() {
-    return openScreen(
-        "fights"
-    );
-}
-function openLife() {
-    return openScreen(
-        "life"
-    );
-}
-function openFamily() {
-    return openScreen(
-        "family"
-    );
-}
-function openFinances() {
-    return openScreen(
-        "finances"
-    );
-}
-function openMedia() {
-    return openScreen(
-        "media"
-    );
-}
-function openDynasty() {
-    return openScreen(
-        "dynasty"
-    );
-}
-function openPromotions() {
-    return openScreen(
-        "promotion"
-    );
-}
-function openRankings() {
-    return openScreen(
-        "rankings"
-    );
-}
-function openContracts() {
-    return openScreen(
-        "contracts"
-    );
-}
-function openProfile() {
-    return openScreen(
-        "profile"
-    );
-}
-function openSettings() {
-    return openScreen(
-        "settings"
-    );
-}
-/* ============================================================
-   EVENTO: PERSONAGEM CRIADO
-   ============================================================ */
-let characterEventHandled =
-    false;
-async function handleCharacterCreated(
-    event
-) {
-    const character =
-        event?.detail?.character;
-    if (
-        !character
-    ) {
-        console.warn(
-            "[MMA LIFE DYNASTY] " +
-            "Evento de personagem sem character."
-        );
         return;
     }
     /*
-        Evita duplicidade.
-    */
+     * Evita registrar o listener duas vezes.
+     */
     if (
-        characterEventHandled ||
-        mainState.careerStarted
+        mainState.characterCreatedListener
     ) {
         return;
     }
-    characterEventHandled =
+    mainState.characterCreatedListener =
         true;
-    console.log(
-        "[MMA LIFE DYNASTY] " +
-        "Personagem recebido."
+    document.addEventListener(
+        "mma-life-character-created",
+        async event => {
+            try {
+                const character =
+                    event?.detail?.character;
+                if (
+                    !character
+                ) {
+                    throw new Error(
+                        "Evento de personagem criado sem personagem."
+                    );
+                }
+                /*
+                 * IMPORTANTE:
+                 *
+                 * characterCreation.js dispara
+                 * este evento ANTES de chamar
+                 * startGameAfterCharacterCreation().
+                 *
+                 * Portanto o main.js assume
+                 * o controle aqui.
+                 */
+                const result =
+                    await startCareer(
+                        character
+                    );
+                if (
+                    !result.success
+                ) {
+                    console.error(
+                        "[MMA LIFE DYNASTY] Falha ao iniciar:",
+                        result.error
+                    );
+                    return;
+                }
+                hideStartScreens();
+            }
+            catch (error) {
+                registerError(
+                    "mma-life-character-created",
+                    error
+                );
+            }
+        }
     );
-    try {
-        await startCareer(
-            character
-        );
-    }
-    catch (error) {
-        characterEventHandled =
-            false;
-        registerError(
-            "mma-life-character-created",
-            error
-        );
-    }
 }
 /* ============================================================
-   INICIALIZAÇÃO
+   ESCONDER TELAS DE BOOT
    ============================================================ */
-async function initialize() {
+function hideStartScreens() {
     if (
-        mainState.initialized
+        typeof document ===
+        "undefined"
     ) {
-        return mainState;
+        return;
     }
-    mainState.status =
-        "booting";
-    console.log(
-        "=========================================="
+    const selectors = [
+        "#boot-screen",
+        "#bootScreen",
+        "#loading-screen",
+        "#loadingScreen",
+        "#start-screen",
+        "#startScreen",
+        ".boot-screen",
+        ".loading-screen",
+        ".start-screen",
+        "[data-boot-screen]",
+        "[data-loading-screen]",
+        "[data-start-screen]"
+    ];
+    selectors.forEach(
+        selector => {
+            document
+                .querySelectorAll(
+                    selector
+                )
+                .forEach(
+                    element => {
+                        element.style.display =
+                            "none";
+                        element.style.pointerEvents =
+                            "none";
+                        element.setAttribute(
+                            "aria-hidden",
+                            "true"
+                        );
+                    }
+                );
+        }
     );
-    console.log(
-        "🥊 MMA LIFE DYNASTY"
-    );
-    console.log(
-        "ENGINE",
-        MAIN_VERSION
-    );
-    console.log(
-        "=========================================="
-    );
+}
+/* ============================================================
+   EXPOSIÇÃO GLOBAL
+   ============================================================ */
+function exposeMainAPI() {
+    const api = {
+        version:
+            MAIN_VERSION,
+        state:
+            mainState,
+        initialize,
+        init:
+            initialize,
+        startCareer,
+        startNewGame,
+        applyCharacterToGame,
+        showDashboard,
+        saveGame,
+        loadGame,
+        getDatabase() {
+            return mainState.database;
+        },
+        setDatabase(
+            database
+        ) {
+            mainState.database =
+                ensureDatabaseStructure(
+                    database
+                );
+            exposeDatabase();
+            connectDatabaseToUI();
+            return mainState.database;
+        },
+        getState() {
+            return mainState;
+        },
+        getErrors() {
+            return [
+                ...mainState.errors
+            ];
+        },
+        getLoadedModules() {
+            return [
+                ...mainState.loadedModules
+            ];
+        },
+        getFailedModules() {
+            return [
+                ...mainState.failedModules
+            ];
+        }
+    };
+    globalThis.mainAPI =
+        api;
+    globalThis.MMA_LIFE_MAIN =
+        api;
+    globalThis.MMA_LIFE_DYNASTY =
+        api;
+    globalThis.mmaLifeMain =
+        api;
+    return api;
+}
+/* ============================================================
+   BOOT
+   ============================================================ */
+async function boot() {
+    exposeMainAPI();
+    bindCharacterCreatedEvent();
     /*
-        DATABASE
-    */
+     * Tenta carregar save apenas se
+     * existir.
+     *
+     * Se não existir, player continua NULL
+     * e a criação de personagem aparece.
+     */
+    const saved =
+        loadGame();
     if (
-        !mainState.database
+        saved &&
+        saved.player
     ) {
+        mainState.database =
+            saved;
+        mainState.started =
+            true;
+        mainState.careerStarted =
+            true;
+    }
+    else {
         mainState.database =
             createDatabase();
     }
-    mainState.database =
-        ensureDatabaseStructure(
-            mainState.database
-        );
     exposeDatabase();
+    await initialize();
     /*
-        SISTEMAS
-    */
-    await loadGameSystems();
-    /*
-        UI
-    */
-    await initializeUI();
-    /*
-        EVENTOS
-    */
+     * Se já existe personagem salvo,
+     * abre Dashboard.
+     *
+     * Se não existe, deixa a UI
+     * mostrar a criação.
+     */
     if (
-        typeof document !==
-        "undefined"
+        mainState.database.player
     ) {
-        /*
-            Não adicionamos o listener
-            mais de uma vez.
-        */
-        if (
-            !document.__mmaLifeCharacterListener
-        ) {
-            document.addEventListener(
-                "mma-life-character-created",
-                handleCharacterCreated
-            );
-            document.__mmaLifeCharacterListener =
-                true;
-        }
+        await showDashboard();
+        hideStartScreens();
     }
-    mainState.initialized =
-        true;
-    mainState.status =
-        "initialized";
-    /*
-        Mostra criação
-        somente se ainda não
-        existe personagem iniciado.
-    */
-    if (
-        !mainState.careerStarted
-    ) {
-        await showCharacterCreation();
-    }
-    console.log(
-        "=========================================="
-    );
-    console.log(
-        "MMA LIFE DYNASTY pronto."
-    );
-    console.log(
-        "=========================================="
-    );
-    dispatchGameEvent(
-        "mma-life-engine-ready",
-        {
-            state:
-                mainState,
-            database:
-                mainState.database
-        }
-    );
     return mainState;
-}
-/* ============================================================
-   RESET
-   ============================================================ */
-function resetGame() {
-    mainState.status =
-        "initialized";
-    mainState.started =
-        false;
-    mainState.careerStarted =
-        false;
-    mainState.database =
-        createDatabase();
-    characterEventHandled =
-        false;
-    exposeDatabase();
-    dispatchGameEvent(
-        "mma-life-game-reset",
-        {
-            database:
-                mainState.database
-        }
-    );
-    showCharacterCreation();
-    return mainState.database;
-}
-/* ============================================================
-   GET STATE
-   ============================================================ */
-function getState() {
-    return {
-        version:
-            mainState.version,
-        status:
-            mainState.status,
-        initialized:
-            mainState.initialized,
-        started:
-            mainState.started,
-        careerStarted:
-            mainState.careerStarted,
-        uiInitialized:
-            mainState.uiInitialized,
-        systemsInitialized:
-            mainState.systemsInitialized,
-        loadedModules:
-            [...mainState.loadedModules],
-        failedModules:
-            [...mainState.failedModules],
-        errors:
-            [...mainState.errors],
-        database:
-            mainState.database
-    };
-}
-/* ============================================================
-   VALIDATE
-   ============================================================ */
-function validateGame() {
-    const errors = [];
-    if (
-        !mainState.database
-    ) {
-        errors.push(
-            "Database não existe."
-        );
-    }
-    if (
-        !mainState.database?.player
-    ) {
-        errors.push(
-            "Player não existe."
-        );
-    }
-    if (
-        !mainState.uiInitialized
-    ) {
-        errors.push(
-            "UI não inicializada."
-        );
-    }
-    return {
-        valid:
-            errors.length === 0,
-        errors
-    };
-}
-/* ============================================================
-   API PRINCIPAL
-   ============================================================ */
-const gameAPI = {
-    version:
-        MAIN_VERSION,
-    state:
-        mainState,
-    initialize,
-    init:
-        initialize,
-    startCareer,
-    startNewGame,
-    applyCharacterToGame,
-    showDashboard,
-    openScreen,
-    openCareer,
-    openTraining,
-    openFights,
-    openLife,
-    openFamily,
-    openFinances,
-    openMedia,
-    openDynasty,
-    openPromotions,
-    openRankings,
-    openContracts,
-    openProfile,
-    openSettings,
-    saveGame,
-    loadGame,
-    resetGame,
-    getState,
-    validate:
-        validateGame,
-    getDatabase() {
-        return mainState.database;
-    }
-};
-/* ============================================================
-   GLOBAL API
-   ============================================================ */
-if (
-    typeof window !==
-    "undefined"
-) {
-    window.MMA_LIFE_GAME =
-        gameAPI;
-    window.MMA_LIFE_DYNASTY =
-        gameAPI;
-    window.MMA_LIFE_MAIN =
-        gameAPI;
-    window.MMA_LIFE_DATABASE =
-        mainState.database;
-}
-/* ============================================================
-   AUTO BOOT
-   ============================================================ */
-async function boot() {
-    try {
-        await initialize();
-    }
-    catch (error) {
-        mainState.status =
-            "error";
-        registerError(
-            "boot",
-            error
-        );
-        /*
-            Mesmo com um sistema secundário
-            quebrado, tentamos manter a UI.
-        */
-        try {
-            await initializeUI();
-        }
-        catch (uiError) {
-            registerError(
-                "boot.ui-recovery",
-                uiError
-            );
-        }
-    }
 }
 /* ============================================================
    DOM READY
@@ -2037,7 +1707,17 @@ if (
     ) {
         document.addEventListener(
             "DOMContentLoaded",
-            boot,
+            () => {
+                boot()
+                    .catch(
+                        error => {
+                            registerError(
+                                "boot",
+                                error
+                            );
+                        }
+                    );
+            },
             {
                 once:
                     true
@@ -2045,39 +1725,42 @@ if (
         );
     }
     else {
-        boot();
+        boot()
+            .catch(
+                error => {
+                    registerError(
+                        "boot",
+                        error
+                    );
+                }
+            );
     }
+}
+else {
+    boot()
+        .catch(
+            error => {
+                registerError(
+                    "boot",
+                    error
+                );
+            }
+        );
 }
 /* ============================================================
    EXPORT
    ============================================================ */
 export {
-    MAIN_VERSION,
     mainState,
-    createDatabase,
     initialize,
+    boot,
     startCareer,
     startNewGame,
     applyCharacterToGame,
-    showDashboard,
-    openScreen,
-    openCareer,
-    openTraining,
-    openFights,
-    openLife,
-    openFamily,
-    openFinances,
-    openMedia,
-    openDynasty,
-    openPromotions,
-    openRankings,
-    openContracts,
-    openProfile,
-    openSettings,
+    createDatabase,
+    ensureDatabaseStructure,
+    exposeDatabase,
     saveGame,
     loadGame,
-    resetGame,
-    getState,
-    validateGame
+    showDashboard
 };
-export default gameAPI;
