@@ -50,7 +50,7 @@ import "./mma/matchup.js";
    5. CAREER
    ============================================================ */
 import "./career/amateur.js";
-import "./career/professional.js";
+import "./career/profissional.js";
 import "./career/rankings.js";
 import "./career/titles.js";
 import "./career/records.js";
