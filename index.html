@@ -1,844 +1,601 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-
-    <meta
-        name="viewport"
-        content="width=device-width, initial-scale=1.0"
-    >
-
-    <meta
-        name="theme-color"
-        content="#0b0b0b"
-    >
-
-    <title>MMA Life Dynasty</title>
-
-    <link
-        rel="stylesheet"
-        href="./css/style.css"
-    >
-
-    <style>
-        /* =====================================================
-           BOOT SCREEN
-           ===================================================== */
-
-        #boot-screen {
-            position: fixed;
-            inset: 0;
-            z-index: 99999;
-
-            display: flex;
-            align-items: center;
-            justify-content: center;
-
-            background: #0b0b0b;
-            color: #ffffff;
-
-            font-family:
-                Arial,
-                Helvetica,
-                sans-serif;
-
-            transition:
-                opacity 0.25s ease,
-                visibility 0.25s ease;
-        }
-
-        #boot-screen.hidden {
-            opacity: 0;
-            visibility: hidden;
-            pointer-events: none;
-        }
-
-        .boot-content {
-            width: min(90%, 420px);
-            text-align: center;
-        }
-
-        .boot-title {
-            margin: 0 0 10px;
-            font-size: 32px;
-            font-weight: 800;
-            letter-spacing: 1px;
-        }
-
-        .boot-subtitle {
-            margin: 0 0 28px;
-            color: #999999;
-            font-size: 14px;
-        }
-
-        .boot-loading {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-
-            color: #cccccc;
-            font-size: 14px;
-        }
-
-        .boot-spinner {
-            width: 18px;
-            height: 18px;
-
-            border: 2px solid #333333;
-            border-top-color: #ffffff;
-
-            border-radius: 50%;
-
-            animation:
-                boot-spin 0.8s linear infinite;
-        }
-
-        @keyframes boot-spin {
-            to {
-                transform: rotate(360deg);
-            }
-        }
-
-        /* =====================================================
-           START SCREEN
-           ===================================================== */
-
-        #start-screen {
-            position: fixed;
-            inset: 0;
-            z-index: 99998;
-
-            display: none;
-            align-items: center;
-            justify-content: center;
-
-            background: #0b0b0b;
-            color: #ffffff;
-
-            font-family:
-                Arial,
-                Helvetica,
-                sans-serif;
-        }
-
-        #start-screen.visible {
-            display: flex;
-        }
-
-        .start-content {
-            width: min(90%, 460px);
-            text-align: center;
-        }
-
-        .start-title {
-            margin: 0;
-
-            font-size: 42px;
-            font-weight: 900;
-            letter-spacing: 1px;
-        }
-
-        .start-subtitle {
-            margin: 10px 0 35px;
-
-            color: #999999;
-            font-size: 15px;
-        }
-
-        .start-buttons {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-        }
-
-        .start-button {
-            width: 100%;
-
-            padding: 16px 20px;
-
-            border: 1px solid #333333;
-            border-radius: 10px;
-
-            background: #171717;
-            color: #ffffff;
-
-            font-size: 16px;
-            font-weight: 700;
-
-            cursor: pointer;
-
-            transition:
-                background 0.15s ease,
-                transform 0.15s ease;
-        }
-
-        .start-button:hover {
-            background: #222222;
-        }
-
-        .start-button:active {
-            transform: scale(0.98);
-        }
-
-        .start-button.primary {
-            background: #ffffff;
-            color: #000000;
-            border-color: #ffffff;
-        }
-
-        .start-button.primary:hover {
-            background: #dddddd;
-        }
-
-        .start-button:disabled {
-            opacity: 0.45;
-            cursor: not-allowed;
-        }
-
-        /* =====================================================
-           GAME ROOT
-           ===================================================== */
-
-        #game-root {
-            min-height: 100vh;
-        }
-
-        /* =====================================================
-           BOOT ERROR
-           ===================================================== */
-
-        #boot-error {
-            display: none;
-
-            margin-top: 20px;
-
-            color: #ff6b6b;
-
-            font-size: 13px;
-            line-height: 1.5;
-        }
-
-        #boot-error.visible {
-            display: block;
-        }
-
-        /* =====================================================
-           FALLBACK
-           ===================================================== */
-
-        #boot-retry {
-            display: none;
-
-            margin-top: 15px;
-
-            padding: 12px 18px;
-
-            border: 1px solid #444;
-            border-radius: 8px;
-
-            background: #171717;
-            color: #fff;
-
-            cursor: pointer;
-        }
-
-        #boot-retry.visible {
-            display: inline-block;
-        }
-    </style>
+<meta charset="UTF-8">
+<title>MMA LIFE DYNASTY</title>
+<style>
+  :root{
+    --bg:#0e0f12; --panel:#17191f; --panel2:#1e2129; --accent:#d62828;
+    --accent2:#f77f00; --text:#eceef1; --muted:#9aa0ab; --good:#3ddc84; --bad:#ff5c5c;
+    --border:#2a2e37;
+  }
+  *{box-sizing:border-box;}
+  body{background:var(--bg); color:var(--text); font-family:'Segoe UI',Arial,sans-serif; margin:0; padding:16px;}
+  h1,h2,h3{margin:0 0 8px 0;}
+  h1{font-size:22px; letter-spacing:1px; color:var(--accent);}
+  h2{font-size:16px; color:var(--accent2); border-bottom:1px solid var(--border); padding-bottom:6px;}
+  .hidden{display:none !important;}
+  .card{background:var(--panel); border:1px solid var(--border); border-radius:10px; padding:14px; margin-bottom:14px;}
+  .row{display:flex; gap:10px; flex-wrap:wrap;}
+  .col{flex:1; min-width:140px;}
+  label{display:block; font-size:12px; color:var(--muted); margin-bottom:4px;}
+  input, select{width:100%; padding:8px; background:var(--panel2); border:1px solid var(--border); color:var(--text); border-radius:6px; margin-bottom:10px;}
+  button{background:var(--accent); color:#fff; border:none; padding:9px 14px; border-radius:6px; cursor:pointer; font-weight:600; margin:3px 4px 3px 0;}
+  button:hover{background:var(--accent2);}
+  button.secondary{background:var(--panel2); border:1px solid var(--border);}
+  button.secondary:hover{background:#2a2e37;}
+  button:disabled{opacity:.4; cursor:not-allowed;}
+  .stat{display:flex; justify-content:space-between; padding:4px 0; border-bottom:1px dashed var(--border); font-size:13px;}
+  .bar{height:8px; background:var(--panel2); border-radius:4px; overflow:hidden; margin-top:3px;}
+  .bar > div{height:100%;}
+  .grid5{display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:8px;}
+  .subskill{background:var(--panel2); border:1px solid var(--border); border-radius:6px; padding:8px; margin-bottom:6px; font-size:12px;}
+  .log{background:#0a0b0d; border:1px solid var(--border); border-radius:8px; padding:10px; height:220px; overflow-y:auto; font-size:13px; line-height:1.5;}
+  .log p{margin:0 0 6px 0;}
+  .log .commentary{color:var(--accent2);}
+  .log .win{color:var(--good);}
+  .log .lose{color:var(--bad);}
+  .tag{display:inline-block; background:var(--panel2); border:1px solid var(--border); padding:2px 8px; border-radius:12px; font-size:11px; color:var(--muted); margin-right:4px;}
+  .topbar{display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;}
+</style>
 </head>
-
 <body>
 
-    <!-- =====================================================
-         BOOT
-         ===================================================== -->
+<div id="app">
 
-    <div id="boot-screen">
+  <!-- ===================== CRIAÇÃO DE PERSONAGEM ===================== -->
+  <div id="screen-create" class="card">
+    <h1>MMA LIFE DYNASTY</h1>
+    <h2>Criação do Lutador — 1ª Geração</h2>
+    <div class="row">
+      <div class="col">
+        <label>Nome do lutador</label>
+        <input id="inName" placeholder="Ex: Guido Santos">
+      </div>
+      <div class="col">
+        <label>País</label>
+        <input id="inCountry" placeholder="Ex: Brasil">
+      </div>
+      <div class="col">
+        <label>Categoria de peso</label>
+        <select id="inWeight">
+          <option>Peso Mosca</option>
+          <option>Peso Galo</option>
+          <option>Peso Pena</option>
+          <option selected>Peso Leve</option>
+          <option>Peso Meio-Médio</option>
+          <option>Peso Médio</option>
+          <option>Peso Meio-Pesado</option>
+          <option>Peso Pesado</option>
+        </select>
+      </div>
+      <div class="col">
+        <label>Estilo de base</label>
+        <select id="inStyle">
+          <option>Striker</option>
+          <option>Wrestler</option>
+          <option>Grappler</option>
+          <option selected>Equilibrado</option>
+        </select>
+      </div>
+    </div>
+    <p class="tag">Idade inicial: 15 anos</p>
+    <p class="tag">Potencial (oculto até desenvolver): sorteado entre 88 e 92</p>
+    <button onclick="Game.createPlayer()">Começar a Dinastia</button>
+  </div>
 
-        <div class="boot-content">
+  <!-- ===================== DASHBOARD ===================== -->
+  <div id="screen-dashboard" class="hidden">
 
-            <h1 class="boot-title">
-                MMA LIFE DYNASTY
-            </h1>
-
-            <p class="boot-subtitle">
-                Construindo seu universo...
-            </p>
-
-            <div class="boot-loading">
-
-                <span class="boot-spinner"></span>
-
-                <span id="boot-status">
-                    Inicializando o universo...
-                </span>
-
-            </div>
-
-            <div id="boot-error"></div>
-
-            <button
-                id="boot-retry"
-                type="button"
-            >
-                TENTAR NOVAMENTE
-            </button>
-
-        </div>
-
+    <div class="card topbar">
+      <div>
+        <h1 id="hudName">—</h1>
+        <span class="tag" id="hudAge">Idade: —</span>
+        <span class="tag" id="hudWeek">Semana: —</span>
+        <span class="tag" id="hudTier">Tier: —</span>
+        <span class="tag" id="hudRecord">Cartel: 0-0-0</span>
+      </div>
+      <div>
+        <button class="secondary" onclick="Game.save()">Salvar</button>
+        <button class="secondary" onclick="Game.load()">Carregar</button>
+        <button class="secondary" onclick="Game.reset()">Reiniciar</button>
+      </div>
     </div>
 
+    <div class="row">
+      <div class="col card">
+        <h2>Status do Lutador</h2>
+        <div class="stat"><span>OVR</span><span id="statOVR">—</span></div>
+        <div class="stat"><span>Energia</span><span id="statEnergy">—</span></div>
+        <div class="bar"><div id="barEnergy" style="width:0%;background:var(--good);"></div></div>
+        <div class="stat"><span>Saúde</span><span id="statHealth">—</span></div>
+        <div class="bar"><div id="barHealth" style="width:0%;background:var(--good);"></div></div>
+        <div class="stat"><span>Fadiga</span><span id="statFatigue">—</span></div>
+        <div class="bar"><div id="barFatigue" style="width:0%;background:var(--bad);"></div></div>
+        <div class="stat"><span>Moral</span><span id="statMorale">—</span></div>
+        <div class="stat"><span>Peso atual</span><span id="statWeight">—</span></div>
+        <div class="stat"><span>Dinheiro</span><span id="statMoney">—</span></div>
+        <div class="stat"><span>Fama</span><span id="statFame">—</span></div>
+      </div>
 
-    <!-- =====================================================
-         START SCREEN
-         ===================================================== -->
-
-    <div id="start-screen">
-
-        <div class="start-content">
-
-            <h1 class="start-title">
-                MMA LIFE DYNASTY
-            </h1>
-
-            <p class="start-subtitle">
-                Viva sua carreira. Construa seu legado.
-            </p>
-
-            <div class="start-buttons">
-
-                <button
-                    id="new-game-button"
-                    class="start-button primary"
-                    type="button"
-                >
-                    NOVO JOGO
-                </button>
-
-                <button
-                    id="continue-game-button"
-                    class="start-button"
-                    type="button"
-                    disabled
-                >
-                    CONTINUAR
-                </button>
-
-            </div>
-
-        </div>
-
+      <div class="col card">
+        <h2>Estilo desenvolvido</h2>
+        <div class="stat"><span>Striker</span><span id="styleStriker">0%</span></div>
+        <div class="bar"><div id="barStriker" style="width:0%;background:var(--accent2);"></div></div>
+        <div class="stat"><span>Wrestler</span><span id="styleWrestler">0%</span></div>
+        <div class="bar"><div id="barWrestler" style="width:0%;background:var(--accent2);"></div></div>
+        <div class="stat"><span>Grappler</span><span id="styleGrappler">0%</span></div>
+        <div class="bar"><div id="barGrappler" style="width:0%;background:var(--accent2);"></div></div>
+        <div class="stat"><span>Conditioning</span><span id="styleCond">0%</span></div>
+        <div class="bar"><div id="barCond" style="width:0%;background:var(--accent2);"></div></div>
+        <div class="stat"><span>Mental</span><span id="styleMental">0%</span></div>
+        <div class="bar"><div id="barMental" style="width:0%;background:var(--accent2);"></div></div>
+      </div>
     </div>
 
-
-    <!-- =====================================================
-         GAME ROOT
-         ===================================================== -->
-
-    <main id="game-root"></main>
-
-
-    <!-- =====================================================
-         SAFE BOOT
-         ===================================================== -->
-
-    <script>
-        (function () {
-
-            "use strict";
-
-            const bootScreen =
-                document.getElementById(
-                    "boot-screen"
-                );
-
-            const startScreen =
-                document.getElementById(
-                    "start-screen"
-                );
-
-            const bootStatus =
-                document.getElementById(
-                    "boot-status"
-                );
-
-            const bootError =
-                document.getElementById(
-                    "boot-error"
-                );
-
-            const bootRetry =
-                document.getElementById(
-                    "boot-retry"
-                );
-
-            const newGameButton =
-                document.getElementById(
-                    "new-game-button"
-                );
-
-            const continueGameButton =
-                document.getElementById(
-                    "continue-game-button"
-                );
-
-
-            let ready = false;
-
-
-            /* =================================================
-               STATUS
-               ================================================= */
-
-            function setStatus(text) {
-
-                if (bootStatus) {
-                    bootStatus.textContent =
-                        text;
-                }
-
-            }
-
-
-            /* =================================================
-               ERROR
-               ================================================= */
-
-            function showError(error) {
-
-                console.error(
-                    "[MMA LIFE DYNASTY]",
-                    error
-                );
-
-                if (!bootError) {
-                    return;
-                }
-
-                const message =
-                    error &&
-                    error.message
-                        ? error.message
-                        : String(error);
-
-                bootError.textContent =
-                    "Falha na inicialização: " +
-                    message;
-
-                bootError.classList.add(
-                    "visible"
-                );
-
-                if (bootRetry) {
-                    bootRetry.classList.add(
-                        "visible"
-                    );
-                }
-
-            }
-
-
-            /* =================================================
-               API
-               ================================================= */
-
-            function getAPI() {
-
-                return (
-                    window.MMA_LIFE_GAME ||
-                    window.MMA_LIFE_MAIN ||
-                    window.mmaLifeGame ||
-                    null
-                );
-
-            }
-
-
-            /* =================================================
-               MOSTRAR MENU
-               ================================================= */
-
-            function showStartScreen() {
-
-                if (ready) {
-                    return;
-                }
-
-                ready = true;
-
-                setStatus(
-                    "Pronto."
-                );
-
-                if (bootScreen) {
-                    bootScreen.classList.add(
-                        "hidden"
-                    );
-                }
-
-                if (startScreen) {
-                    startScreen.classList.add(
-                        "visible"
-                    );
-                }
-
-                console.log(
-                    "[MMA LIFE DYNASTY] " +
-                    "Tela inicial liberada."
-                );
-
-            }
-
-
-            /* =================================================
-               NOVO JOGO
-               ================================================= */
-
-            async function newGame() {
-
-                const api =
-                    getAPI();
-
-                if (!api) {
-
-                    showError(
-                        new Error(
-                            "A API principal do jogo não foi encontrada."
-                        )
-                    );
-
-                    return;
-                }
-
-                try {
-
-                    newGameButton.disabled =
-                        true;
-
-                    setStatus(
-                        "Preparando novo lutador..."
-                    );
-
-
-                    /*
-                     * Inicialização principal
-                     */
-
-                    if (
-                        typeof api.initialize ===
-                        "function"
-                    ) {
-
-                        await api.initialize();
-
-                    }
-
-
-                    /*
-                     * API de criação
-                     */
-
-                    const creation =
-                        window.characterCreationAPI;
-
-
-                    if (
-                        creation &&
-                        typeof creation.start ===
-                        "function"
-                    ) {
-
-                        await creation.start(
-                            api.getGameState
-                                ? api.getGameState()
-                                : null
-                        );
-
-                    }
-
-                    else if (
-                        creation &&
-                        typeof creation.open ===
-                        "function"
-                    ) {
-
-                        await creation.open();
-
-                    }
-
-                    else if (
-                        creation &&
-                        typeof creation.render ===
-                        "function"
-                    ) {
-
-                        const root =
-                            document.getElementById(
-                                "game-root"
-                            );
-
-                        await creation.render(
-                            root
-                        );
-
-                    }
-
-                    else if (
-                        typeof api.start ===
-                        "function"
-                    ) {
-
-                        await api.start();
-
-                    }
-
-
-                    if (startScreen) {
-
-                        startScreen.classList.remove(
-                            "visible"
-                        );
-
-                    }
-
-
-                } catch (error) {
-
-                    newGameButton.disabled =
-                        false;
-
-                    showError(
-                        error
-                    );
-
-                }
-
-            }
-
-
-            /* =================================================
-               CONTINUAR
-               ================================================= */
-
-            async function continueGame() {
-
-                const api =
-                    getAPI();
-
-                if (!api) {
-                    return;
-                }
-
-                try {
-
-                    continueGameButton.disabled =
-                        true;
-
-
-                    if (
-                        typeof api.load ===
-                        "function"
-                    ) {
-
-                        const result =
-                            await api.load();
-
-                        if (
-                            result &&
-                            result.success === false
-                        ) {
-
-                            throw new Error(
-                                result.error ||
-                                "Não foi possível carregar o jogo."
-                            );
-
-                        }
-
-                    }
-
-
-                    if (
-                        typeof api.start ===
-                        "function"
-                    ) {
-
-                        await api.start();
-
-                    }
-
-
-                    if (startScreen) {
-
-                        startScreen.classList.remove(
-                            "visible"
-                        );
-
-                    }
-
-                } catch (error) {
-
-                    continueGameButton.disabled =
-                        false;
-
-                    showError(
-                        error
-                    );
-
-                }
-
-            }
-
-
-            /* =================================================
-               EVENTOS DOS BOTÕES
-               ================================================= */
-
-            if (newGameButton) {
-
-                newGameButton.addEventListener(
-                    "click",
-                    newGame
-                );
-
-            }
-
-
-            if (continueGameButton) {
-
-                continueGameButton.addEventListener(
-                    "click",
-                    continueGame
-                );
-
-            }
-
-
-            if (bootRetry) {
-
-                bootRetry.addEventListener(
-                    "click",
-                    function () {
-
-                        window.location.reload();
-
-                    }
-                );
-
-            }
-
-
-            /* =================================================
-               EVENTO DO MAIN
-               ================================================= */
-
-            window.addEventListener(
-                "mma-life-game-ready",
-                function (event) {
-
-                    console.log(
-                        "[MMA LIFE DYNASTY] " +
-                        "GAME READY",
-                        event
-                    );
-
-                    showStartScreen();
-
-                }
-            );
-
-
-            /* =================================================
-               ERROS GLOBAIS
-               ================================================= */
-
-            window.addEventListener(
-                "error",
-                function (event) {
-
-                    console.error(
-                        "[MMA LIFE DYNASTY] Erro global:",
-                        event.error ||
-                        event.message
-                    );
-
-                }
-            );
-
-
-            window.addEventListener(
-                "unhandledrejection",
-                function (event) {
-
-                    console.error(
-                        "[MMA LIFE DYNASTY] Promise rejeitada:",
-                        event.reason
-                    );
-
-                }
-            );
-
-
-            /* =================================================
-               FALLBACK ABSOLUTO
-               =================================================
-
-               Mesmo que o main.js falhe, o usuário
-               não ficará preso infinitamente na
-               tela "Construindo seu universo".
-
-               Depois de 4 segundos, verificamos
-               a API e liberamos a tela inicial.
-               */
-
-            setTimeout(
-                function () {
-
-                    if (ready) {
-                        return;
-                    }
-
-                    const api =
-                        getAPI();
-
-                    if (api) {
-
-                        console.warn(
-                            "[MMA LIFE DYNASTY] " +
-                            "Fallback encontrou a API."
-                        );
-
-                        showStartScreen();
-
-                    } else {
-
-                        showError(
-                            new Error(
-                                "main.js não disponibilizou a API do jogo."
-                            )
-                        );
-
-                    }
-
-                },
-                4000
-            );
-
-
-        })();
-    </script>
-
-
-    <!-- =====================================================
-         MAIN GAME MODULE
-         ===================================================== -->
-
-    <script
-        type="module"
-        src="./js/main.js"
-    ></script>
-
+    <div class="card">
+      <h2>Treinamento (custa energia)</h2>
+      <div id="trainingAreas" class="grid5"></div>
+    </div>
+
+    <div class="card">
+      <h2>Carreira</h2>
+      <p id="careerInfo" style="font-size:13px;color:var(--muted);"></p>
+      <button id="btnFindFight" onclick="Game.findFight()">Buscar Luta</button>
+      <button id="btnRest" class="secondary" onclick="Game.restWeek()">Descansar (recupera energia/saúde)</button>
+      <button id="btnAdvance" class="secondary" onclick="Game.advanceWeek()">Avançar Semana</button>
+    </div>
+
+    <div id="fightPanel" class="card hidden">
+      <h2>Luta Marcada</h2>
+      <p id="fightInfo"></p>
+      <button onclick="Game.fightWeek()">Ir para a semana da luta</button>
+    </div>
+
+    <div class="card">
+      <h2>Registro / Comentaristas</h2>
+      <div class="log" id="logBox"></div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+/* =========================================================================
+   MMA LIFE DYNASTY — Engine central por semanas
+   Módulos: ENGINE, PLAYER, TRAINING, FIGHTS, CAREER, ECONOMY, SAVE
+   ========================================================================= */
+
+const Game = (function(){
+
+  // ---------------- CONFIG / ECONOMIA (definido em conversa) ----------------
+  const TIERS = ["Amador","Regional","Nacional","Elite","UFC"];
+
+  const ECONOMY = {
+    Amador:   { hasPurse:false },
+    Regional: { hasBonus:false, purseMin:300,   purseMax:5000   },
+    Nacional: { hasBonus:true,  purseMin:3000,  purseMax:25000, bonusWin:[0.20,0.30], bonusFinish:[0.10,0.20] },
+    Elite:    { hasBonus:true,  contract:true,  purseMin:25000, purseMax:50000, bonusWin:0.30, bonusFinish:0.25, potn:5000,  contractGrowth:[0.30,0.50] },
+    UFC:      { hasBonus:true,  contract:true,  purseMin:50000, purseMax:150000, bonusWin:0.30, bonusFinish:0.25, potn:50000, contractGrowth:[0.40,0.80] }
+  };
+
+  const TRAINING_TREE = {
+    STRIKING: {
+      "Boxe Ofensivo":1,"Boxe Defensivo":1,"Muay Thai Ofensivo":1,"Muay Thai Defensivo":1,
+      "Kickboxing Ofensivo":1,"Kickboxing Defensivo":1
+    },
+    GRAPPLING: {
+      "Finalizações":1,"Passagem de Guarda":1,"Controle (Grappling)":1,"Raspagens":1,
+      "Escapes":1,"Defesa de Finalizações":1,"Recuperação de Guarda":1,"Transições":1
+    },
+    WRESTLING: {
+      "Single Leg":1,"Double Leg":1,"Sprawl":1,"Defesa de Quedas":1,"Defesa na Grade":1,
+      "Pressão":1,"Grade":1,"Scrambles":1
+    },
+    CONDITIONING: {
+      "Cardio":1,"Resistência":1,"Força":1,"Explosão":1,"Velocidade":1,"Recuperação":1
+    },
+    MENTAL: {
+      "Foco":1,"Disciplina":1,"Confiança":1,"Controle Emocional":1,"Resistência à Pressão":1,"Preparação para Luta":1
+    }
+  };
+
+  let S = null; // estado global do jogo
+
+  function log(msg, cls){
+    const box = document.getElementById('logBox');
+    const p = document.createElement('p');
+    if(cls) p.className = cls;
+    p.textContent = msg;
+    box.appendChild(p);
+    box.scrollTop = box.scrollHeight;
+  }
+
+  function rand(min,max){ return Math.random()*(max-min)+min; }
+  function randInt(min,max){ return Math.floor(rand(min,max+1)); }
+  function clamp(v,min,max){ return Math.max(min,Math.min(max,v)); }
+
+  // ---------------- PLAYER ----------------
+  function createPlayer(){
+    const name = document.getElementById('inName').value.trim() || "Sem Nome";
+    const country = document.getElementById('inCountry').value.trim() || "Brasil";
+    const weight = document.getElementById('inWeight').value;
+    const baseStyle = document.getElementById('inStyle').value;
+
+    const skills = {};
+    Object.keys(TRAINING_TREE).forEach(area=>{
+      Object.keys(TRAINING_TREE[area]).forEach(sub=>{
+        skills[sub] = randInt(5,15); // base inicial pequena e natural, sem sistema de 400 pontos
+      });
+    });
+
+    S = {
+      week: 0,
+      generation: 1,
+      player: {
+        name, country, weight, baseStyle,
+        ageWeeks: 15*52,
+        potential: randInt(88,92),
+        peakAge: randInt(26,30),
+        declineAge: randInt(33,37),
+        ovr: 40,
+        energy: 100, maxEnergy:100,
+        health: 100,
+        fatigue: 0,
+        morale: 70,
+        weightCurrent: 70,
+        money: 0,
+        fame: 0,
+        record: {w:0,l:0,d:0,ko:0,sub:0,dec:0},
+        skills,
+        amateurWinRequired: true,
+        isPro: false,
+        tier: "Amador",
+        contractFightsLeft: 0,
+        contractBase: 0,
+      },
+      scheduledFight: null,
+      log: []
+    };
+    document.getElementById('screen-create').classList.add('hidden');
+    document.getElementById('screen-dashboard').classList.remove('hidden');
+    renderTrainingAreas();
+    refreshUI();
+    log(`${name} inicia a jornada aos 15 anos, no ${country}, categoria ${weight}. Potencial oculto sorteado.`, "commentary");
+  }
+
+  // ---------------- TRAINING ----------------
+  function renderTrainingAreas(){
+    const wrap = document.getElementById('trainingAreas');
+    wrap.innerHTML = "";
+    Object.keys(TRAINING_TREE).forEach(area=>{
+      const div = document.createElement('div');
+      div.className = "subskill";
+      let html = `<b>${area}</b><br>`;
+      Object.keys(TRAINING_TREE[area]).forEach(sub=>{
+        html += `<button style="width:100%;text-align:left;margin-top:4px;font-size:11px;" class="secondary" onclick="Game.train('${sub}')">${sub} (${S.player.skills[sub]})</button>`;
+      });
+      div.innerHTML = html;
+      wrap.appendChild(div);
+    });
+  }
+
+  const ENERGY_COST = 20;
+  function train(subSkill){
+    const p = S.player;
+    if(p.energy < ENERGY_COST){ log("Energia insuficiente. Descanse antes de treinar.", "lose"); return; }
+    p.energy -= ENERGY_COST;
+    p.fatigue = clamp(p.fatigue + randInt(5,12), 0, 100);
+    const gain = randInt(1,3);
+    p.skills[subSkill] = clamp(p.skills[subSkill] + gain, 0, 99);
+    p.morale = clamp(p.morale + 1, 0, 100);
+    recalcOVRAndStyle();
+    log(`Treino: ${subSkill} +${gain}. Energia restante: ${p.energy}.`);
+    renderTrainingAreas();
+    refreshUI();
+  }
+
+  function recalcOVRAndStyle(){
+    const p = S.player;
+    const areas = TRAINING_TREE;
+    function avg(area){
+      const keys = Object.keys(areas[area]);
+      return keys.reduce((a,k)=>a+p.skills[k],0)/keys.length;
+    }
+    const striking = avg("STRIKING");
+    const wrestling = avg("WRESTLING");
+    const grappling = avg("GRAPPLING");
+    const cond = avg("CONDITIONING");
+    const mental = avg("MENTAL");
+    p.style = {
+      Striker: Math.round(striking),
+      Wrestler: Math.round(wrestling),
+      Grappler: Math.round(grappling),
+      Conditioning: Math.round(cond),
+      Mental: Math.round(mental)
+    };
+    const rawOvr = (striking+wrestling+grappling+cond+mental)/5;
+    p.ovr = Math.round(clamp(rawOvr, 1, p.potential));
+  }
+
+  // ---------------- ENGINE DE TEMPO ----------------
+  function advanceWeek(){
+    const p = S.player;
+    S.week++;
+    p.ageWeeks++;
+
+    // recuperação natural leve
+    p.energy = clamp(p.energy + 15, 0, p.maxEnergy);
+    p.fatigue = clamp(p.fatigue - 8, 0, 100);
+    p.health = clamp(p.health + (p.fatigue>70? -2:1), 0, 100);
+
+    checkAgeMilestones();
+    refreshUI();
+    log(`Semana ${S.week} concluída. Idade: ${ageYears(p)} anos.`);
+  }
+
+  function restWeek(){
+    const p = S.player;
+    p.energy = clamp(p.energy + 40, 0, p.maxEnergy);
+    p.fatigue = clamp(p.fatigue - 25, 0, 100);
+    p.health = clamp(p.health + 10, 0, 100);
+    log("Semana de descanso ativo. Energia e saúde recuperadas.");
+    advanceWeek();
+  }
+
+  function ageYears(p){ return Math.floor(p.ageWeeks/52); }
+
+  function checkAgeMilestones(){
+    const p = S.player;
+    const age = ageYears(p);
+    if(!p.isPro && age>=17 && p.record.w>=1 && p.amateurWinRequired){
+      p.isPro = true;
+      p.tier = "Regional";
+      log(`${p.name} completa 17 anos com vitória amadora registrada — vira PROFISSIONAL e entra no circuito Regional!`, "win");
+    }
+    if(age >= p.declineAge){
+      // leve desgaste extra pós declínio, aplicado ocasionalmente
+      if(Math.random()<0.05){
+        p.health = clamp(p.health-3,0,100);
+        log(`Sinais de declínio físico aos ${age} anos: leve perda de saúde.`, "lose");
+      }
+    }
+  }
+
+  // ---------------- CARREIRA / LUTAS ----------------
+  function tierIndex(t){ return TIERS.indexOf(t); }
+
+  function checkPromotion(){
+    const p = S.player;
+    if(!p.isPro) return;
+    const idx = tierIndex(p.tier);
+    if(idx>=TIERS.length-1) return;
+    const wins = p.record.w, losses = p.record.l;
+    const winRate = wins/(wins+losses||1);
+    const thresholds = { Regional:{w:5,rate:0.6}, Nacional:{w:6,rate:0.6}, Elite:{w:5,rate:0.65} };
+    const need = thresholds[p.tier];
+    if(need && wins>=need.w && winRate>=need.rate && p.ovr>=50+idx*8){
+      p.tier = TIERS[idx+1];
+      p.contractFightsLeft = (p.tier==="Elite"||p.tier==="UFC") ? 3 : 0;
+      log(`PROMOÇÃO DE CARREIRA! ${p.name} sobe para o tier ${p.tier}.`, "win");
+    }
+  }
+
+  function calcPurse(){
+    const p = S.player;
+    const econ = ECONOMY[p.tier];
+    if(!econ.hasPurse && p.tier==="Amador") return {base:0,bonusPct:0,potn:0};
+    let base;
+    if(econ.contract){
+      if(p.contractBase===0){
+        base = rand(econ.purseMin, econ.purseMax);
+      } else {
+        base = p.contractBase;
+      }
+    } else {
+      base = rand(econ.purseMin, econ.purseMax);
+    }
+    return { base, econ };
+  }
+
+  function findFight(){
+    const p = S.player;
+    if(S.scheduledFight){ log("Já existe uma luta marcada."); return; }
+    if(!p.isPro){
+      // luta amadora simples
+      S.scheduledFight = { tier:"Amador", opponentOvr: randInt(20,45), campWeeks:2, isAmateur:true };
+    } else {
+      const oppOvr = clamp(p.ovr + randInt(-12,12), 10, 99);
+      const campOptions = [2,4,6,8, p.tier==="Elite"||p.tier==="UFC"?12:8];
+      const campWeeks = campOptions[randInt(0,campOptions.length-1)];
+      S.scheduledFight = { tier:p.tier, opponentOvr:oppOvr, campWeeks, isAmateur:false, isTitle: campWeeks===12 };
+    }
+    document.getElementById('fightPanel').classList.remove('hidden');
+    document.getElementById('fightInfo').textContent =
+      `Adversário estimado OVR ${S.scheduledFight.opponentOvr} — Camp de ${S.scheduledFight.campWeeks} semanas ${S.scheduledFight.isTitle?"(LUTA DE CINTURÃO)":""}.`;
+    log("Luta encontrada e agendada. Prepare o camp.");
+  }
+
+  function fightWeek(){
+    if(!S.scheduledFight) return;
+    const p = S.player;
+    const f = S.scheduledFight;
+    const campPenalty = f.campWeeks<=2 ? -8 : 0; // camp curto penaliza ajuste tático/corte de peso
+
+    const playerPower = p.ovr + campPenalty + randInt(-10,10);
+    const oppPower = f.opponentOvr + randInt(-10,10);
+
+    const rounds = f.isTitle ? 5 : 3;
+    log(`--- INÍCIO DA LUTA (${rounds} rounds de 5min) ---`, "commentary");
+
+    let playerScore=0, oppScore=0, finishRound=null, finishType=null;
+    for(let r=1;r<=rounds;r++){
+      const rp = playerPower + randInt(-8,8);
+      const ro = oppPower + randInt(-8,8);
+      playerScore += rp; oppScore += ro;
+      log(`Round ${r}: "${rp>ro? p.name+" domina a troca e impõe o ritmo!" : "O adversário responde bem e neutraliza "+p.name+"."}"`, "commentary");
+      if(Math.abs(rp-ro) > 22 && Math.random()<0.35){
+        finishRound = r;
+        finishType = rp>ro ? (Math.random()<0.5?"KO/TKO":"Finalização") : "loss";
+        break;
+      }
+    }
+
+    let result;
+    if(finishRound && finishType!=="loss"){
+      result = "win"; 
+      log(`FIM DE LUTA! Vitória por ${finishType} no round ${finishRound}!`, "win");
+      p.record.w++;
+      if(finishType==="KO/TKO") p.record.ko++; else p.record.sub++;
+    } else if(finishRound && finishType==="loss"){
+      result = "loss";
+      log(`FIM DE LUTA! Derrota por finalização/KO sofrido no round ${finishRound}.`, "lose");
+      p.record.l++;
+    } else if(playerScore>oppScore){
+      result = "win";
+      log("Vitória por decisão dos juízes.", "win");
+      p.record.w++; p.record.dec++;
+    } else {
+      result = "loss";
+      log("Derrota por decisão dos juízes.", "lose");
+      p.record.l++;
+    }
+
+    applyFightConsequences(result, f, finishType);
+    S.scheduledFight = null;
+    document.getElementById('fightPanel').classList.add('hidden');
+
+    // descanso pós-luta obrigatório
+    const damage = randInt(0,100);
+    const restWeeks = damage>60 ? 8 : 4;
+    log(`Período mínimo de recuperação pós-luta: ${restWeeks} semanas.`);
+    for(let i=0;i<restWeeks;i++){ advanceWeek(); }
+
+    checkPromotion();
+    refreshUI();
+  }
+
+  function applyFightConsequences(result, f, finishType){
+    const p = S.player;
+    p.health = clamp(p.health - randInt(10,30), 0, 100);
+    p.fatigue = clamp(p.fatigue + randInt(20,40), 0, 100);
+
+    if(f.isAmateur){
+      p.fame += result==="win"?2:0;
+      log("Luta amadora não gera bolsa (sem remuneração no amadorismo).");
+      return;
+    }
+
+    const {base, econ} = calcPurse();
+    let purse = base;
+    let bonusText = "";
+
+    if(result==="win" && econ){
+      if(econ.hasBonus){
+        const bonusWinPct = Array.isArray(econ.bonusWin) ? rand(econ.bonusWin[0],econ.bonusWin[1]) : econ.bonusWin;
+        const bonusWin = purse*bonusWinPct;
+        purse += bonusWin;
+        bonusText += ` + bônus de vitória ${(bonusWinPct*100).toFixed(0)}%`;
+        if(finishType==="KO/TKO" || finishType==="Finalização"){
+          const bonusFinPct = Array.isArray(econ.bonusFinish) ? rand(econ.bonusFinish[0],econ.bonusFinish[1]) : econ.bonusFinish;
+          const bonusFin = purse*bonusFinPct;
+          purse += bonusFin;
+          bonusText += ` + bônus de ${finishType} ${(bonusFinPct*100).toFixed(0)}%`;
+        }
+        if(econ.potn && Math.random()<0.15){
+          purse += econ.potn;
+          bonusText += ` + bônus de performance $${econ.potn}`;
+        }
+      }
+      p.fame += randInt(3,10);
+      p.morale = clamp(p.morale+10,0,100);
+    } else {
+      purse = purse*0.5; // bolsa reduzida em derrota (regra de mercado, ajustável)
+      p.fame = clamp(p.fame + randInt(-3,1),0,999);
+      p.morale = clamp(p.morale-12,0,100);
+    }
+
+    p.money += Math.round(purse);
+    log(`Pagamento: $${Math.round(purse).toLocaleString()}${bonusText}.`);
+
+    // gestão de contrato (Elite/UFC)
+    if(econ && econ.contract){
+      if(p.contractBase===0) p.contractBase = base;
+      p.contractFightsLeft--;
+      if(p.contractFightsLeft<=0){
+        const growth = rand(econ.contractGrowth[0], econ.contractGrowth[1]);
+        p.contractBase = p.contractBase*(1+growth);
+        p.contractFightsLeft = 3;
+        log(`Novo contrato assinado! Bolsa base sobe ${(growth*100).toFixed(0)}% para o próximo ciclo de 3 lutas.`, "win");
+      }
+    }
+  }
+
+  // ---------------- UI ----------------
+  function refreshUI(){
+    const p = S.player;
+    recalcOVRAndStyle();
+    document.getElementById('hudName').textContent = `${p.name} — ${p.country}`;
+    document.getElementById('hudAge').textContent = `Idade: ${ageYears(p)} anos`;
+    document.getElementById('hudWeek').textContent = `Semana: ${S.week}`;
+    document.getElementById('hudTier').textContent = `Tier: ${p.isPro? p.tier : "Amador"}`;
+    document.getElementById('hudRecord').textContent = `Cartel: ${p.record.w}-${p.record.l}-${p.record.d}`;
+
+    document.getElementById('statOVR').textContent = p.ovr;
+    document.getElementById('statEnergy').textContent = `${p.energy}/${p.maxEnergy}`;
+    document.getElementById('barEnergy').style.width = p.energy+"%";
+    document.getElementById('statHealth').textContent = p.health;
+    document.getElementById('barHealth').style.width = p.health+"%";
+    document.getElementById('barHealth').style.background = p.health<40?"var(--bad)":"var(--good)";
+    document.getElementById('statFatigue').textContent = p.fatigue;
+    document.getElementById('barFatigue').style.width = p.fatigue+"%";
+    document.getElementById('statMorale').textContent = p.morale;
+    document.getElementById('statWeight').textContent = p.weightCurrent.toFixed(1)+" kg";
+    document.getElementById('statMoney').textContent = "$"+Math.round(p.money).toLocaleString();
+    document.getElementById('statFame').textContent = p.fame;
+
+    document.getElementById('styleStriker').textContent = p.style.Striker+"%";
+    document.getElementById('barStriker').style.width = p.style.Striker+"%";
+    document.getElementById('styleWrestler').textContent = p.style.Wrestler+"%";
+    document.getElementById('barWrestler').style.width = p.style.Wrestler+"%";
+    document.getElementById('styleGrappler').textContent = p.style.Grappler+"%";
+    document.getElementById('barGrappler').style.width = p.style.Grappler+"%";
+    document.getElementById('styleCond').textContent = p.style.Conditioning+"%";
+    document.getElementById('barCond').style.width = p.style.Conditioning+"%";
+    document.getElementById('styleMental').textContent = p.style.Mental+"%";
+    document.getElementById('barMental').style.width = p.style.Mental+"%";
+
+    document.getElementById('careerInfo').textContent =
+      p.isPro
+        ? `Profissional no tier ${p.tier}. ${ECONOMY[p.tier].contract? "Contrato ativo: "+p.contractFightsLeft+" lutas restantes no ciclo." : "Bolsa por luta, sem contrato fixo."}`
+        : "Amador: precisa de 1 vitória amadora e 17 anos para virar profissional.";
+
+    document.getElementById('btnFindFight').disabled = !!S.scheduledFight;
+  }
+
+  // ---------------- SAVE / LOAD ----------------
+  function save(){
+    localStorage.setItem('mma_life_dynasty_save', JSON.stringify(S));
+    log("Jogo salvo localmente (localStorage).");
+  }
+  function load(){
+    const raw = localStorage.getItem('mma_life_dynasty_save');
+    if(!raw){ log("Nenhum save encontrado."); return; }
+    S = JSON.parse(raw);
+    document.getElementById('screen-create').classList.add('hidden');
+    document.getElementById('screen-dashboard').classList.remove('hidden');
+    renderTrainingAreas();
+    refreshUI();
+    log("Save carregado.");
+  }
+  function reset(){
+    if(!confirm("Reiniciar apaga o progresso atual (não salvo). Continuar?")) return;
+    localStorage.removeItem('mma_life_dynasty_save');
+    location.reload();
+  }
+
+  return { createPlayer, train, advanceWeek, restWeek, findFight, fightWeek, save, load, reset };
+})();
+</script>
 </body>
 </html>
